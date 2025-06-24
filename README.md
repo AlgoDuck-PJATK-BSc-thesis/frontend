@@ -1,6 +1,7 @@
 # Beetcode – UI System Overview
 ![Screenshot 2025-06-24 at 08 16 52](https://github.com/user-attachments/assets/b9b2fe43-4723-4e37-a4b7-fad3cac50c98)
 ![Screenshot 2025-06-24 at 08 18 04](https://github.com/user-attachments/assets/792309de-f820-4285-95cb-4ab1b79c211f)
+<img width="1432" alt="Screenshot 2025-06-24 at 09 22 44" src="https://github.com/user-attachments/assets/bca1c8fd-3293-4ce7-bbea-8ef5548db0a9" />
 
 ## Font
 
@@ -22,7 +23,7 @@ html {
 }
 ```
 
-Used in all headings, paragraphs, inputs, and buttons.
+Used throughout headings, paragraphs, inputs, and buttons.
 
 ---
 
@@ -35,7 +36,7 @@ Used in all headings, paragraphs, inputs, and buttons.
 | `p`, `input`  | 0.85rem (13.6px) |
 | `.switch`, `a`| 0.68rem (11px) |
 
-All font sizes are defined via CSS inside `.svelte` components.
+Font sizes are set via CSS inside individual `.svelte` components for consistent control.
 
 ---
 
@@ -51,6 +52,7 @@ Defined via CSS variables in `app.css`.
 --color-primary:   #ffb3c1;
 --color-accent-1:  #b5ead7;
 --color-accent-2:  #ffdac1;
+--color-tile:      #fffdf7;
 ```
 
 ### Dark Theme (`[data-theme="dark"]`)
@@ -61,15 +63,48 @@ Defined via CSS variables in `app.css`.
 --color-primary:   #caa9fa;
 --color-accent-1:  #8be9fd;
 --color-accent-2:  #fab387;
+--color-tile:      #2e2e42;
 ```
 
 ---
 
 ## Tailwind Usage
 
-Tailwind is installed and active in the project, but only used for build and utility purposes. No `@apply` or `text-*`, `bg-*` utility classes are used directly.
+Tailwind CSS is used in the project via `@tailwindcss/forms` and `@tailwindcss/typography`, but utility classes (`text-*`, `bg-*`, etc.) are not used in components.
 
-The design system relies fully on custom CSS variables and scoped styles inside `.svelte` components.
+The project relies entirely on custom CSS variables and component-scoped styles to achieve a consistent, pastel pixel-art UI.
+
+---
+
+## Theme Toggle
+
+Component: `ThemeToggle.svelte`
+
+- 🌙 displayed in light mode
+- 🌞 displayed in dark mode
+- Toggles `data-theme="dark"` on `<html>`
+- Minimal, inline-styled button
+
+---
+
+## Logged-in Header
+
+Component: `HeaderUser.svelte`
+
+- Navigation items: Home, Problems, Cohorts, Contest, Leaderboard, Learn more, About us
+- Theme toggle on the right
+- Elliptical **status badge** (Lvl | $) with a skewed separator
+- User icon linking to `/settings`
+
+---
+
+## Guest Header
+
+Component: `HeaderGuest.svelte`
+
+- Logo linking to `/`
+- Navigation: About us, Learn more, Log in, Sign up
+- Theme toggle
 
 ---
 
@@ -79,52 +114,57 @@ The design system relies fully on custom CSS variables and scoped styles inside 
 
 - Heading: "Improve your skills"
 - Subtext: "Transform your coding skills, one problem at a time"
-- Two buttons:
-  - "Start" – always filled with `--color-primary`
-  - "Learn more →" – transparent with underline on hover
-- Centered illustration below buttons
+- Buttons:
+  - "Start" (primary)
+  - "Learn more →" (secondary)
+- Illustration below the buttons (optional)
 
 ### `/login`
 
-- Title: "Log in"
-- Fields:
+- Form fields:
   - Username or email
   - Password
-- Submit button: "Log in"
-- Link to `/signup`: "Don't have an account? Sign up"
+- Submit button: Log in
+- Link to Sign up
+- On submit, redirects to `/home`
 
 ### `/signup`
 
-- Title: "Sign up"
-- Fields:
+- Form fields:
   - Username
   - Email
   - Password
-- Submit button: "Create account"
-- Link to `/login`: "Already have an account? Log in"
+- Submit button: Create account
+- Link to Log in
+- On submit, redirects to `/home`
 
 ### `/about`
 
-- Title: "About us"
-- Paragraph with placeholder text (`lorem ipsum`)
+- Title: About us
+- Placeholder text (`lorem ipsum`)
 
 ### `/learnmore`
 
-- Title: "How Beetcode works"
-- Four visually separated steps (`<ol>`):
-  - Sign up
-  - Choose a challenge
-  - Submit your solution
-  - Track your progress
-- Also `lorem ipsum` used here as temporary placeholder
+- Title: How Beetcode works
+- Ordered list of steps:
+  1. Sign up
+  2. Choose a challenge
+  3. Submit your solution
+  4. Track your progress
+- Temporary content using `lorem ipsum`
+
+### `/home`
+
+- Title: Welcome back
+- Two cards:
+  - Recently solved
+  - Stats
+- Cards use `--color-tile` for background and adapt to light/dark theme
 
 ---
 
-## Theme Toggle
+## Layout & Routing
 
-Component: `ThemeToggle.svelte`
-
-- Displays 🌙 (moon) when theme is light
-- Displays 🌞 (sun) when theme is dark
-- Toggles `data-theme="dark"` on `<html>` element
-- Styled as a minimal inline button
+- Layout uses dynamic header switching based on route (`/home`, `/settings`, etc.)
+- Guest vs logged-in headers handled in `+layout.svelte`
+- Footer visible across all views
