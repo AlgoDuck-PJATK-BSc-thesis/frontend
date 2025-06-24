@@ -17,7 +17,7 @@
 </script>
 
 <div class="layout">
-	{#if isLoggedIn}
+	{#if /* isLoggedIn */ true}
 		<HeaderUser />
 	{:else}
 		<HeaderGuest />
@@ -46,7 +46,7 @@
 	main {
 		flex: 1;
 		width: 100%;
-		max-width: 48rem;
+		max-width: 100vw;
 		margin: 0 auto;
 		padding: 2rem 1rem;
 		box-sizing: border-box;

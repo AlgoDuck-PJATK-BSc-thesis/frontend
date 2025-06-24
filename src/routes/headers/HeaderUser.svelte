@@ -17,6 +17,7 @@
 			<li><a href="/leaderboard">Leaderboard</a></li>
 			<li><a href="/learnmore">Learn more</a></li>
 			<li><a href="/about">About us</a></li>
+			<li><a hre>
 		</ul>
 	</nav>
 
