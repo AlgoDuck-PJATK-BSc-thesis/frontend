@@ -11,6 +11,7 @@
 	--color-primary: #ffb3c1;
 	--color-accent-1: #b5ead7;
 	--color-accent-2: #ffdac1;
+	--color-tile: #fffdf7;
 }
 
 [data-theme='dark'] {
@@ -19,6 +20,7 @@
 	--color-primary: #caa9fa;
 	--color-accent-1: #8be9fd;
 	--color-accent-2: #fab387;
+	--color-tile: #2e2e42;
 }
 
 html {

@@ -1,21 +1,35 @@
 <script lang="ts">
-	import Header from './Header.svelte';
+	import { page } from '$app/stores';
+	import HeaderGuest from './headers/HeaderGuest.svelte';
+	import HeaderUser from './headers/HeaderUser.svelte';
 	import '../app.css';
 
 	let { children } = $props();
+
+	let path = $page.url.pathname;
+	let isLoggedIn =
+		path.startsWith('/home') ||
+		path.startsWith('/problems') ||
+		path.startsWith('/cohorts') ||
+		path.startsWith('/contest') ||
+		path.startsWith('/leaderboard') ||
+		path.startsWith('/settings');
 </script>
 
 <div class="layout">
-	<Header />
+	{#if isLoggedIn}
+		<HeaderUser />
+	{:else}
+		<HeaderGuest />
+	{/if}
 
 	<main>
 		{@render children?.()}
 	</main>
 
 	<footer>
-	<p>© {new Date().getFullYear()} Beetcode</p>
-</footer>
-
+		<p>© {new Date().getFullYear()} Beetcode</p>
+	</footer>
 </div>
 
 <style>
