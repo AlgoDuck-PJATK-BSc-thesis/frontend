@@ -5,6 +5,9 @@
    
   let { data } : {data: ExerciseData} = $props();
   let userCode = $state(data.template);
+  let isDraggingHorizontal = $state(false);
+  let isDraggingVertical = $state(false);
+  
   let editor: Monaco.editor.IStandaloneCodeEditor | null = null;
   let monaco: typeof Monaco | null = null;
   let editorContainer: HTMLElement;
@@ -147,68 +150,101 @@ const setupDynamicElementSizing = () : void => {
 
   actualScrollBarHorizontal.style.left = "50%";
   actualScrollBarHorizontal.style.transform = `translate(-50%)`;
-  actualScrollBarHorizontal.style.background = "#FFFF00";
 }
 
 
-const handleDownHorizontal = (e: MouseEvent) => {    
-    document.addEventListener('mousemove', handleMouseDraggedHorizontal);
-    document.addEventListener('mouseup', handleReleaseHorizontal);
+const handleDownHorizontal = (e: MouseEvent) => {
+  e.preventDefault();
+  isDraggingHorizontal = true;
+  document.addEventListener('mousemove', handleMouseDraggedHorizontal);
+  document.addEventListener('mouseup', handleReleaseHorizontal);
+  document.body.style.cursor = "col-resize";
+  document.body.style.userSelect = "none"; 
 }
 
-const handleDownVertical = (e: MouseEvent) => {    
-    document.addEventListener('mousemove', handleMouseDraggedVertical);
-    document.addEventListener('mouseup', handleReleaseVertical);
+const handleDownVertical = (e: MouseEvent) => {
+  e.preventDefault();
+  isDraggingVertical = true;
+  document.addEventListener('mousemove', handleMouseDraggedVertical);
+  document.addEventListener('mouseup', handleReleaseVertical);
+  document.body.style.cursor = "row-resize";
+  document.body.style.userSelect = "none"; 
 }
 
 
 const handleMouseDraggedHorizontal = (e: MouseEvent) => {
+  if (!isDraggingHorizontal) return;
   const dx = originalWidthLeft + contentPaneClientStartX - e.clientX;
   data_div.style.width = `${originalWidthLeft - dx}px`;
   code_div.style.width = `${originalWidthRight + dx}px`;   
 }
 
 const handleMouseDraggedVertical = (e: MouseEvent) => {
+  if (!isDraggingVertical) return;
   const dy = originalHeightTop + contentPaneClientStartY - e.clientY;
   monaco_div.style.height = `${originalHeightTop - dy}px`;
   terminal_div.style.height = `${originalHeightBottom + dy}px`;
 }
 
 const handleReleaseHorizontal = (e: MouseEvent) => {
+  isDraggingHorizontal = false;
   document.removeEventListener('mousemove', handleMouseDraggedHorizontal);
   document.removeEventListener('mouseup', handleReleaseHorizontal);
+  document.body.style.cursor = "auto";
+  document.body.style.userSelect = "auto";
 }
 
 const handleReleaseVertical = (e: MouseEvent) => {
+  isDraggingVertical = false;
   document.removeEventListener('mousemove', handleMouseDraggedVertical);
   document.removeEventListener('mouseup', handleReleaseVertical);
+  document.body.style.cursor = "auto";
+  document.body.style.userSelect = "auto";
 }
 
 const toggleVerticalWindowResizeBarResized = () => {
+  if (isDraggingHorizontal) return;
+  const resize_bar_accent : HTMLElement | null = document.getElementById("vertical-resize-bar-accent");
   const resize_bar : HTMLElement | null = document.getElementById("vertical-resize-bar");
-  if (!resize_bar) return;
+  if (!resize_bar || !resize_bar_accent) return;
   const resize_bar_width = parseComputedDimensions(getComputedStyle(resize_bar).width);
   if (defaultVerticalScrollBarWidth === resize_bar_width){
     resize_bar.style.width = `${resize_bar_width * 3}px`
-    resize_bar.style.background = "#FF0000";
+    resize_bar_accent.style.visibility = "visible";
+
+    if(document.documentElement.getAttribute('data-theme') === "dark"){
+      resize_bar.style.background = "rgba(255,255,255,0.35)";
+    }else{
+      resize_bar.style.background = "#FF0000";
+    }
   }else {
-    resize_bar.style.background = "#FFFFFF";
+    resize_bar.style.background = "var(--color-bg)";
     resize_bar.style.width = `${resize_bar_width / 3}px`
+    resize_bar_accent.style.visibility = "hidden";
+
   }
   resize_bar.style.left = "50%";
   resize_bar.style.transform = `translate(-50%)`;  
 }
 
 const toggleHorizontalWindowResizeBarResized = () => {
+  if (isDraggingVertical) return;
+  const resize_bar_accent : HTMLElement | null = document.getElementById("horizontal-resize-bar-accent");
   const resize_bar : HTMLElement | null = document.getElementById("horizontal-resize-bar");
-  if (!resize_bar) return;
+  if (!resize_bar || !resize_bar_accent) return;
   const resize_bar_height = parseComputedDimensions(getComputedStyle(resize_bar).height);
   if (defaultHorizontalScrollBarHeight === resize_bar_height){
-    resize_bar.style.height = `${resize_bar_height * 2}px`
-    resize_bar.style.background = "#FF0000";
+    resize_bar.style.height = `${resize_bar_height * 3}px`
+    resize_bar_accent.style.visibility = "visible";
+    if(document.documentElement.getAttribute('data-theme') === "dark"){
+      resize_bar.style.background = "rgba(255,255,255,0.35)";
+    }else{
+      resize_bar.style.background = "#FF0000";
+    }
   }else{
-    resize_bar.style.height = `${resize_bar_height / 2}px`
-    resize_bar.style.background = "#FFFFFF";
+    resize_bar.style.height = `${resize_bar_height / 3}px`;
+    resize_bar.style.background = "var(--color-bg)";
+    resize_bar_accent.style.visibility = "hidden";
   }
   resize_bar.style.top = "50%";
   resize_bar.style.transform = `translate(-50%)`; 
@@ -240,33 +276,38 @@ const toggleHorizontalWindowResizeBarResized = () => {
   </div>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div id="resize-bar-holder-vertical" class="w-[5px] h-full relative hover:cursor-col-resize overflow-visible" 
-    onmouseenter={toggleVerticalWindowResizeBarResized}
-    onmouseleave={toggleVerticalWindowResizeBarResized} 
-    onmousedown={handleDownHorizontal} 
-    onmouseup={handleReleaseHorizontal}
-  >
-    <div id="vertical-resize-bar" class="h-full absolute">
-
-    </div>
+  <div 
+  id="resize-bar-holder-vertical" 
+  class="w-1 h-full relative overflow-visible" 
+  class:hover:cursor-col-resize={!isDraggingHorizontal}
+  onmouseenter={!isDraggingHorizontal ? toggleVerticalWindowResizeBarResized : undefined}
+  onmouseleave={!isDraggingVertical ? toggleVerticalWindowResizeBarResized : undefined}
+  onmousedown={handleDownHorizontal}
+>
+  <div id="vertical-resize-bar" class="h-full absolute flex flex-col justify-center items-center rounded-full">
+    <div id="vertical-resize-bar-accent" class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
   </div>
+</div>
   <div id="code-holder" class="w-full h-full flex flex-col px-1">
       <div id="monaco-container" class="w-full h-[85%] rounded-t-md overflow-hidden" bind:this={editorContainer}></div>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div id="resize-bar-holder-horizontal" class="h-[5px] w-full relative hover:cursor-row-resize overflow-visible"
-          onmouseenter={toggleHorizontalWindowResizeBarResized}
-          onmouseleave={toggleHorizontalWindowResizeBarResized}
+        <div 
+          id="resize-bar-holder-horizontal" 
+          class="h-1 w-full relative overflow-visible"
+          class:hover:cursor-row-resize={!isDraggingVertical}
+          onmouseenter={!isDraggingVertical ? toggleHorizontalWindowResizeBarResized : undefined}
+          onmouseleave={!isDraggingHorizontal ? toggleHorizontalWindowResizeBarResized : undefined}
           onmousedown={handleDownVertical}
           onmouseup={handleReleaseVertical}
-          >
-          <div id="horizontal-resize-bar" class="w-full absolute bg-amber-50"
-          
-          >
-            
+        >
+          <div id="horizontal-resize-bar" class="w-full absolute flex justify-center items-center rounded-full">
+            <div id="horizontal-resize-bar-accent" class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible">
+
+            </div>
           </div>
         </div>
       <div id="terminal-container" class="w-full h-[15%] bg-[var(--color-tile)] px-3 py-1 rounded-b-md ">
-        <span class="font-mono">/&#123;hiya&#125;/terminal&gt; </span>
+        <span class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
       </div>
   </div>
 </main>
