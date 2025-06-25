@@ -38,9 +38,16 @@
         automaticLayout: true,
       });
 
+
+      //this is just a test. This executes after the editor mounts so we could add a loading icon while it's getting set-up, sure it's about 200ms but still noticeable
+      let data_div: HTMLElement | null = document.getElementById("data-div");
+        if (data_div){
+            data_div.style.background = "#FF0000";
+        }
+
     } catch (error) {
       console.error(error);
-    }
+    } 
   });
 
   onDestroy(() => {
@@ -63,7 +70,7 @@
 </script>
 
 <main class="flex h-[80vh] w-full my-5">
-  <div class="flex flex-col bg-[var(--color-tile)] text-center w-[30%] h-full">
+  <div id="data-div" class="flex flex-col bg-[var(--color-tile)] text-center w-[30%] h-full">
     <p class="m-2">
       {data.name}
     </p>
@@ -71,5 +78,5 @@
       {data.description}
     </p>
   </div>
-  <div id="monaco-container" class="w-full h-full" bind:this={editorContainer}></div>
+  <div id="monaco-container" class=" w-full h-full" bind:this={editorContainer}></div>
 </main>
