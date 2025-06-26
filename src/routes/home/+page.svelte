@@ -30,19 +30,18 @@
 </svelte:head>
 
 <section class="home">
+	
+	{#if !isExpanded}
 	<h1>Welcome back @username</h1>
+	<div class="welcome-spacer"></div>
+	{/if}
+
+	<div class="image-spacer"></div>
 
 	<div class="dashboard" class:is-expanded={isExpanded}>
 		{#if !isExpanded}
 			<div class="left-column" style="height: {imageHeight}px">
 				<div class="spacer"></div>
-				<div class="card">
-					<h2>Recently Solved</h2>
-					<div class="center-body">
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
-					</div>
-				</div>
-
 				<div class="card carousel">
 					<h2>{carouselItems[$slideIndex].title}</h2>
 					<div class="center-body">
@@ -55,6 +54,13 @@
 				</div>
 
 				<div class="card">
+					<h2>Recently Solved</h2>
+					<div class="center-body">
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
+					</div>
+				</div>
+
+				<div class="card">
 					<h2>Stats</h2>
 					<div class="center-body">
 						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
@@ -63,18 +69,11 @@
 			</div>
 		{/if}
 
-		{#if isExpanded}
-			<div class="collapse-button">
-				<button on:click={() => isExpanded = false}>›</button>
-			</div>
-		{/if}
-
 		<div class="right-column">
-			<div class="image-controls right-align">
-				<button on:click={() => isExpanded = !isExpanded}>{isExpanded ? '🔽 Minimize' : '🔼 Expand'}</button>
-				<button on:click={() => goto('/store')}>🛒 Store</button>
-			</div>
 			<div class="image-wrapper" class:expanded={isExpanded} bind:this={imageWrapperRef}>
+				<div class="inline-toggle-button">
+					<button on:click={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
+				</div>
 				<img src={preview} alt="preview" on:load={updateHeight} />
 			</div>
 		</div>
@@ -98,6 +97,14 @@
 		margin-bottom: 0.5rem;
 	}
 
+	.welcome-spacer {
+		height: 1rem;
+	}
+
+	.image-spacer {
+		height: 10px;
+	}
+
 	.dashboard {
 		display: grid;
 		grid-template-columns: 1fr 3fr;
@@ -116,6 +123,7 @@
 		gap: 1rem;
 		justify-content: space-between;
 		text-align: center;
+		position: relative;
 	}
 
 	.spacer {
@@ -123,12 +131,12 @@
 	}
 
 	.card {
+		height: calc(100% / 3 + 500px);
 		border: 2px solid var(--color-accent-1);
 		border-radius: 6px;
 		background: var(--color-tile);
 		padding: 1rem;
 		text-align: center;
-		flex: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
@@ -179,26 +187,6 @@
 		gap: 0.5rem;
 	}
 
-	.image-controls {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.image-controls.right-align {
-		justify-content: flex-end;
-	}
-
-	.image-controls button {
-		font-family: var(--font-body);
-		font-size: 0.65rem;
-		padding: 0.3rem 0.6rem;
-		background: var(--color-primary);
-		border: none;
-		cursor: pointer;
-		color: black;
-	}
-
 	.image-wrapper {
 		border: 2px solid var(--color-accent-1);
 		border-radius: 6px;
@@ -208,6 +196,7 @@
 		max-width: 100%;
 		margin: 0 auto;
 		transition: all 0.3s ease;
+		position: relative;
 	}
 
 	.expanded {
@@ -221,24 +210,24 @@
 		object-fit: contain;
 	}
 
-	.collapse-button {
+	.inline-toggle-button {
 		position: absolute;
 		top: 50%;
 		left: 0;
-		transform: translateX(-50%) translateY(-50%);
+		transform: translate(-100%, -50%);
 		background: var(--color-primary);
-		border-radius: 0 6px 6px 0;
-		padding: 0.5rem;
-		z-index: 10;
+		border-radius: 12px 0 0 12px;
+		z-index: 5;
 	}
 
-	.collapse-button button {
-		font-family: var(--font-body);
+	.inline-toggle-button button {
+		font-size: 1.2rem;
 		background: var(--color-primary);
 		border: none;
-		padding: 0.2rem 0.6rem;
-		cursor: pointer;
-		font-size: 1rem;
 		color: white;
+		padding: 0.45rem 0.8rem;
+		cursor: pointer;
+		font-family: var(--font-body);
+		border-radius: 8px 0 0 8px;
 	}
 </style>
