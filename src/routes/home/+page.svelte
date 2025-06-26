@@ -206,7 +206,7 @@
 	}
 
 	.carousel-indicator span {
-		color: white;
+		color: var(--color-text);
 		margin: 0 2px;
 	}
 
