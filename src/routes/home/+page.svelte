@@ -31,16 +31,10 @@
 </svelte:head>
 
 <section class="home">
-	{#if !isExpanded}
-	<h1>Welcome back @username</h1>
-	<div class="welcome-spacer"></div>
-	{/if}
-
-	<div class="image-spacer"></div>
-
 	<div class="dashboard" class:is-expanded={isExpanded}>
 		{#if !isExpanded}
 			<div class="left-column" style="height: {imageHeight}px">
+				<h1 class="welcome-title">Welcome back @username</h1>
 				<div class="spacer"></div>
 				<div class="card carousel">
 					<h2>{carouselItems[$slideIndex].title}</h2>
@@ -95,8 +89,8 @@
 
 <style>
 	.home {
-		height: calc(100vh - 6rem);
-		padding: 1rem 2rem;
+		height: fit-content;
+		padding: 2rem 2rem;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
