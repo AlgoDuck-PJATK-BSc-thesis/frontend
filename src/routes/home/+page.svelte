@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
 	let currentSlide = 0;
@@ -30,7 +31,6 @@
 </svelte:head>
 
 <section class="home">
-	
 	{#if !isExpanded}
 	<h1>Welcome back @username</h1>
 	<div class="welcome-spacer"></div>
@@ -44,12 +44,25 @@
 				<div class="spacer"></div>
 				<div class="card carousel">
 					<h2>{carouselItems[$slideIndex].title}</h2>
-					<div class="center-body">
-						<p>{carouselItems[$slideIndex].body}</p>
+					<div class="carousel-frame">
+						<div class="carousel-controls">
+							<button on:click={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>&lt;</button>
+							<button on:click={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>&gt;</button>
+						</div>
+						<div class="center-body">
+						{#each carouselItems as item, i (i)}
+							{#if i === $slideIndex}
+								<p in:fly={{ x: 30, duration: 250 }} out:fly={{ x: -30, duration: 250 }}>
+									{item.body}
+								</p>
+							{/if}
+						{/each}						
+						</div>
 					</div>
-					<div class="carousel-controls">
-						<button on:click={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>←</button>
-						<button on:click={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>→</button>
+					<div class="carousel-indicator">
+						{#each carouselItems as _, i}
+							<span>{i === $slideIndex ? ' ● ' : ' ○ '}</span>
+						{/each}
 					</div>
 				</div>
 
@@ -143,11 +156,67 @@
 		transition: all 0.3s ease;
 	}
 
+	.card.carousel {
+		position: relative;
+	}
+
+	.carousel-frame {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		position: relative;
+	}
+
+	.carousel-controls {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 100%;
+		pointer-events: none;
+	}
+
+	.carousel-controls button {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: auto;
+	font-family: var(--font-body);
+	cursor: pointer;
+	border: none;
+	background: var(--color-primary);
+	padding: 0.2rem 0.33rem;
+	font-size: 0.90rem;
+	color: white;
+	border-radius: 3px;
+	}
+
+	.carousel-controls button:first-child {
+		left: 0.01rem;
+	}
+
+	.carousel-controls button:last-child {
+		right: 0.01rem;
+	}
+
+	.carousel-indicator {
+		margin-top: 0.5rem;
+		text-align: center;
+		font-size: 0.9rem;
+	}
+
+	.carousel-indicator span {
+		color: white;
+		margin: 0 2px;
+	}
+
 	.center-body {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		height: 100%;
+		padding: 0 2.5rem;
+		text-align: center;
 	}
 
 	.card h2 {
@@ -160,23 +229,6 @@
 		font-size: 0.75rem;
 		color: var(--color-text);
 		margin: 0;
-	}
-
-	.carousel-controls {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 0.5rem;
-		gap: 0.5rem;
-	}
-
-	.carousel-controls button {
-		font-family: var(--font-body);
-		cursor: pointer;
-		border: none;
-		background: var(--color-primary);
-		padding: 0.2rem 0.6rem;
-		font-size: 0.75rem;
-		color: black;
 	}
 
 	.right-column {
