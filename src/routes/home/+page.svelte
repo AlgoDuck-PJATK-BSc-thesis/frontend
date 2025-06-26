@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
 	let currentSlide = 0;
@@ -30,27 +31,45 @@
 </svelte:head>
 
 <section class="home">
+	{#if !isExpanded}
 	<h1>Welcome back @username</h1>
+	<div class="welcome-spacer"></div>
+	{/if}
+
+	<div class="image-spacer"></div>
 
 	<div class="dashboard" class:is-expanded={isExpanded}>
 		{#if !isExpanded}
 			<div class="left-column" style="height: {imageHeight}px">
 				<div class="spacer"></div>
+				<div class="card carousel">
+					<h2>{carouselItems[$slideIndex].title}</h2>
+					<div class="carousel-frame">
+						<div class="carousel-controls">
+							<button on:click={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>&lt;</button>
+							<button on:click={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>&gt;</button>
+						</div>
+						<div class="center-body">
+						{#each carouselItems as item, i (i)}
+							{#if i === $slideIndex}
+								<p in:fly={{ x: 30, duration: 250 }} out:fly={{ x: -30, duration: 250 }}>
+									{item.body}
+								</p>
+							{/if}
+						{/each}						
+						</div>
+					</div>
+					<div class="carousel-indicator">
+						{#each carouselItems as _, i}
+							<span>{i === $slideIndex ? ' ● ' : ' ○ '}</span>
+						{/each}
+					</div>
+				</div>
+
 				<div class="card">
 					<h2>Recently Solved</h2>
 					<div class="center-body">
 						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
-					</div>
-				</div>
-
-				<div class="card carousel">
-					<h2>{carouselItems[$slideIndex].title}</h2>
-					<div class="center-body">
-						<p>{carouselItems[$slideIndex].body}</p>
-					</div>
-					<div class="carousel-controls">
-						<button on:click={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>←</button>
-						<button on:click={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>→</button>
 					</div>
 				</div>
 
@@ -63,18 +82,11 @@
 			</div>
 		{/if}
 
-		{#if isExpanded}
-			<div class="collapse-button">
-				<button on:click={() => isExpanded = false}>›</button>
-			</div>
-		{/if}
-
 		<div class="right-column">
-			<div class="image-controls right-align">
-				<button on:click={() => isExpanded = !isExpanded}>{isExpanded ? '🔽 Minimize' : '🔼 Expand'}</button>
-				<button on:click={() => goto('/store')}>🛒 Store</button>
-			</div>
 			<div class="image-wrapper" class:expanded={isExpanded} bind:this={imageWrapperRef}>
+				<div class="inline-toggle-button">
+					<button on:click={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
+				</div>
 				<img src={preview} alt="preview" on:load={updateHeight} />
 			</div>
 		</div>
@@ -98,6 +110,14 @@
 		margin-bottom: 0.5rem;
 	}
 
+	.welcome-spacer {
+		height: 1rem;
+	}
+
+	.image-spacer {
+		height: 10px;
+	}
+
 	.dashboard {
 		display: grid;
 		grid-template-columns: 1fr 3fr;
@@ -116,6 +136,7 @@
 		gap: 1rem;
 		justify-content: space-between;
 		text-align: center;
+		position: relative;
 	}
 
 	.spacer {
@@ -123,16 +144,70 @@
 	}
 
 	.card {
+		height: calc(100% / 3 + 500px);
 		border: 2px solid var(--color-accent-1);
 		border-radius: 6px;
 		background: var(--color-tile);
 		padding: 1rem;
 		text-align: center;
-		flex: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		transition: all 0.3s ease;
+	}
+
+	.card.carousel {
+		position: relative;
+	}
+
+	.carousel-frame {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		position: relative;
+	}
+
+	.carousel-controls {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 100%;
+		pointer-events: none;
+	}
+
+	.carousel-controls button {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: auto;
+	font-family: var(--font-body);
+	cursor: pointer;
+	border: none;
+	background: var(--color-primary);
+	padding: 0.2rem 0.33rem;
+	font-size: 0.90rem;
+	color: white;
+	border-radius: 3px;
+	}
+
+	.carousel-controls button:first-child {
+		left: 0.01rem;
+	}
+
+	.carousel-controls button:last-child {
+		right: 0.01rem;
+	}
+
+	.carousel-indicator {
+		margin-top: 0.5rem;
+		text-align: center;
+		font-size: 0.9rem;
+	}
+
+	.carousel-indicator span {
+		color: var(--color-text);
+		margin: 0 2px;
 	}
 
 	.center-body {
@@ -140,6 +215,8 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
+		padding: 0 2.5rem;
+		text-align: center;
 	}
 
 	.card h2 {
@@ -154,49 +231,12 @@
 		margin: 0;
 	}
 
-	.carousel-controls {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 0.5rem;
-		gap: 0.5rem;
-	}
-
-	.carousel-controls button {
-		font-family: var(--font-body);
-		cursor: pointer;
-		border: none;
-		background: var(--color-primary);
-		padding: 0.2rem 0.6rem;
-		font-size: 0.75rem;
-		color: black;
-	}
-
 	.right-column {
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
 		justify-content: flex-start;
 		gap: 0.5rem;
-	}
-
-	.image-controls {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.image-controls.right-align {
-		justify-content: flex-end;
-	}
-
-	.image-controls button {
-		font-family: var(--font-body);
-		font-size: 0.65rem;
-		padding: 0.3rem 0.6rem;
-		background: var(--color-primary);
-		border: none;
-		cursor: pointer;
-		color: black;
 	}
 
 	.image-wrapper {
@@ -208,6 +248,7 @@
 		max-width: 100%;
 		margin: 0 auto;
 		transition: all 0.3s ease;
+		position: relative;
 	}
 
 	.expanded {
@@ -221,24 +262,24 @@
 		object-fit: contain;
 	}
 
-	.collapse-button {
+	.inline-toggle-button {
 		position: absolute;
 		top: 50%;
 		left: 0;
-		transform: translateX(-50%) translateY(-50%);
+		transform: translate(-100%, -50%);
 		background: var(--color-primary);
-		border-radius: 0 6px 6px 0;
-		padding: 0.5rem;
-		z-index: 10;
+		border-radius: 12px 0 0 12px;
+		z-index: 5;
 	}
 
-	.collapse-button button {
-		font-family: var(--font-body);
+	.inline-toggle-button button {
+		font-size: 1.2rem;
 		background: var(--color-primary);
 		border: none;
-		padding: 0.2rem 0.6rem;
-		cursor: pointer;
-		font-size: 1rem;
 		color: white;
+		padding: 0.45rem 0.8rem;
+		cursor: pointer;
+		font-family: var(--font-body);
+		border-radius: 8px 0 0 8px;
 	}
 </style>
