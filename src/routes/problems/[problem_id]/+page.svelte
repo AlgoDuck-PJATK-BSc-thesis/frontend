@@ -4,10 +4,18 @@
   import type { ExerciseData } from "./proxy+page";
    
   let { data } : {data: ExerciseData} = $props();
-  let userCode = $state(data.template);
-  let isDraggingHorizontal = $state(false);
-  let isDraggingVertical = $state(false);
+  let userCode : string = $state(data.template);
+  let isDraggingHorizontal : boolean = $state(false);
+  let isDraggingVertical : boolean = $state(false);
+
+  let isHorizontalResized : boolean = $state(false);
+  let isVerticalResized : boolean = $state(false);
+
+  let isHorizontalHovered : boolean = $state(false);
+  let isVerticalHovered : boolean = $state(false);
   
+  let wasClicked: boolean = $state(false);
+
   let editor: Monaco.editor.IStandaloneCodeEditor | null = null;
   let monaco: typeof Monaco | null = null;
   let editorContainer: HTMLElement;
@@ -67,14 +75,6 @@
         readOnly: false,
         automaticLayout: true,
       });
-
-
-      //this is just a test. This executes after the editor mounts so we could add a loading icon while it's getting set-up, sure it's about 200ms but still noticeable
-    //   let data_div: HTMLElement | null = document.getElementById("data-div");
-    //     if (data_div){
-    //         data_div.style.background = "#FF0000";
-    //     }
-
     } catch (error) {
       console.error(error);
     } 
@@ -186,20 +186,26 @@ const handleMouseDraggedVertical = (e: MouseEvent) => {
   terminal_div.style.height = `${originalHeightBottom + dy}px`;
 }
 
-const handleReleaseHorizontal = (e: MouseEvent) => {
+const handleReleaseHorizontal = () => {
   isDraggingHorizontal = false;
+
   document.removeEventListener('mousemove', handleMouseDraggedHorizontal);
   document.removeEventListener('mouseup', handleReleaseHorizontal);
   document.body.style.cursor = "auto";
   document.body.style.userSelect = "auto";
+
+  wasClicked = true;
 }
 
-const handleReleaseVertical = (e: MouseEvent) => {
+const handleReleaseVertical = () => {
   isDraggingVertical = false;
   document.removeEventListener('mousemove', handleMouseDraggedVertical);
   document.removeEventListener('mouseup', handleReleaseVertical);
   document.body.style.cursor = "auto";
   document.body.style.userSelect = "auto";
+
+  wasClicked = true;
+
 }
 
 const toggleVerticalWindowResizeBarResized = () => {
@@ -208,8 +214,9 @@ const toggleVerticalWindowResizeBarResized = () => {
   const resize_bar : HTMLElement | null = document.getElementById("vertical-resize-bar");
   if (!resize_bar || !resize_bar_accent) return;
   const resize_bar_width = parseComputedDimensions(getComputedStyle(resize_bar).width);
-  if (defaultVerticalScrollBarWidth === resize_bar_width){
+  if (!isVerticalResized){
     resize_bar.style.width = `${resize_bar_width * 3}px`
+    isVerticalResized = true;
     resize_bar_accent.style.visibility = "visible";
 
     if(document.documentElement.getAttribute('data-theme') === "dark"){
@@ -218,6 +225,7 @@ const toggleVerticalWindowResizeBarResized = () => {
       resize_bar.style.background = "#FF0000";
     }
   }else {
+    isVerticalResized = false;
     resize_bar.style.background = "var(--color-bg)";
     resize_bar.style.width = `${resize_bar_width / 3}px`
     resize_bar_accent.style.visibility = "hidden";
@@ -233,7 +241,8 @@ const toggleHorizontalWindowResizeBarResized = () => {
   const resize_bar : HTMLElement | null = document.getElementById("horizontal-resize-bar");
   if (!resize_bar || !resize_bar_accent) return;
   const resize_bar_height = parseComputedDimensions(getComputedStyle(resize_bar).height);
-  if (defaultHorizontalScrollBarHeight === resize_bar_height){
+  if (!isHorizontalResized){
+    isHorizontalResized = true;
     resize_bar.style.height = `${resize_bar_height * 3}px`
     resize_bar_accent.style.visibility = "visible";
     if(document.documentElement.getAttribute('data-theme') === "dark"){
@@ -242,6 +251,7 @@ const toggleHorizontalWindowResizeBarResized = () => {
       resize_bar.style.background = "#FF0000";
     }
   }else{
+    isHorizontalResized = false;
     resize_bar.style.height = `${resize_bar_height / 3}px`;
     resize_bar.style.background = "var(--color-bg)";
     resize_bar_accent.style.visibility = "hidden";
@@ -280,9 +290,28 @@ const toggleHorizontalWindowResizeBarResized = () => {
   id="resize-bar-holder-vertical" 
   class="w-1 h-full relative overflow-visible" 
   class:hover:cursor-col-resize={!isDraggingHorizontal}
-  onmouseenter={!isDraggingHorizontal ? toggleVerticalWindowResizeBarResized : undefined}
-  onmouseleave={!isDraggingVertical ? toggleVerticalWindowResizeBarResized : undefined}
+  onmouseenter={!isDraggingHorizontal ? ()=>{
+    if (isHorizontalResized){
+      handleReleaseVertical();
+      toggleHorizontalWindowResizeBarResized();      
+    }
+    toggleVerticalWindowResizeBarResized();
+    isVerticalHovered = true;
+  } : undefined}
+
+  onmouseleave={!isDraggingVertical ? () => {
+    if(!isDraggingHorizontal && wasClicked){
+      isVerticalHovered = false;
+      wasClicked = false;
+      if (isVerticalResized){
+        toggleVerticalWindowResizeBarResized();      
+      }
+    }else{
+        toggleVerticalWindowResizeBarResized();
+    }
+  } : undefined}
   onmousedown={handleDownHorizontal}
+  onmouseup={handleReleaseHorizontal}
 >
   <div id="vertical-resize-bar" class="h-full absolute flex flex-col justify-center items-center rounded-full">
     <div id="vertical-resize-bar-accent" class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
@@ -295,8 +324,23 @@ const toggleHorizontalWindowResizeBarResized = () => {
           id="resize-bar-holder-horizontal" 
           class="h-1 w-full relative overflow-visible"
           class:hover:cursor-row-resize={!isDraggingVertical}
-          onmouseenter={!isDraggingVertical ? toggleHorizontalWindowResizeBarResized : undefined}
-          onmouseleave={!isDraggingHorizontal ? toggleHorizontalWindowResizeBarResized : undefined}
+          onmouseenter={!isDraggingVertical ? ()=>{
+            if (!isDraggingHorizontal){
+              toggleHorizontalWindowResizeBarResized();
+              isHorizontalHovered = true;
+            }
+          } : undefined}
+          onmouseleave={!isDraggingHorizontal ? ()=>{
+            if(!isDraggingVertical && wasClicked){
+              isHorizontalHovered = false;
+              wasClicked = false;
+              if(isHorizontalResized){
+                toggleHorizontalWindowResizeBarResized();
+              }
+            }else{
+              toggleHorizontalWindowResizeBarResized();
+            }
+          } : undefined}
           onmousedown={handleDownVertical}
           onmouseup={handleReleaseVertical}
         >
