@@ -30,11 +30,12 @@
 	</nav>
 
 	<div class="actions">
-		<ThemeToggle />
 
 		<button class="lang-toggle" on:click={toggleLanguage}>
 			{currentLanguage === 'en' ? '🇺🇸' : '🇵🇱'}
 		</button>
+
+		<ThemeToggle />
 	
 		<a href="/settings" class="user-icon" aria-label="User settings">👤</a>
 
@@ -95,7 +96,7 @@
 	.actions {
 		display: flex;
 		align-items: center;
-		gap: 0.7rem;
+		gap: 0.75rem;
 		flex-wrap: wrap;
 	}
 

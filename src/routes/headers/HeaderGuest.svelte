@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ThemeToggle from '../ThemeToggle.svelte';
+
+	let currentLang = '🇺🇸';
+
+	function toggleLang() {
+		currentLang = currentLang === '🇺🇸' ? '🇵🇱' : '🇺🇸';
+	}
 </script>
 
 <header>
@@ -11,7 +17,7 @@
 	<nav>
 		<ul>
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
-				<a href="/about">About Us</a>
+				<a href="/aboutus">About Us</a>
 			</li>
 			<li aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}>
 				<a href="/learnmore">Learn More</a>
@@ -25,7 +31,12 @@
 		</ul>
 	</nav>
 
-	<ThemeToggle />
+	<div class="right-controls">
+		<button class="lang-button" on:click={toggleLang} aria-label="Toggle Language">
+			{currentLang}
+		</button>
+		<ThemeToggle />
+	</div>
 </header>
 
 <style>
@@ -68,5 +79,20 @@
 
 	li[aria-current='page'] a {
 		border-bottom: 2px solid var(--color-primary);
+	}
+
+	.right-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.lang-button {
+		background: none;
+		border: none;
+		font-size: 1.2rem;
+		cursor: pointer;
+		padding: 0;
+		margin-right: 0.5rem;
 	}
 </style>
