@@ -33,9 +33,8 @@
 <section class="home">
 	<div class="dashboard" class:is-expanded={isExpanded}>
 		{#if !isExpanded}
-			<div class="left-column" style="height: {imageHeight}px">
+			<div class="left-column" style="min-height: 70vh; height: {imageHeight || '70vh'}">
 				<h1 class="welcome-title">Welcome back @username</h1>
-				<div class="spacer"></div>
 				<div class="card carousel">
 					<h2>{carouselItems[$slideIndex].title}</h2>
 					<div class="carousel-frame">
@@ -131,6 +130,7 @@
 		justify-content: space-between;
 		text-align: center;
 		position: relative;
+		overflow-y: auto;
 	}
 
 	.spacer {
