@@ -11,7 +11,7 @@
 			<li aria-current={$page.url.pathname === '/home' ? 'page' : undefined}>
 				<a href="/home">Home</a>
 			</li>
-			<li><a href="/problems">Problems</a></li>
+			<li><a href="/Categories">Problems</a></li>
 			<li><a href="/cohorts">Cohorts</a></li>
 			<li><a href="/contest">Contest</a></li>
 			<li><a href="/leaderboard">Leaderboard</a></li>

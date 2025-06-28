@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { userPreferences } from "../Stores/theme";
+
 	let current = 'light';
 
 	if (typeof window !== 'undefined') {
@@ -8,6 +10,7 @@
 	function toggleTheme() {
 		current = current === 'light' ? 'dark' : 'light';
 		document.documentElement.setAttribute('data-theme', current);
+		userPreferences.set({theme: `${current}`});
 	}
 </script>
 
