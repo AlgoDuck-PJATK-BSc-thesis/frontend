@@ -28,13 +28,7 @@
 					Home
 				</a>
 			</li> -->
-			<li><a href="/home" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Home</a></li>
-			<li><a href="/problems" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Problems</a></li>
-			<li><a href="/cohorts" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Cohorts</a></li>
-			<li><a href="/contest" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Contest</a></li>
-			<li><a href="/leaderboard" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Leaderboard</a></li>
-			<li><a href="/store" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Store</a></li>
-		<ul>
+		
 			<li aria-current={$page.url.pathname === '/home' ? 'page' : undefined}>
 				<a href="/home">Home</a>
 			</li>

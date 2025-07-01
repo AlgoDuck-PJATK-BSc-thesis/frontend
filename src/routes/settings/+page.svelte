@@ -53,11 +53,6 @@
 	</div>
 
 	<div class="main">
-		<div class="avatar">
-			<div class="circle">👤</div>
-			<p>{username}</p>
-		</div>
-
 		<div class="panel" id="profile">
 			<h2>Profile Information</h2>
 			<label>
