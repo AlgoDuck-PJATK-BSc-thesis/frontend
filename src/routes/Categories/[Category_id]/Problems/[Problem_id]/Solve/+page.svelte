@@ -297,27 +297,6 @@
     horizontalResizeBar.style.transform = `translate(-50%)`; 
   }
 
-  const toggleDuckContainer = ()=>{
-    if (isDuckContainerShown){
-      hideDuckContainer();
-    }else{
-      showDuckContainer();
-    }
-  }
-
-  const showDuckContainer = () => {
-    duckHolderWrapper.style.right = "40px";
-
-    isDuckContainerShown = true;
-  }
-
-  const hideDuckContainer = () => {
-    duckHolderWrapper.style.right = `-${getOptionalDimesionsString(duckHolderComputedStyle?.width)}`;
-
-    isDuckContainerShown = false;
-    hideHintBox();
-  }
-
   const expandVerticalBarWrapper = ()=>{
     if (isHorizontalResized){
       handleReleaseVertical();
@@ -353,30 +332,44 @@
       toggleHorizontalWindowResizeBarResized();
     }
   }
-
-
-  let frameCounter: number = 0;
-  let currLetter: number = 0;
-  let wrappingIndexCounter: number = 0;
-  const myLorem: string = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni, cumque velit delectus perspiciatis minus voluptate pariatur nobis reiciendis voluptates suscipit cupiditate! Aut tenetur, rem veritatis consequuntur ea et qui suscipit.";
-  const lettersPerSecond: number = 10;
-  let wrappingIndices: number[];
   
-  const toggleHintBox = () => {
-    const textHolderWidth: number = parseOptionalDimensions(textHolderComputedStyle?.width) - parseOptionalDimensions(textHolderComputedStyle?.paddingLeft) - parseOptionalDimensions(textHolderComputedStyle?.paddingRight);
-    const font = `${getOptionalDimesionsString(hintTextContentsComputedStyle?.fontSize)} ${getOptionalDimesionsString(hintTextContentsComputedStyle?.fontFamily)}`;
-    
-    if (isHintBoxShown){
-      hideHintBox();
+  
+
+
+
+
+
+  // duck helper stuff start
+  
+    let frameCounter: number = 0;
+    let currLetter: number = 0;
+    let wrappingIndexCounter: number = 0;
+    const myLorem: string = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni, cumque velit delectus perspiciatis minus voluptate pariatur nobis reiciendis voluptates suscipit cupiditate! Aut tenetur, rem veritatis consequuntur ea et qui suscipit.";
+    const lettersPerSecond: number = 10;
+    let wrappingIndices: number[];
+
+    const toggleDuckContainer = ()=>{
+    if (isDuckContainerShown){
+      hideDuckContainer();
     }else{
-      showHintBox();
+      showDuckContainer();
     }
-  
-    wrappingIndices = findWrappingIndices(myLorem, font, textHolderWidth);
-  
-    requestAnimationFrame(printHintContents);
   }
-  
+
+  const showDuckContainer = () => {
+    duckHolderWrapper.style.right = "40px";
+
+    isDuckContainerShown = true;
+  }
+
+  const hideDuckContainer = () => {
+    duckHolderWrapper.style.right = `-${getOptionalDimesionsString(duckHolderComputedStyle?.width)}`;
+
+    isDuckContainerShown = false;
+    hideHintBox();
+  }
+
+
   const hideHintBox = () => {
     textHolder.style.visibility = "hidden";
     moveHintBox(-(constGetOptionalDimensionsNumber(duckHolderWrapperBoundingBox?.left)));
@@ -394,7 +387,7 @@
   const moveHintBox = (moveBy: number) => {
     dialogBox.style.right = `${bodyClientRect.right - moveBy}px`
   }
-  
+
   const printHintContents = (currentTime : number) => {
   
     if (currLetter === myLorem.length){
@@ -424,6 +417,23 @@
   
     animationCancellationToken = requestAnimationFrame(printHintContents);
   }
+
+  const toggleHintBox = () => {
+    const textHolderWidth: number = parseOptionalDimensions(textHolderComputedStyle?.width) - parseOptionalDimensions(textHolderComputedStyle?.paddingLeft) - parseOptionalDimensions(textHolderComputedStyle?.paddingRight);
+    const font = `${getOptionalDimesionsString(hintTextContentsComputedStyle?.fontSize)} ${getOptionalDimesionsString(hintTextContentsComputedStyle?.fontFamily)}`;
+    
+    if (isHintBoxShown){
+      hideHintBox();
+    }else{
+      showHintBox();
+    }
+  
+    wrappingIndices = findWrappingIndices(myLorem, font, textHolderWidth);
+  
+    requestAnimationFrame(printHintContents);
+  }
+  
+  //duck helper start end
 
 </script>
 
