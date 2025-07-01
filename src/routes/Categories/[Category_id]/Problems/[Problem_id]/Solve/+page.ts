@@ -1,7 +1,10 @@
 import type { PageLoad } from "./$types";
 
+// don't change this or monaco will have a stroke and crash the entire app
+export const ssr = false;
+
 export const load: PageLoad = async ({ params }) => {
-    let exerciseId : string = params.problem_id;
+    let exerciseId : string = params.Problem_id;
     //TODO fetch actual exercise contents
     return {
         template: 
@@ -15,10 +18,4 @@ export const load: PageLoad = async ({ params }) => {
         description: "sort these ints",
         name: "int array sort",
     }
-}
-
-export interface ExerciseData{
-    template: string,
-    description: string,
-    name: string,
 }

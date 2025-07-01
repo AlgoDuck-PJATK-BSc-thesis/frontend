@@ -34,6 +34,15 @@
 			<li><a href="/contest" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Contest</a></li>
 			<li><a href="/leaderboard" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Leaderboard</a></li>
 			<li><a href="/store" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Store</a></li>
+		<ul>
+			<li aria-current={$page.url.pathname === '/home' ? 'page' : undefined}>
+				<a href="/home">Home</a>
+			</li>
+			<li><a href="/Categories">Problems</a></li>
+			<li><a href="/cohorts">Cohorts</a></li>
+			<li><a href="/contest">Contest</a></li>
+			<li><a href="/leaderboard">Leaderboard</a></li>
+			<li><a href="/store">Store</a></li>
 		</ul>
 	</nav>
 
