@@ -17,7 +17,8 @@
 </script>
 
 <div class="layout">
-	{#if /* isLoggedIn */ true}
+	{#if isLoggedIn }
+	<!-- {#if /* isLoggedIn */ true} -->
 		<HeaderUser />
 	{:else}
 		<HeaderGuest />
@@ -53,9 +54,15 @@
 	}
 
 	footer {
-		text-align: center;
-		padding: 1rem;
-		color: var(--color-accent-2);
-		font-size: 0.75rem;
-	}
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background: var(--color-bg);
+	text-align: center;
+	padding: 1rem;
+	font-size: 0.75rem;
+	color: var(--color-accent-2);
+	z-index: 100;
+}
 </style>

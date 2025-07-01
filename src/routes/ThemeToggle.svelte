@@ -11,25 +11,13 @@
 	}
 </script>
 
-<button on:click={toggleTheme} class="theme-toggle">
+<button
+	onclick={toggleTheme}
+	class="text-xl text-[color:var(--color-text)] bg-transparent border-none cursor-pointer px-1 py-0.5 leading-none hover:text-[color:var(--color-primary)] transition-colors duration-200"
+>
 	{#if current === 'light'}
 		🌙
 	{:else}
 		🌞
 	{/if}
 </button>
-
-<style>
-	.theme-toggle {
-		font-size: 1.2rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		color: var(--color-text);
-		padding: 0.5rem;
-		transition: color 0.2s ease;
-	}
-	.theme-toggle:hover {
-		color: var(--color-primary);
-	}
-</style>

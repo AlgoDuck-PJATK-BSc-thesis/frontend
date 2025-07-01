@@ -3,96 +3,64 @@
 	import ThemeToggle from '../ThemeToggle.svelte';
 
 	let currentLang = '🇺🇸';
-
 	function toggleLang() {
 		currentLang = currentLang === '🇺🇸' ? '🇵🇱' : '🇺🇸';
 	}
 </script>
 
-<header>
-	<a href="/" class="logo">
-		BEETCODE
-	</a>
+<header class="flex justify-between items-center px-8 py-4 bg-[color:var(--color-bg)] text-[color:var(--color-text)] border-b-2 border-[color:var(--color-accent-1)] font-body sticky top-0 z-50">
+	<a href="/" class="text-[color:var(--color-primary)] text-base no-underline">BEETCODE</a>
 
 	<nav>
-		<ul>
-			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
-				<a href="/aboutus">About Us</a>
+		<ul class="flex gap-6 list-none p-0 m-0 text-xs uppercase tracking-wide">
+			<li>
+				<a
+					href="/aboutus"
+					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+				>
+					About Us
+				</a>
 			</li>
-			<li aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}>
-				<a href="/learnmore">Learn More</a>
+			<li>
+				<a
+					href="/learnmore"
+					aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+				>
+					Learn More
+				</a>
 			</li>
-			<li aria-current={$page.url.pathname === '/login' ? 'page' : undefined}>
-				<a href="/login">Log In</a>
+			<li>
+				<a
+					href="/login"
+					aria-current={$page.url.pathname === '/login' ? 'page' : undefined}
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+				>
+					Log In
+				</a>
 			</li>
-			<li aria-current={$page.url.pathname === '/signup' ? 'page' : undefined}>
-				<a href="/signup">Sign Up</a>
+			<li>
+				<a
+					href="/signup"
+					aria-current={$page.url.pathname === '/signup' ? 'page' : undefined}
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+				>
+					Sign Up
+				</a>
 			</li>
 		</ul>
 	</nav>
 
-	<div class="right-controls">
-		<button class="lang-button" on:click={toggleLang} aria-label="Toggle Language">
+	<div class="flex items-center gap-4">
+		<button
+			onclick={toggleLang}
+			class="text-xl bg-transparent border-none cursor-pointer p-0 leading-none"
+			aria-label="Toggle Language"
+		>
 			{currentLang}
 		</button>
+
 		<ThemeToggle />
 	</div>
 </header>
-
-<style>
-	header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem 2rem;
-		background-color: var(--color-bg);
-		color: var(--color-text);
-		border-bottom: 2px solid var(--color-accent-1);
-		font-family: var(--font-body);
-	}
-
-	.logo {
-		text-decoration: none;
-		color: var(--color-primary);
-		font-size: 1rem;
-	}
-
-	nav ul {
-		display: flex;
-		gap: 1.5rem;
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-
-	nav a {
-		text-decoration: none;
-		color: var(--color-text);
-		font-size: 0.75rem;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	nav a:hover {
-		color: var(--color-primary);
-	}
-
-	li[aria-current='page'] a {
-		border-bottom: 2px solid var(--color-primary);
-	}
-
-	.right-controls {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-	}
-
-	.lang-button {
-		background: none;
-		border: none;
-		font-size: 1.2rem;
-		cursor: pointer;
-		padding: 0;
-		margin-right: 0.5rem;
-	}
-</style>

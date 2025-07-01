@@ -6,6 +6,7 @@
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
+	let username = 'OrbitOwl';
 	let currentSlide = 0;
 	let imageHeight = 0;
 	let isExpanded = false;
@@ -34,13 +35,13 @@
 	<div class="dashboard" class:is-expanded={isExpanded}>
 		{#if !isExpanded}
 			<div class="left-column" style="min-height: 70vh; height: {imageHeight || '70vh'}">
-				<h1 class="welcome-title">Welcome back @username</h1>
+				<h1 class="welcome-title">Welcome back {username} </h1>
 				<div class="card carousel">
 					<h2>{carouselItems[$slideIndex].title}</h2>
 					<div class="carousel-frame">
 						<div class="carousel-controls">
-							<button on:click={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>&lt;</button>
-							<button on:click={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>&gt;</button>
+							<button onclick={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>&lt;</button>
+							<button onclick={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>&gt;</button>
 						</div>
 						<div class="center-body">
 						{#each carouselItems as item, i (i)}
@@ -78,9 +79,9 @@
 		<div class="right-column">
 			<div class="image-wrapper" class:expanded={isExpanded} bind:this={imageWrapperRef}>
 				<div class="inline-toggle-button">
-					<button on:click={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
+					<button onclick={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
 				</div>
-				<img src={preview} alt="preview" on:load={updateHeight} />
+				<img src={preview} alt="preview" onload={updateHeight} />
 			</div>
 		</div>
 	</div>
@@ -93,7 +94,7 @@
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
-		overflow: hidden;
+		overflow: auto;
 	}
 
 	h1 {
@@ -101,14 +102,6 @@
 		color: var(--color-primary);
 		text-align: center;
 		margin-bottom: 0.5rem;
-	}
-
-	.welcome-spacer {
-		height: 1rem;
-	}
-
-	.image-spacer {
-		height: 10px;
 	}
 
 	.dashboard {
@@ -131,10 +124,6 @@
 		text-align: center;
 		position: relative;
 		overflow-y: auto;
-	}
-
-	.spacer {
-		height: 2rem;
 	}
 
 	.card {
@@ -179,10 +168,10 @@
 	cursor: pointer;
 	border: none;
 	background: var(--color-primary);
-	padding: 0.2rem 0.33rem;
-	font-size: 0.90rem;
+	padding: 0.3rem 0.45rem;
+	font-size: 0.80rem;
 	color: white;
-	border-radius: 3px;
+	border-radius: 6px;
 	}
 
 	.carousel-controls button:first-child {
@@ -264,16 +253,17 @@
 		background: var(--color-primary);
 		border-radius: 12px 0 0 12px;
 		z-index: 5;
+		
 	}
 
 	.inline-toggle-button button {
-		font-size: 1.2rem;
-		background: var(--color-primary);
-		border: none;
-		color: white;
-		padding: 0.45rem 0.8rem;
-		cursor: pointer;
-		font-family: var(--font-body);
-		border-radius: 8px 0 0 8px;
+	font-size: clamp(1rem, 1vw, 1.05rem);
+	padding: clamp(0.1rem, 0.3vw, 0.2rem) clamp(0.25rem, 0.4vw, 0.4rem); 
+	background: var(--color-primary);
+	border: none;
+	color: white;
+	cursor: pointer;
+	font-family: var(--font-body);
+	border-radius: 6px 0 0 6px;
 	}
 </style>

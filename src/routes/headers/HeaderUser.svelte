@@ -13,160 +13,54 @@
 	};
 </script>
 
-<header>
-	<a href="/home" class="logo">BEETCODE</a>
+<header class="flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-body flex-wrap gap-4 sticky top-0 z-[100]">
+	<a href="/home" class="text-[color:var(--color-primary)] text-base no-underline">BEETCODE</a>
 
 	<nav>
-		<ul>
-			<li aria-current={$page.url.pathname === '/home' ? 'page' : undefined}>
-				<a href="/home">Home</a>
-			</li>
-			<li><a href="/problems">Problems</a></li>
-			<li><a href="/cohorts">Cohorts</a></li>
-			<li><a href="/contest">Contest</a></li>
-			<li><a href="/leaderboard">Leaderboard</a></li>
-			<li><a href="/store">Store</a></li>
+		<ul class="flex gap-6 list-none m-0 p-0 flex-wrap text-xs uppercase tracking-wider">
+			<!-- <li>
+				<a
+					href="/home"
+					class={`no-underline ${
+						$page.url.pathname === '/home' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Home
+				</a>
+			</li> -->
+			<li><a href="/home" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Home</a></li>
+			<li><a href="/problems" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Problems</a></li>
+			<li><a href="/cohorts" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Cohorts</a></li>
+			<li><a href="/contest" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Contest</a></li>
+			<li><a href="/leaderboard" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Leaderboard</a></li>
+			<li><a href="/store" class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">Store</a></li>
 		</ul>
 	</nav>
 
-	<div class="actions">
-
-		<button class="lang-toggle" on:click={toggleLanguage}>
+	<div class="flex items-center gap-4 flex-wrap">
+		<button
+			onclick={toggleLanguage}
+			class="text-xl bg-transparent border-none cursor-pointer p-0 leading-none"
+			aria-label="Toggle Language"
+		>
 			{currentLanguage === 'en' ? '🇺🇸' : '🇵🇱'}
 		</button>
 
 		<ThemeToggle />
-	
-		<a href="/settings" class="user-icon" aria-label="User settings">👤</a>
 
-		<div class="status-badge">
-			<div class="half left">Lvl 10</div>
-			<div class="divider"></div>
-			<div class="half right">$10,000</div>
+		<a href="/settings" aria-label="User settings" class="text-xl text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline">👤</a>
+
+		<div class="relative flex border-2 border-[color:var(--color-accent-1)] rounded-full text-[0.65rem] overflow-hidden whitespace-nowrap">
+			<div class="absolute top-[-25%] left-1/2 w-[2px] h-[150%] rotate-[30deg] bg-[color:var(--color-accent-1)] z-[1]"></div>
+			<div class="flex-1 flex items-center justify-center px-3 py-1 z-[2] pl-4 pr-2">Lvl 10</div>
+			<div class="flex-1 flex items-center justify-center px-3 py-1 z-[2] pl-8 pr-2">$10,000</div>
 		</div>
 
-		<button class="logout-btn" on:click={logout}>Logout</button>
-
+		<button
+			onclick={logout}
+			class="text-[0.65rem] px-3 py-1 bg-[color:var(--color-primary)] text-[color:var(--color-bg)] rounded-md border-none cursor-pointer"
+		>
+			Logout
+		</button>
 	</div>
 </header>
-
-<style>
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 1rem 2rem;
-		background-color: var(--color-bg);
-		border-bottom: 2px solid var(--color-accent-1);
-		font-family: var(--font-body);
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
-
-	.logo {
-		text-decoration: none;
-		color: var(--color-primary);
-		font-size: 1rem;
-	}
-
-	nav ul {
-		display: flex;
-		gap: 1.2rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		flex-wrap: wrap;
-	}
-
-	nav a {
-		text-decoration: none;
-		color: var(--color-text);
-		font-size: 0.68rem;
-		text-transform: uppercase;
-	}
-
-	nav a:hover {
-		color: var(--color-primary);
-	}
-
-	li[aria-current='page'] a {
-		border-bottom: 2px solid var(--color-primary);
-	}
-
-	.actions {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-
-	.status-badge {
-		position: relative;
-		display: flex;
-		border: 2px solid var(--color-accent-1);
-		border-radius: 999px;
-		overflow: hidden;
-		font-size: 0.65rem;
-		white-space: nowrap;
-	}
-
-	.status-badge::before {
-		content: '';
-		position: absolute;
-		top: -25%;
-		left: 50%;
-		width: 2px;
-		height: 150%;
-		background: var(--color-accent-1);
-		transform: rotate(30deg);
-		z-index: 1;
-	}
-
-	.half {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.4rem 0.8rem;
-		z-index: 2;
-	}
-
-	.left {
-		padding-left: 1rem;
-	    padding-right: 0.8rem;
-	}
-
-	.right {
-		padding-left: 2rem;
-	    padding-right: 0.8rem;
-	}
-
-	.user-icon {
-		font-size: 1.2rem;
-		text-decoration: none;
-		color: var(--color-text);
-	}
-
-	.user-icon:hover {
-		color: var(--color-primary);
-	}
-
-	.logout-btn {
-	font-family: var(--font-body);
-	font-size: 0.65rem;
-	padding: 0.4rem 0.8rem;
-	background: var(--color-primary);
-	color: var(--color-bg);
-	border: none;
-	cursor: pointer;
-	border-radius: 7px;
-	}
-
-	.lang-toggle {
-		font-size: 1.2rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0;
-	}
-</style>
