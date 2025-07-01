@@ -1,6 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ThemeToggle from '../ThemeToggle.svelte';
+
+	let currentLanguage = 'en';
+	const toggleLanguage = () => {
+		currentLanguage = currentLanguage === 'en' ? 'pl' : 'en';
+	};
+
+	const logout = () => {
+		alert('Logging out...');
+		window.location.href = 'http://localhost:5173';
+	};
 </script>
 
 <header>
@@ -16,12 +26,18 @@
 			<li><a href="/contest">Contest</a></li>
 			<li><a href="/leaderboard">Leaderboard</a></li>
 			<li><a href="/store">Store</a></li>
-
 		</ul>
 	</nav>
 
 	<div class="actions">
+
+		<button class="lang-toggle" on:click={toggleLanguage}>
+			{currentLanguage === 'en' ? '🇺🇸' : '🇵🇱'}
+		</button>
+
 		<ThemeToggle />
+	
+		<a href="/settings" class="user-icon" aria-label="User settings">👤</a>
 
 		<div class="status-badge">
 			<div class="half left">Lvl 10</div>
@@ -29,7 +45,8 @@
 			<div class="half right">$10,000</div>
 		</div>
 
-		<a href="/settings" class="user-icon" aria-label="User settings">👤</a>
+		<button class="logout-btn" on:click={logout}>Logout</button>
+
 	</div>
 </header>
 
@@ -79,7 +96,7 @@
 	.actions {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.75rem;
 		flex-wrap: wrap;
 	}
 
@@ -132,5 +149,24 @@
 
 	.user-icon:hover {
 		color: var(--color-primary);
+	}
+
+	.logout-btn {
+	font-family: var(--font-body);
+	font-size: 0.65rem;
+	padding: 0.4rem 0.8rem;
+	background: var(--color-primary);
+	color: var(--color-bg);
+	border: none;
+	cursor: pointer;
+	border-radius: 7px;
+	}
+
+	.lang-toggle {
+		font-size: 1.2rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0;
 	}
 </style>

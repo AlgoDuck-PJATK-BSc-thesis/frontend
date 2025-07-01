@@ -47,25 +47,13 @@
 		counter-reset: step;
 	}
 
-	.steps li {
-		list-style: none;
-		padding-left: 1.2rem;
-		position: relative;
-	}
-
 	.steps li::before {
-		content: counter(step);
-		counter-increment: step;
-		position: absolute;
-		left: 0;
-		top: 0;
-		font-weight: bold;
-		color: var(--color-accent-2);
+	display: none;
 	}
 
 	h2 {
 		font-size: 1rem;
-		color: var(--color-accent-1);
+		color: var(--color-accent-2);
 		margin-bottom: 0.5rem;
 	}
 

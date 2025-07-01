@@ -10,9 +10,9 @@ export default {
       colors: {
         bg: '#fdfaf6', 
         text: '#222222', 
-        primary: '#ffb3c1', 
+        primary: '##ed9aaa', 
         accent1: '#b5ead7', 
-        accent2: '#ffdac1', 
+        accent2: '#ff9d00', 
         tile: '#fffdf7', 
         
         dark: {
