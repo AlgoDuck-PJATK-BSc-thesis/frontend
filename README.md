@@ -1,6 +1,7 @@
 # Beetcode – UI System Overview
 ![Screenshot 2025-06-24 at 08 16 52](https://github.com/user-attachments/assets/b9b2fe43-4723-4e37-a4b7-fad3cac50c98)
-![Screenshot 2025-06-26 at 03 50 06](https://github.com/user-attachments/assets/d3b6b77a-08c5-4635-b5f1-3db9f0c430c7)
+![Screenshot 2025-07-01 at 19 13 52](https://github.com/user-attachments/assets/05646bf5-a44c-4af0-8a81-26c7527e47f9)
+![Screenshot 2025-07-01 at 19 14 24](https://github.com/user-attachments/assets/2210dd7b-4227-49de-acc8-0c2090d86e56)
 ![Screenshot 2025-06-24 at 08 18 04](https://github.com/user-attachments/assets/792309de-f820-4285-95cb-4ab1b79c211f)
 
 ## Font
