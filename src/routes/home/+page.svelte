@@ -92,10 +92,14 @@ onMount(() => {
 
 		<div class="right-column">
 			<div class="image-wrapper" class:expanded={isExpanded} bind:this={imageWrapperRef}>
-				<div class="inline-toggle-button">
-					<button onclick={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
+				<div class="relative">
+					<button
+						onclick={() => isExpanded = !isExpanded}
+						class="absolute top-20 right-8 bg-[var(--color-primary)] text-white rounded-md text-xs px-2 py-1 z-10">
+						{isExpanded ? '›' : '‹'}
+					</button>
+					<img src={theme === 'dark' ? darkPond : lightPond} alt="pond" onload={updateHeight} />
 				</div>
-				<img src={theme === 'dark' ? darkPond : lightPond} alt="pond" onload={updateHeight} />
 			</div>
 		</div>
 	</div>
@@ -104,7 +108,7 @@ onMount(() => {
 <style>
 	.home {
 		height: fit-content;
-		padding: 2rem 2rem;
+		padding: 0 2rem;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
@@ -132,6 +136,7 @@ onMount(() => {
 
 	.left-column {
 		display: flex;
+		margin-top: 2rem;
 		flex-direction: column;
 		gap: 1rem;
 		justify-content: space-between;
@@ -237,47 +242,42 @@ onMount(() => {
 	}
 
 	.image-wrapper {
-		border: 2px solid var(--color-accent-1);
+		position: relative;
 		border-radius: 6px;
-		background: var(--color-tile);
+		background: var(--color-bg);
 		display: inline-block;
 		width: auto;
 		max-width: 100%;
 		margin: 0 auto;
 		transition: all 0.3s ease;
 		position: relative;
+		overflow: auto;
+
 	}
 
-	.expanded {
+	/* .expanded {
 		grid-column: 1 / -1;
+	} */
+
+	.expanded {
+	position: fixed;
+	inset: 0;
+	z-index: 50; 
+	background: var(--color-bg); 
 	}
 
 	.image-wrapper img {
 		display: block;
-		width: auto;
+		width: 100%;
 		height: 100%;
-		object-fit: contain;
+		object-fit: cover;
 	}
 
-	.inline-toggle-button {
-		position: absolute;
-		top: 50%;
-		left: 0;
-		transform: translate(-100%, -50%);
-		background: var(--color-primary);
-		border-radius: 12px 0 0 12px;
-		z-index: 5;
-		
-	}
+	/* .inline-toggle-button {
+	position: absolute;
+	z-index: 10;
+	top: 1rem;
+	left: 1rem;
+ 	} */
 
-	.inline-toggle-button button {
-	font-size: clamp(1rem, 1vw, 1.05rem);
-	padding: clamp(0.1rem, 0.3vw, 0.2rem) clamp(0.25rem, 0.4vw, 0.4rem); 
-	background: var(--color-primary);
-	border: none;
-	color: white;
-	cursor: pointer;
-	font-family: var(--font-body);
-	border-radius: 6px 0 0 6px;
-	}
 </style>
