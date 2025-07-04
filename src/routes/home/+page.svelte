@@ -1,4 +1,6 @@
 <script lang="ts">
+	import lightPond from '$lib/images/ponds/Staw_jasny.png';
+	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
 	import preview from '$lib/images/pond.jpg';
 	import { goto } from '$app/navigation';
 	import { tweened } from 'svelte/motion';
@@ -16,6 +18,18 @@
 		{ title: 'Challenge 2', body: 'Phasellus iaculis, justo nec tristique tincidunt, orci lorem. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
 		{ title: 'Challenge 3', body: 'Cras faucibus, lorem nec eleifend bibendum, nisi felis. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' }
 	];
+
+	let theme = 'light';
+
+onMount(() => {
+	theme = document.documentElement.getAttribute('data-theme') || 'light';
+
+	const observer = new MutationObserver(() => {
+		const current = document.documentElement.getAttribute('data-theme') || 'light';
+		theme = current;
+	});
+	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
 
 	const slideIndex = tweened(0, { duration: 300, easing: cubicOut });
 	let imageWrapperRef: HTMLDivElement;
@@ -81,7 +95,7 @@
 				<div class="inline-toggle-button">
 					<button onclick={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
 				</div>
-				<img src={preview} alt="preview" onload={updateHeight} />
+				<img src={theme === 'dark' ? darkPond : lightPond} alt="pond" onload={updateHeight} />
 			</div>
 		</div>
 	</div>
