@@ -3,8 +3,24 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
+/* @font-face {
+	font-family: 'Block Blueprint';
+	src: url('/fonts/BlockBlueprint.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+} */
+
+ @font-face {
+	font-family: 'Joystix';
+	src: url('/fonts/joystix monospace.otf') format('opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
 :root {
-	--font-body: 'Press Start 2P', monospace;
+	/* --font-body: 'Block Blueprint', sans-serif; */
+	--font-body: 'Joystix', sans-serif;
+	/* --font-body: 'Press Start 2P', monospace; */
 
 	--color-bg: #fdfaf6;
 	--color-text: #222222;
