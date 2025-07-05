@@ -51,24 +51,25 @@
 		</ul>
 	</div>
 
-	<div class="flex flex-col gap-8 overflow-y-auto pr-4 pb-44 flex-[0.5]">
+	<div class="flex flex-col gap-5 overflow-y-auto pr-4 pb-44 flex-[0.5]">
 		
-		<div id="profile" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)]">Profile Information</h2>
+		<div id="profile" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-5">
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)]">Profile Information</h2>
 			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
 				<span class="mb-1">Username:</span>
 				<input
 					bind:value={username}
 					type="text"
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-xs font-body"
+					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-xs font-body text-black"
 				/>
 			</label>
+
 			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
 				<span class="mb-1">E-mail:</span>
 				<input
 					bind:value={email}
 					type="email"
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-xs font-body"
+					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-xs font-body text-black"
 				/>
 			</label>
 			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
@@ -85,11 +86,11 @@
 				<input
 					type="checkbox"
 					bind:checked={twoFactor}
-					class="w-4 h-4 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+					class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
 					style:background-color={twoFactor ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
-			<p class="text-[0.6rem] text-[color:var(--color-text)] -mt-2">2FA: {twoFactor ? 'Enabled' : 'Disabled'}</p>
+			<p class="text-xs text-[color:var(--color-text)] -mt-2">2FA: {twoFactor ? 'Enabled' : 'Disabled'}</p>
 			<button
 				onclick={saveProfile}
 				class="self-end px-3 py-1 text-xs bg-[color:var(--color-primary)] text-black rounded font-body">Save
@@ -100,7 +101,7 @@
 		</div>
 
 		<div id="contact"class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)]">Contact Details</h2>
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)]">Contact Details</h2>
 			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
 				<span class="mb-1">Phone:</span>
 				<input
@@ -129,13 +130,13 @@
 		</div>
 
 		<div id="email" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)] mb-1">Email Notifications</h2>
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)] mb-1">Email Notifications</h2>
 			<div class="flex flex-row justify-between items-center text-xs text-[color:var(--color-text)]">
 				<span>Receive updates:</span>
 				<input
 				type="checkbox"
 				bind:checked={emailNotifs}
-				class="w-4 h-4 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+				class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
 				style:background-color={emailNotifs ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
@@ -146,13 +147,13 @@
 
 
 		<div id="push" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)] mb-1">Push Notifications</h2>
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)] mb-1">Push Notifications</h2>
 			<div class="flex flex-row justify-between items-center text-xs text-[color:var(--color-text)]">
 				<span>Enable push:</span>
 				<input
 				type="checkbox"
 				bind:checked={pushNotifs}
-				class="w-4 h-4 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+				class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
 				style:background-color={pushNotifs ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
@@ -162,13 +163,13 @@
 		</div>
 
 		<div id="sms" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)] mb-1">SMS Notifications</h2>
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)] mb-1">SMS Notifications</h2>
 			<div class="flex flex-row justify-between items-center text-xs text-[color:var(--color-text)]">
 				<span>Receive alerts:</span>
 				<input
 				type="checkbox"
 				bind:checked={smsNotifs}
-				class="w-4 h-4 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+				class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
 				style:background-color={smsNotifs ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
@@ -178,7 +179,7 @@
 		</div>
 
 		<div id="password" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-base text-[color:var(--color-primary)] text-normal">Password Settings</h2>
+			<h2 class="text-base text-[color:var(--color-accent-2)] text-normal">Password Settings</h2>
 			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
 				<span class="mb-[0.2rem]">Current password:</span>
 				<input
@@ -205,7 +206,7 @@
 		</div>
 
 		<div id="2fa" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-4">
-			<h2 class="text-base font-normal text-[color:var(--color-primary)]">Two-Factor Authentication</h2>
+			<h2 class="text-base font-normal text-[color:var(--color-accent-2)]">Two-Factor Authentication</h2>
 			<p class="text-[0.7rem] text-[color:var(--color-text)]">
 				Add extra layer of security to your account by enabling 2FA.
 			</p>
@@ -214,7 +215,7 @@
 				<input
 				type="checkbox"
 				bind:checked={twoFactor}
-				class="w-4 h-4 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+				class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
 				style:background-color={twoFactor ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
