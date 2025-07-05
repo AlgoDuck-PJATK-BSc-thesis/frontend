@@ -15,10 +15,9 @@
 
 <header class="flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-body flex-wrap gap-4 sticky top-0 z-[100]">
 	<a href="/home" class="text-[color:var(--color-primary)] text-base no-underline">BEETCODE</a>
-
 	<nav>
 		<ul class="flex gap-6 list-none m-0 p-0 flex-wrap text-xs uppercase tracking-wider">
-			<!-- <li>
+			<li>
 				<a
 					href="/home"
 					class={`no-underline ${
@@ -27,16 +26,57 @@
 				>
 					Home
 				</a>
-			</li> -->
-		
-			<li aria-current={$page.url.pathname === '/home' ? 'page' : undefined}>
-				<a href="/home">Home</a>
 			</li>
-			<li><a href="/Categories">Problems</a></li>
-			<li><a href="/cohorts">Cohorts</a></li>
-			<li><a href="/contest">Contest</a></li>
-			<li><a href="/leaderboard">Leaderboard</a></li>
-			<li><a href="/store">Store</a></li>
+			<li>
+				<a
+					href="/Categories"
+					class={`no-underline ${
+						$page.url.pathname === '/Categories' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Problems
+				</a>
+			</li>
+			<li>
+				<a
+					href="/cohorts"
+					class={`no-underline ${
+						$page.url.pathname === '/cohorts' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Cohorts
+				</a>
+			</li>
+			<li>
+				<a
+					href="/contest"
+					class={`no-underline ${
+						$page.url.pathname === '/contest' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Contest
+				</a>
+			</li>
+			<li>
+				<a
+					href="/leaderboard"
+					class={`no-underline ${
+						$page.url.pathname === '/leaderboard' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Leaderboard
+				</a>
+			</li>
+			<li>
+				<a
+					href="/store"
+					class={`no-underline ${
+						$page.url.pathname === '/store' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+					} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+				>
+					Store
+				</a>
+			</li>
 		</ul>
 	</nav>
 

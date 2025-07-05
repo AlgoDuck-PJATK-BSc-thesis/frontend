@@ -53,7 +53,7 @@
 				</h1>
 
 				<div class="aspect-[8/3] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2>{carouselItems[slideIndex].title}</h2>
+					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">{carouselItems[slideIndex].title}</h2>
 					<div class="relative h-full flex flex-col justify-center">
 						<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
 							<button
@@ -141,7 +141,7 @@
 						class={`block object-contain mx-auto ${
 							isExpanded
 								? 'h-[calc(100vh-10rem)] w-auto max-w-full'
-								: 'w-full h-full'
+								: 'w-full h-full mt-2'
 						}`}
 					/>
 				</div>
