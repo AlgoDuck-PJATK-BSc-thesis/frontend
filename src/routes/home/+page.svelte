@@ -141,7 +141,7 @@
 						class={`block object-contain mx-auto ${
 							isExpanded
 								? 'h-[calc(100vh-10rem)] w-auto max-w-full'
-								: 'w-full h-full mt-2'
+								: 'h-[calc(100vh-15rem)] w-auto max-w-full mt-16'
 						}`}
 					/>
 				</div>
