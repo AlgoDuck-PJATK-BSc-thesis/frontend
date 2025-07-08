@@ -95,7 +95,7 @@
 							$page.url.pathname === '/settings' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
 						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
 					>
-						👤
+						Settings
 					</a>
 				</li>
 

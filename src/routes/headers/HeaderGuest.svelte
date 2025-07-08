@@ -53,6 +53,9 @@
 	</nav>
 
 	<div class="flex items-center gap-4">
+		
+		<ThemeToggle />
+		
 		<button
 			onclick={toggleLang}
 			class="text-xl bg-transparent border-none cursor-pointer p-0 leading-none"
@@ -60,7 +63,5 @@
 		>
 			{currentLang}
 		</button>
-
-		<ThemeToggle />
 	</div>
 </header>

@@ -45,14 +45,14 @@
 	<div class={`grid items-start relative gap-8 ${isExpanded ? 'grid-cols-1' : 'grid-cols-[1fr_3fr]'}`}>
 		{#if !isExpanded}
 			<div
-				class="flex flex-col justify-between text-center relative overflow-y-auto gap-4 mt-8"
-				style="min-height: 70vh; height: {imageHeight || '70vh'}"
+				class="flex flex-col justify-between text-center relative gap-4 mt-8 overflow-y-auto pr-1 pb-16"
+				style="max-height: calc(100vh - 8rem);"
 			>
-				<h1 class="text-xl text-[color:var(--color-primary)] text-center mb-2">
+				<h1 class="text-2xl text-[color:var(--color-primary)] text-center mb-2">
 					Welcome back <br />{username}
 				</h1>
 
-				<div class="aspect-[8/3] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+				<div class="aspect-[8/3] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
 					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">{carouselItems[slideIndex].title}</h2>
 					<div class="relative h-full flex flex-col justify-center">
 						<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
@@ -80,7 +80,7 @@
 						{#each carouselItems as item, i (i)}
 							{#if i === slideIndex}
 							<div
-								class="max-h-[8rem] overflow-hidden text-[0.75rem] text-[color:var(--color-text)] m-0 transition-opacity duration-300"
+								class="max-h-[5.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[0.75rem] text-[color:var(--color-text)] m-0 transition-opacity duration-300"
 								in:fly={{ duration: 200 }}
 								out:fly={{ duration: 200 }}
 							>
@@ -102,18 +102,20 @@
 
 				</div>
 
-				<div class="aspect-[8/3] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
 					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Recently Solved</h2>
 					<div class="flex items-center justify-center h-full px-10 text-center">
-						<p class="text-xs text-[color:var(--color-text)] m-0">
+						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
+
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
 					</div>
 				</div>
 
-				<div class="aspect-[8/3] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
 					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Stats</h2>
 					<div class="flex items-center justify-center h-full px-10 text-center">
-						<p class="text-xs text-[color:var(--color-text)] m-0">
+						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
+
 							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
 					</div>
 				</div>
@@ -130,7 +132,7 @@
 				<div class="relative">
 					<button
 						onclick={() => (isExpanded = !isExpanded)}
-						class="absolute top-0 right-0 bg-[color:var(--color-primary)] text-white rounded-md text-xs px-2 py-1 z-10"
+						class="fixed top-20 right-8 bg-[color:var(--color-primary)] text-white rounded-md text-xs px-2 py-1 z-50"
 					>
 						{isExpanded ? '›' : '‹'}
 					</button>
