@@ -4,34 +4,37 @@
 	import bronze from '$lib/images/leaderboard/Bronze.png';
 	import trophy from '$lib/images/leaderboard/trophy.png';
 
-	const topUsers = [
-		{ name: 'QuantumQuokka', points: 300, medal: gold },
-		{ name: 'StarrySpectre', points: 200, medal: silver },
-		{ name: 'FrostedFalcon', points: 150, medal: bronze }
-	];
+	const medals = [gold, silver, bronze];
 
 	const allUsers = [
-	{ name: 'QuantumQuokka', points: 300 },
-	{ name: 'StarrySpectre', points: 200 },
-	{ name: 'FrostedFalcon', points: 150 },
-	{ name: 'EchoOrbit', points: 100 },
-	{ name: 'PixelPenguin', points: 90 },
-	{ name: 'NovaNebula', points: 80 },
-	{ name: 'CrimsonCoyote', points: 70 },
-	{ name: 'BlueBird', points: 60 },
-	{ name: 'NewNoise', points: 50 },
-	{ name: 'HarshHistory', points: 40 },
-	{ name: 'TurboTurtle', points: 30 },
-	{ name: 'SilentShadow', points: 20 }
-    ];
+		{ name: 'QuantumQuokka', points: 300 },
+		{ name: 'StarrySpectre', points: 200 },
+		{ name: 'FrostedFalcon', points: 150 },
+		{ name: 'EchoOrbit', points: 100 },
+		{ name: 'PixelPenguin', points: 90 },
+		{ name: 'NovaNebula', points: 80 },
+		{ name: 'CrimsonCoyote', points: 70 },
+		{ name: 'BlueBird', points: 60 },
+		{ name: 'NewNoise', points: 50 },
+		{ name: 'HarshHistory', points: 40 },
+		{ name: 'TurboTurtle', points: 30 },
+		{ name: 'SilentShadow', points: 20 }
+	];
+
+	$: sortedUsers = [...allUsers].sort((a, b) => b.points - a.points);
+
+	$: topUsers = sortedUsers.slice(0, 3).map((user, i) => ({
+		...user,
+		medal: medals[i]
+	}));
 
 	let currentPage = 1;
 	const pageSize = 5;
 
-	$: totalPages = Math.ceil(allUsers.length / pageSize);
-	$: paginatedUsers = allUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+	$: totalPages = Math.ceil(sortedUsers.length / pageSize);
+	$: paginatedUsers = sortedUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 	$: from = (currentPage - 1) * pageSize + 1;
-	$: to = Math.min(currentPage * pageSize, allUsers.length);
+	$: to = Math.min(currentPage * pageSize, sortedUsers.length);
 </script>
 
 <section class="p-8 flex flex-col items-center gap-8 font-body max-h-[calc(100vh-10rem)] overflow-y-auto">
