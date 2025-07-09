@@ -32,7 +32,7 @@
 
 </script>
 
-<section class="flex justify-center gap-8 p-8 h-[calc(100vh-6rem)] overflow-hidden">
+<section class="flex justify-center gap-8 p-8 h-[calc(100vh-10rem)] overflow-hidden">
 	
 	<div class="w-64 h-[65vh] overflow-y-auto border-2 border-[color:var(--color-accent-1)] rounded-lg p-4 bg-[color:var(--color-tile)] text-xs flex-shrink-0">
 		<ul>
@@ -51,7 +51,7 @@
 		</ul>
 	</div>
 
-	<div class="flex flex-col gap-5 overflow-y-auto pr-4 pb-44 flex-[0.5]">
+	<div class="flex flex-col gap-5 overflow-y-auto pr-4 flex-[0.5]">
 		
 		<div id="profile" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-5">
 			<h2 class="text-base font-normal text-[color:var(--color-accent-2)]">Profile Information</h2>
