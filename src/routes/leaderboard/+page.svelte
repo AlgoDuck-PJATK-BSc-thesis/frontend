@@ -40,7 +40,7 @@
 <section class="p-8 flex flex-col items-center gap-8 font-body max-h-[calc(100vh-10rem)] overflow-y-auto">
 	<h1 class="text-2xl font-bold text-[color:var(--color-text)]">Leaderboard</h1>
     
-    <div class="border-2 border-[color:var(--color-text)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center">
+    <div class="border-2 border-[color:var(--color-accent-1)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center">
         <div class="flex justify-center items-end gap-8 mt-8">
             <div class="flex flex-col items-center translate-y-4 relative">
                 <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-bg)] text-xs font-bold px-2 py-0.5 rounded-full">

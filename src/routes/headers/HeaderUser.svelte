@@ -49,12 +49,12 @@
 				</li>
 				<li>
 					<a
-						href="/cohorts"
+						href="/cohort"
 						class={`no-underline ${
-							$page.url.pathname === '/cohorts' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+							$page.url.pathname === '/cohort' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
 						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
 					>
-						Cohorts
+						Cohort
 					</a>
 				</li>
 				<li>
@@ -69,16 +69,6 @@
 				</li>
 				<li>
 					<a
-						href="/leaderboard"
-						class={`no-underline ${
-							$page.url.pathname === '/leaderboard' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
-					>
-						Leaderboard
-					</a>
-				</li>
-				<li>
-					<a
 						href="/store"
 						class={`no-underline ${
 							$page.url.pathname === '/store' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
@@ -87,7 +77,16 @@
 						Store
 					</a>
 				</li>
-
+				<li>
+					<a
+						href="/leaderboard"
+						class={`no-underline ${
+							$page.url.pathname === '/leaderboard' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
+						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+					>
+						Leaderboard
+					</a>
+				</li>
 				<li>
 					<a
 						href="/settings"
