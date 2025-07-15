@@ -33,6 +33,7 @@
 		"vite-plugin-devtools-json": "^0.2.0"
 	},
 	"dependencies": {
+		"@tanstack/svelte-query": "^5.83.0",
 		"monaco-editor": "^0.52.2",
 		"tailwind-scrollbar": "^4.0.2"
 	}

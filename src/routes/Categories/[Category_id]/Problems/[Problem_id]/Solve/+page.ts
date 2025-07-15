@@ -17,5 +17,7 @@ export const load: PageLoad = async ({ params }) => {
 }`,
         description: "sort these ints",
         name: "int array sort",
+        testCases: [{testData: "[1,2,3]", expectedOutput: "[1,2,3]"}, {testData: "[4,5,6]", expectedOutput: "[4,5,6]"}, {testData: "[7,8,9]", expectedOutput: "[7,8,9]"}],
+        tags: ["tag1", "tag2", "tag3"]
     }
 }
