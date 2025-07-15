@@ -19,8 +19,8 @@
 	class="text-xl text-[color:var(--color-text)] bg-transparent border-none cursor-pointer px-1 py-0.5 leading-none hover:text-[color:var(--color-primary)] transition-colors duration-200"
 >
 	{#if current === 'light'}
-		🌙
-	{:else}
 		🌞
+	{:else}
+		🌙
 	{/if}
 </button>

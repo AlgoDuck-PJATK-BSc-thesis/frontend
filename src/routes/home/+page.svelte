@@ -1,8 +1,6 @@
 <script lang="ts">
-	import preview from '$lib/images/pond.jpg';
-	import { goto } from '$app/navigation';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
+	import lightPond from '$lib/images/ponds/Staw_jasny.png';
+	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 
@@ -17,7 +15,19 @@
 		{ title: 'Challenge 3', body: 'Cras faucibus, lorem nec eleifend bibendum, nisi felis. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' }
 	];
 
-	const slideIndex = tweened(0, { duration: 300, easing: cubicOut });
+	let theme = 'light';
+
+	onMount(() => {
+		theme = document.documentElement.getAttribute('data-theme') || 'light';
+
+		const observer = new MutationObserver(() => {
+			const current = document.documentElement.getAttribute('data-theme') || 'light';
+			theme = current;
+		});
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+	});
+
+	let slideIndex = 0;
 	let imageWrapperRef: HTMLDivElement;
 
 	function updateHeight() {
@@ -31,239 +41,113 @@
 	<title>Home – Beetcode</title>
 </svelte:head>
 
-<section class="home">
-	<div class="dashboard" class:is-expanded={isExpanded}>
+<section class="h-fit px-8 flex flex-col box-border overflow-auto">
+	<div class={`grid items-start relative gap-8 ${isExpanded ? 'grid-cols-1' : 'grid-cols-[1fr_3fr]'}`}>
 		{#if !isExpanded}
-			<div class="left-column" style="min-height: 70vh; height: {imageHeight || '70vh'}">
-				<h1 class="welcome-title">Welcome back {username} </h1>
-				<div class="card carousel">
-					<h2>{carouselItems[$slideIndex].title}</h2>
-					<div class="carousel-frame">
-						<div class="carousel-controls">
-							<button onclick={() => slideIndex.set((currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length))}>&lt;</button>
-							<button onclick={() => slideIndex.set((currentSlide = (currentSlide + 1) % carouselItems.length))}>&gt;</button>
+			<div
+				class="flex flex-col justify-between text-center relative gap-4 mt-8 overflow-y-auto pr-1 pb-16"
+				style="max-height: calc(100vh - 8rem);"
+			>
+				<h1 class="text-2xl text-[color:var(--color-primary)] text-center mb-2">
+					Welcome back <br />{username}
+				</h1>
+
+				<div class="aspect-[8/3] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">{carouselItems[slideIndex].title}</h2>
+					<div class="relative h-full flex flex-col justify-center">
+						<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
+							<button
+								class="absolute left-[0.01rem] top-1/2 -translate-y-1/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
+					
+								onclick={() =>
+									slideIndex = currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length
+								}
+							>
+								&lt;
+							</button>
+							<button
+								class="absolute right-[0.01rem] top-1/2 -translate-y-1/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
+
+								onclick={() =>
+									slideIndex = currentSlide = (currentSlide + 1) % carouselItems.length
+								}
+							>
+								&gt;
+							</button>
 						</div>
-						<div class="center-body">
+
+						<div class="flex items-center justify-center h-full px-10 text-center">
 						{#each carouselItems as item, i (i)}
-							{#if i === $slideIndex}
-								<p in:fly={{ x: 30, duration: 250 }} out:fly={{ x: -30, duration: 250 }}>
-									{item.body}
-								</p>
+							{#if i === slideIndex}
+							<div
+								class="max-h-[5.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[0.75rem] text-[color:var(--color-text)] m-0 transition-opacity duration-300"
+								in:fly={{ duration: 200 }}
+								out:fly={{ duration: 200 }}
+							>
+								{item.body}
+							</div>
 							{/if}
-						{/each}						
+						{/each}
 						</div>
 					</div>
-					<div class="carousel-indicator">
+
+					<div class="mt-2 text-center text-sm">
 						{#each carouselItems as _, i}
-							<span>{i === $slideIndex ? ' ● ' : ' ○ '}</span>
+							<span class="text-[color:var(--color-text)] mx-[2px]">
+								{i === slideIndex ? ' ● ' : ' ○ '}
+
+							</span>
 						{/each}
 					</div>
+
 				</div>
 
-				<div class="card">
-					<h2>Recently Solved</h2>
-					<div class="center-body">
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
+				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Recently Solved</h2>
+					<div class="flex items-center justify-center h-full px-10 text-center">
+						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
+
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
 					</div>
 				</div>
 
-				<div class="card">
-					<h2>Stats</h2>
-					<div class="center-body">
-						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
+				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Stats</h2>
+					<div class="flex items-center justify-center h-full px-10 text-center">
+						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
+
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
 					</div>
 				</div>
 			</div>
 		{/if}
 
-		<div class="right-column">
-			<div class="image-wrapper" class:expanded={isExpanded} bind:this={imageWrapperRef}>
-				<div class="inline-toggle-button">
-					<button onclick={() => isExpanded = !isExpanded}>{isExpanded ? '›' : '‹'}</button>
+		<div class="flex flex-col items-stretch justify-start gap-2">
+			<div
+				class={`relative rounded bg-[color:var(--color-bg)] inline-block w-auto max-w-full mx-auto transition-all overflow-auto ${
+					isExpanded ? 'fixed inset-0 z-[50] bg-[color:var(--color-bg)]' : ''
+				}`}
+				bind:this={imageWrapperRef}
+			>
+				<div class="relative">
+					<button
+						onclick={() => (isExpanded = !isExpanded)}
+						class="fixed top-20 right-8 bg-[color:var(--color-primary)] text-white rounded-md text-xs px-2 py-1 z-50"
+					>
+						{isExpanded ? '›' : '‹'}
+					</button>
+					<img
+						src={theme === 'dark' ? darkPond : lightPond}
+						alt="pond"
+						onload={updateHeight}
+						class={`block object-contain mx-auto ${
+							isExpanded
+								? 'h-[calc(100vh-10rem)] w-auto max-w-full'
+								: 'h-[calc(100vh-15rem)] w-auto max-w-full mt-16'
+						}`}
+					/>
 				</div>
-				<img src={preview} alt="preview" onload={updateHeight} />
 			</div>
 		</div>
 	</div>
 </section>
-
-<style>
-	.home {
-		height: fit-content;
-		padding: 2rem 2rem;
-		display: flex;
-		flex-direction: column;
-		box-sizing: border-box;
-		overflow: auto;
-	}
-
-	h1 {
-		font-size: 1.5rem;
-		color: var(--color-primary);
-		text-align: center;
-		margin-bottom: 0.5rem;
-	}
-
-	.dashboard {
-		display: grid;
-		grid-template-columns: 1fr 3fr;
-		gap: 2rem;
-		align-items: start;
-		position: relative;
-	}
-
-	.dashboard.is-expanded {
-		grid-template-columns: 1fr;
-	}
-
-	.left-column {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		justify-content: space-between;
-		text-align: center;
-		position: relative;
-		overflow-y: auto;
-	}
-
-	.card {
-		height: calc(100% / 3 + 500px);
-		border: 2px solid var(--color-accent-1);
-		border-radius: 6px;
-		background: var(--color-tile);
-		padding: 1rem;
-		text-align: center;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		transition: all 0.3s ease;
-	}
-
-	.card.carousel {
-		position: relative;
-	}
-
-	.carousel-frame {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		position: relative;
-	}
-
-	.carousel-controls {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 100%;
-		pointer-events: none;
-	}
-
-	.carousel-controls button {
-	position: absolute;
-	top: 50%;
-	transform: translateY(-50%);
-	pointer-events: auto;
-	font-family: var(--font-body);
-	cursor: pointer;
-	border: none;
-	background: var(--color-primary);
-	padding: 0.3rem 0.45rem;
-	font-size: 0.80rem;
-	color: white;
-	border-radius: 6px;
-	}
-
-	.carousel-controls button:first-child {
-		left: 0.01rem;
-	}
-
-	.carousel-controls button:last-child {
-		right: 0.01rem;
-	}
-
-	.carousel-indicator {
-		margin-top: 0.5rem;
-		text-align: center;
-		font-size: 0.9rem;
-	}
-
-	.carousel-indicator span {
-		color: var(--color-text);
-		margin: 0 2px;
-	}
-
-	.center-body {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
-		padding: 0 2.5rem;
-		text-align: center;
-	}
-
-	.card h2 {
-		font-size: 1rem;
-		color: var(--color-accent-2);
-		margin-bottom: 0.5rem;
-	}
-
-	.card p {
-		font-size: 0.75rem;
-		color: var(--color-text);
-		margin: 0;
-	}
-
-	.right-column {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		justify-content: flex-start;
-		gap: 0.5rem;
-	}
-
-	.image-wrapper {
-		border: 2px solid var(--color-accent-1);
-		border-radius: 6px;
-		background: var(--color-tile);
-		display: inline-block;
-		width: auto;
-		max-width: 100%;
-		margin: 0 auto;
-		transition: all 0.3s ease;
-		position: relative;
-	}
-
-	.expanded {
-		grid-column: 1 / -1;
-	}
-
-	.image-wrapper img {
-		display: block;
-		width: auto;
-		height: 100%;
-		object-fit: contain;
-	}
-
-	.inline-toggle-button {
-		position: absolute;
-		top: 50%;
-		left: 0;
-		transform: translate(-100%, -50%);
-		background: var(--color-primary);
-		border-radius: 12px 0 0 12px;
-		z-index: 5;
-		
-	}
-
-	.inline-toggle-button button {
-	font-size: clamp(1rem, 1vw, 1.05rem);
-	padding: clamp(0.1rem, 0.3vw, 0.2rem) clamp(0.25rem, 0.4vw, 0.4rem); 
-	background: var(--color-primary);
-	border: none;
-	color: white;
-	cursor: pointer;
-	font-family: var(--font-body);
-	border-radius: 6px 0 0 6px;
-	}
-</style>

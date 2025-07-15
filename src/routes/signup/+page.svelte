@@ -2,99 +2,50 @@
 	<title>Sign up – Beetcode</title>
 </svelte:head>
 
-<section class="auth">
-	<h1>Sign up</h1>
+<section class="max-w-md mx-auto mt-20 px-4 text-center">
+	<h1 class="text-xl mb-8 text-[color:var(--color-primary)]">Sign up</h1>
 
-	<form method="POST" class="form">
-		<label>
+	<form method="POST" class="flex flex-col gap-4">
+		<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
 			<span>Username</span>
-			<input type="text" name="username" required />
+			<input
+				type="text"
+				name="username"
+				required
+				class="mt-2 p-2.5 border-2 border-[color:var(--color-accent-1)] rounded bg-white text-black font-body"
+			/>
 		</label>
 
-		<label>
+		<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
 			<span>Email</span>
-			<input type="email" name="email" required />
+			<input
+				type="email"
+				name="email"
+				required
+				class="mt-2 p-2.5 border-2 border-[color:var(--color-accent-1)] rounded bg-white text-black font-body"
+			/>
 		</label>
 
-		<label>
+		<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
 			<span>Password</span>
-			<input type="password" name="password" required />
+			<input
+				type="password"
+				name="password"
+				required
+				class="mt-2 p-2.5 border-2 border-[color:var(--color-accent-1)] rounded bg-white text-black font-body"
+			/>
 		</label>
 
-		<button type="submit">Create account</button>
+		<button
+			type="submit"
+			class="bg-[color:var(--color-primary)] text-black px-6 py-2.5 font-body transition-transform hover:-translate-y-0.5"
+		>
+			Create account
+		</button>
 	</form>
 
-	<p class="switch">
-		Already have an account?&nbsp;<a href="/login">Log in</a>
+	<p class="mt-6 text-xs leading-snug text-center">
+		<span>Already have an account?</span>
+		<a href="/login" class="text-[color:var(--color-accent-2)] hover:underline ml-1">Log in</a>
 	</p>
 </section>
-
-<style>
-	.auth {
-		max-width: 400px;
-		margin: 5rem auto;
-		padding: 0 1rem;
-		text-align: center;
-	}
-
-	h1 {
-		font-size: 1.5rem;
-		margin-bottom: 2rem;
-		color: var(--color-primary);
-	}
-
-	.form {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	label {
-		display: flex;
-		flex-direction: column;
-		text-align: left;
-		font-size: 0.85rem;
-		color: var(--color-text);
-	}
-
-	input {
-		margin-top: 0.4rem;
-		padding: 0.6rem;
-		border: 2px solid var(--color-accent-1);
-		border-radius: 4px;
-		background: white;
-		color: black;
-		font-family: var(--font-body);
-	}
-
-	button {
-		background: var(--color-primary);
-		color: black;
-		padding: 0.6rem 1.4rem;
-		border: none;
-		cursor: pointer;
-		font-family: var(--font-body);
-		transition: transform 0.2s ease;
-	}
-
-	button:hover {
-		transform: translateY(-2px);
-	}
-
-	.switch {
-		margin-top: 1.5rem;
-		font-size: 0.68rem;
-		line-height: 1.3;
-		word-break: keep-all;
-		white-space: normal;
-		text-align: center;
-	}
-
-	a {
-		color: var(--color-accent-2);
-		text-decoration: none;
-	}
-	a:hover {
-		text-decoration: underline;
-	}
-</style>

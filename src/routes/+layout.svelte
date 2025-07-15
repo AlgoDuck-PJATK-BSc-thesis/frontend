@@ -7,6 +7,7 @@
 	let { children } = $props();
 
 	let path = $page.url.pathname;
+	
 	let isLoggedIn =
 		path.startsWith('/home') ||
 		path.startsWith('/problems') ||
@@ -14,55 +15,22 @@
 		path.startsWith('/contest') ||
 		path.startsWith('/leaderboard') ||
 		path.startsWith('/settings');
+		
 </script>
 
-<div class="layout">
-	{#if isLoggedIn }
+<div class="min-h-screen flex flex-col bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-body transition-colors duration-300">
 	<!-- {#if /* isLoggedIn */ true} -->
+	{#if isLoggedIn}
 		<HeaderUser />
 	{:else}
 		<HeaderGuest />
 	{/if}
 
-	<main>
+	<main class="flex-1 w-full max-w-full mx-auto px-4 py-8 box-border">
 		{@render children?.()}
 	</main>
 
-	<footer>
+	<footer class="fixed bottom-0 left-0 w-full bg-[color:var(--color-bg)] text-center p-4 text-xs text-[color:var(--color-accent-2)] z-[100]">
 		<p>© {new Date().getFullYear()} Beetcode</p>
 	</footer>
 </div>
-
-<style>
-	.layout {
-		min-height: 100vh;
-		display: flex;
-		flex-direction: column;
-		background-color: var(--color-bg);
-		color: var(--color-text);
-		font-family: var(--font-body);
-		transition: background-color 0.3s ease, color 0.3s ease;
-	}
-
-	main {
-		flex: 1;
-		width: 100%;
-		max-width: 100vw;
-		margin: 0 auto;
-		padding: 2rem 1rem;
-		box-sizing: border-box;
-	}
-
-	footer {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	background: var(--color-bg);
-	text-align: center;
-	padding: 1rem;
-	font-size: 0.75rem;
-	color: var(--color-accent-2);
-	z-index: 100;
-}
-</style>
