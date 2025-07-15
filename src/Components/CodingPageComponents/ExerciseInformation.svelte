@@ -35,11 +35,11 @@
   }
 
 
-  const executeCode = (code: string) => {
+  const executeCode = () => {
 
   }
 
-  const submitCode = (code: string) => {
+  const submitCode = () => {
 
   }
 
@@ -55,7 +55,7 @@
   </div>
   <div class="w-full h-[80%] py-2 px-1 bg-[var(--color-tile)] text-xs overflow-scroll">
     <!-- description -->
-      <div bind:this={htmlDescriptionDiv} class="w-full h-10 bg-red-500 rounded-t-md overflow-hidden">
+      <div bind:this={htmlDescriptionDiv} class="w-full h-10 rounded-t-md overflow-hidden">
         <div class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400)}> 
             <span style="user-select: none;">Description</span>
             <svg bind:this={htmlDescriptionDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg> <!-- TODO placeholder so chill out Maja -->
@@ -118,30 +118,17 @@
             <svg bind:this={htmlControlDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
         </div>
         <div class="w-full h-15 p-2 bg-[var(--color-bg)] flex justify-center">
-          <div class="w-[50%] hover:cursor-pointer rounded-l-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-r-1 border-[var(--color-primary)]">
+          <div class="w-[50%] hover:cursor-pointer rounded-l-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-r-1 border-[var(--color-primary)]"
+            onclick={executeCode}
+          >
             <span style="user-select: none;">Execute</span> 
           </div>
-          <div class="w-[50%] hover:cursor-pointer rounded-r-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-l-1 border-[var(--color-primary)]">
+          <div class="w-[50%] hover:cursor-pointer rounded-r-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-l-1 border-[var(--color-primary)]"
+            onclick={submitCode}
+          >
             <span style="user-select: none;">Submit</span>
           </div>
        </div>
       </div>
   </div>
 </div> 
-
-{#snippet TestCaseCard(testCaseContents: string, expectedOutput: string)}
-<div class="flex flex-col justify-start p-2">
-  <div class="flex justify-start">
-    <span>Test Data</span>
-  </div>
-  <div class="rounded-sm h-6 bg-[rgba(60,60,60,255)] flex flex-col justify-center items-center">
-    <span>{`test case contents: ${testCaseContents}`}</span>
-  </div>
-  <div class="flex justify-start">
-    <span>Expected Output</span>
-  </div>
-  <div class="rounded-sm h-6 bg-[rgba(60,60,60,255)] flex flex-col justify-center items-center">
-    <span>{`expected output: ${expectedOutput}`}</span>
-  </div>
-</div>
-{/snippet}
