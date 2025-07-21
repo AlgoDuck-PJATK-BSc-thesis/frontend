@@ -37,6 +37,10 @@
 	$: to = Math.min(currentPage * pageSize, sortedUsers.length);
 </script>
 
+<svelte:head>
+	<title>Leaderboard – Beetcode</title>
+</svelte:head>
+
 <section class="p-8 flex flex-col items-center gap-8 font-body max-h-[calc(100vh-10rem)] overflow-y-auto">
 	<h1 class="text-2xl font-bold text-[color:var(--color-text)]">Leaderboard</h1>
     
@@ -70,6 +74,25 @@
 
 	<div class="w-full max-w-2xl flex flex-col gap-2 text-[color:var(--color-text)]">
 		{#each paginatedUsers as user, i}
+			<div class="flex items-center justify-between px-4 py-2 rounded">
+				<div class="flex items-center gap-2">
+					<span class="min-w-[3.5rem] text-right">{from + i}.</span>
+					<span class="text-sm max-w-[20rem] overflow-x-auto whitespace-nowrap scrollbar-thin hover:scrollbar-thumb-gray-400">
+						{user.name}
+					</span>
+				</div>
+
+				<div class="flex items-center gap-1 border-2 rounded-full px-3 py-0.5 text-sm border-[color:var(--color-text)] text-[color:var(--color-text)]">
+					<span>{user.points}</span>
+					<span>⭐</span>
+				</div>
+			</div>
+		{/each}
+	</div>
+
+
+	<!-- <div class="w-full max-w-2xl flex flex-col gap-2 text-[color:var(--color-text)]">
+		{#each paginatedUsers as user, i}
 			<div class={`flex items-center justify-between px-4 py-2 rounded 
 				${(from + i - 1) === 0 ? 'bg-[color:var(--color-primary)] text-[color:var(--color-bg)] font-bold' : ''}`}>
 				
@@ -89,12 +112,12 @@
 				</div>
 			</div>
 		{/each}
-	</div>
+	</div> -->
 
 	<div class="mt-4 flex items-center gap-4 text-sm text-[color:var(--color-text)]">
 		<button
 			class="px-2 py-1 border rounded disabled:opacity-30"
-			on:click={() => currentPage = Math.max(currentPage - 1, 1)}
+			onclick={() => currentPage = Math.max(currentPage - 1, 1)}
 			disabled={currentPage === 1}
 		>
 			&lt;
@@ -106,7 +129,7 @@
 
 		<button
 			class="px-2 py-1 border rounded disabled:opacity-30"
-			on:click={() => currentPage = Math.min(currentPage + 1, totalPages)}
+			onclick={() => currentPage = Math.min(currentPage + 1, totalPages)}
 			disabled={currentPage === totalPages}
 		>
 			&gt;

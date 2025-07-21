@@ -32,6 +32,10 @@
 
 </script>
 
+<svelte:head>
+	<title>Settings – Beetcode</title>
+</svelte:head>
+
 <section class="flex justify-center gap-8 p-8 h-[calc(100vh-10rem)] overflow-hidden">
 	
 	<div class="w-64 h-[65vh] overflow-y-auto border-2 border-[color:var(--color-accent-1)] rounded-lg p-4 bg-[color:var(--color-tile)] text-xs flex-shrink-0">

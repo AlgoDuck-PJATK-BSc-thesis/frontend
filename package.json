@@ -34,6 +34,8 @@
 	},
 	"dependencies": {
 		"monaco-editor": "^0.52.2",
+		"motion": "^12.23.6",
+		"svelte-motion": "^0.12.2",
 		"tailwind-scrollbar": "^4.0.2"
 	}
 }

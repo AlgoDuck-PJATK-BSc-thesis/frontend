@@ -13,6 +13,7 @@
 		path.startsWith('/problems') ||
 		path.startsWith('/cohorts') ||
 		path.startsWith('/contest') ||
+		path.startsWith('/store') ||
 		path.startsWith('/leaderboard') ||
 		path.startsWith('/settings');
 		

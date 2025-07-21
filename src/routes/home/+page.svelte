@@ -3,6 +3,7 @@
 	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
+	import Expand from '../components/Expand.svelte';
 
 	let username = 'OrbitOwl';
 	let currentSlide = 0;
@@ -130,12 +131,18 @@
 				bind:this={imageWrapperRef}
 			>
 				<div class="relative">
-					<button
+					<!-- <button
 						onclick={() => (isExpanded = !isExpanded)}
 						class="fixed top-20 right-8 bg-[color:var(--color-primary)] text-white rounded-md text-xs px-2 py-1 z-50"
 					>
 						{isExpanded ? '›' : '‹'}
-					</button>
+					</button> -->
+	
+					<Expand
+						expanded={isExpanded}
+						ontoggle={() => (isExpanded = !isExpanded)}
+					/>
+					
 					<img
 						src={theme === 'dark' ? darkPond : lightPond}
 						alt="pond"
