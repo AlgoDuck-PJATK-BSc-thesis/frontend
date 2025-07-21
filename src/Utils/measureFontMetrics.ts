@@ -7,47 +7,49 @@ export const measureTextMetrics = (text: string, font: string) : TextMetrics => 
   return ctx.measureText(text);
 }
 
-export const findWrappingIndices = (text: string, font: string, containerWidth: number) : number[] => {
+export const findWrappingIndices = (text: string, font: string, containerWidth: number): number[] => {
   const wrappingIndices: number[] = [];
-
   const canvas = document.createElement('canvas');
-  const ctx: CanvasRenderingContext2D | null= canvas.getContext('2d');
-  if (!ctx) throw new Error("dumbass");
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error("Failed to get canvas context");
+  
   ctx.font = font;
-
   let start = 0;
-  let end = text.length;
 
-  while (start < end){
-    let mid : number = Math.floor((start + end) / 2);
-    let prevMid: number = 0;
-    
-    let subStr: string;
-    let subStrWidth : TextMetrics;
+  while (start < text.length) {
+    let left = start;
+    let right = text.length;
+    let bestFit = start;
 
-    while (prevMid != mid){
-      prevMid = mid;
-      subStr = text.substring(start, mid);
-      subStrWidth = ctx.measureText(subStr);
-      if (subStrWidth.width > containerWidth){
-        end = mid - 2;
-        mid = Math.floor((start + end) / 2);
-      }else{
-        mid += Math.floor((end - mid) / 2) + 1;
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const substr = text.substring(start, mid);
+      const width = ctx.measureText(substr).width;
+
+      if (width <= containerWidth) {
+        bestFit = mid;
+        left = mid + 1;
+      } else {
+        right = mid - 1;
       }
     }
 
-    if (mid + 1 <= text.length){
-      let firstSpace: number = mid;
-      while (text.at(firstSpace) !== ' '){
-        firstSpace--;
-      }
-      wrappingIndices.push(firstSpace);
-      start = firstSpace + 1;
-    }else{
-      start = mid + 1;
+    if (bestFit >= text.length) {
+      break;
     }
-    end = text.length;
+
+    let wrapIndex = bestFit;
+    while (wrapIndex > start && text[wrapIndex] !== ' ') {
+      wrapIndex--;
+    }
+
+    if (wrapIndex === start) {
+      break;
+    }
+
+    wrappingIndices.push(wrapIndex);
+    start = wrapIndex + 1;
   }
+
   return wrappingIndices;
 }

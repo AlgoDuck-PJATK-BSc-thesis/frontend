@@ -47,6 +47,7 @@
   let verticalResizeBar: HTMLElement;
   let horizontalResizeBarAccent: HTMLElement;
   let resizeVerticalButton: HTMLElement; // TODO come up with a better name here
+  let resizeHorizontalButton: HTMLElement; // TODO come up with a better name here
   
   let horizontalResizeBar: HTMLElement;
 
@@ -199,6 +200,7 @@
       handleReleaseVertical();
       hideHorizontalBarWrapper()
       isTerminalDivSnappedToBottom = true;
+      resizeHorizontalButton.style.visibility = "visible";
     }
     monacoDiv.style.height = `${newMonacoDivHeight}px`;
     terminalDiv.style.height = `${newTerminalDivHeight}px`;
@@ -320,12 +322,19 @@
     }
   }
   const returnInfoDiv = (): void => {
-    const rect: DOMRect = document.body.getBoundingClientRect();
-    dataDiv.style.width = `${rect.width * 0.2}px`;
-    codeDiv.style.width = `${rect.width * 0.8}px`;
+    const bodyRect: DOMRect = document.body.getBoundingClientRect();
+    dataDiv.style.width = `${bodyRect.width * 0.2}px`;
+    codeDiv.style.width = `${bodyRect.width * 0.8}px`;
     resizeVerticalButton.style.visibility = "hidden";
     isDataDivSnappedToLeft = false;
+  }
 
+  const returnTerminalDiv = () : void => {
+    const codeDivComputedDim: CSSStyleDeclaration = getComputedStyle(codeDiv);
+    monacoDiv.style.height = `${parseComputedDimensions(codeDivComputedDim.height) * 0.85}px`;
+    terminalDiv.style.height = `${parseComputedDimensions(codeDivComputedDim.height) * 0.15}px`;
+    resizeHorizontalButton.style.visibility = "hidden";
+    isTerminalDivSnappedToBottom = false;
   }
 
 </script>
@@ -335,8 +344,15 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <main bind:this={mainDiv} class="flex h-[88vh] w-full bg-[var(--color-bg)]">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div bind:this={resizeVerticalButton} class="h-[20%] w-4 rounded-r-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-l-0 fixed left-0 top-[40%] invisible z-999 flex justify-center items-center hover:cursor-pointer" onclick={returnInfoDiv}>
-    <div class="transform rotate-90 origin-center">huh</div>  
+  <div bind:this={resizeVerticalButton} class="h-[20%] w-6 rounded-r-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-l-0 fixed left-0 top-[40%] invisible z-999 flex flex-col justify-center items-center hover:cursor-pointer" onclick={returnInfoDiv}>
+    <div class="transform rotate-90 origin-center flex justify-start">
+      <div class="mx-3">
+        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 8.2C3 7.07989 3 6.51984 3.21799 6.09202C3.40973 5.71569 3.71569 5.40973 4.09202 5.21799C4.51984 5 5.0799 5 6.2 5H9.67452C10.1637 5 10.4083 5 10.6385 5.05526C10.8425 5.10425 11.0376 5.18506 11.2166 5.29472C11.4184 5.4184 11.5914 5.59135 11.9373 5.93726L12.0627 6.06274C12.4086 6.40865 12.5816 6.5816 12.7834 6.70528C12.9624 6.81494 13.1575 6.89575 13.3615 6.94474C13.5917 7 13.8363 7 14.3255 7H17.8C18.9201 7 19.4802 7 19.908 7.21799C20.2843 7.40973 20.5903 7.71569 20.782 8.09202C21 8.51984 21 9.0799 21 10.2V15.8C21 16.9201 21 17.4802 20.782 17.908C20.5903 18.2843 20.2843 18.5903 19.908 18.782C19.4802 19 18.9201 19 17.8 19H6.2C5.07989 19 4.51984 19 4.09202 18.782C3.71569 18.5903 3.40973 18.2843 3.21799 17.908C3 17.4802 3 16.9201 3 15.8V8.2Z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>Details</div>  
+    </div>
 </div>
 
   <HelperDuck/>
@@ -362,7 +378,7 @@
 
 
 {#snippet CodeEditor()}
-  <div bind:this={codeDiv} class="w-full h-full flex flex-col px-1">
+  <div bind:this={codeDiv} class="w-full h-full flex flex-col px-1 relative">
       <div bind:this={monacoDiv} class="w-full h-[85%] rounded-t-md overflow-hidden" bind:this={editorContainer}></div>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div bind:this={resizeBarHorizontalDiv}
@@ -372,7 +388,6 @@
           onmouseleave={hideHorizontalBarWrapper}
           onmousedown={handleDownVertical}
           onmouseup={handleReleaseVertical}>
-
           <div bind:this={horizontalResizeBar} class="w-full absolute flex justify-center items-center rounded-full">
             <div bind:this={horizontalResizeBarAccent} class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
           </div>
@@ -380,6 +395,16 @@
       <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] rounded-b-md px-4 py-2">
           <span class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
       </div>
-      <div class="h-10 w-10 fixed  bg-white"></div>
+      <div bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
+        <div class="flex justify-center h-full w-full">
+          <div class="h-10 w-10">
+            <svg width="24px" height="24px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0.792725 12.2929L5.08562 8.00002L0.792725 3.70712L2.20694 2.29291L7.91405 8.00002L2.20694 13.7071L0.792725 12.2929Z" fill="#FFFFFF"/>
+            <path d="M7.00006 15H15.0001V13H7.00006V15Z" fill="#FFFFFF"/>
+            </svg>
+          </div>
+          <span>Terminal</span>  
+        </div>
+      </div>
   </div>
 {/snippet}

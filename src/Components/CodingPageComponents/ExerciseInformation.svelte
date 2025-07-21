@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import type { ExerciseData } from "../../Types/ExerciseData";
   let { data, dataDiv = $bindable() } : { data: ExerciseData, dataDiv?: HTMLElement } = $props();
 
@@ -43,6 +44,10 @@
 
   }
 
+  onMount(()=>{
+    toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400);
+    toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)
+  });
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
