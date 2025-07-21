@@ -3,7 +3,7 @@
 	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import Expand from '../components/Expand.svelte';
+	import Expand from '../../Components/Expand.svelte';
 
 	let username = 'OrbitOwl';
 	let currentSlide = 0;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import ThemeToggle from '../components/ThemeToggle.svelte';
+	import ThemeToggle from '../../Components/ThemeToggle.svelte';
 
 	let currentLanguage = 'en';
 	const toggleLanguage = () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { userPreferences } from "../../Stores/theme";
+	import { userPreferences } from "../Stores/theme";
 
 	let current = 'light';
 
