@@ -3,7 +3,7 @@
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import type { ExerciseData } from "../../../../../../Types/ExerciseData";
   import { userPreferences } from "../../../../../../Stores/theme";
-  import { parseComputedDimensions, findWrappingIndices, getOptionalDimesionsString, constGetOptionalDimensionsNumber, parseOptionalDimensions } from "../../../../../../Utils/index";
+  import { parseComputedDimensions, parseOptionalDimensions } from "../../../../../../Utils/index";
 	import HelperDuck from "../../../../../../Components/CodingPageComponents/HelperDuck.svelte";
 	import ExerciseInformation from "../../../../../../Components/CodingPageComponents/ExerciseInformation.svelte";
 
@@ -18,6 +18,7 @@
   let isVerticalResized: boolean = false;
   let wasClicked: boolean = false;
   let isDataDivSnappedToLeft = false;
+  let isTerminalDivSnappedToBottom = false;
 
   let theme: string = $state("light");
 
@@ -190,8 +191,17 @@
   const handleMouseDraggedVertical = (e: MouseEvent) => {
     if (!isDraggingVertical) return;
     const dy = originalHeightTop + contentPaneClientStartY - e.clientY;
-    monacoDiv.style.height = `${originalHeightTop - dy}px`;
-    terminalDiv.style.height = `${originalHeightBottom + dy}px`;
+    let newMonacoDivHeight: number = originalHeightTop - dy;
+    let newTerminalDivHeight: number = originalHeightBottom + dy;
+    if (newTerminalDivHeight < 50){
+      newMonacoDivHeight += newTerminalDivHeight;
+      newTerminalDivHeight = 0;
+      handleReleaseVertical();
+      hideHorizontalBarWrapper()
+      isTerminalDivSnappedToBottom = true;
+    }
+    monacoDiv.style.height = `${newMonacoDivHeight}px`;
+    terminalDiv.style.height = `${newTerminalDivHeight}px`;
   }
 
   const handleReleaseHorizontal = () => {
@@ -268,8 +278,9 @@
       if (isHorizontalResized && !isDraggingHorizontal){
         handleReleaseVertical();
         toggleHorizontalWindowResizeBarResized();      
+      }else{
+        toggleVerticalWindowResizeBarResized();
       }
-      toggleVerticalWindowResizeBarResized();
     }
   }
 
@@ -281,25 +292,31 @@
           toggleVerticalWindowResizeBarResized();      
         }
       }else{
-          toggleVerticalWindowResizeBarResized();
+        toggleVerticalWindowResizeBarResized();
       }
     }
   }
 
   const expandHorizontalBarWrapper = ()=>{
-    if (!isDraggingHorizontal){
+    if (!isTerminalDivSnappedToBottom){
+      if (isVerticalResized && !isDraggingVertical){
+        handleReleaseHorizontal();
+        toggleVerticalWindowResizeBarResized()
+      }
       toggleHorizontalWindowResizeBarResized();
     }
   }
 
   const hideHorizontalBarWrapper = ()=>{
-    if(!isDraggingVertical && wasClicked){
-      wasClicked = false;
-      if(isHorizontalResized){
+    if(!isTerminalDivSnappedToBottom){
+      if (!isDraggingVertical && !isDraggingHorizontal && wasClicked){
+        wasClicked = false;
+        if(isHorizontalResized){
+          toggleHorizontalWindowResizeBarResized();
+        }
+      }else{
         toggleHorizontalWindowResizeBarResized();
       }
-    }else{
-      toggleHorizontalWindowResizeBarResized();
     }
   }
   const returnInfoDiv = (): void => {
@@ -316,7 +333,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<main bind:this={mainDiv} class="flex h-[84vh] w-full my-5 bg-[var(--color-bg)]">
+<main bind:this={mainDiv} class="flex h-[88vh] w-full bg-[var(--color-bg)]">
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div bind:this={resizeVerticalButton} class="h-[20%] w-4 rounded-r-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-l-0 fixed left-0 top-[40%] invisible z-999 flex justify-center items-center hover:cursor-pointer" onclick={returnInfoDiv}>
     <div class="transform rotate-90 origin-center">huh</div>  
@@ -325,26 +342,21 @@
   <HelperDuck/>
 
   <ExerciseInformation {data} bind:dataDiv />
-  <!-- {@render ExerciseInformation()} -->
 
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div 
-    bind:this={resizeBarVerticalDiv}
+  <div bind:this={resizeBarVerticalDiv}
     class="w-1 h-full relative overflow-visible" 
     class:hover:cursor-col-resize={!isDraggingHorizontal}
     onmouseenter={expandVerticalBarWrapper}
     onmouseleave={hideVerticalBarWrapper}
     onmousedown={handleDownHorizontal}
-    onmouseup={handleReleaseHorizontal}
-  >
-  <div 
-    bind:this={verticalResizeBar}
-    class="h-full absolute flex flex-col justify-center items-center rounded-full"
-  >
+    onmouseup={handleReleaseHorizontal}>
 
-    <div bind:this={verticalResizeBarAccent} class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
+    <div bind:this={verticalResizeBar} class="h-full absolute flex flex-col justify-center items-center rounded-full">
+      <div bind:this={verticalResizeBarAccent} class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
+    </div>
+
   </div>
-</div>
+
   {@render CodeEditor()}
 </main>
 
@@ -353,22 +365,21 @@
   <div bind:this={codeDiv} class="w-full h-full flex flex-col px-1">
       <div bind:this={monacoDiv} class="w-full h-[85%] rounded-t-md overflow-hidden" bind:this={editorContainer}></div>
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div 
-          id="resize-bar-holder-horizontal" 
-          bind:this={resizeBarHorizontalDiv}
+        <div bind:this={resizeBarHorizontalDiv}
           class="h-1 w-full relative overflow-visible"
           class:hover:cursor-row-resize={!isDraggingVertical}
-          onmouseenter={!isDraggingVertical ? expandHorizontalBarWrapper : undefined}
-          onmouseleave={!isDraggingHorizontal ? hideHorizontalBarWrapper : undefined}
+          onmouseenter={expandHorizontalBarWrapper}
+          onmouseleave={hideHorizontalBarWrapper}
           onmousedown={handleDownVertical}
-          onmouseup={handleReleaseVertical}
-        >
+          onmouseup={handleReleaseVertical}>
+
           <div bind:this={horizontalResizeBar} class="w-full absolute flex justify-center items-center rounded-full">
             <div bind:this={horizontalResizeBarAccent} class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
           </div>
         </div>
-      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[var(--color-tile)] px-3 py-1 rounded-b-md ">
-        <span class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
+      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] rounded-b-md px-4 py-2">
+          <span class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
       </div>
+      <div class="h-10 w-10 fixed  bg-white"></div>
   </div>
 {/snippet}
