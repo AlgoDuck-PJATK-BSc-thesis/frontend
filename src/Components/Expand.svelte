@@ -54,6 +54,7 @@
 <button
 	type="button"
 	onclick={toggle}
+	title="Expand/Collapse the Pond"
 	aria-pressed={expanded}
 	aria-label={expanded ? 'Collapse view' : 'Expand view'}
 	class="cursor-pointer select-none p-2 flex items-center justify-center bg-[color:var(--color-primary)] text-white rounded-md text-xs z-50 fixed top-20 right-8"

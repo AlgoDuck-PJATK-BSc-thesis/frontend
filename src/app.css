@@ -10,7 +10,7 @@
 	font-style: normal;
 } */
 
- @font-face {
+@font-face {
 	font-family: 'Joystix';
 	src: url('/fonts/joystix monospace.otf') format('opentype');
 	font-weight: normal;
@@ -22,12 +22,15 @@
 	/* --font-body: 'Block Blueprint', sans-serif; */
 	--font-body: 'Joystix', sans-serif;
 
-	--color-bg: #229788;
-	--color-text: #222222;
-	--color-primary: #ed9aaa;
-	--color-accent-1: #b5ead7;
-	--color-accent-2: #ff9d00;
-	--color-tile: #fff5b9;
+	--color-bg:#f5f7fa;   
+	--color-text:#1e1e2e;  
+	--color-primary:#7c3aed;  
+	--color-accent-1:#4c3175;  
+	--color-accent-2:#f97316;   
+	--color-tile:#ffffff;   
+
+	--color-access-yellow: #f2b500; 
+	--color-access-black: #000000;
 }
 
 [data-theme='dark'] {
@@ -44,4 +47,37 @@ html {
 	background-color: var(--color-bg);
 	color: var(--color-text);
 	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html[data-contrast='1'] {
+	--color-bg: var(--color-access-black);     
+	--color-text: var(--color-access-yellow);  
+	--color-primary: var(--color-access-yellow);
+	--color-accent-1: var(--color-access-yellow);
+	--color-accent-2: var(--color-access-yellow);
+	--color-tile: var(--color-access-black);   
+}
+
+html[data-contrast='2'] {
+	--color-bg: var(--color-access-yellow);
+	--color-text: var(--color-access-black);
+	--color-primary: var(--color-access-black);
+	--color-accent-1: var(--color-access-black);
+	--color-accent-2: var(--color-access-black);
+	--color-tile: var(--color-access-yellow);
+}
+
+[data-underline-links='true'] a {
+	text-decoration: underline !important;
+	text-decoration-thickness: 2px !important; 
+	text-underline-offset: 4px; 
+}
+
+[data-reduce-motion='true'] * {
+	transition: none !important;
+	animation: none !important;
+}
+
+[data-reduce-motion='true'] {
+	scroll-behavior: auto !important;
 }

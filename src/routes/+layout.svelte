@@ -4,6 +4,15 @@
 	import HeaderUser from './headers/HeaderUser.svelte';
 	import '../app.css';
 
+	import AccessibilityButton from '../Components/AccessibilityComponents/AccessibilityButton.svelte';
+	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
+
+	let togglePanelFn: () => void;
+
+	function handleToggle() {
+		togglePanelFn?.();
+	}
+
 	let { children } = $props();
 
 	let path = $page.url.pathname;
@@ -26,6 +35,9 @@
 	{:else}
 		<HeaderGuest />
 	{/if}
+
+	<AccessibilityButton ontoggle={handleToggle} />
+	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
 
 	<main class="flex-1 w-full max-w-full mx-auto px-4 py-8 box-border">
 		{@render children?.()}

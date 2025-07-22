@@ -30,9 +30,8 @@
 				<li>
 					<a
 						href="/home"
-						class={`no-underline ${
-							$page.url.pathname === '/home' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/home' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Home
 					</a>
@@ -40,9 +39,8 @@
 				<li>
 					<a
 						href="/Categories"
-						class={`no-underline ${
-							$page.url.pathname === '/Categories' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/Categories' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Problems
 					</a>
@@ -50,9 +48,8 @@
 				<li>
 					<a
 						href="/cohort"
-						class={`no-underline ${
-							$page.url.pathname === '/cohort' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/cohort' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Cohort
 					</a>
@@ -60,9 +57,8 @@
 				<li>
 					<a
 						href="/contest"
-						class={`no-underline ${
-							$page.url.pathname === '/contest' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/contest' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Contest
 					</a>
@@ -70,9 +66,8 @@
 				<li>
 					<a
 						href="/store"
-						class={`no-underline ${
-							$page.url.pathname === '/store' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/store' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Store
 					</a>
@@ -80,9 +75,8 @@
 				<li>
 					<a
 						href="/leaderboard"
-						class={`no-underline ${
-							$page.url.pathname === '/leaderboard' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/leaderboard' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Leaderboard
 					</a>
@@ -90,9 +84,8 @@
 				<li>
 					<a
 						href="/settings"
-						class={`no-underline ${
-							$page.url.pathname === '/settings' ? 'border-b-2 border-[color:var(--color-primary)]' : ''
-						} text-[color:var(--color-text)] hover:text-[color:var(--color-primary)]`}
+						aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
 						Settings
 					</a>
