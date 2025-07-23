@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import type { ExerciseData } from "../../../../../../Types/ExerciseData";
+
   import { userPreferences } from "../../../../../../Stores/theme";
   import { parseComputedDimensions, parseOptionalDimensions } from "../../../../../../Utils/index";
 	import HelperDuck from "../../../../../../Components/CodingPageComponents/HelperDuck.svelte";
@@ -36,10 +38,10 @@
   let editorContainer: HTMLElement;
   
   let dataDiv: HTMLElement = $state(document.createElement("div"));
+  let terminalDiv: HTMLElement = $state(document.createElement("div"));
   
   let mainDiv: HTMLElement;
   let codeDiv: HTMLElement;
-  let terminalDiv: HTMLElement;
   let monacoDiv: HTMLElement;
   let resizeBarVerticalDiv: HTMLElement;
   let resizeBarHorizontalDiv: HTMLElement;
@@ -357,7 +359,7 @@
 
   <HelperDuck/>
 
-  <ExerciseInformation {data} bind:dataDiv />
+  <ExerciseInformation {data} {editor} bind:dataDiv/>
 
   <div bind:this={resizeBarVerticalDiv}
     class="w-1 h-full relative overflow-visible" 
