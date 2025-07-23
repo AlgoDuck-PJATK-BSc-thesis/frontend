@@ -2,7 +2,6 @@
   import { goto } from '$app/navigation';
   import { parseOptionalDimensions } from "../../Utils/index";
   
-  
   let scrollableFrame : HTMLElement;
 
   const scrollableFrameComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
@@ -17,7 +16,6 @@
     if (!main) return undefined;
     return getComputedStyle(main);
   });
-
 
 
   let lastXCoords : number;
