@@ -3,7 +3,7 @@
 	import type { ExerciseData } from "../../Types/ExerciseData";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
 
-  let { data, dataDiv = $bindable(), editor } : { data: ExerciseData, editor: Monaco.editor.IStandaloneCodeEditor | null , dataDiv?: HTMLElement} = $props();
+  let { data, editor, terminalContents = $bindable(), dataDiv = $bindable()} : { data: ExerciseData, editor: Monaco.editor.IStandaloneCodeEditor | null, terminalContents: HTMLElement, dataDiv?: HTMLElement} = $props();
 
   let htmlDescriptionDiv: HTMLElement;
   let htmlTestCaseDiv: HTMLElement;
@@ -45,7 +45,7 @@
 
   const executeCode = async () : Promise<void> => {
     const userContent: string = getCurrentContent();
-    const result = await fetch("http://localhost/api/execute/dry",
+    const result = await fetch("http://localhost:1337/api/execute/dry",
     {
       method: 'POST',
       headers: {
@@ -59,12 +59,12 @@
     });
 
     const serverResponse = await result.json();
-    console.log(serverResponse);
+    terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
   }
 
   const submitCode = async () : Promise<void> => {
     const userContent: string = getCurrentContent();
-    const result = await fetch("http://localhost/api/execute/full",
+    const result = await fetch("http://localhost:1337/api/execute/full",
     {
       method: 'POST',
       headers: {
@@ -78,7 +78,7 @@
     });
 
     const serverResponse = await result.json();
-    console.log(serverResponse);
+    terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
   }
 
   onMount(()=>{
