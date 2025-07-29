@@ -1,5 +1,5 @@
 <script lang="ts">
-	import image from '$lib/images/ponds/image.jpeg';
+	import image from '$lib/images/ponds/Image.jpeg';
 </script>
 
 <svelte:head>
