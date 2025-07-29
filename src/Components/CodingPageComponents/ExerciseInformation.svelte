@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import type { ExerciseData } from "../../Types/ExerciseData";
-  let { data, dataDiv = $bindable() } : { data: ExerciseData, dataDiv?: HTMLElement } = $props();
+  import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
+
+  let { data, editor, terminalContents = $bindable(), dataDiv = $bindable()} : { data: ExerciseData, editor: Monaco.editor.IStandaloneCodeEditor | null, terminalContents: HTMLElement, dataDiv?: HTMLElement} = $props();
 
   let htmlDescriptionDiv: HTMLElement;
   let htmlTestCaseDiv: HTMLElement;
@@ -36,12 +38,47 @@
   }
 
 
-  const executeCode = () => {
-
+  const getCurrentContent = (): string => {
+    if (!editor) return '';
+    return editor.getValue();
   }
 
-  const submitCode = () => {
+  const executeCode = async () : Promise<void> => {
+    const userContent: string = getCurrentContent();
+    const result = await fetch("http://localhost:1337/api/execute/dry",
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        CodeB64: `${btoa(userContent)}`,
+        Lang: "java",
+        ExerciseId: "0fd5d3a8-48c1-451b-bcdf-cf414cc6d477",
+      })
+    });
 
+    const serverResponse = await result.json();
+    terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
+  }
+
+  const submitCode = async () : Promise<void> => {
+    const userContent: string = getCurrentContent();
+    const result = await fetch("http://localhost:1337/api/execute/full",
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        CodeB64: `${btoa(userContent)}`,
+        Lang: "java",
+        ExerciseId: "0fd5d3a8-48c1-451b-bcdf-cf414cc6d477",
+      })
+    });
+
+    const serverResponse = await result.json();
+    terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
   }
 
   onMount(()=>{

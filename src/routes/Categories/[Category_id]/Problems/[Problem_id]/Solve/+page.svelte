@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
   import type { ExerciseData } from "../../../../../../Types/ExerciseData";
+
   import { userPreferences } from "../../../../../../Stores/theme";
   import { parseComputedDimensions, parseOptionalDimensions } from "../../../../../../Utils/index";
 	import HelperDuck from "../../../../../../Components/CodingPageComponents/HelperDuck.svelte";
@@ -36,10 +38,11 @@
   let editorContainer: HTMLElement;
   
   let dataDiv: HTMLElement = $state(document.createElement("div"));
+  let terminalDiv: HTMLElement = $state(document.createElement("div"));
+  let terminalContents: HTMLElement = $state(document.createElement("div"));
   
   let mainDiv: HTMLElement;
   let codeDiv: HTMLElement;
-  let terminalDiv: HTMLElement;
   let monacoDiv: HTMLElement;
   let resizeBarVerticalDiv: HTMLElement;
   let resizeBarHorizontalDiv: HTMLElement;
@@ -357,7 +360,7 @@
 
   <HelperDuck/>
 
-  <ExerciseInformation {data} bind:dataDiv />
+  <ExerciseInformation {data} {editor} bind:terminalContents bind:dataDiv/>
 
   <div bind:this={resizeBarVerticalDiv}
     class="w-1 h-full relative overflow-visible" 
@@ -393,7 +396,7 @@
           </div>
         </div>
       <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] rounded-b-md px-4 py-2">
-          <span class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
+          <span bind:this={terminalContents} class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
       </div>
       <div bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
         <div class="flex justify-center h-full w-full">
