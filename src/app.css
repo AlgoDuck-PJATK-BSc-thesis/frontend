@@ -3,12 +3,12 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* @font-face {
+@font-face {
 	font-family: 'Block Blueprint';
 	src: url('/fonts/BlockBlueprint.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
-} */
+}
 
 @font-face {
 	font-family: 'Joystix';
@@ -18,9 +18,11 @@
 }
 
 :root {
-	/* --font-body: 'Press Start 2P', monospace; */
-	/* --font-body: 'Block Blueprint', sans-serif; */
-	--font-body: 'Joystix', sans-serif;
+	--font-pressstart2p: 'Press Start 2P', monospace; 
+	--font-blockblueprint: 'Block Blueprint', sans-serif; 
+	--font-joystix: 'Joystix', sans-serif;
+	--font-montserrat: 'Montserrat', sans-serif;
+	--font-playfairdisplay: 'Playfair Display', medium;
 
 	--color-bg:#f5f7fa;   
 	--color-text:#1e1e2e;  
@@ -34,16 +36,16 @@
 }
 
 [data-theme='dark'] {
-	--color-bg: #1e1e2e;
+	--color-bg: #232333;
 	--color-text: #f5f5f5;
 	--color-primary: #caa9fa;
 	--color-accent-1: #8be9fd;
 	--color-accent-2: #fab387;
-	--color-tile: #2e2e42;
+	--color-tile: #1e1e2e;
 }
 
 html {
-	font-family: var(--font-body);
+	font-family: var(--font-joystix);
 	background-color: var(--color-bg);
 	color: var(--color-text);
 	transition: background-color 0.3s ease, color 0.3s ease;

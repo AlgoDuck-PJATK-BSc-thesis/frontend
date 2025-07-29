@@ -43,7 +43,7 @@
 		{@render children?.()}
 	</main>
 
-	<footer class="fixed bottom-0 left-0 w-full bg-[color:var(--color-bg)] text-center p-4 text-xs text-[color:var(--color-accent-2)] z-[100]">
+	<footer class="fixed bottom-0 left-0 w-full bg-[color:var(--color-bg)] text-center p-2 text-xs text-[color:var(--color-accent-2)] z-[100]">
 		<p>© {new Date().getFullYear()} Beetcode</p>
 	</footer>
 </div>

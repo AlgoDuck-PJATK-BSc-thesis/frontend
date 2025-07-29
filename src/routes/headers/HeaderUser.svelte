@@ -14,10 +14,10 @@
 </script>
 
 <div class="w-full overflow-x-auto">
-	<header class="min-w-max flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-body sticky top-0 z-[100] gap-4">
+	<header class="min-w-max flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] text-[color:var(--color-text)] font-body sticky top-0 z-[100] gap-4">
 		
 		<div class="flex items-center gap-6 whitespace-nowrap">
-			<a href="/home" class="text-[color:var(--color-primary)] text-base no-underline">BEETCODE</a>
+			<a href="/home" class="text-[color:var(--color-accent-2)] text-base no-underline">BEETCODE</a>
 			<div class="relative flex border-2 border-[color:var(--color-accent-1)] rounded-full text-[0.65rem] overflow-hidden">
 				<div class="absolute top-[-25%] left-1/2 w-[2px] h-[150%] rotate-[30deg] bg-[color:var(--color-accent-1)] z-[1]"></div>
 				<div class="flex-1 flex items-center justify-center px-3 py-1 z-[2] pl-4 pr-2">Lvl 10</div>
@@ -108,7 +108,7 @@
 
 			<button
 				onclick={logout}
-				class="text-[0.65rem] px-3 py-1 bg-[color:var(--color-primary)] text-[color:var(--color-bg)] rounded-md border-none cursor-pointer"
+				class="text-[0.65rem] px-3 py-1 bg-[color:var(--color-accent-2)] text-[color:var(--color-tile)] rounded-md border-none cursor-pointer"
 			>
 				Logout
 			</button>

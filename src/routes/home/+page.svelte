@@ -9,11 +9,16 @@
 	let currentSlide = 0;
 	let imageHeight = 0;
 	let isExpanded = false;
+	let reduceMotion = false;
+
+	if (typeof window !== 'undefined') {
+		reduceMotion = document.documentElement.dataset.reduceMotion === 'true';
+	}
 
 	const carouselItems = [
-		{ title: 'Challenge 1', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
-		{ title: 'Challenge 2', body: 'Phasellus iaculis, justo nec tristique tincidunt, orci lorem. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
-		{ title: 'Challenge 3', body: 'Cras faucibus, lorem nec eleifend bibendum, nisi felis. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' }
+		{ title: 'Welcome back!', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+		{ title: 'Welcome back!', body: 'Phasellus iaculis, justo nec tristique tincidunt, orci lorem. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
+		{ title: 'Welcome back!', body: 'Cras faucibus, lorem nec eleifend bibendum, nisi felis. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' }
 	];
 
 	let theme = 'light';
@@ -43,18 +48,21 @@
 </svelte:head>
 
 <section class="h-fit px-8 flex flex-col box-border overflow-auto">
-	<div class={`grid items-start relative gap-8 ${isExpanded ? 'grid-cols-1' : 'grid-cols-[1fr_3fr]'}`}>
+	<div class={`grid items-start relative ${isExpanded ? 'grid-cols-1' : 'grid-cols-[1fr_3fr]'}`}>
 		{#if !isExpanded}
 			<div
-				class="flex flex-col justify-between text-center relative gap-4 mt-8 overflow-y-auto pr-1 pb-16"
-				style="max-height: calc(100vh - 8rem);"
+				class="flex flex-col justify-between text-center relative gap-4 overflow-y-auto pr-1 pb-16"
+				style="max-height: calc(100vh - 6rem);"
 			>
-				<h1 class="text-2xl text-[color:var(--color-primary)] text-center mb-2">
+				<!-- <h1 class="text-2xl text-[color:var(--color-primary)] text-center mb-2">
 					Welcome back <br />{username}
-				</h1>
+				</h1> -->
 
-				<div class="aspect-[8/3] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">{carouselItems[slideIndex].title}</h2>
+				<div class="aspect-[8/9] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+					<h2 
+					class="text-2xl text-[color:var(--color-accent-2)]"
+					>
+					{carouselItems[slideIndex].title}</h2>
 					<div class="relative h-full flex flex-col justify-center">
 						<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
 							<button
@@ -77,13 +85,14 @@
 							</button>
 						</div>
 
-						<div class="flex items-center justify-center h-full px-10 text-center">
+						<div class="flex items-center justify-center h-full pt-6 pr-10 pb-6 pl-10 text-center">
 						{#each carouselItems as item, i (i)}
 							{#if i === slideIndex}
 							<div
-								class="max-h-[5.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[0.75rem] text-[color:var(--color-text)] m-0 transition-opacity duration-300"
-								in:fly={{ duration: 200 }}
-								out:fly={{ duration: 200 }}
+								class="max-h-[10.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[1.65rem] text-[color:var(--color-text)] m-0 transition-opacity duration-300"
+								style="font-family: var(--font-playfairdisplay)"
+								in:fly={!reduceMotion ? { duration: 200 } : undefined}
+								out:fly={!reduceMotion ? { duration: 200 } : undefined}
 							>
 								{item.body}
 							</div>
@@ -103,33 +112,37 @@
 
 				</div>
 
-				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Recently Solved</h2>
-					<div class="flex items-center justify-center h-full px-10 text-center">
-						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
+				<div class="aspect-[8/9] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+					<h2 class="text-2xl text-[color:var(--color-accent-2)] ">Stats</h2>
+					<div class="flex items-center justify-center h-full px-8 text-center">
+						<p class="text-[1.65rem] text-[color:var(--color-text)] max-h-[12.5rem] overflow-hidden hover:overflow-y-auto "
+						style="font-family: var(--font-playfairdisplay)">
 
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
 					</div>
 				</div>
 
-				<div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+				<!-- <div class="aspect-[8/3] min-h-[12rem] w-full border-2 border-[color:var(--color-accent-1)] rounded bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
 					<h2 class="text-base text-[color:var(--color-accent-2)] mb-2">Stats</h2>
 					<div class="flex items-center justify-center h-full px-10 text-center">
 						<p class="text-xs text-[color:var(--color-text)] m-0 max-h-[5rem] overflow-hidden hover:overflow-y-auto pr-1">
 
 							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		{/if}
 
 		<div class="flex flex-col items-stretch justify-start gap-2">
 			<div
-				class={`relative rounded bg-[color:var(--color-bg)] inline-block w-auto max-w-full mx-auto transition-all overflow-auto ${
-					isExpanded ? 'fixed inset-0 z-[50] bg-[color:var(--color-bg)]' : ''
-				}`}
+				class={`relative inline-block w-auto max-w-full mx-auto transition-all overflow-auto
+				${isExpanded 
+					? 'fixed inset-0 z-[50] bg-[color:var(--color-bg)]' 
+					: 'border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-bg)] shadow-lg'}
+				`}
 				bind:this={imageWrapperRef}
 			>
+
 				<div class="relative">
 					<!-- <button
 						onclick={() => (isExpanded = !isExpanded)}
