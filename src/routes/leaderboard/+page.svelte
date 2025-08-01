@@ -18,7 +18,11 @@
 		{ name: 'NewNoise', points: 50 },
 		{ name: 'HarshHistory', points: 40 },
 		{ name: 'TurboTurtle', points: 30 },
-		{ name: 'SilentShadow', points: 20 }
+		{ name: 'SilentShadow', points: 20 },
+		{ name: 'SlySpeed', points: 10 },
+		{ name: 'MadMercury', points: 5 },
+		{ name: 'TurboTurbine', points: 0 }
+		
 	];
 
 	$: sortedUsers = [...allUsers].sort((a, b) => b.points - a.points);
@@ -44,7 +48,7 @@
 	<title>Leaderboard – Beetcode</title>
 </svelte:head>
 
-<section class="p-8 flex flex-col items-center gap-8 font-body max-h-[calc(100vh-6rem)] overflow-y-auto">
+<section class="pt-8  pl-8  pr-8 pb-0 flex flex-col items-center gap-6  font-body max-h-[calc(100vh-5rem)] overflow-y-auto">
 	<h1 class="text-5xl font-bold mt-4 mb-2 text-[color:var(--color-primary)]"
 		style="font-family: var(--font-ariw9500);">Leaderboard</h1>
     <div class="border-2 bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center">
