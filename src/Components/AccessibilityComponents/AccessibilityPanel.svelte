@@ -42,7 +42,7 @@
 
 <div
 	class="fixed bottom-40 right-0 w-64 z-[9999] border-2 shadow-lg overflow-y-auto transition-transform duration-300
-	bg-[color:var(--color-bg)] text-[color:var(--color-text)] border-[color:var(--color-text)]"
+	bg-[color:var(--color-bg-a11y)] text-[color:var(--color-text-a11y)] border-[color:var(--color-text-a11y)]"
 	class:translate-x-0={isOpen}
 	class:translate-x-full={!isOpen}
 	style="font-size: {panelFontSize};"
@@ -55,29 +55,29 @@
 			<div class="flex gap-2 flex-wrap">
 				<button
 					class="px-2 py-1 border-2 rounded
-                    hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
-					class:bg-[color:var(--color-text)]={textSize === 120 || textSize === 140}
-					class:text-[color:var(--color-bg)]={textSize === 120 || textSize === 140}
-					class:border-[color:var(--color-text)]={textSize === 120 || textSize === 140}
+                    hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+					class:bg-[color:var(--color-text-a11y)]={textSize === 120 || textSize === 140}
+					class:text-[color:var(--color-bg-a11y)]={textSize === 120 || textSize === 140}
+					class:border-[color:var(--color-text-a11y)]={textSize === 120 || textSize === 140}
 					onclick={() => (textSize = Math.min(textSize + 20, 140))}
 				>
 					A+
 				</button>
 				<button
-					class="px-2 py-1 border-2 rounded hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
-					class:bg-[color:var(--color-text)]={textSize === 100}
-					class:text-[color:var(--color-bg)]={textSize === 100}
-					class:border-[color:var(--color-text)]={textSize === 100}
+					class="px-2 py-1 border-2 rounded hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+					class:bg-[color:var(--color-text-a11y)]={textSize === 100}
+					class:text-[color:var(--color-bg-a11y)]={textSize === 100}
+					class:border-[color:var(--color-text-a11y)]={textSize === 100}
 					onclick={() => (textSize = 100)}
 				>
 					A
 				</button>
                 <button
 					class="px-2 py-1 border-2 rounded
-                    hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
-					class:bg-[color:var(--color-text)]={textSize === 80 || textSize === 60}
-					class:text-[color:var(--color-bg)]={textSize === 80 || textSize === 60}
-					class:border-[color:var(--color-text)]={textSize === 80 || textSize === 60}
+                    hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+					class:bg-[color:var(--color-text-a11y)]={textSize === 80 || textSize === 60}
+					class:text-[color:var(--color-bg-a11y)]={textSize === 80 || textSize === 60}
+					class:border-[color:var(--color-text-a11y)]={textSize === 80 || textSize === 60}
 					onclick={() => (textSize = Math.max(textSize - 20, 60))}
 				>
 					A−

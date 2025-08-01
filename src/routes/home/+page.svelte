@@ -1,9 +1,27 @@
 <script lang="ts">
-	import lightPond from '$lib/images/ponds/Staw_jasny.png';
-	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
+	
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Expand from '../../Components/Expand.svelte';
+
+	import lightPond from '$lib/images/ponds/Staw_jasny.png';
+	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
+	
+	import duck from '$lib/images/ducks/duck.png';
+	import ghost from '$lib/images/ducks/ghost.png';
+	import anakin from '$lib/images/ducks/anakin.png';
+	import cowboy from '$lib/images/ducks/cowboy.png';
+	import detective from '$lib/images/ducks/detective.png';
+	import knight from '$lib/images/ducks/knight.png';
+	import mallard from '$lib/images/ducks/mallard.png';
+	import mermaid from '$lib/images/ducks/mermaid.png';
+	import miku from '$lib/images/ducks/miku.png';
+	import ninja from '$lib/images/ducks/ninja.png';
+	import pirate from '$lib/images/ducks/pirate.png';
+	import princess from '$lib/images/ducks/princess.png';
+	import samurai from '$lib/images/ducks/samurai.png';
+	import viking from '$lib/images/ducks/viking.png';
+	import witch from '$lib/images/ducks/witch.png';
 
 	let username = 'OrbitOwl';
 	let currentSlide = 0;
@@ -41,6 +59,45 @@
 			imageHeight = imageWrapperRef.clientHeight;
 		}
 	}
+
+
+	//experimental duck stuff
+	const duckImages = [
+		anakin, cowboy, detective, knight, mallard,
+		mermaid, miku, ninja, pirate, princess, samurai, viking, witch
+	];
+
+	type Duck = {
+		id: number;
+		x: number;
+		y: number;
+		img: string;
+	};
+
+	let ducks: Duck[] = [];
+
+	onMount(() => {
+		const shuffled = [...duckImages].sort(() => Math.random() - 0.5);
+		ducks = shuffled.slice(0, 10).map((img, i) => ({
+			id: i,
+			x: Math.random() * 60 + 15,
+			y: Math.random() * 45 + 15,
+			img
+		}));
+
+		startDuckMovement();
+	});
+
+	function startDuckMovement() {
+		setInterval(() => {
+			ducks = ducks.map(duck => ({
+				...duck,
+				x: Math.random() * 60 + 10,
+				y: Math.random() * 45 + 10
+			}));
+		}, 2000);
+	}
+
 </script>
 
 <svelte:head>
@@ -54,7 +111,7 @@
 				class="flex flex-col justify-between text-center relative gap-4 overflow-y-auto pr-1 pb-1"
 				style="max-height: calc(100vh - 7.5rem);"
 			>
-				<h1 class="text-5xl text-[color:var(--color-primary)] text-center mb-4 mt-6"
+				<h1 class="text-5xl text-[color:var(--color-primary)] text-center mb-2 mt-4 leading-[1.2]"
 				style="font-family: var(--font-ariw9500);">
 					Welcome back <br />{username}
 				</h1>
@@ -90,7 +147,7 @@
 						{#each carouselItems as item, i (i)}
 							{#if i === slideIndex}
 							<div
-								class="max-h-[9rem] overflow-hidden hover:overflow-y-auto pr-1 text-[1rem] text-[color:var(--color-text)] ml-4 mr-4 mt-1 transition-opacity duration-300"
+								class="max-h-[7.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[1rem] text-[color:var(--color-text)] ml-4 mr-4 mt-1  transition-opacity duration-300"
 								style="font-family: var(--font-newmonzane);"
 								in:fly={!reduceMotion ? { duration: 200 } : undefined}
 								out:fly={!reduceMotion ? { duration: 200 } : undefined}
@@ -156,7 +213,16 @@
 						expanded={isExpanded}
 						ontoggle={() => (isExpanded = !isExpanded)}
 					/>
-					
+
+					{#each ducks as duck (duck.id)}
+						<img
+							src={duck.img}
+							alt="duck"
+							class="absolute w-[7rem] transition-all duration-1000 ease-in-out pointer-events-none"
+							style="top: {duck.y}%; left: {duck.x}%;"
+						/>
+					{/each}
+
 					<img
 						src={theme === 'dark' ? darkPond : lightPond}
 						alt="pond"
