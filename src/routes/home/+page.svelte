@@ -6,6 +6,13 @@
 
 	import lightPond from '$lib/images/ponds/Staw_jasny.png';
 	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
+
+	import lightPond1 from '$lib/images/ponds/JasnyStaw_1_2.png';
+	import lightPond2 from '$lib/images/ponds/JasnyStaw_2_2.png';
+
+	import darkPond1 from '$lib/images/ponds/StawCiemny_1_2.png';
+	import darkPond2 from '$lib/images/ponds/StawCiemny_2_2.png';
+
 	
 	import duck from '$lib/images/ducks/duck.png';
 	import ghost from '$lib/images/ducks/ghost.png';
@@ -60,6 +67,28 @@
 		}
 	}
 
+	// stuff for pond, the 2 frames water moving animation version
+
+	let frame = 0;
+
+	let pondInterval: number;
+
+	onMount(() => {
+		pondInterval = setInterval(() => {
+			frame = frame === 0 ? 1 : 0;
+		}, 500);
+
+		return () => clearInterval(pondInterval);
+	});
+
+	$: pondSrc =
+		theme === 'dark'
+			? frame === 0
+				? darkPond1
+				: darkPond2
+			: frame === 0
+				? lightPond1
+				: lightPond2;
 
 	//experimental duck stuff
 	const duckImages = [
@@ -80,7 +109,7 @@
 		const shuffled = [...duckImages].sort(() => Math.random() - 0.5);
 		ducks = shuffled.slice(0, 10).map((img, i) => ({
 			id: i,
-			x: Math.random() * 60 + 15,
+			x: Math.random() * 45 + 15,
 			y: Math.random() * 45 + 15,
 			img
 		}));
@@ -95,7 +124,7 @@
 				x: Math.random() * 60 + 10,
 				y: Math.random() * 45 + 10
 			}));
-		}, 2000);
+		}, 2200);
 	}
 
 </script>
@@ -224,7 +253,7 @@
 					{/each}
 
 					<img
-						src={theme === 'dark' ? darkPond : lightPond}
+						src={pondSrc}
 						alt="pond"
 						onload={updateHeight}
 						class={`block object-contain mx-auto ${
@@ -233,6 +262,7 @@
 								: 'h-[calc(100vh-15rem)] w-auto max-w-full mt-16'
 						}`}
 					/>
+
 				</div>
 			</div>
 		</div>
