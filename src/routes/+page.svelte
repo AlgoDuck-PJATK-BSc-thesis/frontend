@@ -8,7 +8,7 @@
 </svelte:head>
 
 <section class="flex flex-col items-center text-center px-4 py-24">
-	<h1 class="text-2xl text-[color:var(--color-accent-2)] font-bold mb-4">Improve your skills</h1>
+	<h1 class="text-2xl text-[color:var(--color-primary)] font-bold mb-4">Improve your skills</h1>
 	
 	<p class="text-[0.95rem] text-[color:var(--color-text)] mb-8">
 		Transform your coding skills, one problem at a time
@@ -16,7 +16,7 @@
 
 	<div class="flex gap-4 mb-8">
 		<a href="/signup"
-		class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[var(--color-text)] bg-[var(--color-text)] text-[var(--color-bg)] hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+		class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-bg)] hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
 		Start
 		</a>
 

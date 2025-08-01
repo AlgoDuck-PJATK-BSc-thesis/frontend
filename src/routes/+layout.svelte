@@ -42,7 +42,7 @@
 	<AccessibilityButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
 	
-	<main class="flex-1 w-full max-w-full mx-auto px-4 py-8 box-border">
+	<main class="flex-1 w-full max-w-full mx-auto px-4 py-4 box-border">
 		{@render children?.()}
 	</main>
 

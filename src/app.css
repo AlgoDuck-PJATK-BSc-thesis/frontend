@@ -17,19 +17,53 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'New Mozane';
+	src: url('/fonts/new_monzane.otf') format('opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Pixel Grid Square Bold M';
+	src: url('/fonts/pixelgrid-squareboldm.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Pixel Grid Square Bold S';
+	src: url('/fonts/pixelgrid/pixelgrid-squarebolds.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Ari W9500 Bold';
+	src: url('/fonts/ari-w9500-bold.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+
 :root {
-	--font-pressstart2p: 'Press Start 2P', monospace; 
+	--font-pressstart2p: 'Press Start 2P', normal; 
 	--font-blockblueprint: 'Block Blueprint', sans-serif; 
 	--font-joystix: 'Joystix', sans-serif;
 	--font-montserrat: 'Montserrat', sans-serif;
 	--font-playfairdisplay: 'Playfair Display', medium;
+	--font-inter: 'Inter', sans-serif;
+	--font-pixelify: 'Pixelify Sans', sans-serif;
+	--font-pixelgrid: 'Pixel Grid Square Bold M', sans-serif;
+	--font-newmonzane: 'New Mozane', sans-serif;
+	--font-ariw9500: 'Ari W9500 Bold', sans-serif;
 
-	--color-bg:#f5f7fa;   
-	--color-text:#1e1e2e;  
-	--color-primary:#7c3aed;  
-	--color-accent-1:#4c3175;  
-	--color-accent-2:#f97316;   
-	--color-tile:#ffffff;   
+	--color-bg:#a2e1bd;   
+	--color-text:#1e2e25;  
+	--color-primary:#504def;  
+	--color-accent-1:#dfffdd;  
+	--color-accent-2:#ef4d52; 
+	--color-tile:#cdfbc8;   
 
 	--color-access-yellow: #f2b500; 
 	--color-access-black: #000000;

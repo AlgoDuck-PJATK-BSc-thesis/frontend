@@ -11,6 +11,8 @@
 	let underlineLinks = false;
 	let reduceMotion = false;
 
+	$: panelFontSize = `${10000 / textSize}%`;
+
 	function toggle() {
 		isOpen = !isOpen;
 	}
@@ -40,39 +42,43 @@
 
 <div
 	class="fixed bottom-40 right-0 w-64 z-[9999] border-2 shadow-lg overflow-y-auto transition-transform duration-300
-	bg-white text-black border-black dark:border-white dark:bg-[color:var(--color-bg)] dark:text-[color:var(--color-text)]"
+	bg-[color:var(--color-bg)] text-[color:var(--color-text)] border-[color:var(--color-text)]"
 	class:translate-x-0={isOpen}
 	class:translate-x-full={!isOpen}
+	style="font-size: {panelFontSize};"
 >
 	<div class="p-4 space-y-5 text-sm">
 		<h2 class="font-bold text-lg">Accessibility</h2>
 
 		<div class="space-y-1">
-			<p class="font-semibold">Text size</p>
+			<p class="font-semibold">Text size: {textSize}%</p>
 			<div class="flex gap-2 flex-wrap">
 				<button
 					class="px-2 py-1 border-2 rounded
-                    hover:bg-black hover:text-white
-		            dark:hover:bg-white dark:hover:text-black"
+                    hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
+					class:bg-[color:var(--color-text)]={textSize === 120 || textSize === 140}
+					class:text-[color:var(--color-bg)]={textSize === 120 || textSize === 140}
+					class:border-[color:var(--color-text)]={textSize === 120 || textSize === 140}
 					onclick={() => (textSize = Math.min(textSize + 20, 140))}
 				>
 					A+
 				</button>
 				<button
-					class="px-2 py-1 border-2 rounded"
-					class:bg-black={textSize === 100}
-					class:text-white={textSize === 100}
-					class:dark:bg-white={textSize === 100}
-					class:dark:text-black={textSize === 100}
+					class="px-2 py-1 border-2 rounded hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
+					class:bg-[color:var(--color-text)]={textSize === 100}
+					class:text-[color:var(--color-bg)]={textSize === 100}
+					class:border-[color:var(--color-text)]={textSize === 100}
 					onclick={() => (textSize = 100)}
 				>
 					A
 				</button>
                 <button
 					class="px-2 py-1 border-2 rounded
-                    hover:bg-black hover:text-white
-		            dark:hover:bg-white dark:hover:text-black"
-					onclick={() => (textSize = Math.max(textSize - 10, 70))}
+                    hover:bg-[color:var(--color-text)] hover:text-[color:var(--color-bg)] hover:border-[color:var(--color-text)]"
+					class:bg-[color:var(--color-text)]={textSize === 80 || textSize === 60}
+					class:text-[color:var(--color-bg)]={textSize === 80 || textSize === 60}
+					class:border-[color:var(--color-text)]={textSize === 80 || textSize === 60}
+					onclick={() => (textSize = Math.max(textSize - 20, 60))}
 				>
 					A−
 				</button>

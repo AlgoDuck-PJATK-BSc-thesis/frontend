@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ThemeToggle from '../../Components/ThemeToggle.svelte';
+	import logoutButton from '$lib/images/logout.png';
+
 
 	let currentLanguage = 'en';
 	const toggleLanguage = () => {
@@ -18,11 +20,20 @@
 		
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-[color:var(--color-accent-2)] text-base no-underline">BEETCODE</a>
-			<div class="relative flex border-2 border-[color:var(--color-accent-1)] rounded-full text-[0.65rem] overflow-hidden">
-				<div class="absolute top-[-25%] left-1/2 w-[2px] h-[150%] rotate-[30deg] bg-[color:var(--color-accent-1)] z-[1]"></div>
-				<div class="flex-1 flex items-center justify-center px-3 py-1 z-[2] pl-4 pr-2">Lvl 10</div>
-				<div class="flex-1 flex items-center justify-center px-3 py-1 z-[2] pl-8 pr-2">$10,000</div>
+
+			<div class="relative inline-flex items-center text-[0.70rem] rounded-full overflow-hidden">
+				<div class="absolute inset-0 border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] rounded-full z-0 pointer-events-none"></div>
+				
+				<div class="relative z-10 border border-[color:var(--color-primary)]  bg-[color:var(--color-primary)] text-[color:var(--color-tile)] px-2 py-[0.2rem] rounded-full ml-[-1px]">
+					LVL 10
+				</div>
+				
+				<div class="relative z-10 px-2 py-[0.2rem] text-[color:var(--color-primary)]">
+					$10,000
+				</div>
+
 			</div>
+			
 		</div>
 		
 		<nav class="ml-6">
@@ -108,9 +119,10 @@
 
 			<button
 				onclick={logout}
-				class="text-[0.65rem] px-3 py-1 bg-[color:var(--color-accent-2)] text-[color:var(--color-tile)] rounded-md border-none cursor-pointer"
+				class=" px-3 cursor-pointer"
+				aria-label="Logout"
 			>
-				Logout
+				<img src={logoutButton} alt="Logout" class="inline-block w-6 h-6" />
 			</button>
 		</div>
 	</header>
