@@ -37,11 +37,12 @@
 		</label>
 
 		<button
-			type="submit"
-			class="bg-[color:var(--color-primary)] text-black px-6 py-2.5 font-body transition-transform hover:-translate-y-0.5"
+		type="submit"
+		class="bg-[var(--color-primary)] text-[var(--color-bg)] px-6 py-2.5 font-body transition-transform hover:-translate-y-0.5"
 		>
-			Create account
+		Create account
 		</button>
+
 	</form>
 
 	<p class="mt-6 text-xs leading-snug text-center">

@@ -16,9 +16,10 @@
 
 	<div class="flex gap-4 mb-8">
 		<a href="/signup"
-			class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[color:var(--color-text)] bg-[color:var(--color-primary)] text-black hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
-			Start
+		class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-bg)] hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+		Start
 		</a>
+
 		<a href="/learnmore"
 			class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[color:var(--color-text)] text-[color:var(--color-text)] bg-transparent hover:underline hover:translate-x-1 transition-all duration-200">
 			Learn more →

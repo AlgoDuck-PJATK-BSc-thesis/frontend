@@ -27,11 +27,12 @@
 		</label>
 
 		<button
-			type="submit"
-			class="bg-[color:var(--color-primary)] text-black px-6 py-2.5 rounded font-body cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
+		type="submit"
+		class="bg-[var(--color-primary)] text-[var(--color-bg)] px-6 py-2.5 rounded font-body cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
 		>
-			Log in
+		Log in
 		</button>
+
 	</form>
 
 	<p class="mt-6 text-xs leading-snug text-center">
