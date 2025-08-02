@@ -278,11 +278,11 @@
             <div class="h-[12%] w-full flex flex-col justify-start px-2 pt-2 rounded-t-2xl">
 
                 <!-- TODO I don't like the color on this... -->
-                <div class="w-full h-[45%] bg-[var(--color-accent-1)] p2 flex flex-col justify-center items-center rounded-lg">
+                <div class="w-full h-[45%] bg-[var(--color-accent-2)] p2 flex flex-col justify-center items-center rounded-lg">
                     <div class="w-[25%] h-full flex justify-center items-center pt-2">
                         
-                        <button class="h-full w-[50%] mx-2 bg-blue-300 rounded-t-xl flex justify-center items-center hover:cursor-pointer active:bg-[var(--color-bg)]" class:bg-blue-950={isDuckPageActive} aria-label="ducks" onclick="{() => {isDuckPageActive = true; isPlantPageActive = false;}}">
-                            <svg class="h-7.5 w-7.5 fill-white" viewBox="0 0 512 512">
+                        <button class="h-full w-[50%] mx-2 bg-[var(--color-accent-1)] rounded-t-xl flex justify-center items-center hover:cursor-pointer active:bg-[var(--color-bg)]" class:bg-blue-950={isDuckPageActive} aria-label="ducks" onclick="{() => {isDuckPageActive = true; isPlantPageActive = false;}}">
+                            <svg class="h-7.5 w-7.5 fill-[var(--color-accent-2)]" viewBox="0 0 512 512">
                                 <g>
                                     <path class="st0" d="M442.973,250.491c-25.635,18.05-196.165,53.474-141.134-74.936c3.975-11.693,6.732-29.452,6.732-42.457
                                         c0-64.839-53.389-117.403-119.24-117.403c-50.361,0-93.398,30.764-110.867,74.224c-34.196,6.826-42.062-6.929-48.861-22.794
@@ -295,8 +295,8 @@
                                 </g>
                             </svg>
                         </button>
-                        <button class="h-full w-[50%] mx-2 bg-blue-300 rounded-t-xl flex justify-center items-center hover:cursor-pointer active:bg-[var(--color-bg)]" class:bg-blue-950={isPlantPageActive} aria-label="decorations" onclick="{() => {isDuckPageActive = false; isPlantPageActive = true;}}">
-                            <svg class="h-7.5 w-7.5 fill-white" viewBox="0 0 48 48">
+                        <button class="h-full w-[50%] mx-2 bg-[var(--color-accent-1)] rounded-t-xl flex justify-center items-center hover:cursor-pointer active:bg-[var(--color-bg)]" class:bg-blue-950={isPlantPageActive} aria-label="decorations" onclick="{() => {isDuckPageActive = false; isPlantPageActive = true;}}">
+                            <svg class="h-7.5 w-7.5 fill-[var(--color-accent-2)]" viewBox="0 0 48 48">
                             <path d="M0 0h48v48H0z" fill="none"/>
                             <g id="Shopicon">
                                 <path d="M28.783,23.536c1.846-0.252,3.498-1.38,4.431-3.068c0.93-1.681,1.02-3.717,0.299-5.468
