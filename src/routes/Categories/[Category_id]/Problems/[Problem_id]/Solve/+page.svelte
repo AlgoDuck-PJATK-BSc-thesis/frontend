@@ -395,8 +395,8 @@
             <div bind:this={horizontalResizeBarAccent} class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
           </div>
         </div>
-      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] rounded-b-md px-4 py-2">
-          <span bind:this={terminalContents} class="font-mono">&#123;username&#125;@&#123;exercise_name&#125;:/home/&#123;username&#125;/terminal$ </span>
+      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] overflow-y-scroll overflow-x-clip rounded-b-md px-4 py-2">
+          <span bind:this={terminalContents} class="font-mono">~/&gt;</span>
       </div>
       <div bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
         <div class="flex justify-center h-full w-full">

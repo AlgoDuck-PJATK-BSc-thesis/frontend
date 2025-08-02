@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { ExerciseData } from "../../Types/ExerciseData";
+	import type { ExerciseData, ExecResponse } from "../../Types/index";
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
 
   let { data, editor, terminalContents = $bindable(), dataDiv = $bindable()} : { data: ExerciseData, editor: Monaco.editor.IStandaloneCodeEditor | null, terminalContents: HTMLElement, dataDiv?: HTMLElement} = $props();
@@ -16,6 +16,7 @@
   const defaultTileHeight: number = 40; 
 
   let testCaseIndex: number = $state(0);
+  let testCaseResults: Array<boolean> = $state([]);
 
   const toggleTile = (elementToToggle: HTMLElement, chevron: SVGSVGElement,  defaultHeight: number, expandedHeight: number) => {
     chevron.style.transition = 'all 0.3s ease';
@@ -54,12 +55,17 @@
       body: JSON.stringify({
         CodeB64: `${btoa(userContent)}`,
         Lang: "java",
-        ExerciseId: "0fd5d3a8-48c1-451b-bcdf-cf414cc6d477",
+        ExerciseId: "b836362e-29ad-4302-aa12-1ec9c2fa12d7",
       })
     });
 
-    const serverResponse = await result.json();
-    terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
+    const serverResponse: ExecResponse = await result.json();
+
+    console.log(serverResponse);
+
+    const earlierOutput: string = terminalContents.innerText;
+    terminalContents.innerText = `${earlierOutput}${serverResponse.stdOutput}~/>`;
+    // terminalContents.innerText = `${serverResponse.StdOutput}${terminalContents.innerText}`;
   }
 
   const submitCode = async () : Promise<void> => {
@@ -73,18 +79,67 @@
       body: JSON.stringify({
         CodeB64: `${btoa(userContent)}`,
         Lang: "java",
-        ExerciseId: "0fd5d3a8-48c1-451b-bcdf-cf414cc6d477",
+        ExerciseId: "b836362e-29ad-4302-aa12-1ec9c2fa12d7",
       })
     });
 
-    const serverResponse = await result.json();
+    const serverResponse: ExecResponse = await result.json();
+    console.log(serverResponse);
+    if (serverResponse.testResults) {
+      testCaseResults = [];
+    
+      const cleanedResults = serverResponse.testResults
+        .replaceAll("\r\n", "\n")
+        .replaceAll("\r", "\n")
+        .trim();
+    
+      cleanedResults.split("\n").forEach((result) => {
+        if (result.trim()) {
+          testCaseResults.push(result.trim() === "true");
+        }
+      });
+    }
     terminalContents.innerText = `${serverResponse.stdOutput}${terminalContents.innerText}`;
+  }
+
+  const prevTestCase = () : void => {
+    testCaseIndex--;
+  }
+
+  const nextTestCase = () : void => {
+    testCaseIndex++;
   }
 
   onMount(()=>{
     toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400);
     toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)
   });
+
+  const getBorderColor = (index: number, type: 'input' | 'output'): string => {
+  if (testCaseResults.length === 0 || index >= testCaseResults.length) {
+    return 'border-[var(--color-accent-1)]';
+  }
+  
+  const passed = testCaseResults[index];
+  if (passed) {
+    return 'border-green-500';
+  } else {
+    return 'border-red-500'; 
+  }
+};
+
+const getResultBadgeStyle = (index: number): string => {
+  if (testCaseResults.length === 0 || index >= testCaseResults.length) {
+    return 'bg-gray-500 text-white';
+  }
+  
+  const passed = testCaseResults[index];
+  if (passed) {
+    return 'bg-green-500 text-white';
+  } else {
+    return 'bg-red-500 text-white';
+  }
+};
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -126,27 +181,27 @@
                 <div class="flex justify-start p-1">
                   <span>Test Data</span>
                 </div>
-                <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 border-[var(--color-accent-1)]" >
+                <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(testCaseIndex, 'input')}">
                   <span class="flex justify-start">{testCase.testData}</span>
                 </div>
 
                 <div class="flex justify-start pt-3 p-1">
                   <span>Expected Output</span>
                 </div>
-                <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 border-[var(--color-accent-1)]" >
-                  <span class="flex justify-start">{testCase.expectedOutput}</span>
+                  <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(testCaseIndex, 'output')}" >
+                    <span class="flex justify-start">{testCase.expectedOutput}</span>
                 </div>
               </div>
             {/each}
             <div class="flex justify-between p-5">
               {#if testCaseIndex > 0}
-                <p class="hover:cursor-pointer w-[10%]" onclick={()=>{testCaseIndex--}}>&lt;</p>
+                <p class="hover:cursor-pointer w-[10%]" onclick={prevTestCase}>&lt;</p>
               {:else}
                 <p class="w-[10%]"></p>
               {/if}
               <p>{`${testCaseIndex + 1}/${data.testCases.length}`}</p>
               {#if testCaseIndex < 2}
-                <p class="hover:cursor-pointer w-[10%]" onclick={()=>{testCaseIndex++}}>&gt;</p>
+                <p class="hover:cursor-pointer w-[10%]" onclick={nextTestCase}>&gt;</p>
               {:else}
                 <p class="w-[10%]"></p>
               {/if}

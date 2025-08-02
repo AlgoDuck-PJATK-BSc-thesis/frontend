@@ -5,13 +5,7 @@
 <script lang="ts">
 
     import { goto } from '$app/navigation';
-
-    interface ProblemDescription {
-    id: string;
-    description: string;
-    tags: string[];
-    ownedStars: number;
-}
+    import type { ProblemDescription } from "../../../../Types/ProblemDescription"
 
 const scheduledResizes = new Map<HTMLElement, number>();
 

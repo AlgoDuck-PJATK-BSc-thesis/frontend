@@ -65,11 +65,11 @@
 				</li>
 				<li>
 					<a
-						href="/store"
-						aria-current={$page.url.pathname === '/store' ? 'page' : undefined}
+						href="/Shop"
+						aria-current={$page.url.pathname === '/Shop' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
 					>
-						Store
+						Shop
 					</a>
 				</li>
 				<li>
