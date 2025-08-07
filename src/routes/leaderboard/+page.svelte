@@ -48,48 +48,87 @@
 	<title>Leaderboard – Beetcode</title>
 </svelte:head>
 
-<section class="pt-8  pl-8  pr-8 pb-0 flex flex-col items-center gap-6  font-body max-h-[calc(100vh-5rem)] overflow-y-auto">
+<section class="pt-8  pl-8  pr-8 pb-0 flex flex-col items-center gap-6  font-body max-h-[calc(100vh-6rem)] overflow-y-auto"
+>
 	<h1 class="text-5xl font-bold mt-4 mb-2 text-[color:var(--color-primary)]"
-		style="font-family: var(--font-ariw9500);">Leaderboard</h1>
-    <div class="border-2 bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center">
-        <div class="flex justify-center items-end gap-8 mt-8">
-            <div class="flex flex-col items-center translate-y-4 relative">
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full">
+		style="font-family: var(--font-ariw9500);"
+		>
+		Leaderboard
+	</h1>
+    <div class="border-2 bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center"
+	>
+        <div class="flex justify-center items-end gap-8 mt-8"
+		>
+            <div class="flex flex-col items-center translate-y-4 relative"
+			>
+                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
+				>
                     2
                 </div>
-                <img src={trophy} alt="Silver Trophy" class="w-20 h-20 mb-2" />
-                <div class="text-m  text-[color:var(--color-accent-2)]">{topUsers[1].name}</div>
+                <img src={trophy} alt="Silver Trophy" class="w-20 h-20 mb-2" 
+				/>
+                <div class="text-lg  text-[color:var(--color-accent-2)]"
+				
+				>
+				{topUsers[1].name}
+				</div>
             </div>
 
-            <div class="flex flex-col items-center -translate-y-2 relative">
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full">
+            <div class="flex flex-col items-center -translate-y-2 relative"
+			>
+                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
+				>
                     1
                 </div>
-                <img src={trophy} alt="Gold Trophy" class="w-24 h-24 mb-2" />
-                <div class="text-lg  text-[color:var(--color-accent-2)]">{topUsers[0].name}</div>
+                <img src={trophy} alt="Gold Trophy" class="w-24 h-24 mb-2" 
+				/>
+                <div class="text-lg  text-[color:var(--color-accent-2)]"
+				
+				>
+				{topUsers[0].name}
+				</div>
             </div>
 
-            <div class="flex flex-col items-center translate-y-4 relative">
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full">
+            <div class="flex flex-col items-center translate-y-4 relative"
+			>
+                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
+				>
                     3
                 </div>
-                <img src={trophy} alt="Bronze Trophy" class="w-20 h-20 mb-2" />
-                <div class="text-m  text-[color:var(--color-accent-2)]">{topUsers[2].name}</div>
+                <img src={trophy} alt="Bronze Trophy" class="w-20 h-20 mb-2" 
+				/>
+                <div class="text-lg text-[color:var(--color-accent-2)]"
+				
+				>
+					{topUsers[2].name}
+					
+				</div>
             </div>
         </div>
     </div>
 
-	<div class="w-full h-max max-w-2xl flex flex-col text-[color:var(--color-text)] overflow-auto">
+	<div class="w-full h-max max-w-2xl flex flex-col text-[color:var(--color-text)]"
+	
+	>
 		{#each sortedUsers as user, i}
-			<div class="flex items-center justify-between px-4 py-2 rounded">
-				<div class="flex items-center gap-2">
-					<span class="min-w-[3.5rem] text-right">{i + 1}.</span>
-					<span class="text-sm max-w-[20rem] overflow-x-auto whitespace-nowrap scrollbar-thin hover:scrollbar-thumb-gray-400">
+			<div class="flex items-center justify-between px-4 py-2 rounded"
+			
+			>
+				<div class="flex items-center gap-2"
+				>
+					<span class="min-w-[3.5rem] text-right"
+					>
+						{i + 1}.
+
+					</span>
+					<span class="text max-w-[20rem] overflow-x-auto whitespace-nowrap scrollbar-thin hover:scrollbar-thumb-gray-400"
+					>
 						{user.name}
 					</span>
 				</div>
 
-				<div class="flex items-center gap-1 border-2 rounded-full px-3 py-0.5 text-sm bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] text-[color:var(--color-text)]">
+				<div class="flex items-center gap-1 border-2 rounded-full px-3 py-0.5 text-sm bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] text-[color:var(--color-text)]"
+			>
 					<span>{user.points}</span>
 					<span>⭐</span>
 				</div>

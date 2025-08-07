@@ -4,6 +4,9 @@
 	import logoutButton from '$lib/images/logout.png';
 	import coin from '$lib/images/coin.png';
 
+	let coins = 5000;
+	let level = 5;
+
 	let currentLanguage = 'en';
 	const toggleLanguage = () => {
 		currentLanguage = currentLanguage === 'en' ? 'pl' : 'en';
@@ -16,20 +19,27 @@
 </script>
 
 <div class="w-full overflow-x-auto">
-	<header class="min-w-max flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] text-[color:var(--color-text)] font-body sticky top-0 z-[100] gap-4">
+	<header class="min-w-max flex justify-between items-center p-4 md:px-8 border-b-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] text-[color:var(--color-text)] font-body sticky top-0 z-[100] gap-4">
 		
 		<div class="flex items-center gap-6 whitespace-nowrap">
-			<a href="/home" class="text-[color:var(--color-accent-2)] text-base no-underline">BEETCODE</a>
+			<a href="/home" class="text-[color:var(--color-accent-2)] text-lg no-underline"
+			>
+				BEETCODE</a>
 
 			<div class="relative inline-flex items-center tracking-widest text-[0.85rem] px-1 rounded-full overflow-hidden">
-				<div class="absolute inset-0 border-2 border-[color:var(--color-primary)] bg-[color:var(--color-bg-2)] rounded-full z-0 pointer-events-none"></div>
+				<div class="absolute inset-0 border-2 border-[color:var(--color-primary)] bg-[color:var(--color-bg-2)] rounded-full z-0 pointer-events-none"
+				></div>
 				
-				<div class="relative z-10 border border-[color:var(--color-primary)]  bg-[color:var(--color-primary)] text-[color:var(--color-bg-2)] px-3 py-[0.2rem] rounded-full ml-[-2px]" style="font-family: var(--font-ariw9500);">
-					LVL 10
+				<div class="relative z-10 border border-[color:var(--color-primary)]  bg-[color:var(--color-primary)] text-[color:var(--color-bg-2)] px-3 py-[0.2rem] rounded-full ml-[-2px]" 
+				style="font-family: var(--font-ariw9500);"
+				>
+					LVL {level.toLocaleString()}
 				</div>
 				
-				<div class="relative z-10 px-2 py-[0.2rem] text-[color:var(--color-primary)]" style="font-family: var(--font-ariw9500);">
-					5,000
+				<div class="relative z-10 px-2 py-[0.2rem] text-[color:var(--color-primary)]" 
+				style="font-family: var(--font-ariw9500);"
+				>
+					{coins.toLocaleString()}
 					  <img src={coin} alt="coin" class="inline-block w-[1.5rem] h-[1.5rem] align-[-0.45em]" />
 				</div>
 
@@ -38,7 +48,7 @@
 		</div>
 		
 		<nav class="ml-6">
-			<ul class="flex gap-6 list-none m-0 p-0 text-sm uppercase tracking-wider whitespace-nowrap">
+			<ul class="flex gap-6 list-none m-0 p-0 tracking-wider whitespace-nowrap">
 				<li>
 					<a
 						href="/home"

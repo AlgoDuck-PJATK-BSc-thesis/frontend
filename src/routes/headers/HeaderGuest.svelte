@@ -8,16 +8,19 @@
 	}
 </script>
 
-<header class="flex justify-between items-center px-8 py-4 bg-[color:var(--color-tile)] text-[color:var(--color-text)] border-b-2 border-[color:var(--color-accent-1)] font-body sticky top-0 z-50">
-	<a href="/" class="text-[color:var(--color-accent-2)] text-base no-underline">BEETCODE</a>
+<header class="flex justify-between items-center px-8 py-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] text-[color:var(--color-text)] border-b-2 border-[color:var(--color-accent-1)] font-body sticky top-0 z-50">
+	<a href="/" class="text-[color:var(--color-accent-2)] text-base no-underline"
+	>
+		BEETCODE
+	</a>
 
 	<nav>
-		<ul class="flex gap-6 list-none p-0 m-0 text-xs uppercase tracking-wide">
+		<ul class="flex gap-7 list-none p-0 m-0 tracking-wide">
 			<li>
 				<a
 					href="/aboutus"
 					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
 				>
 					About Us
 				</a>
@@ -26,7 +29,7 @@
 				<a
 					href="/learnmore"
 					aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
 				>
 					Learn More
 				</a>
@@ -35,7 +38,7 @@
 				<a
 					href="/login"
 					aria-current={$page.url.pathname === '/login' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
 				>
 					Log In
 				</a>
@@ -44,7 +47,7 @@
 				<a
 					href="/signup"
 					aria-current={$page.url.pathname === '/signup' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline"
+					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
 				>
 					Sign Up
 				</a>

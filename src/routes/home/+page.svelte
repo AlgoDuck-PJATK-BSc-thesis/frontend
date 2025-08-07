@@ -134,91 +134,102 @@
 </svelte:head>
 
 <section class="h-fit px-10 flex flex-col box-border overflow-auto">
-	<div class={`grid items-start relative ${isExpanded ? 'grid-cols-1' : 'grid-cols-[1fr_3fr]'}`}>
-		{#if !isExpanded}
-			<div
-				class="flex flex-col justify-between text-center relative gap-4 overflow-y-auto pr-1 pb-1"
-				style="max-height: calc(100vh - 7.5rem);"
-			>
-				<h1 class="text-5xl text-[color:var(--color-primary)] text-center mb-2 mt-4 leading-[1.2]"
-				style="font-family: var(--font-ariw9500);">
-					Welcome back <br />{username}
-				</h1>
-
-				<div class="aspect-[2/1] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2 
-					class="text-2xl text-[color:var(--color-accent-2)]"
+	<div class={`grid items-start relative ${isExpanded ? 'grid-cols-1' : 'grid-cols-[2fr_6fr]'}`}>
+		<div class="flex flex-col items-center justify-center text-center gap-4 overflow-y-auto pr-1 pb-1 h-[calc(100vh-7rem)]">
+			{#if !isExpanded}
+				<div class="flex flex-col justify-between text-center relative gap-4 overflow-y-auto"
+				style="max-height: calc(100vh - 6rem);"
+				>
+					<h1 class="text-4xl text-[color:var(--color-primary)] text-center mb-2 leading-[1.2]"
+						style="font-family: var(--font-ariw9500);"
 					>
-					{carouselItems[slideIndex].title}</h2>
-					<div class="relative h-full flex flex-col justify-center">
-						<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
-							<button
-								class="absolute left-[0.01rem] top-1/2 -translate-y-2/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
-					
-								onclick={() =>
-									slideIndex = currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length
-								}
-							>
-								&lt;
-							</button>
-							<button
-								class="absolute right-[0.01rem] top-1/2 -translate-y-2/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
+						Welcome back 
+					</h1>
 
-								onclick={() =>
-									slideIndex = currentSlide = (currentSlide + 1) % carouselItems.length
-								}
-							>
-								&gt;
-							</button>
-						</div>
+					<div class="aspect-[2/1] min-h-[11rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] pt-4 pl-4 pr-4 text-center flex flex-col justify-between transition-all">
+						<h2 
+						class="text-xl text-[color:var(--color-accent-2)]"
+						style="font-family: var(--font-ariw9500);"
+						>
+						{carouselItems[slideIndex].title}</h2>
+						<div class="relative h-full flex flex-col justify-center">
+							<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
+								<button
+									class="absolute left-[0.01rem] top-1/2 -translate-y-2/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
+						
+									onclick={() =>
+										slideIndex = currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length
+									}
+								>
+									&lt;
+								</button>
+								<button
+									class="absolute right-[0.01rem] top-1/2 -translate-y-2/2 bg-[color:var(--color-primary)] text-white text-[0.8rem] px-2 py-1 rounded font-body pointer-events-auto"
 
-						<div class="flex items-left justify-center h-full pt-2 pr-10 pb-6 pl-10 text-left">
-						{#each carouselItems as item, i (i)}
-							{#if i === slideIndex}
-							<div
-								class="max-h-[7.5rem] overflow-hidden hover:overflow-y-auto pr-1 text-[1rem] text-[color:var(--color-text)] ml-4 mr-4 mt-1  transition-opacity duration-300"
-								style="font-family: var(--font-newmonzane);"
-								in:fly={!reduceMotion ? { duration: 200 } : undefined}
-								out:fly={!reduceMotion ? { duration: 200 } : undefined}
-							>
-								{item.body}
+									onclick={() =>
+										slideIndex = currentSlide = (currentSlide + 1) % carouselItems.length
+									}
+								>
+									&gt;
+								</button>
 							</div>
-							{/if}
-						{/each}
+
+							<div class="flex items-left justify-center h-full pt-1 pr-8 pl-10 text-left">
+							{#each carouselItems as item, i (i)}
+								{#if i === slideIndex}
+								<div
+									class="max-h-[6rem] overflow-hidden hover:overflow-y-auto pr-1 text-[1rem] text-[color:var(--color-text)] mt-1  transition-opacity duration-300"
+									
+									in:fly={!reduceMotion ? { duration: 200 } : undefined}
+									out:fly={!reduceMotion ? { duration: 200 } : undefined}
+								>
+									{item.body}
+								</div>
+								{/if}
+							{/each}
+							</div>
+						</div>
+
+						<!-- <div class="mt-2 text-center text-sm">
+							{#each carouselItems as _, i}
+								<span class="text-[color:var(--color-text)] mx-[2px]">
+									{i === slideIndex ? ' ● ' : ' ○ '}
+
+								</span>
+							{/each}
+						</div> -->
+
+					</div>
+
+					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-2 text-center flex flex-col justify-between transition-all">
+						<h2 class="text-xl mt-1 text-[color:var(--color-accent-2)]"
+							style="font-family: var(--font-ariw9500);"
+							>
+							Stats
+						</h2>
+						<div class="flex items-center justify-center h-full px-8 text-left">
+							<p class="text-[1rem] text-[color:var(--color-text)] max-h-[7.5rem] overflow-hidden hover:overflow-y-auto "
+							>
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+							</p>
 						</div>
 					</div>
 
-					<!-- <div class="mt-2 text-center text-sm">
-						{#each carouselItems as _, i}
-							<span class="text-[color:var(--color-text)] mx-[2px]">
-								{i === slideIndex ? ' ● ' : ' ○ '}
-
-							</span>
-						{/each}
-					</div> -->
-
-				</div>
-
-				<div class="aspect-[2/3] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2 class="text-2xl text-[color:var(--color-accent-2)] ">Stats</h2>
-					<div class="flex items-center justify-center h-full px-8 text-left">
-						<p class="text-[1rem] text-[color:var(--color-text)] max-h-[7.5rem] overflow-hidden hover:overflow-y-auto "
-						style="font-family: var(--font-newmonzane);">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
+					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
+						<h2 class="text-xl mb-2 text-[color:var(--color-accent-2)]"
+						style="font-family: var(--font-ariw9500);"
+						>
+							Recently solved
+						</h2>
+						<div class="flex items-center justify-center h-full px-8 text-left">
+							<p class="text-[1rem] text-[color:var(--color-text)] max-h-[7.5rem] overflow-hidden hover:overflow-y-auto "
+							>
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
+						</div>
 					</div>
 				</div>
-
- 
-				<div class="aspect-[2/3] min-h-[14rem] w-full border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-					<h2 class="text-2xl text-[color:var(--color-accent-2)] ">Recently solved</h2>
-					<div class="flex items-center justify-center h-full px-8 text-left">
-						<p class="text-[1rem] text-[color:var(--color-text)] max-h-[7.5rem] overflow-hidden hover:overflow-y-auto "
-						style="font-family: var(--font-newmonzane);">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.</p>
-					</div>
-				</div>
-			</div>
-		{/if}
+			{/if}
+		</div>
 
 		<div class="flex flex-col items-stretch justify-start gap-2">
 			<div
@@ -268,3 +279,4 @@
 		</div>
 	</div>
 </section>
+

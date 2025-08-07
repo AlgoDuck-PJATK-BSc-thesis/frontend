@@ -2,8 +2,11 @@
 	<title>Sign up – Beetcode</title>
 </svelte:head>
 
-<section class="max-w-md mx-auto mt-20 px-4 text-center">
-	<h1 class="text-xl mb-8 text-[color:var(--color-primary)]">Sign up</h1>
+<section class="max-w-md mx-auto mt-20 px-4 text-center border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl">
+	<h1 class="text-4xl mb-8 text-[color:var(--color-primary)]"
+		style="font-family: var(--font-ariw9500);">
+		Sign up
+	</h1>
 
 	<form method="POST" class="flex flex-col gap-4">
 		<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
@@ -36,12 +39,14 @@
 			/>
 		</label>
 
-		<button
-		type="submit"
-		class="bg-[var(--color-primary)] text-[var(--color-bg)] px-6 py-2.5 font-body transition-transform hover:-translate-y-0.5"
-		>
-		Create account
-		</button>
+		<div class="flex justify-center">
+			<button
+				type="submit"
+				class="w-1/2 bg-[var(--color-primary)] text-[var(--color-bg)] px-6 py-2.5 rounded font-body cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
+			>
+				Create account
+			</button>
+		</div>
 
 	</form>
 

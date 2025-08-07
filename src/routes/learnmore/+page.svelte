@@ -3,7 +3,8 @@
 </svelte:head>
 
 <section class="max-w-4xl mx-auto mt-20 px-4">
-	<h1 class="text-xl text-[color:var(--color-primary)] text-center mb-8">
+	<h1 class="text-4xl text-[color:var(--color-primary)] text-center mb-8"
+		style="font-family: var(--font-ariw9500);">
 		How Beetcode works
 	</h1>
 
