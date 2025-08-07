@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Button from '../Components/ButtonComponents/Button.svelte';
 
 	import background1 from '$lib/images/ponds/Textura_wody1.png';
 	import background2 from '$lib/images/ponds/Textura_wody2.png';
@@ -58,27 +59,41 @@
 	<img
 		src={islandVisible}
 		alt="island"
-		class="absolute w-150 h-auto z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/4 pointer-events-none transition-opacity duration-500"
+		class="absolute w-140 h-auto z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/5 pointer-events-none transition-opacity duration-500"
 	/>
 
 	<div class="relative z-20 flex flex-col items-center text-center px-4 py-24">
-		<h1 class="text-4xl text-[color:var(--color-primary)] font-bold mb-4">BEETCODE</h1>
-		<p class="text-[0.95rem] text-[color:var(--color-text)] mb-8">
+		
+		<h1 class="text-4xl text-[color:var(--color-primary)] font-bold mb-4">
+			BEETCODE
+		</h1>
+
+		<p class="text-2xl font-bold text-white mb-6">
 			Transform your coding skills, one problem at a time
 		</p>
+
 		<div class="flex gap-4 mb-8">
-			<a
-				href="/signup"
-				class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-bg)] hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 rounded-lg"
-			>
-				Start
-			</a>
-			<a
-				href="/learnmore"
-				class="px-5 py-[0.6rem] text-sm no-underline border-2 border-[color:var(--color-text)] text-[color:var(--color-text)] bg-transparent hover:underline hover:translate-x-1 transition-all duration-200 rounded-lg"
-			>
-				Learn more →
-			</a>
+
+			<Button
+				size="small"
+				label="START"
+				labelColor="[color:var(--color-text-button)]"
+				labelFontSize="1rem"
+				labelFontFamily="var(--font-ariw9500)"
+				labelFontWeight="normal"
+				onclick={() => (window.location.href = '/signup')}
+			/>
+
+			<Button
+				size="big"
+				label="LEARN MORE"
+				labelColor="[color:var(--color-text-button)]"
+				labelFontSize="1rem"
+				labelFontFamily="var(--font-ariw9500)"
+				labelFontWeight="normal"
+				onclick={() => (window.location.href = '/learnmore')}
+			/>
+
 		</div>
 	</div>
 </section>

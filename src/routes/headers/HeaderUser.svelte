@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import ThemeToggle from '../../Components/ThemeToggle.svelte';
+	import ThemeToggle from '../../Components/LayoutComponents/ThemeToggle.svelte';
 	import logoutButton from '$lib/images/logout.png';
 	import coin from '$lib/images/coin.png';
 

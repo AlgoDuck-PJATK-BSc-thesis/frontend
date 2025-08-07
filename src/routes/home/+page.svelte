@@ -2,7 +2,7 @@
 	
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import Expand from '../../Components/Expand.svelte';
+	import Expand from '../../Components/LayoutComponents/Expand.svelte';
 
 	import lightPond from '$lib/images/ponds/Staw_jasny.png';
 	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
@@ -146,12 +146,11 @@
 						Welcome back 
 					</h1>
 
-					<div class="aspect-[2/1] min-h-[11rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] pt-4 pl-4 pr-4 text-center flex flex-col justify-between transition-all">
-						<h2 
-						class="text-xl text-[color:var(--color-accent-2)]"
-						style="font-family: var(--font-ariw9500);"
-						>
-						{carouselItems[slideIndex].title}</h2>
+					<div class="aspect-[2/1] min-h-[11rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-4 pl-4 pr-4 text-center flex flex-col justify-between transition-all">
+						<h2 class="text-xl font-bold text-[color:var(--color-accent-2)]"
+							>
+							{carouselItems[slideIndex].title}
+						</h2>
 						<div class="relative h-full flex flex-col justify-center">
 							<div class="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
 								<button
@@ -201,9 +200,8 @@
 
 					</div>
 
-					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-2 text-center flex flex-col justify-between transition-all">
-						<h2 class="text-xl mt-1 text-[color:var(--color-accent-2)]"
-							style="font-family: var(--font-ariw9500);"
+					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-2 text-center flex flex-col justify-between transition-all">
+						<h2 class="text-xl font-bold mt-1 text-[color:var(--color-accent-2)]"
 							>
 							Stats
 						</h2>
@@ -215,9 +213,8 @@
 						</div>
 					</div>
 
-					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[color:var(--color-tile)] p-4 text-center flex flex-col justify-between transition-all">
-						<h2 class="text-xl mb-2 text-[color:var(--color-accent-2)]"
-						style="font-family: var(--font-ariw9500);"
+					<div class="aspect-[2/1] min-h-[12rem] w-[20rem] border-2 border-[color:var(--color-accent-1)] rounded-xl bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-4 text-center flex flex-col justify-between transition-all">
+						<h2 class="text-xl font-bold mb-2 text-[color:var(--color-accent-2)]"
 						>
 							Recently solved
 						</h2>

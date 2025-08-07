@@ -63,10 +63,11 @@
 	--color-text:#071041;  
 	--color-primary:#fd9fff;  
 	--color-accent-1:#06ddec;  
-	--color-accent-2:#0d77bc; 
+	--color-accent-2:#0b6eb0; 
 	--color-accent-3: #4ee6e9e2;
 	--color-accent-4: #34c5e6;
 	--color-tile:#55eef6;
+	--color-text-button: #841755;
 
 	--color-bg-a11y:#ffffff; 
 	--color-text-a11y:#000000;
@@ -84,6 +85,7 @@
 	--color-accent-3: #0b3b5c;
 	--color-accent-4: #053640;
 	--color-tile: #083640;
+	--color-text-button: #052f34;
 
 	--color-bg-a11y:#000000; 
 	--color-text-a11y:#ffffff;
