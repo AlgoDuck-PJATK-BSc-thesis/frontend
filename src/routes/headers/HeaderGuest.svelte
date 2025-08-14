@@ -8,19 +8,18 @@
 	}
 </script>
 
-<header class="flex justify-between items-center px-8 py-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] text-[color:var(--color-text)] border-b-2 border-[color:var(--color-accent-1)] font-body sticky top-0 z-50">
-	<a href="/" class="text-[color:var(--color-accent-2)] text-base no-underline"
-	>
-		BEETCODE
-	</a>
+<header
+	class="font-body sticky top-0 z-50 flex items-center justify-between border-b-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-8 py-4 text-[color:var(--color-text)]"
+>
+	<a href="/" class="text-base text-[color:var(--color-accent-2)] no-underline"> BEETCODE </a>
 
 	<nav>
-		<ul class="flex gap-7 list-none p-0 m-0 tracking-wide">
+		<ul class="m-0 flex list-none gap-7 p-0 tracking-wide">
 			<li>
 				<a
 					href="/aboutus"
 					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					About Us
 				</a>
@@ -29,7 +28,7 @@
 				<a
 					href="/learnmore"
 					aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Learn More
 				</a>
@@ -38,7 +37,7 @@
 				<a
 					href="/login"
 					aria-current={$page.url.pathname === '/login' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Log In
 				</a>
@@ -47,7 +46,7 @@
 				<a
 					href="/signup"
 					aria-current={$page.url.pathname === '/signup' ? 'page' : undefined}
-					class="text-[color:var(--color-text)] hover:text-[color:var(--color-primary)] no-underline tracking-tight"
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Sign Up
 				</a>
@@ -56,12 +55,11 @@
 	</nav>
 
 	<div class="flex items-center gap-4">
-		
 		<ThemeToggle />
-		
+
 		<button
 			onclick={toggleLang}
-			class="text-xl bg-transparent border-none cursor-pointer p-0 leading-none"
+			class="cursor-pointer border-none bg-transparent p-0 text-xl leading-none"
 			aria-label="Toggle Language"
 		>
 			{currentLang}

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { stopPropagation } from '$lib/actions/stopPropagation';
+	import { stopPropagation } from '$lib/actions/stopPropagation';
 
 	export let toggleRef: ((fn: () => void) => void) | undefined;
 
 	let isOpen = false;
 
-	let textSize = 100; 
+	let textSize = 100;
 	let contrast = 0;
 	let underlineLinks = false;
 	let reduceMotion = false;
@@ -32,30 +32,29 @@
 {#if isOpen}
 	<button
 		type="button"
-		class="fixed inset-0 z-[9998] bg-transparent cursor-default"
+		class="fixed inset-0 z-[9998] cursor-default bg-transparent"
 		onclick={toggle}
 		aria-label="Close accessibility panel"
 	>
 	</button>
 {/if}
 
-
 <div
-	class="fixed bottom-40 right-0 w-64 z-[9999] border-2 shadow-lg overflow-y-auto transition-transform duration-300
-	bg-[color:var(--color-bg-a11y)] text-[color:var(--color-text-a11y)] border-[color:var(--color-text-a11y)]"
+	class="fixed right-0 bottom-40 z-[9999] w-64 overflow-y-auto border-2 border-[color:var(--color-text-a11y)] bg-[color:var(--color-bg-a11y)] text-[color:var(--color-text-a11y)]
+	shadow-lg transition-transform duration-300"
 	class:translate-x-0={isOpen}
 	class:translate-x-full={!isOpen}
 	style="font-size: {panelFontSize};"
 >
-	<div class="p-4 space-y-5 text-sm">
-		<h2 class="font-bold text-lg">Accessibility</h2>
+	<div class="space-y-5 p-4 text-sm">
+		<h2 class="text-lg font-bold">Accessibility</h2>
 
 		<div class="space-y-1">
 			<p class="font-semibold">Text size: {textSize}%</p>
-			<div class="flex gap-2 flex-wrap">
+			<div class="flex flex-wrap gap-2">
 				<button
-					class="px-2 py-1 border-2 rounded
-                    hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+					class="rounded border-2 px-2 py-1
+                    hover:border-[color:var(--color-text-a11y)] hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)]"
 					class:bg-[color:var(--color-text-a11y)]={textSize === 120 || textSize === 140}
 					class:text-[color:var(--color-bg-a11y)]={textSize === 120 || textSize === 140}
 					class:border-[color:var(--color-text-a11y)]={textSize === 120 || textSize === 140}
@@ -64,7 +63,7 @@
 					A+
 				</button>
 				<button
-					class="px-2 py-1 border-2 rounded hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+					class="rounded border-2 px-2 py-1 hover:border-[color:var(--color-text-a11y)] hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)]"
 					class:bg-[color:var(--color-text-a11y)]={textSize === 100}
 					class:text-[color:var(--color-bg-a11y)]={textSize === 100}
 					class:border-[color:var(--color-text-a11y)]={textSize === 100}
@@ -72,9 +71,9 @@
 				>
 					A
 				</button>
-                <button
-					class="px-2 py-1 border-2 rounded
-                    hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)] hover:border-[color:var(--color-text-a11y)]"
+				<button
+					class="rounded border-2 px-2 py-1
+                    hover:border-[color:var(--color-text-a11y)] hover:bg-[color:var(--color-text-a11y)] hover:text-[color:var(--color-bg-a11y)]"
 					class:bg-[color:var(--color-text-a11y)]={textSize === 80 || textSize === 60}
 					class:text-[color:var(--color-bg-a11y)]={textSize === 80 || textSize === 60}
 					class:border-[color:var(--color-text-a11y)]={textSize === 80 || textSize === 60}
@@ -87,7 +86,10 @@
 
 		<div class="space-y-1">
 			<p class="font-semibold">Change contrast</p>
-			<button class="px-2 py-2 border-2 rounded w-full" onclick={() => (contrast = (contrast + 1) % 3)}>
+			<button
+				class="w-full rounded border-2 px-2 py-2"
+				onclick={() => (contrast = (contrast + 1) % 3)}
+			>
 				{#if contrast === 0}
 					Default
 				{:else if contrast === 1}
@@ -99,14 +101,14 @@
 		</div>
 
 		<div class="space-y-1">
-			<label class="flex items-center gap-2 cursor-pointer">
+			<label class="flex cursor-pointer items-center gap-2">
 				<input type="checkbox" bind:checked={underlineLinks} />
 				<span>Underline Links</span>
 			</label>
 		</div>
 
 		<div class="space-y-1">
-			<label class="flex items-center gap-2 cursor-pointer">
+			<label class="flex cursor-pointer items-center gap-2">
 				<input type="checkbox" bind:checked={reduceMotion} />
 				<span>Reduce Motion</span>
 			</label>

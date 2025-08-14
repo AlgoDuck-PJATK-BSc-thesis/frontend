@@ -26,7 +26,6 @@
 	}
 
 	onMount(() => {
-
 		animateWater();
 
 		islandInterval = setInterval(() => {
@@ -42,38 +41,34 @@
 	$: islandVisible = islandFrame === 0 ? island1 : island2;
 </script>
 
-<section class="relative w-full h-[calc(100vh-6rem)] overflow-hidden">
+<section class="relative h-[calc(100vh-6rem)] w-full overflow-hidden">
 	<img
 		src={background2}
 		alt="water static"
-		class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
 	/>
 
 	<img
 		src={background1}
 		alt="water drift"
-		class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none transition-transform duration-[150ms]"
+		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover transition-transform duration-[150ms]"
 		style={`transform: translate(${offsetX}px, ${offsetY}px);`}
 	/>
 
 	<img
 		src={islandVisible}
 		alt="island"
-		class="absolute w-140 h-auto z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/5 pointer-events-none transition-opacity duration-500"
+		class="pointer-events-none absolute top-1/2 left-1/2 z-10 h-auto w-140 -translate-x-1/2 -translate-y-1/5 transition-opacity duration-500"
 	/>
 
-	<div class="relative z-20 flex flex-col items-center text-center px-4 py-24">
-		
-		<h1 class="text-4xl text-[color:var(--color-primary)] font-bold mb-4">
-			BEETCODE
-		</h1>
+	<div class="relative z-20 flex flex-col items-center px-4 py-24 text-center">
+		<h1 class="mb-4 text-4xl font-bold text-[color:var(--color-primary)]">BEETCODE</h1>
 
-		<p class="text-2xl font-bold text-white mb-6">
+		<p class="mb-6 text-2xl font-bold text-white">
 			Transform your coding skills, one problem at a time
 		</p>
 
-		<div class="flex gap-4 mb-8">
-
+		<div class="mb-8 flex gap-4">
 			<Button
 				size="small"
 				label="START"
@@ -93,7 +88,6 @@
 				labelFontWeight="normal"
 				onclick={() => (window.location.href = '/learnmore')}
 			/>
-
 		</div>
 	</div>
 </section>

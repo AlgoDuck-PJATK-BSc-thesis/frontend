@@ -22,7 +22,6 @@
 		{ name: 'SlySpeed', points: 10 },
 		{ name: 'MadMercury', points: 5 },
 		{ name: 'TurboTurbine', points: 0 }
-		
 	];
 
 	$: sortedUsers = [...allUsers].sort((a, b) => b.points - a.points);
@@ -34,7 +33,7 @@
 
 	$: from = 1;
 	$: to = sortedUsers.length;
-	
+
 	// let currentPage = 1;
 	// const pageSize = 12;
 
@@ -48,87 +47,74 @@
 	<title>Leaderboard – Beetcode</title>
 </svelte:head>
 
-<section class="pt-8  pl-8  pr-8 pb-0 flex flex-col items-center gap-6  font-body max-h-[calc(100vh-6rem)] overflow-y-auto"
+<section
+	class="font-body flex max-h-[calc(100vh-6rem)] flex-col items-center gap-6 overflow-y-auto pt-8 pr-8 pb-0 pl-8"
 >
-	<h1 class="text-5xl font-bold mt-4 mb-2 text-[color:var(--color-primary)]"
+	<h1
+		class="mt-4 mb-2 text-5xl font-bold text-[color:var(--color-primary)]"
 		style="font-family: var(--font-ariw9500);"
-		>
+	>
 		Leaderboard
 	</h1>
-    <div class="border-2 bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] rounded-xl pt-8 pb-12 px-10 w-full max-w-2xl flex flex-col items-center"
+	<div
+		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] px-10 pt-8 pb-12"
 	>
-        <div class="flex justify-center items-end gap-8 mt-8"
-		>
-            <div class="flex flex-col items-center translate-y-4 relative"
-			>
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
+		<div class="mt-8 flex items-end justify-center gap-8">
+			<div class="relative flex translate-y-4 flex-col items-center">
+				<div
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
 				>
-                    2
-                </div>
-                <img src={trophy} alt="Silver Trophy" class="w-20 h-20 mb-2" 
-				/>
-                <div class="text-lg  text-[color:var(--color-accent-2)]"
-				
-				>
-				{topUsers[1].name}
+					2
 				</div>
-            </div>
-
-            <div class="flex flex-col items-center -translate-y-2 relative"
-			>
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
-				>
-                    1
-                </div>
-                <img src={trophy} alt="Gold Trophy" class="w-24 h-24 mb-2" 
-				/>
-                <div class="text-lg  text-[color:var(--color-accent-2)]"
-				
-				>
-				{topUsers[0].name}
+				<img src={trophy} alt="Silver Trophy" class="mb-2 h-20 w-20" />
+				<div class="text-lg text-[color:var(--color-accent-2)]">
+					{topUsers[1].name}
 				</div>
-            </div>
+			</div>
 
-            <div class="flex flex-col items-center translate-y-4 relative"
-			>
-                <div class="absolute -top-6 bg-[color:var(--color-text)] text-[color:var(--color-tile)] text-xs font-bold px-2 py-0.5 rounded-full"
+			<div class="relative flex -translate-y-2 flex-col items-center">
+				<div
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
 				>
-                    3
-                </div>
-                <img src={trophy} alt="Bronze Trophy" class="w-20 h-20 mb-2" 
-				/>
-                <div class="text-lg text-[color:var(--color-accent-2)]"
-				
+					1
+				</div>
+				<img src={trophy} alt="Gold Trophy" class="mb-2 h-24 w-24" />
+				<div class="text-lg text-[color:var(--color-accent-2)]">
+					{topUsers[0].name}
+				</div>
+			</div>
+
+			<div class="relative flex translate-y-4 flex-col items-center">
+				<div
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
 				>
+					3
+				</div>
+				<img src={trophy} alt="Bronze Trophy" class="mb-2 h-20 w-20" />
+				<div class="text-lg text-[color:var(--color-accent-2)]">
 					{topUsers[2].name}
-					
 				</div>
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 
-	<div class="w-full h-max max-w-2xl flex flex-col text-[color:var(--color-text)]"
-	
-	>
+	<div class="flex h-max w-full max-w-2xl flex-col text-[color:var(--color-text)]">
 		{#each sortedUsers as user, i}
-			<div class="flex items-center justify-between px-4 py-2 rounded"
-			
-			>
-				<div class="flex items-center gap-2"
-				>
-					<span class="min-w-[3.5rem] text-right"
-					>
+			<div class="flex items-center justify-between rounded px-4 py-2">
+				<div class="flex items-center gap-2">
+					<span class="min-w-[3.5rem] text-right">
 						{i + 1}.
-
 					</span>
-					<span class="text max-w-[20rem] overflow-x-auto whitespace-nowrap scrollbar-thin hover:scrollbar-thumb-gray-400"
+					<span
+						class="text scrollbar-thin hover:scrollbar-thumb-gray-400 max-w-[20rem] overflow-x-auto whitespace-nowrap"
 					>
 						{user.name}
 					</span>
 				</div>
 
-				<div class="flex items-center gap-1 border-2 rounded-full px-3 py-0.5 text-sm bg-[color:var(--color-tile)] border-[color:var(--color-accent-1)] text-[color:var(--color-text)]"
-			>
+				<div
+					class="flex items-center gap-1 rounded-full border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] px-3 py-0.5 text-sm text-[color:var(--color-text)]"
+				>
 					<span>{user.points}</span>
 					<span>⭐</span>
 				</div>

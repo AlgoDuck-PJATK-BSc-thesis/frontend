@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	let username = 'OrbitOwl';
 	let email = 'orbitowl@gmail.com';
 	let currentPassword = '';
@@ -39,109 +38,99 @@
 		showSavedPassword = true;
 		setTimeout(() => (showSavedPassword = false), 1000);
 	}
-
 </script>
 
 <svelte:head>
 	<title>Settings – Beetcode</title>
 </svelte:head>
 
-<section class="flex justify-center gap-14 p-10 h-[calc(100vh-4rem)] overflow-hidden">
-
-	<div class="flex flex-col gap-2 w-66 flex-shrink-0">
-
-  		<h2 
-		class="font-bold text-5xl text-[color:var(--color-primary)] mt-2 mb-6 text-center"
-		style="font-family: var(--font-ariw9500);"
+<section class="flex h-[calc(100vh-4rem)] justify-center gap-14 overflow-hidden p-10">
+	<div class="flex w-66 flex-shrink-0 flex-col gap-2">
+		<h2
+			class="mt-2 mb-6 text-center text-5xl font-bold text-[color:var(--color-primary)]"
+			style="font-family: var(--font-ariw9500);"
 		>
-		Settings
+			Settings
 		</h2>
 
-		<div 
-		class="w-74 h-[57vh] overflow-y-auto border-2 border-[color:var(--color-accent-1)] rounded-lg p-4 bg-[color:var(--color-tile)]  flex-shrink-0"
-		
+		<div
+			class="h-[57vh] w-74 flex-shrink-0 overflow-y-auto rounded-lg border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
 		>
 			<ul>
-				<li 
-				class="font-bold text-xl text-[color:var(--color-accent-2)] mt-2"
-				>
-				Personal Details
-				</li>
+				<li class="mt-2 text-xl font-bold text-[color:var(--color-accent-2)]">Personal Details</li>
 
 				<li>
-					<button onclick={() => scrollTo('profile')} 
-						class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('profile')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Profile Information
 					</button>
 				</li>
 
 				<li>
-					<button onclick={() => scrollTo('language')} 
-						class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('language')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Display Language
 					</button>
 				</li>
 
-				<li class="font-bold text-xl text-[color:var(--color-accent-2)] mt-8">Security
-				</li>
-				
+				<li class="mt-8 text-xl font-bold text-[color:var(--color-accent-2)]">Security</li>
+
 				<li>
-					<button onclick={() => scrollTo('password')} 
-						class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('password')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Password Settings
 					</button>
 				</li>
 				<li>
-					<button onclick={() => scrollTo('2fa')} 
-						class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('2fa')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Two-Factor Authentication
 					</button>
 				</li>
 
-				<li class="font-bold text-xl text-[color:var(--color-accent-2)] mt-8"
-				>
-				Notifications
-				</li>
+				<li class="mt-8 text-xl font-bold text-[color:var(--color-accent-2)]">Notifications</li>
 
 				<li>
-					<button onclick={() => scrollTo('email')} class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('email')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Email Notifications
 					</button>
 				</li>
 				<li>
-					<button onclick={() => scrollTo('push')} class="block w-full text-[color:var(--color-accent-2)] text-left p-2 hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)] rounded"
-						>
+					<button
+						onclick={() => scrollTo('push')}
+						class="block w-full rounded p-2 text-left text-[color:var(--color-accent-2)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-tile)]"
+					>
 						Push Notifications
 					</button>
 				</li>
-
 			</ul>
-		</div> 
-    </div>
+		</div>
+	</div>
 
-	
-	<div class="flex flex-col gap-5 overflow-y-auto pr-4 flex-[0.5]"
-	
-	>
-		<div id="profile" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-5"
+	<div class="flex flex-[0.5] flex-col gap-5 overflow-y-auto pr-4">
+		<div
+			id="profile"
+			class="flex flex-col gap-5 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
 		>
-			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]"
-			>
-				Profile Information
-			</h2>
+			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]">Profile Information</h2>
 
-			<label class="flex flex-col text-sm text-[color:var(--color-text)]"
-			>
+			<label class="flex flex-col text-sm text-[color:var(--color-text)]">
 				<span class="mb-1">Username:</span>
 				<input
 					bind:value={username}
 					type="text"
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-sm font-body text-black"
+					class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-1 text-sm text-black"
 				/>
 			</label>
 
@@ -150,49 +139,53 @@
 				<input
 					bind:value={email}
 					type="email"
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-1 text-sm font-body text-black"
+					class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-1 text-sm text-black"
 				/>
 			</label>
 
 			<button
 				onclick={saveProfile}
-				class="self-end px-3 py-1 text-xs bg-[color:var(--color-primary)] text-[color:var(--color-tile)] rounded font-body">Save
+				class="font-body self-end rounded bg-[color:var(--color-primary)] px-3 py-1 text-xs text-[color:var(--color-tile)]"
+				>Save
 			</button>
 			{#if showSavedProfile}
-				<p class="text-[0.75rem] text-[color:var(--color-accent-2)] text-right mt-1">Changes saved!</p>
+				<p class="mt-1 text-right text-[0.75rem] text-[color:var(--color-accent-2)]">
+					Changes saved!
+				</p>
 			{/if}
 		</div>
 
-		<div id="language" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-4"
+		<div
+			id="language"
+			class="flex flex-col gap-4 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
 		>
-			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]"
-			>
-			Display Language
-			</h2>
+			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]">Display Language</h2>
 
 			<div class="flex gap-4 text-sm text-[color:var(--color-text)]">
-				<label class="flex items-center gap-2 cursor-pointer">
+				<label class="flex cursor-pointer items-center gap-2">
 					<input
 						type="radio"
 						name="displayLanguage"
 						value="en"
 						bind:group={displayLanguage}
-						class="hidden peer"
+						class="peer hidden"
 					/>
-					<div class="w-4 h-4 rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] flex items-center justify-center peer-checked:after:bg-[color:var(--color-primary)] after:content-[''] after:w-2 after:h-2 after:rounded-full after:bg-[color:var(--color-tile)] transition-colors"
+					<div
+						class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-tile)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
 					></div>
 					English
 				</label>
 
-				<label class="flex items-center gap-2 cursor-pointer">
+				<label class="flex cursor-pointer items-center gap-2">
 					<input
 						type="radio"
 						name="displayLanguage"
 						value="pl"
 						bind:group={displayLanguage}
-						class="hidden peer"
+						class="peer hidden"
 					/>
-					<div class="w-4 h-4 rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] flex items-center justify-center peer-checked:after:bg-[color:var(--color-primary)] after:content-[''] after:w-2 after:h-2 after:rounded-full after:bg-[color:var(--color-tile)] transition-colors"
+					<div
+						class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-tile)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
 					></div>
 					Polish
 				</label>
@@ -200,133 +193,122 @@
 
 			<button
 				onclick={saveLanguage}
-				class="self-end px-3 py-1 text-xs bg-[color:var(--color-primary)] text-[color:var(--color-tile)] rounded font-body"
+				class="font-body self-end rounded bg-[color:var(--color-primary)] px-3 py-1 text-xs text-[color:var(--color-tile)]"
 			>
 				Save
 			</button>
 
 			{#if showSavedLanguage}
-				<p class="text-[0.75rem] text-[color:var(--color-accent-2)] text-right mt-1"
-				>
-				Changes saved!
-				</p>
-			{/if}
-		</div>
-
-		<div id="password" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6"
-		>
-			<h2 class="text-lg text-[color:var(--color-accent-2)] text-normal"
-			>
-			Password Settings
-			</h2>
-
-			<label class="flex flex-col text-sm text-[color:var(--color-text)]">
-				<span class="mb-[0.2rem]"
-				>
-				Current password:
-				</span> 
-				<input
-					type="password"
-					placeholder="********"
-					bind:value={currentPassword}
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-[0.3rem] text-black font-body text-xs"
-				/>
-			</label>
-			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
-				<span class="mb-[0.2rem]"
-				>
-				New password:
-				</span>
-				<input
-					type="password"
-					placeholder="********"
-					bind:value={newPassword}
-					class="bg-white border-2 border-[color:var(--color-accent-1)] p-[0.3rem] text-black font-body text-xs"
-				/>
-			</label>
-			<button
-				onclick={savePassword}
-				class="self-end px-[0.8rem] py-[0.3rem] bg-[color:var(--color-primary)] text-[color:var(--color-tile)] text-xs font-body rounded cursor-pointer border-none"
-				>
-				Save
-			</button>
-			{#if showSavedPassword}
-				<p class="text-[0.75rem] text-[color:var(--color-accent-2)] mt-[0.3rem] text-right"
-				>
+				<p class="mt-1 text-right text-[0.75rem] text-[color:var(--color-accent-2)]">
 					Changes saved!
 				</p>
 			{/if}
 		</div>
 
-		<div id="2fa" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-4"
+		<div
+			id="password"
+			class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
 		>
-			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]"
-			>
-				Two-Factor Authentication
+			<h2 class="text-normal text-lg text-[color:var(--color-accent-2)]">Password Settings</h2>
 
+			<label class="flex flex-col text-sm text-[color:var(--color-text)]">
+				<span class="mb-[0.2rem]"> Current password: </span>
+				<input
+					type="password"
+					placeholder="********"
+					bind:value={currentPassword}
+					class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
+				/>
+			</label>
+			<label class="flex flex-col text-xs text-[color:var(--color-text)]">
+				<span class="mb-[0.2rem]"> New password: </span>
+				<input
+					type="password"
+					placeholder="********"
+					bind:value={newPassword}
+					class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
+				/>
+			</label>
+			<button
+				onclick={savePassword}
+				class="font-body cursor-pointer self-end rounded border-none bg-[color:var(--color-primary)] px-[0.8rem] py-[0.3rem] text-xs text-[color:var(--color-tile)]"
+			>
+				Save
+			</button>
+			{#if showSavedPassword}
+				<p class="mt-[0.3rem] text-right text-[0.75rem] text-[color:var(--color-accent-2)]">
+					Changes saved!
+				</p>
+			{/if}
+		</div>
+
+		<div
+			id="2fa"
+			class="flex flex-col gap-4 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
+		>
+			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)]">
+				Two-Factor Authentication
 			</h2>
-			<div class="flex flex-row justify-between items-center text-sm text-[color:var(--color-text)]">
-				<span>
-					Enable 2FA:
-				</span>
+			<div
+				class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+			>
+				<span> Enable 2FA: </span>
 				<input
 					type="checkbox"
 					bind:checked={twoFactor}
-					class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+					class="h-5 w-5 cursor-pointer appearance-none rounded border-2 border-[color:var(--color-accent-1)] bg-white transition-colors"
 					style:background-color={twoFactor ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
-			<p class="text-xs text-[color:var(--color-text)] -mt-2">
+			<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 				{twoFactor ? 'Enabled' : 'Disabled'}
 			</p>
 		</div>
 
-		<div id="email" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6"
+		<div
+			id="email"
+			class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
 		>
-			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)] mb-1"
-			>
+			<h2 class="mb-1 text-lg font-normal text-[color:var(--color-accent-2)]">
 				Email Notifications
 			</h2>
-			<div class="flex flex-row justify-between items-center text-sm text-[color:var(--color-text)]"
+			<div
+				class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
 			>
-				<span>
-					Receive updates:
-
-				</span>
+				<span> Receive updates: </span>
 				<input
 					type="checkbox"
 					bind:checked={emailNotifs}
-					class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+					class="h-5 w-5 cursor-pointer appearance-none rounded border-2 border-[color:var(--color-accent-1)] bg-white transition-colors"
 					style:background-color={emailNotifs ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
-			<p class="text-xs text-[color:var(--color-text)] -mt-2">
+			<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 				{emailNotifs ? 'On' : 'Off'}
 			</p>
 		</div>
 
-		<div id="push" class="border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl flex flex-col gap-6">
-			<h2 class="text-lg font-normal text-[color:var(--color-accent-2)] mb-1"
-			>
+		<div
+			id="push"
+			class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4"
+		>
+			<h2 class="mb-1 text-lg font-normal text-[color:var(--color-accent-2)]">
 				Push Notifications
-
 			</h2>
-			<div class="flex flex-row justify-between items-center text-sm text-[color:var(--color-text)]">
-				<span>
-					Enable push:
-
-				</span>
+			<div
+				class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+			>
+				<span> Enable push: </span>
 				<input
 					type="checkbox"
 					bind:checked={pushNotifs}
-					class="w-5 h-5 appearance-none border-2 border-[color:var(--color-accent-1)] rounded bg-white cursor-pointer transition-colors"
+					class="h-5 w-5 cursor-pointer appearance-none rounded border-2 border-[color:var(--color-accent-1)] bg-white transition-colors"
 					style:background-color={pushNotifs ? 'var(--color-primary)' : 'white'}
 				/>
 			</div>
-			<p class="text-xs text-[color:var(--color-text)] -mt-2">
+			<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 				{pushNotifs ? 'On' : 'Off'}
 			</p>
 		</div>
-
 	</div>
 </section>

@@ -47,7 +47,6 @@
 		animate(path2, map[state][1] as any, transition);
 		animate(path3, map[state][2] as any, transition);
 		animate(path4, map[state][3] as any, transition);
-
 	}
 </script>
 
@@ -57,7 +56,7 @@
 	title="Expand/Collapse the Pond"
 	aria-pressed={expanded}
 	aria-label={expanded ? 'Collapse view' : 'Expand view'}
-	class="cursor-pointer select-none p-2 flex items-center justify-center bg-[color:var(--color-primary)] text-white rounded-md text-xs z-50 fixed top-20 right-8"
+	class="fixed top-20 right-8 z-50 flex cursor-pointer items-center justify-center rounded-md bg-[color:var(--color-primary)] p-2 text-xs text-white select-none"
 >
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -65,26 +64,14 @@
 		{height}
 		viewBox="0 0 24 24"
 		fill="none"
-		stroke={stroke}
+		{stroke}
 		stroke-width={strokeWidth}
 		stroke-linecap="round"
 		stroke-linejoin="round"
 	>
-		<path
-			bind:this={path1}
-			d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"
-		/>
-		<path
-			bind:this={path2}
-			d="M3 16.2V21m0 0h4.8M3 21l6-6"
-		/>
-		<path
-			bind:this={path3}
-			d="M21 7.8V3m0 0h-4.8M21 3l-6 6"
-		/>
-		<path
-			bind:this={path4}
-			d="M3 7.8V3m0 0h4.8M3 3l6 6"
-		/>
+		<path bind:this={path1} d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8" />
+		<path bind:this={path2} d="M3 16.2V21m0 0h4.8M3 21l6-6" />
+		<path bind:this={path3} d="M21 7.8V3m0 0h-4.8M21 3l-6 6" />
+		<path bind:this={path4} d="M3 7.8V3m0 0h4.8M3 3l6 6" />
 	</svg>
 </button>

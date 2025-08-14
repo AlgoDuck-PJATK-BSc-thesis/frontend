@@ -2,9 +2,13 @@
 	<title>Log in – Beetcode</title>
 </svelte:head>
 
-<section class="max-w-md mx-auto mt-20 px-4 text-center border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 rounded-xl">
-	<h1 class="text-4xl text-[color:var(--color-primary)] mb-8"
-		style="font-family: var(--font-ariw9500);">
+<section
+	class="mx-auto mt-20 max-w-md rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 px-4 text-center"
+>
+	<h1
+		class="mb-8 text-4xl text-[color:var(--color-primary)]"
+		style="font-family: var(--font-ariw9500);"
+	>
 		Log in
 	</h1>
 
@@ -15,7 +19,7 @@
 				type="text"
 				name="identifier"
 				required
-				class="mt-2 p-2.5 border-2 border-[color:var(--color-accent-1)] rounded bg-white text-black font-body"
+				class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
 			/>
 		</label>
 
@@ -25,23 +29,22 @@
 				type="password"
 				name="password"
 				required
-				class="mt-2 p-2.5 border-2 border-[color:var(--color-accent-1)] rounded bg-white text-black font-body"
+				class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
 			/>
 		</label>
 
 		<div class="flex justify-center">
 			<button
 				type="submit"
-				class="w-1/3 bg-[var(--color-primary)] text-[var(--color-bg)] px-6 py-2.5 rounded font-body cursor-pointer transition-transform duration-200 hover:-translate-y-0.5"
+				class="font-body w-1/3 cursor-pointer rounded bg-[var(--color-primary)] px-6 py-2.5 text-[var(--color-bg)] transition-transform duration-200 hover:-translate-y-0.5"
 			>
 				Log in
 			</button>
 		</div>
-
 	</form>
 
-	<p class="mt-6 text-xs leading-snug text-center">
+	<p class="mt-6 text-center text-xs leading-snug">
 		<span>Don't have an account?</span>
-		<a href="/signup" class="text-[color:var(--color-accent-2)] hover:underline ml-1">Sign up</a>
+		<a href="/signup" class="ml-1 text-[color:var(--color-accent-2)] hover:underline">Sign up</a>
 	</p>
 </section>
