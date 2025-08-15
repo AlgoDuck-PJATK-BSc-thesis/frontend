@@ -11,7 +11,7 @@
 
 	const allFrames = Array.from(
 		{ length: totalFrames },
-		(_, i) => `/ThemeSwitch1/yellow ver MERGED - ${i + 1}.png`
+		(_, i) => `/ThemeSwitch2/Blue ver MERGED - ${i + 1}.png`
 	);
 	const lightToDarkFrames = [...allFrames].reverse();
 	const darkToLightFrames = [...allFrames];
@@ -62,8 +62,8 @@
 		<img
 			class="frame-img"
 			src={current === 'light'
-				? '/ThemeSwitch1/yellow ver MERGED - 11.png'
-				: '/ThemeSwitch1/yellow ver MERGED - 1.png'}
+				? '/ThemeSwitch2/Blue ver MERGED - 11.png'
+				: '/ThemeSwitch2/Blue ver MERGED - 1.png'}
 			alt={current + ' theme'}
 		/>
 	{/if}
