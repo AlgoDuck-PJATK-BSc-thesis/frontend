@@ -1,27 +1,20 @@
 # Beetcode – UI System Overview
-![Screenshot 2025-06-24 at 08 16 52](https://github.com/user-attachments/assets/b9b2fe43-4723-4e37-a4b7-fad3cac50c98)
-![Screenshot 2025-07-01 at 19 13 52](https://github.com/user-attachments/assets/05646bf5-a44c-4af0-8a81-26c7527e47f9)
-![Screenshot 2025-07-01 at 19 14 24](https://github.com/user-attachments/assets/2210dd7b-4227-49de-acc8-0c2090d86e56)
-![Screenshot 2025-06-24 at 08 18 04](https://github.com/user-attachments/assets/792309de-f820-4285-95cb-4ab1b79c211f)
+
+<img width="1440" height="826" alt="Screenshot 2025-08-15 at 04 53 39" src="https://github.com/user-attachments/assets/373cbadb-d563-460e-8063-14a7484e50fb" />
+<img width="1440" height="783" alt="Screenshot 2025-08-15 at 04 55 07" src="https://github.com/user-attachments/assets/e5f5a7d7-2e77-4e89-a1d9-969408ca2857" />
+<img width="1440" height="828" alt="Screenshot 2025-08-15 at 04 55 52" src="https://github.com/user-attachments/assets/dde2bf1f-f421-4c4b-8cee-75da17bbde75" />
+<img width="1440" height="825" alt="Screenshot 2025-08-15 at 05 01 22" src="https://github.com/user-attachments/assets/cf33d317-2b7e-4f99-a4a2-c690b34f372c" />
 
 ## Font
 
-**Primary font:**  
-`'Press Start 2P', monospace` (imported via Google Fonts)
+**Primary fonts:**   `Ari W9500 Bold` and `Open Sans` (imported via Google Fonts)
 
 **Usage:**  
 Defined globally in `app.css` as:
 
 ```css
---font-body: 'Press Start 2P', monospace;
-```
-
-Applied in:
-
-```css
-html {
-	font-family: var(--font-body);
-}
+--font-ariw9500: 'Ari W9500 Bold', sans-serif;
+--font-opensans: 'Open Sans', sans-serif;
 ```
 
 Used throughout headings, paragraphs, inputs, and buttons.
