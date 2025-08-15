@@ -11,10 +11,21 @@
 <header
 	class="font-body sticky top-0 z-50 flex items-center justify-between border-b-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-8 py-4 text-[color:var(--color-text)]"
 >
-	<a href="/" class="text-base text-[color:var(--color-accent-2)] no-underline"> BEETCODE </a>
+	<a href="/" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
+		BEETCODE
+	</a>
 
 	<nav>
 		<ul class="m-0 flex list-none gap-7 p-0 tracking-wide">
+			<li>
+				<a
+					href="/"
+					aria-current={$page.url.pathname === '/' ? 'page' : undefined}
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Home
+				</a>
+			</li>
 			<li>
 				<a
 					href="/aboutus"
@@ -51,18 +62,34 @@
 					Sign Up
 				</a>
 			</li>
+
+			<li>
+				<div class="relative h-[1rem] w-[1rem]">
+					<ThemeToggle />
+				</div>
+			</li>
+
+			<li>
+				<div class="ml-12 flex">
+					<button
+						onclick={toggleLang}
+						class="cursor-pointer border-none bg-transparent p-0 text-2xl leading-none"
+						aria-label="Toggle Language"
+					>
+						{currentLang}
+					</button>
+				</div>
+			</li>
 		</ul>
 	</nav>
 
 	<div class="flex items-center gap-4">
-		<ThemeToggle />
-
-		<button
+		<!-- <button
 			onclick={toggleLang}
 			class="cursor-pointer border-none bg-transparent p-0 text-xl leading-none"
 			aria-label="Toggle Language"
 		>
 			{currentLang}
-		</button>
+		</button> -->
 	</div>
 </header>

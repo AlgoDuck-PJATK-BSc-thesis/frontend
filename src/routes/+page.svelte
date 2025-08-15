@@ -62,7 +62,12 @@
 	/>
 
 	<div class="relative z-20 flex flex-col items-center px-4 py-24 text-center">
-		<h1 class="mb-4 text-4xl font-bold text-[color:var(--color-primary)]">BEETCODE</h1>
+		<h1
+			class="mb-4 text-5xl font-bold tracking-wide text-[color:var(--color-white)]"
+			style="font-family: var(--font-ariw9500);"
+		>
+			BEETCODE
+		</h1>
 
 		<p class="mb-6 text-2xl font-bold text-white">
 			Transform your coding skills, one problem at a time
@@ -71,7 +76,7 @@
 		<div class="mb-8 flex gap-4">
 			<Button
 				size="small"
-				label="START"
+				label="Start"
 				labelColor="[color:var(--color-text-button)]"
 				labelFontSize="1rem"
 				labelFontFamily="var(--font-ariw9500)"
@@ -80,8 +85,8 @@
 			/>
 
 			<Button
-				size="big"
-				label="LEARN MORE"
+				size="medium"
+				label="Learn More"
 				labelColor="[color:var(--color-text-button)]"
 				labelFontSize="1rem"
 				labelFontFamily="var(--font-ariw9500)"

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	type SizeType = 'small' | 'medium' | 'big';
+	type SizeType = 'small' | 'medium' | 'big' | 'square';
 	type ThemeType = 'light' | 'dark';
 
 	let {
@@ -44,13 +44,27 @@
 
 	const restPath = $derived(() => {
 		const color = currentTheme === 'light' ? 'Jasny' : 'Ciemny';
-		const sizeName = size === 'big' ? 'duzy' : size === 'medium' ? 'sredni' : 'maly';
+		const sizeName =
+			size === 'big'
+				? 'duzy'
+				: size === 'medium'
+					? 'sredni'
+					: size === 'small'
+						? 'maly'
+						: 'kwadratowy';
 		return `${imagesPath}/${currentTheme}/${size}/${color}_guzik_${sizeName}1.png`;
 	});
 
 	const hoverPath = $derived(() => {
 		const color = currentTheme === 'light' ? 'Jasny' : 'Ciemny';
-		const sizeName = size === 'big' ? 'duzy' : size === 'medium' ? 'sredni' : 'maly';
+		const sizeName =
+			size === 'big'
+				? 'duzy'
+				: size === 'medium'
+					? 'sredni'
+					: size === 'small'
+						? 'maly'
+						: 'kwadratowy';
 		return `${imagesPath}/${currentTheme}/${size}/${color}_guzik_${sizeName}2.png`;
 	});
 

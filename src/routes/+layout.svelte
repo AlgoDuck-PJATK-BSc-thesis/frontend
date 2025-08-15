@@ -6,7 +6,7 @@
 
 	import { browser } from '$app/environment';
 
-	import AccessibilityButton from '../Components/AccessibilityComponents/AccessibilityButton.svelte';
+	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButton.svelte';
 	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
 
 	let togglePanelFn: () => void;
@@ -38,7 +38,7 @@
 		<HeaderGuest />
 	{/if}
 
-	<AccessibilityButton ontoggle={handleToggle} />
+	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
 
 	<main class="mx-auto box-border w-full max-w-full flex-1">

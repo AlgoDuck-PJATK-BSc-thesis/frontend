@@ -1,10 +1,5 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
-	import Expand from '../../Components/LayoutComponents/Expand.svelte';
-
-	import lightPond from '$lib/images/ponds/Staw_jasny.png';
-	import darkPond from '$lib/images/ponds/Staw_ciemny.png';
 
 	import lightPond1 from '$lib/images/ponds/JasnyStaw_1_2.png';
 	import lightPond2 from '$lib/images/ponds/JasnyStaw_2_2.png';
@@ -28,30 +23,11 @@
 	import viking from '$lib/images/ducks/viking.png';
 	import witch from '$lib/images/ducks/witch.png';
 
-	let username = 'OrbitOwl';
-	let currentSlide = 0;
-	let imageHeight = 0;
-	let isExpanded = false;
 	let reduceMotion = false;
 
 	if (typeof window !== 'undefined') {
 		reduceMotion = document.documentElement.dataset.reduceMotion === 'true';
 	}
-
-	const carouselItems = [
-		{
-			title: 'Task 1',
-			body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-		},
-		{
-			title: 'Task 2',
-			body: 'Phasellus iaculis, justo nec tristique tincidunt, orci lorem. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-		},
-		{
-			title: 'Task 3',
-			body: 'Cras faucibus, lorem nec eleifend bibendum, nisi felis. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'
-		}
-	];
 
 	let theme = 'light';
 
@@ -68,15 +44,12 @@
 		});
 	});
 
-	let slideIndex = 0;
-	let imageWrapperRef: HTMLDivElement;
-
 	const problemCategories = [
-		'array problems',
-		'loop problems',
+		'array',
+		'loop',
 		'string manipulation',
 		'graph traversal',
-		'tree problems',
+		'tree',
 		'sorting algorithms',
 		'dynamic programming',
 		'bit manipulation',
@@ -84,6 +57,21 @@
 	];
 
 	let currentCategory = problemCategories[Math.floor(Math.random() * problemCategories.length)];
+
+	onMount(() => {
+		const lastUpdate = localStorage.getItem('lastCategoryUpdate');
+		const now = Date.now();
+
+		if (!lastUpdate || now - Number(lastUpdate) > 24 * 60 * 60 * 1000) {
+			const random = problemCategories[Math.floor(Math.random() * problemCategories.length)];
+			currentCategory = random;
+			localStorage.setItem('currentCategory', random);
+			localStorage.setItem('lastCategoryUpdate', now.toString());
+		} else {
+			const saved = localStorage.getItem('currentCategory');
+			if (saved) currentCategory = saved;
+		}
+	});
 
 	// stuff for pond, the 2 frames water moving animation version
 
@@ -185,7 +173,7 @@
 						<p class="mt-1 text-sm font-semibold text-[color:var(--color-white)]">Helper Duck</p>
 
 						<div
-							class="absolute top-1/2 left-full ml-3 w-max max-w-[350px] -translate-y-1/2 rounded-lg bg-white px-4 py-2 whitespace-normal text-black shadow
+							class="absolute top-1/2 left-full ml-3 w-max max-w-[310px] -translate-y-1/2 rounded-2xl bg-white px-4 py-3 whitespace-normal text-black shadow
 			after:absolute after:top-1/2 after:-left-2 after:-translate-y-1/2 after:border-[8px] after:border-transparent after:border-r-white after:content-['']"
 						>
 							<div
@@ -193,7 +181,7 @@
 			-translate-x-full -translate-y-1/2 border-y-[6px] border-r-[8px] border-y-transparent border-r-white"
 							></div>
 							Hey!<br />
-							Let's solve some {currentCategory} today
+							Let's solve some {currentCategory} problems today
 						</div>
 					</div>
 				</div>

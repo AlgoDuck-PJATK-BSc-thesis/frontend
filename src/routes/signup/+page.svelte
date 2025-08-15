@@ -2,6 +2,10 @@
 	<title>Sign up – Beetcode</title>
 </svelte:head>
 
+<script>
+	import Button from '../../Components/ButtonComponents/Button.svelte';
+</script>
+
 <section
 	class="mx-auto mt-20 max-w-md rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 px-4 text-center"
 >
@@ -44,13 +48,16 @@
 		</label>
 
 		<div class="flex justify-center">
-			<button
-				type="submit"
-				class="font-body w-1/2 cursor-pointer rounded bg-[var(--color-primary)] px-6 py-2.5 text-[var(--color-bg)] transition-transform duration-200 hover:-translate-y-0.5"
-			>
-				Create account
-			</button>
-		</div>
+	<Button
+		size="big"
+		label="Create account"
+		labelColor="[color:var(--color-text-button)]"
+		labelFontSize="1.1rem"
+		labelFontFamily="var(--font-ariw9500)"
+		labelFontWeight="normal"
+		onclick={() => document.querySelector('form')?.requestSubmit()}
+	/>
+</div>
 	</form>
 
 	<p class="mt-6 text-center text-xs leading-snug">
