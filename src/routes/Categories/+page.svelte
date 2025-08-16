@@ -203,7 +203,7 @@
 <svelte:window on:resize={calculateIslandCoordinates} bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 
-<main bind:this={main} class="w-full h-[calc(100vh-10rem)] relative rounded-2xl overflow-hidden">
+<main bind:this={main} class="w-full h-[calc(100vh-3.9rem)] relative overflow-hidden">
   <div bind:this={scrollableFrame}  role="button" tabindex="0" class="w-[300%] hover:cursor-grab active:cursor-grabbing h-full absolute z-10 bg-blue-900 bg-repeat-x bg-no-repeat-y bg-[length:auto_100%]"
     onmousedown={handleMouseDown}
     onmouseup={handleMouseUp}
