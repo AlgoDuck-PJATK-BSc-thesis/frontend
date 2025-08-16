@@ -57,7 +57,7 @@
 		Leaderboard
 	</h1>
 	<div
-		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] px-10 pt-8 pb-12"
+		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-10 pt-8 pb-12"
 	>
 		<div class="mt-8 flex items-end justify-center gap-8">
 			<div class="relative flex translate-y-4 flex-col items-center">
@@ -79,7 +79,7 @@
 					1
 				</div>
 				<img src={trophy} alt="Gold Trophy" class="mb-2 h-24 w-24" />
-				<div class="text-lg font-bold text-[color:var(--color-accent-2)]">
+				<div class="text-xl font-bold text-[color:var(--color-accent-2)]">
 					{topUsers[0].name}
 				</div>
 			</div>

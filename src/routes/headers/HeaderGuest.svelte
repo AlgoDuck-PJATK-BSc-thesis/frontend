@@ -64,13 +64,7 @@
 			</li>
 
 			<li>
-				<div class="relative h-[1rem] w-[1rem]">
-					<ThemeToggle />
-				</div>
-			</li>
-
-			<li>
-				<div class="ml-12 flex">
+				<div class="ml-4 flex">
 					<button
 						onclick={toggleLang}
 						class="cursor-pointer border-none bg-transparent p-0 text-2xl leading-none"
@@ -80,6 +74,13 @@
 					</button>
 				</div>
 			</li>
+
+			<li>
+				<div class="relative h-[1rem] w-[1rem]">
+					<ThemeToggle />
+				</div>
+			</li>
+
 		</ul>
 	</nav>
 

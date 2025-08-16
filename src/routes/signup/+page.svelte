@@ -1,16 +1,16 @@
-<svelte:head>
-	<title>Sign up – Beetcode</title>
-</svelte:head>
-
 <script>
 	import Button from '../../Components/ButtonComponents/Button.svelte';
 </script>
 
+<svelte:head>
+	<title>Sign up – Beetcode</title>
+</svelte:head>
+
 <section
-	class="mx-auto mt-20 max-w-md rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] p-4 px-4 text-center"
+	class="mx-auto mt-20 max-w-md rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-4 px-4 text-center"
 >
 	<h1
-		class="mb-8 text-4xl text-[color:var(--color-primary)]"
+		class="mt-1 mb-8 text-6xl text-[color:var(--color-primary)]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		Sign up
@@ -48,19 +48,19 @@
 		</label>
 
 		<div class="flex justify-center">
-	<Button
-		size="big"
-		label="Create account"
-		labelColor="[color:var(--color-text-button)]"
-		labelFontSize="1.1rem"
-		labelFontFamily="var(--font-ariw9500)"
-		labelFontWeight="normal"
-		onclick={() => document.querySelector('form')?.requestSubmit()}
-	/>
-</div>
+			<Button
+				size="big"
+				label="Create account"
+				labelColor="[color:var(--color-text-button)]"
+				labelFontSize="1.1rem"
+				labelFontFamily="var(--font-ariw9500)"
+				labelFontWeight="normal"
+				onclick={() => document.querySelector('form')?.requestSubmit()}
+			/>
+		</div>
 	</form>
 
-	<p class="mt-6 text-center text-xs leading-snug">
+	<p class="mt-6 text-center leading-snug">
 		<span>Already have an account?</span>
 		<a href="/login" class="ml-1 text-[color:var(--color-accent-2)] hover:underline">Log in</a>
 	</p>

@@ -11,6 +11,7 @@
 
 	const allFrames = Array.from(
 		{ length: totalFrames },
+		// (_, i) => `/ThemeSwitch1/yellow ver MERGED - ${i + 1}.png`
 		(_, i) => `/ThemeSwitch2/Blue ver MERGED - ${i + 1}.png`
 	);
 	const lightToDarkFrames = [...allFrames].reverse();
@@ -59,6 +60,13 @@
 	{#if isAnimating}
 		<img class="frame-img" src={frameList[frame]} alt="theme animation" />
 	{:else}
+		<!-- <img
+			class="frame-img"
+			src={current === 'light'
+				? '/ThemeSwitch1/yellow ver MERGED - 11.png'
+				: '/ThemeSwitch1/yellow ver MERGED - 1.png'}
+			alt={current + ' theme'}
+		/> -->
 		<img
 			class="frame-img"
 			src={current === 'light'

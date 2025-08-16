@@ -12,7 +12,7 @@
 		Join a Cohort
 	</h1>
 	<div
-		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] px-10 pt-8 pb-12"
+		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12"
 	>
 		<h1 class="mb-6 text-3xl font-bold text-[color:var(--color-accent-2)]">How to do it?</h1>
 		<h5 class="mb-10 text-base text-[color:var(--color-text)]">
