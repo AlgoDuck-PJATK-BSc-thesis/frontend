@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ThemeToggle from '../../Components/LayoutComponents/ThemeToggle.svelte';
-	import logoutButton from '$lib/images/logout.png';
 	import coin from '$lib/images/coin.png';
 
 	let coins = 5000;
@@ -20,7 +19,7 @@
 
 <div class="w-full overflow-x-auto">
 	<header
-		class="font-body sticky top-0 z-[100] flex min-w-max items-center justify-between gap-4 border-b-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-4 text-[color:var(--color-text)] md:px-8"
+		class="font-body sticky top-0 z-[100] flex min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
 	>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
@@ -48,7 +47,7 @@
 		</div>
 
 		<nav class="ml-6">
-			<ul class="m-0 flex list-none gap-6 p-0 tracking-wider whitespace-nowrap">
+			<ul class="mr-35 flex list-none gap-6 font-medium tracking-wider whitespace-nowrap">
 				<li>
 					<a
 						href="/home"
@@ -69,20 +68,20 @@
 				</li>
 				<li>
 					<a
-						href="/contest"
-						aria-current={$page.url.pathname === '/contest' ? 'page' : undefined}
-						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
-					>
-						Contest
-					</a>
-				</li>
-				<li>
-					<a
 						href="/Shop"
 						aria-current={$page.url.pathname === '/Shop' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Shop
+					</a>
+				</li>
+				<li>
+					<a
+						href="/contest"
+						aria-current={$page.url.pathname === '/contest' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					>
+						Contest
 					</a>
 				</li>
 				<li>

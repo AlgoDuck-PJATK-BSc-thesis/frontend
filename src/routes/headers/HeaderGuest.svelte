@@ -6,17 +6,18 @@
 	function toggleLang() {
 		currentLang = currentLang === '🇺🇸' ? '🇵🇱' : '🇺🇸';
 	}
+	
 </script>
 
 <header
-	class="font-body sticky top-0 z-50 flex items-center justify-between border-b-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-8 py-4 text-[color:var(--color-text)]"
+	class="font-body sticky top-0 z-50 flex items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-8 py-4 text-[color:var(--color-text)]"
 >
 	<a href="/" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
 		BEETCODE
 	</a>
 
 	<nav>
-		<ul class="m-0 flex list-none gap-7 p-0 tracking-wide">
+		<ul class="mr-16 flex list-none gap-7 p-0 font-medium tracking-widest">
 			<li>
 				<a
 					href="/"
@@ -28,20 +29,20 @@
 			</li>
 			<li>
 				<a
-					href="/aboutus"
-					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					About Us
-				</a>
-			</li>
-			<li>
-				<a
 					href="/learnmore"
 					aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}
 					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Learn More
+				</a>
+			</li>
+			<li>
+				<a
+					href="/aboutus"
+					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
+					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					About Us
 				</a>
 			</li>
 			<li>
@@ -62,35 +63,21 @@
 					Sign Up
 				</a>
 			</li>
-
-			<li>
-				<div class="ml-4 flex">
-					<button
-						onclick={toggleLang}
-						class="cursor-pointer border-none bg-transparent p-0 text-2xl leading-none"
-						aria-label="Toggle Language"
-					>
-						{currentLang}
-					</button>
-				</div>
-			</li>
-
 			<li>
 				<div class="relative h-[1rem] w-[1rem]">
 					<ThemeToggle />
 				</div>
 			</li>
-
 		</ul>
 	</nav>
 
 	<div class="flex items-center gap-4">
-		<!-- <button
+		<button
 			onclick={toggleLang}
-			class="cursor-pointer border-none bg-transparent p-0 text-xl leading-none"
+			class="cursor-pointer border-none bg-transparent text-2xl leading-none"
 			aria-label="Toggle Language"
 		>
 			{currentLang}
-		</button> -->
+		</button>
 	</div>
 </header>

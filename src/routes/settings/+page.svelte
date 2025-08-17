@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '../../Components/ButtonComponents/Button.svelte';
+	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 
 	let username = 'OrbitOwl';
 	let email = 'orbitowl@gmail.com';
@@ -77,17 +78,16 @@
 	<title>Settings – Beetcode</title>
 </svelte:head>
 
-<section class="flex h-[calc(100vh-6rem)] justify-center gap-14 overflow-hidden p-10">
-	<div class="flex w-66 flex-shrink-0 flex-col gap-2">
-		<!-- <h2
-			class="mt-2 mb-6 ml-2 text-6xl font-bold text-[color:var(--color-primary)]"
+<section class="mt-8 flex h-[calc(100vh-6rem)] justify-center gap-10 overflow-hidden p-8">
+	<div class="flex w-74 flex-shrink-0 flex-col gap-2 overflow-auto">
+		<h2
+			class=" mb-8 ml-2 text-6xl font-bold text-[color:var(--color-primary)]"
 			style="font-family: var(--font-ariw9500);"
 		>
 			Settings
-		</h2> -->
-
-		<div
-			class="h-[70vh] w-74 flex-shrink-0 overflow-y-auto rounded-lg border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-4"
+		</h2>
+		<PixelFrame
+			className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 flex-shrink-0 "
 		>
 			<ul>
 				<li class="mt-2 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">
@@ -112,7 +112,7 @@
 					</button>
 				</li>
 
-				<li class="mt-8 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">Security</li>
+				<li class="mt-4 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">Security</li>
 
 				<li>
 					<button
@@ -131,7 +131,7 @@
 					</button>
 				</li>
 
-				<li class="mt-8 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">
+				<li class="mt-4 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">
 					Notifications
 				</li>
 
@@ -152,18 +152,18 @@
 					</button>
 				</li>
 			</ul>
-		</div>
+		</PixelFrame>
 	</div>
 
 	<div class="flex h-full flex-[0.5] flex-col justify-between gap-5 overflow-y-auto pr-4">
 		<div class="flex flex-col gap-5 overflow-y-auto pr-1 pb-4">
-			<div
+			<PixelFrame
 				id="language"
-				class="flex flex-col gap-4 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6"
 			>
-				<h2 class="text-lg font-normal text-[color:var(--color-text)]">Display Language</h2>
+				<h2 class="mb-4 text-lg font-normal text-[color:var(--color-text)]">Display Language</h2>
 
-				<div class="flex gap-4 text-sm text-[color:var(--color-text)]">
+				<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-text)]">
 					<label class="flex cursor-pointer items-center gap-2">
 						<input
 							type="radio"
@@ -173,7 +173,7 @@
 							class="peer hidden"
 						/>
 						<div
-							class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-tile)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
+							class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
 						></div>
 						English
 					</label>
@@ -187,21 +187,21 @@
 							class="peer hidden"
 						/>
 						<div
-							class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-tile)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-tile)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
+							class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] transition-colors after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
 						></div>
 						Polish
 					</label>
 				</div>
-			</div>
+			</PixelFrame>
 
-			<div
+			<PixelFrame
 				id="profile"
-				class="flex flex-col gap-5 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-5 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6"
 			>
-				<h2 class="text-lg font-normal text-[color:var(--color-text)]">Profile Information</h2>
+				<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">Profile Information</h2>
 
-				<label class="flex flex-col text-sm text-[color:var(--color-text)]">
-					<span class="mb-1">Username:</span>
+				<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<span class="mb-3">Username:</span>
 					<input
 						bind:value={username}
 						type="text"
@@ -209,51 +209,51 @@
 					/>
 				</label>
 
-				<label class="flex flex-col text-sm text-[color:var(--color-text)]">
-					<span class="mb-1">E-mail:</span>
+				<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<span class="mb-3">E-mail:</span>
 					<input
 						bind:value={email}
 						type="email"
 						class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-1 text-sm text-black"
 					/>
 				</label>
-			</div>
+			</PixelFrame>
 
-			<div
+			<PixelFrame
 				id="password"
-				class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6"
 			>
-				<h2 class="text-normal text-lg text-[color:var(--color-text)]">Password Settings</h2>
+				<h2 class="text-normal mb-3 text-lg text-[color:var(--color-text)]">Password Settings</h2>
 
 				<label class="flex flex-col text-sm text-[color:var(--color-text)]">
-					<span class="mb-[0.2rem]"> Current password: </span>
+					<span class="mb-3"> Current password: </span>
 					<input
 						type="password"
 						placeholder="********"
 						bind:value={currentPassword}
-						class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
+						class="font-body mb-3 border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
 					/>
 				</label>
 				<label class="flex flex-col text-xs text-[color:var(--color-text)]">
-					<span class="mb-[0.2rem]"> New password: </span>
+					<span class="mb-3"> New password: </span>
 					<input
 						type="password"
 						placeholder="********"
 						bind:value={newPassword}
-						class="font-body border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
+						class="font-body mb-3 border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
 					/>
 				</label>
-			</div>
+			</PixelFrame>
 
-			<div
+			<PixelFrame
 				id="2fa"
-				class="flex flex-col gap-4 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6"
 			>
-				<h2 class="text-lg font-normal text-[color:var(--color-text)]">
+				<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">
 					Two-Factor Authentication
 				</h2>
 				<div
-					class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+					class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
 				>
 					<span> Enable 2FA: </span>
 					<input
@@ -266,15 +266,15 @@
 				<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 					{twoFactor ? 'Enabled' : 'Disabled'}
 				</p>
-			</div>
+			</PixelFrame>
 
-			<div
+			<PixelFrame
 				id="email"
-				class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6"
 			>
 				<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">Email Notifications</h2>
 				<div
-					class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+					class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
 				>
 					<span> Receive updates: </span>
 					<input
@@ -287,15 +287,15 @@
 				<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 					{emailNotifs ? 'On' : 'Off'}
 				</p>
-			</div>
+			</PixelFrame>
 
-			<div
+			<PixelFrame
 				id="push"
-				class="flex flex-col gap-6 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-3))] p-4"
+				className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6"
 			>
 				<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">Push Notifications</h2>
 				<div
-					class="flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+					class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
 				>
 					<span> Enable push: </span>
 					<input
@@ -308,7 +308,7 @@
 				<p class="-mt-2 text-xs text-[color:var(--color-text)]">
 					{pushNotifs ? 'On' : 'Off'}
 				</p>
-			</div>
+			</PixelFrame>
 		</div>
 		<div id="logout" class="mt-2 flex w-full items-center justify-between gap-4">
 			<Button

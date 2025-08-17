@@ -1,4 +1,7 @@
 <script lang="ts">
+	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import PixelFrameMini from '../../Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+
 	import gold from '$lib/images/leaderboard/Gold.png';
 	import silver from '$lib/images/leaderboard/Silver.png';
 	import bronze from '$lib/images/leaderboard/Bronze.png';
@@ -48,57 +51,59 @@
 </svelte:head>
 
 <section
-	class="font-body flex max-h-[calc(100vh-6rem)] flex-col items-center gap-6 overflow-y-auto pt-8 pr-8 pb-0 pl-8"
+	class="font-body flex max-h-[calc(100vh-4rem)] flex-col items-center gap-6 overflow-y-auto pt-8 pr-8 pb-0 pl-8"
 >
 	<h1
-		class="mt-4 mb-2 text-6xl font-bold text-[color:var(--color-primary)]"
+		class="mt-8 mb-4 text-6xl font-bold text-[color:var(--color-primary)]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		Leaderboard
 	</h1>
-	<div
-		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-10 pt-8 pb-12"
+	<PixelFrame
+		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-10 pt-8 pb-12"
 	>
 		<div class="mt-8 flex items-end justify-center gap-8">
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
 				>
 					2
 				</div>
 				<img src={trophy} alt="Silver Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-semibold text-[color:var(--color-accent-2)]">
 					{topUsers[1].name}
 				</div>
 			</div>
 
 			<div class="relative flex -translate-y-2 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
 				>
 					1
 				</div>
 				<img src={trophy} alt="Gold Trophy" class="mb-2 h-24 w-24" />
-				<div class="text-xl font-bold text-[color:var(--color-accent-2)]">
+				<div class="text-xl font-semibold text-[color:var(--color-accent-2)]">
 					{topUsers[0].name}
 				</div>
 			</div>
 
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-tile)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
 				>
 					3
 				</div>
 				<img src={trophy} alt="Bronze Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-semibold text-[color:var(--color-accent-2)]">
 					{topUsers[2].name}
 				</div>
 			</div>
 		</div>
-	</div>
+	</PixelFrame>
 
-	<div class="flex h-max w-full max-w-2xl flex-col text-[color:var(--color-text)]">
+	<PixelFrame
+		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
+	>
 		{#each sortedUsers as user, i}
 			<div class="flex items-center justify-between rounded px-4 py-2">
 				<div class="flex items-center gap-2">
@@ -112,15 +117,15 @@
 					</span>
 				</div>
 
-				<div
-					class="flex items-center gap-1 rounded-full border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-tile)] px-3 py-0.5 text-sm text-[color:var(--color-text)]"
+				<PixelFrameMini
+					className="flex items-center gap-1 bg-[color:var(--color-tile)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
 				>
 					<span>{user.points}</span>
 					<span>⭐</span>
-				</div>
+				</PixelFrameMini>
 			</div>
 		{/each}
-	</div>
+	</PixelFrame>
 
 	<!-- <div class="mt-4 flex items-center gap-4 text-sm text-[color:var(--color-text)]">
 		<button

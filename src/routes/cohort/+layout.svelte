@@ -1,5 +1,6 @@
 <script>
 	import Button from '../../Components/ButtonComponents/Button.svelte';
+	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 
 	let cohortName = '';
 </script>
@@ -11,10 +12,10 @@
 	>
 		Join a Cohort
 	</h1>
-	<div
-		class="flex w-full max-w-2xl flex-col items-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12"
+	<PixelFrame
+		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12"
 	>
-		<h1 class="mb-6 text-3xl font-bold text-[color:var(--color-accent-2)]">How to do it?</h1>
+		<h1 class="mb-6 text-3xl font-semibold text-[color:var(--color-accent-2)]">How to do it?</h1>
 		<h5 class="mb-10 text-base text-[color:var(--color-text)]">
 			You can either create your own or ask a friend for an invite link
 		</h5>
@@ -34,5 +35,5 @@
 			labelFontWeight="normal"
 			onclick={() => alert(`Creating cohort: ${cohortName}`)}
 		/>
-	</div>
+	</PixelFrame>
 </section>
