@@ -2,7 +2,7 @@
 	export let className = '';
 </script>
 
-<div {...$$restProps} class={`relative inline-block rounded-[12px] ${className}`}>
+<div {...$$restProps} class={`relative inline-block rounded-[15px] ${className}`}>
 	<div class="absolute top-0 right-[6px] left-[6px] h-[3px] bg-[color:var(--color-accent-1)]"></div>
 	<div
 		class="absolute right-[6px] bottom-0 left-[6px] h-[3px] bg-[color:var(--color-accent-1)]"

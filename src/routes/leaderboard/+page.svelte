@@ -70,7 +70,7 @@
 					2
 				</div>
 				<img src={trophy} alt="Silver Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-semibold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
 					{topUsers[1].name}
 				</div>
 			</div>
@@ -82,7 +82,7 @@
 					1
 				</div>
 				<img src={trophy} alt="Gold Trophy" class="mb-2 h-24 w-24" />
-				<div class="text-xl font-semibold text-[color:var(--color-accent-2)]">
+				<div class="text-xl font-bold text-[color:var(--color-accent-2)]">
 					{topUsers[0].name}
 				</div>
 			</div>
@@ -94,7 +94,7 @@
 					3
 				</div>
 				<img src={trophy} alt="Bronze Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-semibold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
 					{topUsers[2].name}
 				</div>
 			</div>
@@ -118,7 +118,7 @@
 				</div>
 
 				<PixelFrameMini
-					className="flex items-center gap-1 bg-[color:var(--color-tile)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+					className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
 				>
 					<span>{user.points}</span>
 					<span>⭐</span>

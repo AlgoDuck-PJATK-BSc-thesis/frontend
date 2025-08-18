@@ -17,7 +17,7 @@
 	</a>
 
 	<nav>
-		<ul class="mr-16 flex list-none gap-7 p-0 font-medium tracking-widest">
+		<ul class="mr-18 flex list-none gap-7 p-0 font-medium tracking-widest">
 			<li>
 				<a
 					href="/"

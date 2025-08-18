@@ -79,7 +79,7 @@
 </svelte:head>
 
 <section class="mt-8 flex h-[calc(100vh-6rem)] justify-center gap-10 overflow-hidden p-8">
-	<div class="flex w-74 flex-shrink-0 flex-col gap-2 overflow-auto">
+	<div class="flex w-75 flex-shrink-0 flex-col gap-2 overflow-auto">
 		<h2
 			class=" mb-8 ml-2 text-6xl font-bold text-[color:var(--color-primary)]"
 			style="font-family: var(--font-ariw9500);"
@@ -90,7 +90,7 @@
 			className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 flex-shrink-0 "
 		>
 			<ul>
-				<li class="mt-2 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">
+				<li class="mt-2 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">
 					Personal Details
 				</li>
 
@@ -112,7 +112,7 @@
 					</button>
 				</li>
 
-				<li class="mt-4 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">Security</li>
+				<li class="mt-4 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">Security</li>
 
 				<li>
 					<button
@@ -131,7 +131,7 @@
 					</button>
 				</li>
 
-				<li class="mt-4 ml-3 text-xl font-semibold text-[color:var(--color-accent-2)]">
+				<li class="mt-4 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">
 					Notifications
 				</li>
 

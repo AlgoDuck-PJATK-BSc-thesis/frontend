@@ -13,17 +13,17 @@
 		Join a Cohort
 	</h1>
 	<PixelFrame
-		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12"
+		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-10 pt-8 pb-12"
 	>
-		<h1 class="mb-6 text-3xl font-semibold text-[color:var(--color-accent-2)]">How to do it?</h1>
-		<h5 class="mb-10 text-base text-[color:var(--color-text)]">
+		<h1 class="mb-3 mt-4  text-2xl font-bold tracking-normal text-[color:var(--color-accent-2)]">How to do it?</h1>
+		<h5 class="mb-8 text-base text-[color:var(--color-text)]">
 			You can either create your own or ask a friend for an invite link
 		</h5>
 
 		<input
 			bind:value={cohortName}
-			placeholder="type a name"
-			class="mb-6 w-full rounded border bg-white px-4 py-2 text-black"
+			placeholder="type a name for a new cohort"
+			class="mb-10 w-full rounded border bg-white px-4 py-2 text-black"
 		/>
 
 		<Button

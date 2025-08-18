@@ -60,17 +60,18 @@
 
 	--color-access-yellow: #f2b500;
 	--color-access-black: #000000;
+
 	--color-bg-a11y: #ffffff;
 	--color-text-a11y: #000000;
 
 	--color-bg: #e3f7ff;
 	--color-bg-2: #fef8ff;
-	--color-text: #071041;
+	--color-text: #254f64;
 	--color-primary: #fd9fff;
 
 	--color-tile: #99e0ff;
 	--color-accent-1: #77c5e6;
-	--color-accent-2: #3c5efc;
+	--color-accent-2: #386682c5;
 	--color-accent-3: #c4e9f8;
 	--color-accent-4: #97deff;
 
@@ -91,7 +92,7 @@
 	--color-primary: #1cd6ff;
 
 	--color-tile: #124575;
-	--color-accent-1: #2978ac;
+	--color-accent-1: #3781b3;
 	--color-accent-2: #7fd2ff;
 	--color-accent-3: #105584;
 	--color-accent-4: #0b3b5c;
@@ -117,8 +118,8 @@ html[data-contrast='1'] {
 	--color-bg-2: var(--color-access-black);
 	--color-text: var(--color-access-yellow);
 	--color-primary: var(--color-access-yellow);
+	
 	--color-tile: var(--color-access-black);
-
 	--color-accent-1: var(--color-access-yellow);
 	--color-accent-2: var(--color-access-yellow);
 	--color-accent-3: var(--color-access-black);
@@ -138,8 +139,8 @@ html[data-contrast='2'] {
 	--color-bg-2: var(--color-access-yellow);
 	--color-text: var(--color-access-black);
 	--color-primary: var(--color-access-black);
+	
 	--color-tile: var(--color-access-yellow);
-
 	--color-accent-1: var(--color-access-black);
 	--color-accent-2: var(--color-access-black);
 	--color-accent-3: var(--color-access-yellow);
