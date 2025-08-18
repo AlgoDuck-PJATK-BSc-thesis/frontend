@@ -59,13 +59,15 @@
 	>
 		Leaderboard
 	</h1>
-	<PixelFrame
-		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-10 pt-8 pb-12"
+	
+
+	<div
+		class="flex w-full max-w-2xl flex-col items-center px-10 pt-2 pb-6"
 	>
 		<div class="mt-8 flex items-end justify-center gap-8">
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
 				>
 					2
 				</div>
@@ -77,7 +79,7 @@
 
 			<div class="relative flex -translate-y-2 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
 				>
 					1
 				</div>
@@ -89,7 +91,7 @@
 
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-accent-3)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
 				>
 					3
 				</div>
@@ -99,7 +101,7 @@
 				</div>
 			</div>
 		</div>
-	</PixelFrame>
+	</div>
 
 	<PixelFrame
 		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"

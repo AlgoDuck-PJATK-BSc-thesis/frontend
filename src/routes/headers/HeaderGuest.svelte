@@ -17,12 +17,12 @@
 	</a>
 
 	<nav>
-		<ul class="mr-18 flex list-none gap-7 p-0 font-medium tracking-widest">
+		<ul class="mr-16 flex list-none gap-7 p-0 font-semibold tracking-wide">
 			<li>
 				<a
 					href="/"
 					aria-current={$page.url.pathname === '/' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					class="tracking-normal text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Home
 				</a>
@@ -31,7 +31,7 @@
 				<a
 					href="/learnmore"
 					aria-current={$page.url.pathname === '/learnmore' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					class="tracking-normal text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Learn More
 				</a>
@@ -40,7 +40,7 @@
 				<a
 					href="/aboutus"
 					aria-current={$page.url.pathname === '/about' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					class="tracking-normal text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					About Us
 				</a>
@@ -49,7 +49,7 @@
 				<a
 					href="/login"
 					aria-current={$page.url.pathname === '/login' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					class="tracking-normal text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Log In
 				</a>
@@ -58,7 +58,7 @@
 				<a
 					href="/signup"
 					aria-current={$page.url.pathname === '/signup' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					class="tracking-normal text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Sign Up
 				</a>

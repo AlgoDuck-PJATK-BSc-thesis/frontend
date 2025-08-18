@@ -47,7 +47,7 @@
 		</div>
 
 		<nav class="ml-6">
-			<ul class="mr-35 flex list-none gap-6 font-medium tracking-wider whitespace-nowrap">
+			<ul class="mr-35 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
 				<li>
 					<a
 						href="/home"
