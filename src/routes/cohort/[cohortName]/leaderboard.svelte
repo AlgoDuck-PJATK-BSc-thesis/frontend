@@ -99,7 +99,7 @@
 
 			{#each sortedUsers as user, i}
 				<div
-					class={`mx-auto mb-1 flex w-full max-w-[30rem] items-center justify-between rounded py-2 pr-8 ${i === sortedUsers.length - 1 ? 'pb-2' : ''}`}
+					class={`mx-auto mb-1 flex w-full max-w-[30rem] items-center justify-between rounded py-2 pr-8 ${i === sortedUsers.length - 1 ? 'mb-10' : ''}`}
 				>
 					<div class="flex items-center gap-2">
 						<span class="min-w-[3.5rem] text-right">
