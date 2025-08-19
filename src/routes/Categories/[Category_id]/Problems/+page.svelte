@@ -64,7 +64,7 @@ const handleResizeLeave = (e: MouseEvent) => {
             <li class="m-1">
               {@render problemCard(
                   { 
-                    id: `some-id-${i}`,
+                    id: `3152daea-43cd-426b-be3b-a7e6d0e376e1`,
                     description: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Repellat asperiores nemo suscipit atque, consequuntur animi quia consequatur nihil aut alias expedita quam laborum necessitatibus in neque? Nemo aliquid laborum nostrum?",
                     tags: ["#tag1", "#tag2"],
                     ownedStars: i % 3, 

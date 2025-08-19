@@ -2,16 +2,16 @@
   import { onDestroy, onMount } from "svelte";
 
   import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
-  import type { ExerciseData } from "../../../../../../Types/ExerciseData";
 
   import { userPreferences } from "../../../../../../Stores/theme";
   import { parseComputedDimensions, parseOptionalDimensions } from "../../../../../../Utils/index";
 	import HelperDuck from "../../../../../../Components/CodingPageComponents/HelperDuck.svelte";
-	import ExerciseInformation from "../../../../../../Components/CodingPageComponents/ExerciseInformation.svelte";
+	import type { Problem } from "../../../../../../Types/Categories/Problem";
+	import type { ExecResponse } from "../../../../../../Types";
 
-  let { data } : {data: ExerciseData} = $props();
+  let { data } : {data: Problem} = $props();
 
-  let userCode: string = $state(data.template);
+  let userCode: string = $state(data.templateContents);
 
   let isDraggingHorizontal: boolean = $state(false);
   let isDraggingVertical: boolean = $state(false);
@@ -54,6 +54,22 @@
   
   let horizontalResizeBar: HTMLElement;
 
+  let htmlDescriptionDiv: HTMLElement;
+  let htmlTestCaseDiv: HTMLElement;
+  let htmlControlDiv: HTMLElement;
+
+  let htmlDescriptionDivChevron: SVGSVGElement;
+  let htmlTestCaseDivChevron: SVGSVGElement;
+  let htmlControlDivChevron: SVGSVGElement;
+
+  const defaultTileHeight: number = 40; 
+
+  let testCaseIndex: number = $state(0);
+  let testCaseResults: Array<boolean> = $state([]);
+
+  let waitingForServerResponse: boolean = $state(false);
+  let serverResponse: ExecResponse | null = $state(null);
+
   const horizontalResizeBarComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
     if (!horizontalResizeBar) return undefined;
     return getComputedStyle(horizontalResizeBar);
@@ -70,6 +86,7 @@
     For some reason the theme passed to getMonacoTheme() does not count as a referenced state???
      */
     theme = theme;
+    terminalDiv.style.background = theme === "light" ? "#fffffe" : "#1e1e1e";
     monaco?.editor.setTheme(getMonacoTheme(theme));
   });
 
@@ -85,6 +102,8 @@
   }
 
   onMount(async () => {
+    toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400);
+    toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)
     calculateMountedSizing();
     setupDynamicElementSizing();
     try {      
@@ -105,6 +124,7 @@
     } catch (error) {
       console.error(error);
     } 
+    
   });
 
   onDestroy(() => {
@@ -154,6 +174,95 @@
     actualScrollBarHorizontal.style.transform = `translate(-50%)`;
   }
 
+  const toggleTile = (elementToToggle: HTMLElement, chevron: SVGSVGElement,  defaultHeight: number, expandedHeight: number) => {
+    chevron.style.transition = 'all 0.3s ease';
+    if (!(chevron.style.rotate === "180deg")){
+      expandTile(elementToToggle, expandedHeight);
+      chevron.style.rotate = "180deg"
+    }else{
+      shrinkTile(elementToToggle, defaultHeight);
+      chevron.style.rotate = "0deg"
+    }
+  };
+
+  const expandTile = (elementToToggle: HTMLElement, expandedHeight: number) => {
+    elementToToggle.style.height = `${expandedHeight}px`;
+    elementToToggle.style.transition = 'all 0.3s ease';
+  }
+  
+  const shrinkTile = (elementToToggle: HTMLElement, defaultHeight: number) => {
+    elementToToggle.style.height = `${defaultHeight}px`;
+  }
+
+
+  const getCurrentContent = (): string => {
+    if (!editor) return '';
+    return editor.getValue();
+  }
+
+  const executeCode = async () : Promise<void> => {
+    const userContent: string = getCurrentContent();
+    raf = requestAnimationFrame(animateSubmission);
+    waitingForServerResponse = true;
+    const result = await fetch("http://localhost:8080/api/Executor/dry",
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        CodeB64: `${btoa(userContent)}`,
+        Lang: "java",
+        ExerciseId: data.problemId,
+      })
+    });
+
+    serverResponse = await result.json();
+    waitingForServerResponse = false;    
+  }
+
+  const submitCode = async () : Promise<void> => {
+    const userContent: string = getCurrentContent();
+    raf = requestAnimationFrame(animateSubmission);
+    waitingForServerResponse = true;
+    const result = await fetch("http://localhost:8080/api/Executor/full",
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({
+        CodeB64: `${btoa(userContent)}`,
+        Lang: "java",
+        ExerciseId: data.problemId,
+      })
+    });
+
+    serverResponse = await result.json();
+    waitingForServerResponse = false;    
+  }
+
+  const prevTestCase = () : void => {
+    testCaseIndex--;
+  }
+
+  const nextTestCase = () : void => {
+    testCaseIndex++;
+  }
+
+
+  const getBorderColor = (index: number, type: 'input' | 'output'): string => {
+  if (testCaseResults.length === 0 || index >= testCaseResults.length) {
+    return 'border-[var(--color-accent-1)]';
+  }
+  
+  const passed = testCaseResults[index];
+  if (passed) {
+    return 'border-green-500';
+  } else {
+    return 'border-red-500'; 
+  }
+};
 
   const handleDownHorizontal = (e: MouseEvent) => {
     e.preventDefault();
@@ -243,7 +352,7 @@
       if(theme === "dark"){
         verticalResizeBar.style.background = "rgba(255,255,255,0.35)";
       }else{
-        verticalResizeBar.style.background = "#FF0000";
+        verticalResizeBar.style.background = "rgba(0,0,0,0.65)";
       }
     }else {
       isVerticalResized = false;
@@ -266,7 +375,7 @@
       if(theme === "dark"){
         horizontalResizeBar.style.background = "rgba(255,255,255,0.35)";
       }else{
-        horizontalResizeBar.style.background = "#FF0000";
+        horizontalResizeBar.style.background = "rgba(0,0,0,0.65)";
       }
     }else{
       isHorizontalResized = false;
@@ -324,6 +433,7 @@
       }
     }
   }
+
   const returnInfoDiv = (): void => {
     const bodyRect: DOMRect = document.body.getBoundingClientRect();
     dataDiv.style.width = `${bodyRect.width * 0.2}px`;
@@ -340,14 +450,33 @@
     isTerminalDivSnappedToBottom = false;
   }
 
+  let frameCounter: number  = 0;
+  let raf: number;
+  let dotCounter: number = 0;
+
+  const animateSubmission = () => {
+    if (waitingForServerResponse){
+      if (frameCounter % 25 == 0){
+        frameCounter = 0;
+        dotCounter++;
+        dotCounter %= 4;
+        terminalContents.innerText = `Executing${".".repeat(dotCounter)}`;
+      }
+      frameCounter++;
+      raf = requestAnimationFrame(animateSubmission);
+    }else{
+      cancelAnimationFrame(raf);
+      terminalContents.style.whiteSpace = 'pre-wrap';
+      terminalContents.innerText = `Total execution time: ${100}ms (not real yet)\n`;
+      setTimeout(()=>{
+        terminalContents.innerText = `${terminalContents.innerText}${serverResponse!.stdOutput}`;
+      }, 1000);
+    }
+  }
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<main bind:this={mainDiv} class="flex h-[88vh] w-full bg-[var(--color-bg)]">
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div bind:this={resizeVerticalButton} class="h-[20%] w-6 rounded-r-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-l-0 fixed left-0 top-[40%] invisible z-999 flex flex-col justify-center items-center hover:cursor-pointer" onclick={returnInfoDiv}>
+<main bind:this={mainDiv} class="flex h-[94vh] w-full bg-[var(--color-bg)]">
+  <button bind:this={resizeVerticalButton} class="h-[20%] w-6 rounded-r-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-l-0 fixed left-0 top-[40%] invisible z-999 flex flex-col justify-center items-center hover:cursor-pointer" onclick={returnInfoDiv}>
     <div class="transform rotate-90 origin-center flex justify-start">
       <div class="mx-3">
         <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -356,49 +485,134 @@
       </div>
       <div>Details</div>  
     </div>
-</div>
+</button>
 
   <HelperDuck/>
 
-  <ExerciseInformation {data} {editor} bind:terminalContents bind:dataDiv/>
+  <div bind:this={dataDiv} class="flex flex-col text-center w-[30%] h-full overflow-hidden border-r-2 border-[#e6e6e6]">
+  <div class="flex justify-center text-l items-center w-full h-[20%]">
+    <span class="m-2">
+      {data.title}
+    </span>
+  </div>
+  <div class="w-full h-[80%] py-2 px-1 bg-[var(--color-tile)] text-xs overflow-scroll">
+    <!-- description -->
+      <div bind:this={htmlDescriptionDiv} class="w-full h-10 rounded-t-md overflow-hidden">
+        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400)}> 
+            <span style="user-select: none;">Description</span>
+            <svg bind:this={htmlDescriptionDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg> <!-- TODO placeholder so chill out Maja -->
+        </button>
+        <div class="w-full h-90 bg-[var(--color-bg)] flex flex-col justify-between">
+          <div class="bg-[var(--color-bg)] h-[90%] flex justify-start p-3">
+            <p>{data.description}</p>
+          </div>
+          <div class="flex justify-end items-center bg-[var(--color-bg)] h-[10%] p-3 mx-5 border-t-2 border-[var(--color-accent-1)]">
+            {#each ["tag 1", "tag 2", "tag 3"] as tag}
+              <p class="mx-1">{`#${tag}`}</p>
+            {/each}
+          </div>  
+          
+        </div>
+      </div>
+      <div bind:this={htmlTestCaseDiv} class="w-full h-10 overflow-hidden">
+        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlTestCaseDiv, htmlTestCaseDivChevron, defaultTileHeight, 240)}> 
+            <span style="user-select: none;">Test Cases</span> <!-- Figure out why this works in inline style but not tailwind -->
+            <svg bind:this={htmlTestCaseDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
+        </button>
+        <div class="w-full h-50 overflow-hidden bg-[var(--color-bg)]"> 
+          <div class="flex flex-col justify-start py-2 px-5">
+            {#each data.testCases as testCase, i (i)}
+              <div>
+                <div class="flex justify-start p-1">
+                  <span>Test Data</span>
+                </div>
+                <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(i, 'input')}">
+                  <span class="flex justify-start">{testCase.display}</span>
+                </div>
 
-  <div bind:this={resizeBarVerticalDiv}
+                <div class="flex justify-start pt-3 p-1">
+                  <span>Expected Output</span>
+                </div>
+                  <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(i, 'output')}" >
+                    <span class="flex justify-start">{testCase.displayRes}</span>
+                </div>
+              </div>
+            {/each}
+            <div class="flex justify-between p-5">
+              {#if testCaseIndex > 0}
+                <button class="hover:cursor-pointer w-[10%]" onclick={prevTestCase}>&lt;</button>
+              {:else}
+                <p class="w-[10%]"></p>
+              {/if}
+              <p>{`${testCaseIndex + 1}/${data.testCases.length}`}</p>
+              {#if testCaseIndex < 2}
+                <button class="hover:cursor-pointer w-[10%]" onclick={nextTestCase}>&gt;</button>
+              {:else}
+                <p class="w-[10%]"></p>
+              {/if}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div bind:this={htmlControlDiv} class="w-full h-10 rounded-b-md overflow-hidden">
+        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)}> 
+            <span class="select-none">Control</span>
+            <svg bind:this={htmlControlDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
+        </button>
+        <div class="w-full h-15 p-2 bg-[var(--color-bg)] flex justify-center">
+          <button class="w-[50%] hover:cursor-pointer rounded-l-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-r-1 border-[var(--color-primary)]"
+            onclick={executeCode}
+          >
+            <span style="user-select: none;">Execute</span> 
+          </button>
+          <button class="w-[50%] hover:cursor-pointer rounded-r-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-l-1 border-[var(--color-primary)]"
+            onclick={submitCode}
+          >
+            <span style="user-select: none;">Submit</span>
+          </button>
+         </div>
+        </div>
+    </div>
+  </div> 
+
+  <button bind:this={resizeBarVerticalDiv}
     class="w-1 h-full relative overflow-visible" 
     class:hover:cursor-col-resize={!isDraggingHorizontal}
     onmouseenter={expandVerticalBarWrapper}
     onmouseleave={hideVerticalBarWrapper}
     onmousedown={handleDownHorizontal}
-    onmouseup={handleReleaseHorizontal}>
+    onmouseup={handleReleaseHorizontal}
+    aria-label="resize-bar">
 
-    <div bind:this={verticalResizeBar} class="h-full absolute flex flex-col justify-center items-center rounded-full">
+    <div bind:this={verticalResizeBar} class="h-full left-0 top-0 absolute flex flex-col justify-center items-center rounded-full">
       <div bind:this={verticalResizeBarAccent} class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
     </div>
 
-  </div>
+  </button>
 
   {@render CodeEditor()}
 </main>
 
 
 {#snippet CodeEditor()}
-  <div bind:this={codeDiv} class="w-full h-full flex flex-col px-1 relative">
-      <div bind:this={monacoDiv} class="w-full h-[85%] rounded-t-md overflow-hidden" bind:this={editorContainer}></div>
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div bind:this={resizeBarHorizontalDiv}
+  <div bind:this={codeDiv} class="w-full h-full flex flex-col relative">
+      <div bind:this={monacoDiv} class="w-full h-[85%] overflow-hidden" bind:this={editorContainer}></div>
+        <button bind:this={resizeBarHorizontalDiv}
           class="h-1 w-full relative overflow-visible"
           class:hover:cursor-row-resize={!isDraggingVertical}
           onmouseenter={expandHorizontalBarWrapper}
           onmouseleave={hideHorizontalBarWrapper}
           onmousedown={handleDownVertical}
-          onmouseup={handleReleaseVertical}>
+          onmouseup={handleReleaseVertical}
+          aria-label="resize-bar">
           <div bind:this={horizontalResizeBar} class="w-full absolute flex justify-center items-center rounded-full">
             <div bind:this={horizontalResizeBarAccent} class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
           </div>
-        </div>
-      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] overflow-y-scroll overflow-x-clip rounded-b-md px-4 py-2">
+        </button>
+      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] overflow-y-scroll overflow-x-clip px-4 py-2">
           <span bind:this={terminalContents} class="font-mono">~/&gt;</span>
       </div>
-      <div bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
+      <button bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
         <div class="flex justify-center h-full w-full">
           <div class="h-10 w-10">
             <svg width="24px" height="24px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -408,6 +622,6 @@
           </div>
           <span>Terminal</span>  
         </div>
-      </div>
+      </button>
   </div>
 {/snippet}
