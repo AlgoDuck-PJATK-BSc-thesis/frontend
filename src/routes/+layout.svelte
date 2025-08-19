@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import HeaderGuest from './headers/HeaderGuest.svelte';
-	import HeaderUser from './headers/HeaderUser.svelte';
 	import '../app.css';
 
-	import { browser } from '$app/environment';
+	import HeaderGuest from './headers/HeaderGuest.svelte';
+	import HeaderUser from './headers/HeaderUser.svelte';
 
 	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButton.svelte';
 	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
@@ -22,7 +21,7 @@
 	let isLoggedIn =
 		path.startsWith('/home') ||
 		path.startsWith('/problems') ||
-		path.startsWith('/cohorts') ||
+		path.startsWith('/cohort') ||
 		path.startsWith('/contest') ||
 		path.startsWith('/store') ||
 		path.startsWith('/leaderboard') ||
