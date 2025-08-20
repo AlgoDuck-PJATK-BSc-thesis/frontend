@@ -78,16 +78,13 @@ const handleResizeLeave = (e: MouseEvent) => {
 </main>
 
 {#snippet problemCard(problemDescription: ProblemDescription)}
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div
+    <button
     onmouseenter={handleResizeEnter}
     onmouseleave={handleResizeLeave}
     onclick={()=>{
         goto(`./Problems/${problemDescription.id}/Solve`);
     }}
-    class="hover:cursor-pointer flex flex-col justify-start items-center h-20 px-3 py-1 bg-[var(--color-bg)] text-[var(--color-primary)] text-l rounded-sm "
-    >
+    class="hover:cursor-pointer flex flex-col justify-start items-center h-20 px-3 py-1 bg-[var(--color-bg)] text-[var(--color-primary)] text-l rounded-sm">
         <div class="w-full h-18 min-h-18 flex justify-between items-center">
           <p class="mx-1">Exercise title</p>
           <div class="flex justify-end">
@@ -117,5 +114,5 @@ const handleResizeLeave = (e: MouseEvent) => {
         <div class="w-full h-38 bg-[var(--color-tile)] rounded-xs">
           <!-- <p class="">Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis odio est vel eius nisi tempora? Minima itaque porro pariatur molestiae sit. Molestias dolorem beatae id quidem, iste numquam! Rem, impedit.</p> -->
         </div>
-    </div>
+    </button>
 {/snippet}

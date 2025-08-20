@@ -6,8 +6,9 @@
   import { userPreferences } from "../../../../../../Stores/theme";
   import { parseComputedDimensions, parseOptionalDimensions } from "../../../../../../Utils/index";
 	import HelperDuck from "../../../../../../Components/CodingPageComponents/HelperDuck.svelte";
-	import type { Problem } from "../../../../../../Types/Categories/Problem";
+	import type { Problem, TestCase } from "../../../../../../Types/Categories/Problem";
 	import type { ExecResponse } from "../../../../../../Types";
+	import Chevron from "./chevron.svelte";
 
   let { data } : {data: Problem} = $props();
 
@@ -51,24 +52,38 @@
   let horizontalResizeBarAccent: HTMLElement;
   let resizeVerticalButton: HTMLElement; // TODO come up with a better name here
   let resizeHorizontalButton: HTMLElement; // TODO come up with a better name here
+
+  let allTestCasesToggleChevron: HTMLDivElement | undefined = $state();
+  let publicTestCasesToggleChevron: HTMLDivElement | undefined = $state();
+  let privateTestCasesToggleChevron: HTMLDivElement | undefined = $state();
   
   let horizontalResizeBar: HTMLElement;
 
   let htmlDescriptionDiv: HTMLElement;
-  let htmlTestCaseDiv: HTMLElement;
   let htmlControlDiv: HTMLElement;
 
   let htmlDescriptionDivChevron: SVGSVGElement;
-  let htmlTestCaseDivChevron: SVGSVGElement;
   let htmlControlDivChevron: SVGSVGElement;
+
+  let htmlTestCaseDirectoryDiv: HTMLElement | null = $state(null);
+  let htmlPublicTestCaseDirectoryDiv: HTMLElement | null = $state(null);
+  let htmlPrivateTestCaseDirectoryDiv: HTMLElement | null = $state(null);
 
   const defaultTileHeight: number = 40; 
 
-  let testCaseIndex: number = $state(0);
-  let testCaseResults: Array<boolean> = $state([]);
-
   let waitingForServerResponse: boolean = $state(false);
   let serverResponse: ExecResponse | null = $state(null);
+
+  let terminalContentsString: string = $state("~/>");
+
+  let testCases: TestCase[] = $state(data.testCases);
+  let testCasesMappedById: Map<string, TestCase> = $derived.by(()=>{
+    const tmp: Map<string, TestCase> = new Map();
+    testCases.forEach(tc => tmp.set(tc.testCaseId, tc));
+    return tmp;
+  });
+
+  let previewedTestCase: TestCase | undefined = $state(data.testCases.at(0));
 
   const horizontalResizeBarComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
     if (!horizontalResizeBar) return undefined;
@@ -124,8 +139,8 @@
     } catch (error) {
       console.error(error);
     } 
-    
   });
+
 
   onDestroy(() => {
     try {
@@ -202,6 +217,7 @@
 
   const executeCode = async () : Promise<void> => {
     const userContent: string = getCurrentContent();
+    startTime = new Date().getTime();
     raf = requestAnimationFrame(animateSubmission);
     waitingForServerResponse = true;
     const result = await fetch("http://localhost:8080/api/Executor/dry",
@@ -218,11 +234,17 @@
     });
 
     serverResponse = await result.json();
+    endTime = new Date().getTime();
     waitingForServerResponse = false;    
   }
 
+
+  let startTime: number;
+  let endTime: number;
+
   const submitCode = async () : Promise<void> => {
     const userContent: string = getCurrentContent();
+    startTime = new Date().getTime();
     raf = requestAnimationFrame(animateSubmission);
     waitingForServerResponse = true;
     const result = await fetch("http://localhost:8080/api/Executor/full",
@@ -237,32 +259,17 @@
         ExerciseId: data.problemId,
       })
     });
-
     serverResponse = await result.json();
+    if (serverResponse){
+      serverResponse.testResults.forEach(tcr => {
+        if (testCasesMappedById.has(tcr.testId)){
+          testCasesMappedById.get(tcr.testId)!.isPassed = tcr.isTestPassed;
+        }
+      });
+    }
+    endTime = new Date().getTime();
     waitingForServerResponse = false;    
   }
-
-  const prevTestCase = () : void => {
-    testCaseIndex--;
-  }
-
-  const nextTestCase = () : void => {
-    testCaseIndex++;
-  }
-
-
-  const getBorderColor = (index: number, type: 'input' | 'output'): string => {
-  if (testCaseResults.length === 0 || index >= testCaseResults.length) {
-    return 'border-[var(--color-accent-1)]';
-  }
-  
-  const passed = testCaseResults[index];
-  if (passed) {
-    return 'border-green-500';
-  } else {
-    return 'border-red-500'; 
-  }
-};
 
   const handleDownHorizontal = (e: MouseEvent) => {
     e.preventDefault();
@@ -460,17 +467,64 @@
         frameCounter = 0;
         dotCounter++;
         dotCounter %= 4;
-        terminalContents.innerText = `Executing${".".repeat(dotCounter)}`;
+        terminalContentsString = `Executing${".".repeat(dotCounter)}`;
       }
       frameCounter++;
       raf = requestAnimationFrame(animateSubmission);
     }else{
       cancelAnimationFrame(raf);
-      terminalContents.style.whiteSpace = 'pre-wrap';
-      terminalContents.innerText = `Total execution time: ${100}ms (not real yet)\n`;
+      if (serverResponse){     
+        // TODO this is meant to use error codes not this shitty string checking but the distributed nature of the executino pipeline will make it sligthly more time consuming than I can bare atm
+        if (serverResponse.stdError !== ""){
+          terminalContentsString = `${serverResponse.stdError}`;
+        } else{
+          terminalContentsString = `Total execution time: ${endTime - startTime}ms\nReal execution time: ${serverResponse.executionTime}ms (gotta make it more precise by not using linux "time")\n`;
+        }  
+      }
       setTimeout(()=>{
-        terminalContents.innerText = `${terminalContents.innerText}${serverResponse!.stdOutput}`;
+        terminalContentsString = `${terminalContentsString}\n${serverResponse!.stdOutput}`;
       }, 1000);
+    }
+  }
+
+  let isTerminalShown: boolean = $state(true);
+  let isTestCaseContainerShown: boolean = $state(false);
+
+
+  // TODO could this use cleaning up? Yes. Emphatically. Am I gonna do it now? ... No
+  const toggleTestCaseContainer = () => {
+    if (!htmlTestCaseDirectoryDiv || !allTestCasesToggleChevron) return;
+    const htmlTestCaseDirectoryDivComputedStyle: CSSStyleDeclaration = getComputedStyle(htmlTestCaseDirectoryDiv);
+    if (htmlTestCaseDirectoryDivComputedStyle.height === "0px"){
+      allTestCasesToggleChevron.style.transform = ""
+      htmlTestCaseDirectoryDiv.style.height = "";
+    }else{
+      allTestCasesToggleChevron.style.transform = "rotate(-90deg)"
+      htmlTestCaseDirectoryDiv.style.height = "0px";
+    }
+  }
+
+  const togglePublicTestCaseDiv = () => {
+    if (!htmlPublicTestCaseDirectoryDiv || !publicTestCasesToggleChevron) return;
+    const htmlPublicTestCaseDirectoryDivComputedStyle: CSSStyleDeclaration = getComputedStyle(htmlPublicTestCaseDirectoryDiv);
+    if (htmlPublicTestCaseDirectoryDivComputedStyle.height === "0px"){
+      htmlPublicTestCaseDirectoryDiv.style.height = "";
+      publicTestCasesToggleChevron.style.transform = ""
+    }else{
+      htmlPublicTestCaseDirectoryDiv.style.height = "0px";
+      publicTestCasesToggleChevron.style.transform = "rotate(-90deg)"
+    }
+  }
+
+  const togglePrivateTestCaseDiv = () => {
+    if (!htmlPrivateTestCaseDirectoryDiv || !privateTestCasesToggleChevron) return;
+    const htmlPrivateTestCaseDirectoryDivComputedStyle: CSSStyleDeclaration = getComputedStyle(htmlPrivateTestCaseDirectoryDiv);
+    if (htmlPrivateTestCaseDirectoryDivComputedStyle.height === "0px"){
+      htmlPrivateTestCaseDirectoryDiv.style.height = "";
+      privateTestCasesToggleChevron.style.transform = ""
+    }else{
+      htmlPrivateTestCaseDirectoryDiv.style.height = "0px";
+      privateTestCasesToggleChevron.style.transform = "rotate(-90deg)"
     }
   }
 </script>
@@ -495,107 +549,62 @@
       {data.title}
     </span>
   </div>
-  <div class="w-full h-[80%] py-2 px-1 bg-[var(--color-tile)] text-xs overflow-scroll">
-    <!-- description -->
-      <div bind:this={htmlDescriptionDiv} class="w-full h-10 rounded-t-md overflow-hidden">
-        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400)}> 
-            <span style="user-select: none;">Description</span>
-            <svg bind:this={htmlDescriptionDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg> <!-- TODO placeholder so chill out Maja -->
-        </button>
-        <div class="w-full h-90 bg-[var(--color-bg)] flex flex-col justify-between">
-          <div class="bg-[var(--color-bg)] h-[90%] flex justify-start p-3">
-            <p>{data.description}</p>
-          </div>
-          <div class="flex justify-end items-center bg-[var(--color-bg)] h-[10%] p-3 mx-5 border-t-2 border-[var(--color-accent-1)]">
-            {#each ["tag 1", "tag 2", "tag 3"] as tag}
-              <p class="mx-1">{`#${tag}`}</p>
-            {/each}
-          </div>  
-          
-        </div>
-      </div>
-      <div bind:this={htmlTestCaseDiv} class="w-full h-10 overflow-hidden">
-        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlTestCaseDiv, htmlTestCaseDivChevron, defaultTileHeight, 240)}> 
-            <span style="user-select: none;">Test Cases</span> <!-- Figure out why this works in inline style but not tailwind -->
-            <svg bind:this={htmlTestCaseDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
-        </button>
-        <div class="w-full h-50 overflow-hidden bg-[var(--color-bg)]"> 
-          <div class="flex flex-col justify-start py-2 px-5">
-            {#each data.testCases as testCase, i (i)}
-              <div>
-                <div class="flex justify-start p-1">
-                  <span>Test Data</span>
-                </div>
-                <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(i, 'input')}">
-                  <span class="flex justify-start">{testCase.display}</span>
-                </div>
-
-                <div class="flex justify-start pt-3 p-1">
-                  <span>Expected Output</span>
-                </div>
-                  <div class="rounded-sm h-10 bg-[var(--color-tile)] flex flex-col justify-center p-2 border-2 {getBorderColor(i, 'output')}" >
-                    <span class="flex justify-start">{testCase.displayRes}</span>
-                </div>
-              </div>
-            {/each}
-            <div class="flex justify-between p-5">
-              {#if testCaseIndex > 0}
-                <button class="hover:cursor-pointer w-[10%]" onclick={prevTestCase}>&lt;</button>
-              {:else}
-                <p class="w-[10%]"></p>
-              {/if}
-              <p>{`${testCaseIndex + 1}/${data.testCases.length}`}</p>
-              {#if testCaseIndex < 2}
-                <button class="hover:cursor-pointer w-[10%]" onclick={nextTestCase}>&gt;</button>
-              {:else}
-                <p class="w-[10%]"></p>
-              {/if}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div bind:this={htmlControlDiv} class="w-full h-10 rounded-b-md overflow-hidden">
-        <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)}> 
-            <span class="select-none">Control</span>
-            <svg bind:this={htmlControlDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
-        </button>
-        <div class="w-full h-15 p-2 bg-[var(--color-bg)] flex justify-center">
-          <button class="w-[50%] hover:cursor-pointer rounded-l-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-r-1 border-[var(--color-primary)]"
-            onclick={executeCode}
-          >
-            <span style="user-select: none;">Execute</span> 
-          </button>
-          <button class="w-[50%] hover:cursor-pointer rounded-r-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-l-1 border-[var(--color-primary)]"
-            onclick={submitCode}
-          >
-            <span style="user-select: none;">Submit</span>
-          </button>
-         </div>
-        </div>
+    <div class="w-full h-[80%] py-2 px-1 bg-[var(--color-tile)] text-xs overflow-scroll">
+      {@render SidePanel()}
     </div>
   </div> 
 
-  <button bind:this={resizeBarVerticalDiv}
-    class="w-1 h-full relative overflow-visible" 
-    class:hover:cursor-col-resize={!isDraggingHorizontal}
-    onmouseenter={expandVerticalBarWrapper}
-    onmouseleave={hideVerticalBarWrapper}
-    onmousedown={handleDownHorizontal}
-    onmouseup={handleReleaseHorizontal}
-    aria-label="resize-bar">
-
+  <button bind:this={resizeBarVerticalDiv} class="w-1 h-full relative overflow-visible" class:hover:cursor-col-resize={!isDraggingHorizontal} onmouseenter={expandVerticalBarWrapper} onmouseleave={hideVerticalBarWrapper} onmousedown={handleDownHorizontal} onmouseup={handleReleaseHorizontal} aria-label="resize-bar">
     <div bind:this={verticalResizeBar} class="h-full left-0 top-0 absolute flex flex-col justify-center items-center rounded-full">
       <div bind:this={verticalResizeBarAccent} class="w-1 h-25 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
     </div>
-
   </button>
 
-  {@render CodeEditor()}
+  {@render CodingComponent()}
 </main>
 
 
-{#snippet CodeEditor()}
-  <div bind:this={codeDiv} class="w-full h-full flex flex-col relative">
+{#snippet SidePanel()}
+  <div bind:this={htmlDescriptionDiv} class="w-full h-10 rounded-t-md overflow-hidden">
+    <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlDescriptionDiv, htmlDescriptionDivChevron, defaultTileHeight, 400)}> 
+        <span style="user-select: none;">Description</span>
+        <svg bind:this={htmlDescriptionDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg> <!-- TODO placeholder so chill out Maja -->
+    </button>
+    <div class="w-full h-90 bg-[var(--color-bg)] flex flex-col justify-between">
+      <div class="bg-[var(--color-bg)] h-[90%] flex justify-start p-3">
+        <p>{data.description}</p>
+      </div>
+      <div class="flex justify-end items-center bg-[var(--color-bg)] h-[10%] p-3 mx-5 border-t-2 border-[var(--color-accent-1)]">
+        {#each ["tag 1", "tag 2", "tag 3"] as tag}
+          <p class="mx-1">{`#${tag}`}</p>
+        {/each}
+      </div>  
+      
+    </div>
+  </div>
+  <div bind:this={htmlControlDiv} class="w-full h-10 rounded-b-md overflow-hidden">
+    <button class="w-full h-10 bg-[var(--color-bg)] px-5 flex items-center justify-between hover:cursor-pointer" onclick={() => toggleTile(htmlControlDiv, htmlControlDivChevron, defaultTileHeight, 100)}> 
+        <span class="select-none">Control</span>
+        <svg bind:this={htmlControlDivChevron} class="fill-white h-6 w-6" viewBox="0 0 407.437 407.437"><polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 "/></svg>
+    </button>
+    <div class="w-full h-15 p-2 bg-[var(--color-bg)] flex justify-center">
+      <button class="w-[50%] hover:cursor-pointer rounded-l-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-r-1 border-[var(--color-primary)]"
+        onclick={executeCode}
+      >
+        <span style="user-select: none;">Execute</span> 
+      </button>
+      <button class="w-[50%] hover:cursor-pointer rounded-r-md h-full flex justify-center items-center bg-[var(--color-tile)] border-2 border-l-1 border-[var(--color-primary)]"
+        onclick={submitCode}
+      >
+        <span style="user-select: none;">Submit</span>
+      </button>
+      </div>
+    </div>
+{/snippet}
+
+
+{#snippet CodingComponent()}
+<div bind:this={codeDiv} class="w-full h-full flex flex-col relative">
       <div bind:this={monacoDiv} class="w-full h-[85%] overflow-hidden" bind:this={editorContainer}></div>
         <button bind:this={resizeBarHorizontalDiv}
           class="h-1 w-full relative overflow-visible"
@@ -609,8 +618,86 @@
             <div bind:this={horizontalResizeBarAccent} class="w-25 h-1 bg-[var(--color-accent-1)] rounded-full none invisible"></div>
           </div>
         </button>
-      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] overflow-y-scroll overflow-x-clip px-4 py-2">
-          <span bind:this={terminalContents} class="font-mono">~/&gt;</span>
+      <div bind:this={terminalDiv} class="w-full h-[15%] bg-[#1e1e1e] flex justify-center">
+        <div class="w-[2.5%] h-full bg-[#181818] flex flex-col justify-start items-center py-3">
+          <button class="w-[90%] aspect-square {isTerminalShown ? "bg-blue-500" : "bg-transparent"} {isTerminalShown ? "" :"hover:bg-[rgba(255,255,255,0.35)]"} mb-2 rounded-md" onclick="{()=>{isTerminalShown = true; isTestCaseContainerShown = false;}}" aria-label="terminal">t</button>
+          <button class="w-[90%] aspect-square {isTestCaseContainerShown ? "bg-blue-500" : "bg-transparent"} {isTestCaseContainerShown ? "" :"hover:bg-[rgba(255,255,255,0.35)]"} mb-2 rounded-md" onclick="{()=>{isTerminalShown = false; isTestCaseContainerShown = true;}}" aria-label="test-cases">c</button>
+        </div>
+        {#if isTerminalShown}  
+        <div class="w-[97.5%] h-full overflow-y-scroll overflow-x-clip px-4 py-2">
+          <span bind:this={terminalContents} class="font-mono whitespace-pre-wrap">{terminalContentsString}</span>
+        </div>
+        {:else if isTestCaseContainerShown}
+          <div class="w-[98%] h-full flex justify-start">
+            <div class="w-[20%] h-full"> 
+              <div class="w-full h-full bg-[#1e1e1e] text-[#d3d3d3] border-r-1 border-r-[#181818] select-none overflow-hidden">
+
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                 <!-- TODO rework this to comply with a11y i.e. add click handlers etc. -->
+                <div onclick="{toggleTestCaseContainer}" class="w-full h-8 active:bg-[#2b7fff] rounded-md  flex justify-start items-center">
+                  <div bind:this={allTestCasesToggleChevron} class="w-2 h-2 rotate-90 ml-2">
+                    <Chevron/>
+                  </div>
+                  <span class="p-1 text-center">exercise testing</span>
+                </div>
+
+                <div bind:this={htmlTestCaseDirectoryDiv} class="h-full overflow-hidden">
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div class="flex-col overflow-hidden">
+                    <div class="w-full h-8 active:bg-[#2b7fff] rounded-md flex justify-start items-center" onclick="{togglePublicTestCaseDiv}">
+                      <div bind:this={publicTestCasesToggleChevron} class="ml-6 w-2 h-2 rotate-90">
+                        <Chevron/>
+                      </div>
+                      <span class="p-1">public tests</span>
+                    </div>
+                    <div bind:this={htmlPublicTestCaseDirectoryDiv}>
+                      {#each testCases.filter(tc=>tc.isPublic) as testCase, i (testCase.testCaseId)}
+                        <div class="w-full h-8 active:bg-[#2b7fff] rounded-md" onclick="{()=>{previewedTestCase = testCase}}">
+                          <span class="ml-12 p-1 {testCase.isPassed === null ? "" : testCase.isPassed ? "text-green-500" : "text-red-500"}">public test {i + 1}</span>
+                        </div>
+                      {/each}
+                    </div>
+                  </div>
+  
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div class="flex-col overflow-hidden">
+                    <div class="w-full h-8 active:bg-[#2b7fff] rounded-md flex justify-start items-center" onclick="{togglePrivateTestCaseDiv}">
+                      <div bind:this={privateTestCasesToggleChevron} class="ml-6 w-2 h-2 rotate-90">
+                        <Chevron/>
+                      </div>
+                      <span class="p-1">private tests</span>
+                    </div>
+                    <div bind:this={htmlPrivateTestCaseDirectoryDiv}>
+                      {#each testCases.filter(tc=>!tc.isPublic) as testCase, i (testCase.testCaseId)}
+                        <div class="w-full h-8 active:bg-[#2b7fff] rounded-md" onclick="{previewedTestCase = undefined}">
+                          <span class="ml-12 p-1 {testCase.isPassed === null ? "" : testCase.isPassed ? "text-green-500" : "text-red-500"}">private test {i + 1}</span>
+                        </div>
+                      {/each}
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+
+            </div>
+
+
+            <div class="w-[80%] h-full bg-[#1e1e1e] p-4">
+              <div class="bg-transparent w-full h-full">
+                {#if previewedTestCase && previewedTestCase.isPublic}
+                  {@render PublicTestCaseCard(previewedTestCase)}
+                {:else if !previewedTestCase}
+                  {@render PrivateTestCard()}
+                {/if}
+              </div>
+            </div>
+
+          </div>
+        {/if}
       </div>
       <button bind:this={resizeHorizontalButton} onclick={returnTerminalDiv} class="h-10 w-[20%] absolute right-[40%] bottom-0 z-50 rounded-t-md bg-[var(--color-tile)] border-2 border-[var(--color-primary)] border-b-0 flex flex-col justify-start items-center hover:cursor-pointer invisible">
         <div class="flex justify-center h-full w-full">
@@ -623,5 +710,37 @@
           <span>Terminal</span>  
         </div>
       </button>
+  </div>
+
+{/snippet}
+
+
+{#snippet PublicTestCaseCard(testCase: TestCase)}
+  <main class="w-full h-full flex flex-col">
+    <div class="w-full flex-1 overflow-auto flex flex-col items-center">
+      {@render TestCaseDataCard("Test input:", testCase.display)}
+      {@render TestCaseDataCard("Expected output:", testCase.displayRes)}
+    </div>
+    <!-- {#if testCase.isPassed !== null}
+      <div class="w-full h-12 bg-green-300 flex-shrink-0 flex justify-start border-t-2 border-red-500">
+        <span>Passed: {testCase.isPassed}</span>
+      </div>
+    {/if} -->
+  </main>
+{/snippet}
+
+{#snippet PrivateTestCard()}
+  <main class="w-full h-full flex flex-col justify-center items-center">
+    <button onclick="{()=>{console.log("bought")}}">
+      buy
+    </button>
+    <span>This test case is non public. You can however buy access to it for: {100}</span>
+  </main>
+{/snippet}
+
+{#snippet TestCaseDataCard(label: string, textToDisplay: string)}
+  <div class="w-[95%] h-12 bg-blue-950 flex justify-start flex-shrink-0 items-center text-center mt-2 rounded-md px-3 py-1 select-none">
+    <span class="w-[25%] border-r-2 border-black">{label}</span>
+    <span class="w-[75%]">{textToDisplay}</span>
   </div>
 {/snippet}
