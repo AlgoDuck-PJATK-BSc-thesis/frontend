@@ -10,6 +10,19 @@
 	let cohortName = '';
 	let showOptions = false;
 
+	const allUsers = [
+		{ name: 'FrostedFalcon', points: 15000 },
+		{ name: 'EchoOrbit', points: 100 },
+		{ name: 'PixelPenguin', points: 9000 },
+		{ name: 'NovaNebula', points: 80 },
+		{ name: 'CrimsonCoyote', points: 7000 },
+		{ name: 'BlueBird', points: 4000 },
+		{ name: 'HarshHistory', points: 40 },
+		{ name: 'TurboTurtle', points: 30 },
+		{ name: 'SilentShadow', points: 20 },
+		{ name: 'SlySpeed', points: 10 }
+	];
+
 	onMount(() => {
 		view = $page.url.searchParams.get('view') ?? '';
 		cohortName = $page.params.cohortName;
@@ -141,8 +154,52 @@
 	</PixelFrame>
 </div>
 
-{#if view === 'chat'}
-	<Chat />
-{:else if view === 'leaderboard'}
-	<Leaderboard />
-{/if}
+<div class="flex items-start justify-between px-6 pr-16">
+	<div class="w-[80vw]">
+		{#if view === 'chat'}
+			<Chat />
+		{:else if view === 'leaderboard'}
+			<Leaderboard />
+		{/if}
+	</div>
+
+	<PixelFrame
+		className="h-[74vh] mt-[3.8rem] w-[24vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+	>
+		<h1
+			class="m-5 mt-2 ml-4 p-4 text-5xl font-bold text-[color:var(--color-accent-2)]"
+			style="font-family: var(--font-ariw9500);"
+		>
+			Members
+		</h1>
+
+		<div class="mt-2 ml-[1rem] h-[43vh] w-full flex-1 overflow-auto px-4">
+			{#each allUsers as user}
+				<div
+					class="mb-2 w-[90%] rounded-xl border-3 border-[color:var(--color-accent-1)] bg-[color:var(--color-bg)] px-3 py-2 text-sm text-[color:var(--color-text)]"
+				>
+					{user.name}
+				</div>
+			{/each}
+		</div>
+
+		<div class=" mt-4 h-[18vh] px-4 pb-4">
+			<PixelFrame
+				className="w-full rounded-xl px-4 py-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-1))] flex flex-col items-start text-left"
+			>
+				<p class="mb-2 text-xs leading-tight text-[color:var(--color-text)]">
+					Share this link to invite others to your cohort
+				</p>
+				<div class="flex w-full justify-center">
+					<button
+						onclick={() =>
+							navigator.clipboard.writeText(`${window.location.origin}/cohort/${cohortName}`)}
+						class="rounded bg-[color:var(--color-accent-2)] px-4 py-2 text-sm font-semibold text-white hover:bg-[color:var(--color-accent-2)]"
+					>
+						Copy Invite Link
+					</button>
+				</div>
+			</PixelFrame>
+		</div>
+	</PixelFrame>
+</div>
