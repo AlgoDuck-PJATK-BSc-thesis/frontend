@@ -6,6 +6,7 @@
 	import silver from '$lib/images/leaderboard/Silver.png';
 	import bronze from '$lib/images/leaderboard/Bronze.png';
 	import trophy from '$lib/images/leaderboard/trophy.png';
+	import duck from '$lib/images/ducks/duck.png';
 
 	const medals = [gold, silver, bronze];
 
@@ -107,26 +108,39 @@
 		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
 	>
 		{#each sortedUsers as user, i}
-			<div class="flex items-center justify-between rounded px-4 py-2">
-				<div class="flex items-center gap-2">
-					<span class="min-w-[3.5rem] text-right">
-						{i + 1}.
-					</span>
-					<span
-						class="text scrollbar-thin hover:scrollbar-thumb-gray-400 max-w-[20rem] overflow-x-auto whitespace-nowrap"
-					>
-						{user.name}
-					</span>
-				</div>
-
-				<PixelFrameMini
-					className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+				<div
+					class={`mx-auto mb-1 flex w-full max-w-[40rem] items-center justify-between rounded py-2 pr-8 ${i === sortedUsers.length - 1 ? 'mb-2' : ''}`}
 				>
-					<span>{user.points}</span>
-					<span>⭐</span>
-				</PixelFrameMini>
-			</div>
-		{/each}
+					<div class="flex items-center gap-3">
+						<span class="min-w-[3.5rem] text-right">
+							{i + 1}.
+						</span>
+
+						<div
+							class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
+						>
+							<img
+								src={duck}
+								alt="duck"
+								class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+							/>
+						</div>
+
+						<span
+							class="text scrollbar-thin hover:scrollbar-thumb-gray-400 max-w-[10rem] overflow-x-auto whitespace-nowrap"
+						>
+							{user.name}
+						</span>
+					</div>
+
+					<PixelFrameMini
+						className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+					>
+						<span>{user.points}</span>
+						<span>⭐</span>
+					</PixelFrameMini>
+				</div>
+			{/each}
 	</PixelFrame>
 
 	<!-- <div class="mt-4 flex items-center gap-4 text-sm text-[color:var(--color-text)]">

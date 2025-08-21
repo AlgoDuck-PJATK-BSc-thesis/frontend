@@ -4,7 +4,10 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+
 	import PixelFrame from '../../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import PixelFrameSimple from '../../../Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import duck from '$lib/images/ducks/duck.png';
 
 	let view = '';
 	let cohortName = '';
@@ -82,10 +85,10 @@
 </svelte:head>
 
 <div
-	class="fixed top-[6rem] left-[24rem] z-[9] w-[calc(42vw)] overflow-y-hidden whitespace-nowrap select-none"
+	class="fixed top-[5rem] left-[24rem] z-[9] w-[calc(42vw)] overflow-y-hidden whitespace-nowrap select-none"
 >
 	<h1
-		class="inline-block text-6xl font-bold text-[color:var(--color-accent-2)]"
+		class="inline-block text-6xl leading-[1.5]  font-bold text-[color:var(--color-accent-2)]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		{cohortName} Cohort
@@ -93,7 +96,7 @@
 </div>
 
 <div class="-mt-[3px] flex w-[18rem] gap-4 pr-98 pl-10">
-	<PixelFrame
+	<PixelFrameSimple
 		className="flex-1 px-6 py-2 flex items-center justify-start  bg-[linear-gradient(to_bottom,var(--color-tile),var(--color-accent-3))]"
 	>
 		<nav class="mt-2 flex gap-6 text-lg font-semibold">
@@ -151,7 +154,7 @@
 				{/if}
 			</div>
 		</nav>
-	</PixelFrame>
+	</PixelFrameSimple>
 </div>
 
 <div class="flex items-start justify-between px-6 pr-16">
@@ -164,7 +167,7 @@
 	</div>
 
 	<PixelFrame
-		className="h-[74vh] mt-[3.8rem] w-[24vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+		className="h-[74vh] mt-[4rem] w-[24vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
 		<h1
 			class="m-5 mt-2 ml-4 p-4 text-5xl font-bold text-[color:var(--color-accent-2)]"
@@ -175,31 +178,42 @@
 
 		<div class="mt-2 ml-[1rem] h-[43vh] w-full flex-1 overflow-auto px-4">
 			{#each allUsers as user}
-				<div
-					class="mb-2 w-[90%] rounded-xl border-3 border-[color:var(--color-accent-1)] bg-[color:var(--color-bg)] px-3 py-2 text-sm text-[color:var(--color-text)]"
-				>
-					{user.name}
+				<div class="mb-3 flex w-[90%] items-center gap-3">
+					<div
+						class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
+					>
+						<img
+							src={duck}
+							alt="duck"
+							class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+						/>
+					</div>
+					<PixelFrameSimple
+						className="flex-1 rounded-2xl bg-[color:var(--color-bg)] px-4 py-3 text-sm text-[color:var(--color-text)]"
+					>
+						<span class="font-semibold">{user.name}</span>
+					</PixelFrameSimple>
 				</div>
 			{/each}
 		</div>
 
 		<div class=" mt-4 h-[18vh] px-4 pb-4">
-			<PixelFrame
-				className="w-full rounded-xl px-4 py-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-1))] flex flex-col items-start text-left"
+			<PixelFrameSimple
+				className="w-full rounded-[20px] px-4 py-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-1))] flex flex-col items-start text-left"
 			>
-				<p class="mb-2 text-xs leading-tight text-[color:var(--color-text)]">
+				<p class="mb-2 text-xs text-center leading-tight text-[color:var(--color-text)]">
 					Share this link to invite others to your cohort
 				</p>
 				<div class="flex w-full justify-center">
 					<button
 						onclick={() =>
 							navigator.clipboard.writeText(`${window.location.origin}/cohort/${cohortName}`)}
-						class="rounded bg-[color:var(--color-accent-2)] px-4 py-2 text-sm font-semibold text-white hover:bg-[color:var(--color-accent-2)]"
+						class="rounded border-[color:var(--color-accent-4)] bg-[color:var(--color-accent-2)] px-4 py-2 text-sm font-semibold text-white hover:border-[color:var(--color-text)] hover:bg-[color:var(--color-accent-4)] hover:text-[color:var(--color-text)]"
 					>
 						Copy Invite Link
 					</button>
 				</div>
-			</PixelFrame>
+			</PixelFrameSimple>
 		</div>
 	</PixelFrame>
 </div>

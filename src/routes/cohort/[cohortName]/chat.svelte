@@ -144,10 +144,10 @@
 	}
 </script>
 
-<div class="relative mt-8 mr-2 ml-10 w-fit">
-	<img src={duck} alt="Duck" class="absolute -top-[2.4rem] right-15 z-10 h-20 w-20" />
+<div class="relative mt-16 mr-2 ml-13 w-fit">
+	<img src={duck} alt="Duck" class="absolute -top-[4.4rem] right-16 z-10 h-20 w-20" />
 	<PixelFrame
-		className="h-[74vh] w-[67vw] ml-4 mt-8 mr-8 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+		className="h-[74vh] w-[66vw] ml-1 mt-8 mr-6 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
 		<div class="flex h-full w-full flex-col">
 			<div

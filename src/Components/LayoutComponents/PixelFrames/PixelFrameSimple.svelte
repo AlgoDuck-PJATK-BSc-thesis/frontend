@@ -2,10 +2,7 @@
 	export let className = '';
 </script>
 
-<div
-	{...$$restProps}
-	class={`relative inline-block rounded-t-[10px] ${className}`}
->
+<div {...$$restProps} class={`relative inline-block rounded-[20px] ${className}`}>
 	<div class="absolute top-0 right-[8px] left-[8px] h-[4px] bg-[color:var(--color-accent-1)]"></div>
 	<div
 		class="absolute right-[8px] bottom-0 left-[8px] h-[4px] bg-[color:var(--color-accent-1)]"
@@ -44,26 +41,6 @@
 	></span>
 	<span class="absolute right-[0px] bottom-[8px] h-[4px] w-[4px] bg-[color:var(--color-accent-1)]"
 	></span>
-
-	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: 4px; left: {8 + i * 4}px"
-		></span>
-	{/each}
-
-	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: {8 + i * 4}px; left: 4px"
-		></span>
-	{/each}
-
-	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: 4px; right: {8 + i * 4}px"
-		></span>
-	{/each}
-
-	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: {8 + i * 4}px; right: 4px"
-		></span>
-	{/each}
 
 	<div class="relative z-10">
 		<slot />

@@ -40,7 +40,7 @@
 {/if}
 
 <div
-	class="fixed right-0 bottom-40 z-[9999] w-64 overflow-y-auto border-2 border-[color:var(--color-text-a11y)] bg-[color:var(--color-bg-a11y)] text-[color:var(--color-text-a11y)]
+	class="fixed right-0 bottom-30 z-[9999] w-64 overflow-y-auto border-2 border-[color:var(--color-text-a11y)] bg-[color:var(--color-bg-a11y)] text-[color:var(--color-text-a11y)]
 	shadow-lg transition-transform duration-300"
 	class:translate-x-0={isOpen}
 	class:translate-x-full={!isOpen}

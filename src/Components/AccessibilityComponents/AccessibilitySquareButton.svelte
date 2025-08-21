@@ -75,7 +75,7 @@
 	aria-label="Accessibility options"
 	aria-pressed={isAnimated}
 	title="Accessibility options"
-	class="group fixed right-7 bottom-14 z-[999] border-none bg-transparent p-0"
+	class="group fixed right-10 bottom-10 z-[999] border-none bg-transparent p-0"
 >
 	<img
 		src={restPath}

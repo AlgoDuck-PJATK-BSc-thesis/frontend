@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import Button from '../../../Components/ButtonComponents/Button.svelte';
 	import PixelFrame from '../../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import duck from '$lib/images/ducks/duck.png';
 
 	let cohortName = '';
 
@@ -22,13 +23,14 @@
 		Join a Cohort
 	</h1>
 	<PixelFrame
-		className="flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12"
+		className="relative flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12 mt-26"
 	>
-		<!-- <h1 class="mt-4 mb-3 text-3xl font-bold tracking-normal text-[color:var(--color-accent-2)]">
-			How to do it?
-		</h1> -->
+		<div class="absolute -top-[7.3rem] left-1/2 z-10 flex -translate-x-1/2 gap-4">
+			<img src={duck} alt="duck" class="h-24 w-25 -scale-x-100 drop-shadow-md" />
+			<img src={duck} alt="duck" class="h-24 w-25 drop-shadow-md" />
+		</div>
 
-		<h5 class="mb-8 mt-2 text-base text-[color:var(--color-text)]">
+		<h5 class="mt-2 mb-8 text-base text-[color:var(--color-text)]">
 			You can either create your own or ask a friend for an invite link
 		</h5>
 
