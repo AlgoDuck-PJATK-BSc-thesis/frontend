@@ -15,12 +15,10 @@ export interface Problem {
   testCases: TestCase[];
 }
 
-interface TestCase {
-  testInput: string;
-  expectedOutput: string;
-  call: string;
-  funcName: string;
+export interface TestCase {
+  testCaseId: string,
   display: string;
   displayRes: string;
   isPublic: boolean;
+  isPassed: boolean | null,
 }
