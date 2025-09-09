@@ -1,9 +1,11 @@
 # Beetcode – UI/UX System Overview
 
-<img width="1440" height="826" alt="Screenshot 2025-08-15 at 04 53 39" src="https://github.com/user-attachments/assets/373cbadb-d563-460e-8063-14a7484e50fb" />
-<img width="1440" height="783" alt="Screenshot 2025-08-15 at 04 55 07" src="https://github.com/user-attachments/assets/e5f5a7d7-2e77-4e89-a1d9-969408ca2857" />
-<img width="1440" height="828" alt="Screenshot 2025-08-15 at 04 55 52" src="https://github.com/user-attachments/assets/dde2bf1f-f421-4c4b-8cee-75da17bbde75" />
-<img width="1440" height="825" alt="Screenshot 2025-08-15 at 05 01 22" src="https://github.com/user-attachments/assets/cf33d317-2b7e-4f99-a4a2-c690b34f372c" />
+<img width="1916" height="953" alt="Screenshot 2025-09-08 at 20 07 06" src="https://github.com/user-attachments/assets/b96c91e2-8b11-40c3-8a76-de6bd2aacfe3" />
+<img width="1916" height="979" alt="Screenshot 2025-09-08 at 20 07 38" src="https://github.com/user-attachments/assets/4462a8ce-f17a-495f-aca0-307841b84a7b" />
+<img width="1919" height="985" alt="Screenshot 2025-09-08 at 20 09 18" src="https://github.com/user-attachments/assets/8be8aaa5-3dad-4b97-bd52-5a9afd88a0f8" />
+<img width="1919" height="980" alt="Screenshot 2025-09-08 at 20 08 29" src="https://github.com/user-attachments/assets/df0d5791-ef29-4332-9e24-5e0127981483" />
+<img width="1919" height="981" alt="Screenshot 2025-09-08 at 20 09 07" src="https://github.com/user-attachments/assets/8c69327e-c7f5-4766-858c-a2b51a402914" />
+
 
 ## Font
 
