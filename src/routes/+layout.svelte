@@ -5,7 +5,7 @@
 	import HeaderGuest from './headers/HeaderGuest.svelte';
 	import HeaderUser from './headers/HeaderUser.svelte';
 
-	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButton.svelte';
+	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
 	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
 
 	let togglePanelFn: () => void;

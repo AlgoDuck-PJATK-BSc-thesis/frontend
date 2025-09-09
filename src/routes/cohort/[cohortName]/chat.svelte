@@ -200,7 +200,7 @@
 
 				<Button
 					size="small"
-					label="Send"
+					label="SEND"
 					labelColor="[color:var(--color-text-button)]"
 					labelFontSize="1rem"
 					labelFontFamily="var(--font-ariw9500)"

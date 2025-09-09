@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ThemeToggle from '../../Components/LayoutComponents/ThemeToggle.svelte';
-	import coin from '$lib/images/coin.png';
+	import coin from '$lib/images/headers/Coin.png';
 
 	let coins = 5000;
 	let level = 5;
@@ -41,7 +41,7 @@
 
 				<div class="relative z-10 px-2 py-[0.1rem] font-bold text-[color:var(--color-primary)]">
 					{coins.toLocaleString()}
-					<img src={coin} alt="coin" class="inline-block h-[1.5rem] w-[1.5rem] align-[-0.45em]" />
+					<img src={coin} alt="coin" class="inline-block h-[1rem] w-[1rem] align-[-0.15em]" />
 				</div>
 			</div>
 		</div>

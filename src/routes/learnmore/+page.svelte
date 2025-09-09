@@ -8,7 +8,7 @@
 
 <section class="mx-auto mt-16 max-w-4xl px-4">
 	<h1
-		class="mb-10 text-center text-6xl text-[color:var(--color-primary)]"
+		class="mt-2 mb-10 ml-2 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		How Beetcode works

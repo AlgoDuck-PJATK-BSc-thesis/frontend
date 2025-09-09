@@ -52,19 +52,16 @@
 </svelte:head>
 
 <section
-	class="font-body flex max-h-[calc(100vh-4rem)] flex-col items-center gap-6 overflow-y-auto pt-8 pr-8 pb-0 pl-8"
+	class="font-body flex max-h-[calc(100vh-4rem)] flex-col items-center gap-6 overflow-y-auto pt-12 pr-8 pb-0 pl-8"
 >
 	<h1
-		class="mt-8 mb-4 text-6xl font-bold text-[color:var(--color-primary)]"
+		class="mt-8 mb-4 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		Leaderboard
 	</h1>
-	
 
-	<div
-		class="flex w-full max-w-2xl flex-col items-center px-10 pt-2 pb-6"
-	>
+	<div class="flex w-full max-w-2xl flex-col items-center px-10 pt-2 pb-10">
 		<div class="mt-8 flex items-end justify-center gap-8">
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
@@ -108,39 +105,39 @@
 		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
 	>
 		{#each sortedUsers as user, i}
-				<div
-					class={`mx-auto mb-1 flex w-full max-w-[40rem] items-center justify-between rounded py-2 pr-8 ${i === sortedUsers.length - 1 ? 'mb-2' : ''}`}
-				>
-					<div class="flex items-center gap-3">
-						<span class="min-w-[3.5rem] text-right">
-							{i + 1}.
-						</span>
+			<div
+				class={`mx-auto mb-1 flex w-full max-w-[40rem] items-center justify-between rounded py-2 pr-8 ${i === sortedUsers.length - 1 ? 'mb-2' : ''}`}
+			>
+				<div class="flex items-center gap-3">
+					<span class="min-w-[3.5rem] text-right">
+						{i + 1}.
+					</span>
 
-						<div
-							class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
-						>
-							<img
-								src={duck}
-								alt="duck"
-								class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
-							/>
-						</div>
-
-						<span
-							class="text scrollbar-thin hover:scrollbar-thumb-gray-400 max-w-[10rem] overflow-x-auto whitespace-nowrap"
-						>
-							{user.name}
-						</span>
+					<div
+						class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
+					>
+						<img
+							src={duck}
+							alt="duck"
+							class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+						/>
 					</div>
 
-					<PixelFrameMini
-						className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+					<span
+						class="text scrollbar-thin hover:scrollbar-thumb-gray-400 max-w-[10rem] overflow-x-auto whitespace-nowrap"
 					>
-						<span>{user.points}</span>
-						<span>⭐</span>
-					</PixelFrameMini>
+						{user.name}
+					</span>
 				</div>
-			{/each}
+
+				<PixelFrameMini
+					className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+				>
+					<span>{user.points}</span>
+					<span>⭐</span>
+				</PixelFrameMini>
+			</div>
+		{/each}
 	</PixelFrame>
 
 	<!-- <div class="mt-4 flex items-center gap-4 text-sm text-[color:var(--color-text)]">

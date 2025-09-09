@@ -78,26 +78,20 @@
 	<title>Settings – Beetcode</title>
 </svelte:head>
 
-<section class="mt-8 flex h-[calc(100vh-6rem)] justify-center gap-10 overflow-hidden p-8">
-	<div class="flex w-75 flex-shrink-0 flex-col gap-2 overflow-auto">
-		<h2
-			class=" mb-8 ml-2 text-6xl font-bold text-[color:var(--color-primary)]"
-			style="font-family: var(--font-ariw9500);"
-		>
-			Settings
-		</h2>
+<section class="mt-2 flex h-[calc(100vh-5rem)] justify-left gap-10 overflow-hidden px-12 pt-7">
+	<div class="flex w-70 flex-shrink-0 flex-col overflow-auto">
 		<PixelFrame
-			className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 flex-shrink-0 "
+			className="flex flex-col w-70 mt-8 gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-5 flex-shrink-0 "
 		>
 			<ul>
-				<li class="mt-2 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">
+				<li class="mt-1 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">
 					Personal Details
 				</li>
 
 				<li>
 					<button
 						onclick={() => scrollTo('language')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Display Language
 					</button>
@@ -106,7 +100,7 @@
 				<li>
 					<button
 						onclick={() => scrollTo('profile')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Profile Information
 					</button>
@@ -117,7 +111,7 @@
 				<li>
 					<button
 						onclick={() => scrollTo('password')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Password Settings
 					</button>
@@ -125,7 +119,7 @@
 				<li>
 					<button
 						onclick={() => scrollTo('2fa')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Two-Factor Authentication
 					</button>
@@ -138,7 +132,7 @@
 				<li>
 					<button
 						onclick={() => scrollTo('email')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Email Notifications
 					</button>
@@ -146,7 +140,7 @@
 				<li>
 					<button
 						onclick={() => scrollTo('push')}
-						class="ml-3 block w-full rounded p-2 text-left text-lg text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
+						class="text-normal ml-3 block w-full rounded p-2 text-left text-[color:var(--color-text)] hover:bg-[color:var(--color-primary)] hover:text-[color:var(--color-bg)]"
 					>
 						Push Notifications
 					</button>
@@ -155,8 +149,14 @@
 		</PixelFrame>
 	</div>
 
-	<div class="flex h-full flex-[0.5] flex-col justify-between gap-5 overflow-y-auto pr-4">
-		<div class="flex flex-col gap-5 overflow-y-auto pr-1 pb-4">
+	<div class="flex h-full flex-[0.5] flex-col justify-between gap-5 overflow-y-auto">
+		<div class="flex flex-col gap-5 overflow-y-auto pb-4">
+			<h2
+				class="mt-2 mb-4 ml-6 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
+				style="font-family: var(--font-ariw9500);"
+			>
+				Settings
+			</h2>
 			<PixelFrame
 				id="language"
 				className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6"
@@ -310,24 +310,24 @@
 				</p>
 			</PixelFrame>
 		</div>
-		<div id="logout" class="mt-2 flex w-full items-center justify-between gap-4">
+		<div id="logout" class="flex w-full items-center mt-1 justify-between gap-4">
 			<Button
-				size="small"
-				label="Log Out"
+				size="medium"
+				label="LOG OUT"
 				labelColor="[color:var(--color-text-button)]"
 				labelFontSize="1rem"
 				labelFontFamily="var(--font-ariw9500)"
-				labelFontWeight="normal"
+				labelFontWeight="bold"
 				onclick={logout}
 			/>
 
 			<Button
 				size="small"
-				label="Save"
+				label="SAVE"
 				labelColor="[color:var(--color-text-button)]"
 				labelFontSize="1rem"
 				labelFontFamily="var(--font-ariw9500)"
-				labelFontWeight="normal"
+				labelFontWeight="bold"
 				onclick={saveAll}
 			/>
 		</div>

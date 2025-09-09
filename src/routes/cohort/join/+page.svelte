@@ -15,17 +15,17 @@
 	}
 </script>
 
-<section class="mx-auto max-w-md py-16 text-center">
+<section class="mx-auto max-w-xl py-12 text-center">
 	<h1
-		class="mb-10 text-6xl font-bold text-[color:var(--color-primary)]"
+		class="mt-8 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
 		style="font-family: var(--font-ariw9500);"
 	>
 		Join a Cohort
 	</h1>
 	<PixelFrame
-		className="relative flex w-full max-w-2xl flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] px-10 pt-8 pb-12 mt-26"
+		className="relative flex w-full max-w-md flex-col items-center bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] ml-14 px-10 pt-5 pb-1 mt-28 mb-10 "
 	>
-		<div class="absolute -top-[7.3rem] left-1/2 z-10 flex -translate-x-1/2 gap-4">
+		<div class="absolute -top-[6.5rem] left-1/2 z-10 flex -translate-x-1/2 gap-2">
 			<img src={duck} alt="duck" class="h-24 w-25 -scale-x-100 drop-shadow-md" />
 			<img src={duck} alt="duck" class="h-24 w-25 drop-shadow-md" />
 		</div>
@@ -42,15 +42,15 @@
 				if (e.key === 'Enter') createCohort();
 			}}
 		/>
-
-		<Button
-			size="medium"
-			label="Create"
-			labelColor="[color:var(--color-text-button)]"
-			labelFontSize="1.15rem"
-			labelFontFamily="var(--font-ariw9500)"
-			labelFontWeight="normal"
-			onclick={createCohort}
-		/>
 	</PixelFrame>
+
+	<Button
+		size="medium"
+		label="CREATE"
+		labelColor="[color:var(--color-text-button)]"
+		labelFontSize="1.15rem"
+		labelFontFamily="var(--font-ariw9500)"
+		labelFontWeight="normal"
+		onclick={createCohort}
+	/>
 </section>

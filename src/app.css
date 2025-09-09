@@ -68,8 +68,9 @@
 
 	--color-bg: #e3f7ff;
 	--color-bg-2: #fef8ff;
-	--color-text: #254f64;
+	--color-text: #151115;
 	--color-primary: #fd9fff;
+	--color-landingpage: #fae0f0;
 
 	--color-tile: #99e0ff;
 	--color-accent-1: #77c5e6;
@@ -96,6 +97,7 @@
 	--color-bg-2: #083640;
 	--color-text: #f5f5f5;
 	--color-primary: #1cd6ff;
+	--color-landingpage: #c1f3fa;
 
 	--color-tile: #124575;
 	--color-accent-1: #3781b3;
