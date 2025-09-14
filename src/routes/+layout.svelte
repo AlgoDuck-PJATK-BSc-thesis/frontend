@@ -26,16 +26,20 @@
 		path.startsWith('/store') ||
 		path.startsWith('/leaderboard') ||
 		path.startsWith('/settings');
+
+	let hideHeader = $derived($page.data.hideHeader);
 </script>
 
 <div
 	class="font-body flex min-h-screen flex-col bg-[color:var(--color-bg)] text-[color:var(--color-text)] transition-colors duration-300"
 >
-	{#if isLoggedIn}
-		<HeaderUser />
-	{:else}
-		<HeaderGuest />
-	{/if}
+	{#if !hideHeader}
+    {#if isLoggedIn}
+      <HeaderUser />
+    {:else}
+      <HeaderGuest />
+    {/if}
+  {/if}
 
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />

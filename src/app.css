@@ -2,6 +2,8 @@
 @import '@fontsource/fira-mono';
 @import 'highlight.js/styles/github-dark.css';
 
+@config '../tailwind.config.ts';
+
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 

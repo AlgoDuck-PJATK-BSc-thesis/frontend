@@ -1,37 +1,17 @@
-import type { Problem } from "../../../../../../Types/Categories/Problem";
 import type { PageLoad } from "./$types";
-
-// don't change this or monaco will have a stroke and crash the entire app
-export const ssr = false;
-
-
+import type { Problem } from "./Types/Problem";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    let exerciseId: string = params.Problem_id;
-    let exId="3152daea-43cd-426b-be3b-a7e6d0e376e1";
-    
-    console.log(exerciseId);
-    const result = await fetch(`http://localhost:8080/api/Problem?id=${exerciseId}`, {
-        method: 'GET',
-    });
-    if (!result.ok){
-        return fallback;
-    }
-    const serverResponse: Problem = await result.json();
-    console.log(serverResponse)
-    serverResponse.testCases.forEach(tc=>tc.isPassed=null); // TODO I don't love this
-    return serverResponse
+    return {
+        problem: fallback,
+        hideHeader: true
+    };
 }
-
-
-
-
-
 
 const fallback: Problem = {
   "problemId": "3152daea-43cd-426b-be3b-a7e6d0e376e1",
   "title": "Linked List Cycle Detection",
-  "description": "Implement a method to detect cycles in a linked list using the tortoise and hare algorithm. The solution should include a Node class with next and previous references, and a method that checks for cycles starting from a given node.",
+  "description": "In many applications, linked lists are used to represent dynamic data structures.  \nHowever, faulty logic or unintended pointer manipulations can sometimes cause a **cycle** to appear in the list, meaning that traversal never reaches a `null` terminator.  \n\nYour task is to implement a cycle detection algorithm for a **doubly linked list**. Specifically, you should: \n1. **Define a `Node` class**  \n- Contains an integer value  \n- Has both `next` and `prev` references  \n\n2. **Implement a method `hasCycle(Node start)`**  \n- Determines whether a cycle exists starting from the provided node  \n3. **Use Floyd’s Tortoise and Hare algorithm**  \n- A classic two-pointer technique  \n- Detects the cycle efficiently in **O(n) time** and **O(1) space**  \nA correct solution should be able to identify both the **presence and absence of cycles** for lists of varying sizes.  \n### Edge Cases to Consider\n- Empty list (`null` start node)  \n- Single-node list without a cycle  \n- Single-node list that links to itself",
   "category": {
     "name": "test category 4"
   },
@@ -71,5 +51,12 @@ const fallback: Problem = {
       "isPublic": false,
       "isPassed": null
     }
-  ]
+  ],
+  "tags": [
+    "cycle-detection",
+    "linked-list",
+    "pointer-manipulation",
+    "two-pointers",
+    "graph-theory-in-disguise",
+  ],
 };
