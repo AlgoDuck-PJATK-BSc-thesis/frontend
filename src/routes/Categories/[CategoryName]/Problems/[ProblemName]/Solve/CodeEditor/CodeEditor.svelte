@@ -3,11 +3,10 @@
 
 	let {
 		editorContents = $bindable(),
-		theme,
 		fontSize
-	}: { editorContents: string; theme: string; fontSize: number } = $props();
+	}: { editorContents: string; fontSize: number } = $props();
 </script>
 
 <main class="w-full h-full">
-	<Monaco {editorContents} {theme} {fontSize} readOnly={false} />
+	<Monaco {editorContents} {fontSize} readOnly={false} />
 </main>

@@ -102,7 +102,7 @@
   }
 
   const handleMouseUp = () => {
-    document.body.style.userSelect = "auto";
+    document.body.style.userSelect = "";
 
     isDragging = false;
     
@@ -154,8 +154,8 @@
       return parseComputedDimensions(getOptionalDimesionsString(dim));
   }
 
-  const selectCategory = (id: string) : void => {
-    goto(`/Categories/some-${id}/Problems`);
+  const selectCategory = (categoryName: string) : void => {
+    goto(`/Categories/${categoryName}/Problems`);
   }
 
 
@@ -172,8 +172,8 @@
     const islandWidthParsed: number = parseComputedDimensions(baselineIslandComputedStyle.width);
     const islandHeightParsed: number = parseComputedDimensions(baselineIslandComputedStyle.height);
 
-    const paddingX: number = islandWidthParsed / 4;
-    const paddingY: number = islandHeightParsed / 4
+    const paddingX: number = islandWidthParsed / 2;
+    const paddingY: number = islandHeightParsed / 2;
 
     const scrollableFrameWidthInPixels: number = Math.max(paddingX + islandWidthParsed * 1.25 * categoryDivs.length, mainWidth);
 
@@ -193,8 +193,6 @@
     }
   }
 
-
-  
   onMount(() => { 
     calculateIslandCoordinates();
   });
@@ -209,12 +207,12 @@
     onmouseup={handleMouseUp}
   >
 
-  <!-- TODO this hypothetically presents an interesting opportunity to use tastacks infinite query. More so for presentation reasons rather than an actual practical application but still may be fun -->
+  <!-- TODO this hypothetically presents an interesting opportunity to use tatacks infinite query. More so for presentation reasons rather than an actual practical application but still may be fun -->
     <div class="relative w-full h-full">
       {#each data.LoadedCategories as loadedCategory, i}
         <button bind:this={categoryDivs[i]} class="w-100 h-100 absolute rounded-full flex hover:cursor-pointer z50 justify-center items-center bg-transparent select-none" 
         onmousedown="{() => {clicked = true}}"
-        onmouseup="{() => {if (clicked) selectCategory(loadedCategory.id)}}">
+        onmouseup="{() => {if (clicked) selectCategory(loadedCategory.name)}}">
           <img class="w-full" src="{Island}" alt="category thematic island" draggable="false"/>
         </button>
       {/each}

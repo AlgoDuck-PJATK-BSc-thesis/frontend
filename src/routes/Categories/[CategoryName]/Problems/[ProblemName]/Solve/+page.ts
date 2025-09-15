@@ -1,4 +1,4 @@
-import type { PageLoad } from "./$types";
+import type { PageLoad } from "../../../../$types";
 import type { Problem } from "./Types/Problem";
 
 export const load: PageLoad = async ({ params, fetch }) => {

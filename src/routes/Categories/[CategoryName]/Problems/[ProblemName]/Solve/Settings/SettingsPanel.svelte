@@ -70,7 +70,7 @@
 		class="w-[45%] h-[50%] bg-ide-dcard flex justify-center rounded-xl overflow-hidden border-2 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
 	>
 		<div class="h-full w-[25%] bg-ide-card flex flex-col justify-start">
-			<h3 class="w-full h-[10%] px-4 py-1 text-text-secondary text-2xl my-4 select-none">
+			<h3 class="w-full h-[10%] px-4 py-1 text-ide-text-secondary text-2xl my-4 select-none">
 				Settings
 			</h3>
 			<div class="w-full h-[90%] flex flex-col justify-start items-center px-3">
@@ -104,7 +104,7 @@
 		<div class="h-[60%] aspect-square">
 			<ActiveIcon options={{ color: '#9290C3' }} />
 		</div>
-		<span class="flex justify-center items-center text-xl select-none text-text-primary mx-4 my-2">
+		<span class="flex justify-center items-center text-xl select-none text-ide-text-primary mx-4 my-2">
 			{tab.label}
 		</span>
 	</button>

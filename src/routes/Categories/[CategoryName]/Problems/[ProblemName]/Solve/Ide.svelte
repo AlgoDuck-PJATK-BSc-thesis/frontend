@@ -126,7 +126,7 @@
 		<div bind:this={ideHolderContainer} class="h-full p-1 flex w-[97.5%]">
 			<div
 				bind:this={informationIdeContainer}
-				class="h-full bg-ide-bg text-text-primary rounded-xl overflow-hidden"
+				class="h-full bg-ide-bg text-ide-text-primary rounded-xl overflow-hidden"
 				style="flex: {informationIdeProportion}"
 			>
 				<InfoPanel {problemDto} />
@@ -162,7 +162,7 @@
 					class="w-full rounded-xl overflow-hidden"
 					style="flex: {editorIdeProportion}"
 				>
-					<CodeEditor bind:editorContents {theme} {fontSize} />
+					<CodeEditor bind:editorContents {fontSize} />
 				</div>
 
 				<button

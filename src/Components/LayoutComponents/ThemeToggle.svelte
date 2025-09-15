@@ -1,8 +1,9 @@
 <script lang="ts">
+	import type { ThemeName } from '$lib/Themes';
 	import { userPreferences } from '../../Stores/theme';
 	import { onMount } from 'svelte';
 
-	let current: 'light' | 'dark' = 'light';
+	let current: ThemeName = 'dark';
 	let isAnimating = false;
 	let frame = 0;
 	let interval: number;
@@ -21,17 +22,17 @@
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
-			current =
-				(document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'light';
+			if (!document.documentElement.getAttribute('data-theme')){
+				document.documentElement.setAttribute('data-theme', 'dark');
+			}
+			current = (document.documentElement.getAttribute('data-theme') as ThemeName);
 		}
 	});
 
 	function toggleTheme() {
 		if (isAnimating) return;
 
-		const htmlTheme =
-			(document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'light';
-		const isCurrentlyLight = htmlTheme === 'light';
+		const isCurrentlyLight = current === 'light';
 
 		frameList = isCurrentlyLight ? lightToDarkFrames : darkToLightFrames;
 

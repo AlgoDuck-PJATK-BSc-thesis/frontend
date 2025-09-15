@@ -7,6 +7,7 @@
 
 	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
 	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
+	import ThemeInitializer from '$lib/Components/ThemeInitializer.svelte';
 
 	let togglePanelFn: () => void;
 
@@ -29,7 +30,7 @@
 
 	let hideHeader = $derived($page.data.hideHeader);
 </script>
-
+<ThemeInitializer/>
 <div
 	class="font-body flex min-h-screen flex-col bg-[color:var(--color-bg)] text-[color:var(--color-text)] transition-colors duration-300"
 >

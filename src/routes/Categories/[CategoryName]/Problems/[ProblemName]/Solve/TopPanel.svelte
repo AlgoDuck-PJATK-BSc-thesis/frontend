@@ -71,7 +71,7 @@
 		</button>
 		<button
 			bind:this={submitButton}
-			class="w-[60%] h-full flex-grow flex justify-center bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer text-text-primary overflow-hidden
+			class="w-[60%] h-full flex-grow flex justify-center bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer text-ide-text-primary overflow-hidden
 			{isExecutin
 				? 'border-0'
 				: 'border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}
@@ -85,7 +85,7 @@
 				<div class="h-full aspect-square mr-[2%] flex justify-center items-center">
 					<Upload args={{ color: '#9290c3' }} />
 				</div>
-				<span class="flex justify-center items-center text-text-secondary">submit</span>
+				<span class="flex justify-center items-center text-ide-text-secondary">submit</span>
 			{/if}
 		</button>
 	</div>
@@ -108,6 +108,6 @@
 		<div class="h-[90%] aspect-square flex justify-center items-center px-1">
 			<Runner />
 		</div>
-		<span class="flex text-text-secondary text-sm justify-center items-center px-1">{label}</span>
+		<span class="flex text-ide-text-secondary text-sm justify-center items-center px-1">{label}</span>
 	</div>
 {/snippet}

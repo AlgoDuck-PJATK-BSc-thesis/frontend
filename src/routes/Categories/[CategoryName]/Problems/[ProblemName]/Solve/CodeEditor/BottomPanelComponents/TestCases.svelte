@@ -48,7 +48,7 @@
 	});
 </script>
 
-<main class="w-full h-full bg-ide-card flex justify-start text-text-primary">
+<main class="w-full h-full bg-ide-card flex justify-start text-ide-text-primary">
 	<div class="h-full bg-ide-dcard flex flex-col justfiy-start w-[25%] py-2">
 		<TestCaseFileTreeRoot {root} />
 	</div>
@@ -56,13 +56,13 @@
 		<div
 			class="w-full h-10 bg-ide-dcard flex justify-end items-center px-5 text-lg select-none font-bold"
 		>
-			<span class="flex justify-center items-center text-text-secondary">Testing results</span>
+			<span class="flex justify-center items-center text-ide-text-secondary">Testing results</span>
 		</div>
 		{#if previewedTestCase.isPublic}
 			<div class="h-[calc(100%-2.5rem)] w-full flex overflow-y-hidden">
 				<div class="h-full w-[50%] bg-ide-bg flex flex-col justify-start">
 					<div class="w-full h-10 flex justify-center items-center text center">
-						<span class="flex justify-center items-center text-text-secondary select-none"
+						<span class="flex justify-center items-center text-ide-text-secondary select-none"
 							>{`${previewedTestCase.testCaseId.substring(0, 8)} preview`}</span
 						>
 					</div>
@@ -70,7 +70,6 @@
 						<div class="w-full h-full overflow-hidden rounded-xl">
 							<Monaco
 								editorContents={'//something'}
-								theme={'vs-dark'}
 								readOnly={true}
 								fontSize={16}
 							/>
@@ -102,7 +101,7 @@
 	<main class="rounded-2xl mb-2">
 		<div class="w-full p-2 flex justify-center">
 			<div class="w-[99%] h-full p-1 rounded-md overflow-hidden">
-				<span class="w-full h-full flex items-center justify-start text-text-secondary"
+				<span class="w-full h-full flex items-center justify-start text-ide-text-secondary"
 					>{label}</span
 				>
 			</div>

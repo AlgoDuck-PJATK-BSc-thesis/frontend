@@ -4,10 +4,12 @@
 
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
+  
 	import NonProblemButton from "./NonProblemButton.svelte";
 	import ProblemButton from "./ProblemButton.svelte";
-	import { goto } from "$app/navigation";
-	import type { Category } from "./proxy+page";
+
+	import type { Category } from "./Types/Category";
 
 
   let { data } : { data: Category } = $props();

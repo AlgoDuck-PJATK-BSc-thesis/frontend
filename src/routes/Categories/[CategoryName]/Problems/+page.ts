@@ -1,7 +1,7 @@
-import type { PageLoad } from "./$types";
+import type { PageLoad } from "../../$types";
+import type { Category } from "./Types/Category";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    let categoryId: string = params.Category_id;
 
     const serverResponse: Category = {
         name: "test-1",
@@ -13,15 +13,4 @@ export const load: PageLoad = async ({ params, fetch }) => {
     }
 
     return serverResponse;
-}
-
-export interface Category{
-    name: string,
-    problems: ProblemShowcase[],
-}
-
-export interface ProblemShowcase{
-    id: string,
-    name: string,
-    synopsis: string,
 }
