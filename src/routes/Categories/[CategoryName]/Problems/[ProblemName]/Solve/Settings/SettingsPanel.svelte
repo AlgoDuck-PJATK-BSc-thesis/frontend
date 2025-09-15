@@ -3,16 +3,13 @@
 	import Editor from '../svg/editor.svelte';
 	import Cross from '../svg/cross.svelte';
 
-	import type { EditorCompArgs } from './Types/EditorTabCompArgs';
 	import type { TabConfig } from './Types/TabConfig';
 
 	let {
-		fontSize = $bindable(),
-		theme = $bindable(),
 		isSettingsPanelShown = $bindable()
-	}: { fontSize: number; theme: string; isSettingsPanelShown: boolean } = $props();
+	}: {isSettingsPanelShown: boolean } = $props();
 
-	const tabs: TabConfig<EditorCompArgs>[] = [
+	const tabs: TabConfig<{}>[] = [
 		{
 			id: 'editor',
 			label: 'Editor',
@@ -24,20 +21,7 @@
 			},
 			comp: {
 				component: EditorSettings,
-				options: {
-					setFontCallback: (newFontSize: number) => {
-						fontSize = newFontSize;
-					},
-					getCurrFontSize: () => {
-						return fontSize;
-					},
-					setThemeCallback: (newTheme: string) => {
-						theme = newTheme;
-					},
-					getCurrTheme: () => {
-						return theme;
-					}
-				}
+				options: {}
 			}
 		}
 	];

@@ -1,6 +1,6 @@
 <script lang="ts" generics="T1 extends {}, T2 extends {}">
 	import { onMount, type Component } from 'svelte';
-	import type { ResizeableComponentArg } from './ResizeableComponentArg';
+	import type { ResizeableComponentArg } from './Types/ResizeableComponentArg';
 
 	let { options }: { options: ResizeableComponentArg<T1, T2> } = $props();
 
@@ -54,6 +54,14 @@
 		return options.axis === 0 ? e.clientX : e.clientY;
 	}
 
+	const handleMouseOverResizeBar = (): void => {
+		isResizeBarHovered = true;
+	}
+
+	const handleMouseLeaveResizeBar = (): void => {
+		if (!isDragging) isResizeBarHovered = false;
+	}
+
 	onMount(() => {
 		return () => {
 			document.removeEventListener('mousemove', handleMouseMove);
@@ -69,10 +77,8 @@
 
 	<button
 		onmousedown={handleMouseDown}
-		onmouseenter={() => (isResizeBarHovered = true)}
-		onmouseleave={() => {
-			if (!isDragging) isResizeBarHovered = false;
-		}}
+		onmouseenter={handleMouseOverResizeBar}
+		onmouseleave={handleMouseLeaveResizeBar}
 		class="{options.axis === 0 ? 'h-full w-2.5' : 'w-full h-2.5'} bg-transparent flex-shrink-0 flex-grow-0 flex justify-center items-center"
 		aria-label="resize-bar"
 	>

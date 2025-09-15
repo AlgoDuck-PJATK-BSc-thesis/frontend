@@ -5,6 +5,10 @@ export const userPreferences = writable<{ theme : ThemeName}>({
     theme: 'dark'
 });
 
-export const userEditorPreferences = writable< {editorTheme: EditorThemeName }>({
-    editorTheme: 'vs-dark'
+export const userEditorThemePreferences = writable< {editorTheme: EditorThemeName }>({
+    editorTheme: 'vs-dark',
 });
+
+export const userEditorFontSizePreferences = writable<{ fontSize: number }>({
+    fontSize: 16
+})

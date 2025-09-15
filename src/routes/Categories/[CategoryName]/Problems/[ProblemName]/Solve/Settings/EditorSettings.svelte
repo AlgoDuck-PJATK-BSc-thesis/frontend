@@ -1,33 +1,48 @@
 <script lang="ts">
-	import DropDownSelect from './dropDownSelect.svelte';
+	import DropDownSelect from '../GenericComponents/DropDownSelect.svelte';
 
-	import type { DropDownMenuOptions } from './Types/DropDownSelectOptions';
-	import type { EditorCompArgs } from './Types/EditorTabCompArgs';
-	import type { ComponentConfig } from './Types/ComponentConfig';
+	import type { DropDownMenuOptions } from '../GenericComponents/Types/DropDownSelectOptions';
+	import type { ComponentConfig } from '../GenericComponents/Types/ComponentConfig';
 	import { applyThemeEditor, editorThemes, type EditorThemeName } from '$lib/Themes';
-	import { userEditorPreferences } from '../../../../../../../Stores';
+	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../../Stores';
+	import type { EditorCompArgs } from './Types/EditorTabCompArgs';
 
 	let { options }: { options: EditorCompArgs } = $props();
 
-	const fontSizeSelectOptions: ComponentConfig<DropDownMenuOptions> = {
+
+	let fontSize: number = $state(16);
+	let editorTheme: EditorThemeName = $state('vs-dark'); 
+
+	userEditorThemePreferences.subscribe((pref) => {
+		editorTheme = pref.editorTheme;
+	});
+
+	userEditorFontSizePreferences.subscribe((pref) => {
+		fontSize = pref.fontSize;
+	});
+
+const fontSizeSelectOptions: ComponentConfig<DropDownMenuOptions> = {
 		component: DropDownSelect,
+			// svelte-ignore state_referenced_locally
+			// intentional init only state capture as DropDownMenu handles it's own label changes after initial render
 		options: {
-			label: `${options.getCurrFontSize()}px`,
+			label: `${fontSize}px`,
 			options: ['10px', '12px', '16px', '20px'],
 			onSelectCallback: (selected: string) => {
-				options.setFontCallback(parseInt(selected.replaceAll('px', '')));
+				userEditorFontSizePreferences.set({fontSize: parseInt(selected.replaceAll('px', ''))})
 			}
 		}
 	};
 
 	const themeSelectOptions: ComponentConfig<DropDownMenuOptions> = {
 		component: DropDownSelect,
+			// svelte-ignore state_referenced_locally
+			// intentional init only state capture as DropDownMenu handles it's own label changes after initial render
 		options: {
-			label: options.getCurrTheme(),
+			label: editorTheme,
 			options: Object.keys(editorThemes),
 			onSelectCallback: (selected: string) => {
-				options.setThemeCallback(selected);
-				userEditorPreferences.set({editorTheme: selected as EditorThemeName});
+				userEditorThemePreferences.set({editorTheme: selected as EditorThemeName});
 				applyThemeEditor(selected as EditorThemeName)
 			}
 		}

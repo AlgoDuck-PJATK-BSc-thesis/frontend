@@ -2,24 +2,31 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
-	import { userEditorPreferences } from '../../../../../../../Stores';
+	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../../Stores';
 	import type { EditorThemeName } from '$lib/Themes';
 
 	let {
 		editorContents,
 		fontSize,
 		readOnly
-	}: { editorContents: string; fontSize: number; readOnly: boolean } = $props();
+	}: { editorContents: string; fontSize?: number; readOnly?: boolean;} = $props();
+
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
 	let editorContainer: HTMLElement;
 
 	let editorTheme: EditorThemeName = $state('vs-dark')
+	let editorFontSize: number = $state(fontSize ?? 16)
 
-	const unsubscribe = userEditorPreferences.subscribe(value => {
+	const unsubscribeTheme = userEditorThemePreferences.subscribe(value => {
     editorTheme = value.editorTheme;
   });
 
+	const unsubscribeFont = userEditorFontSizePreferences.subscribe(pref => {
+		if (!fontSize){
+			editorFontSize = pref.fontSize;
+		}
+	});
 
 	onMount(async () => {
 		if (!browser) return;
@@ -38,19 +45,19 @@
 			minimap: {
 				enabled: false
 			},
-			readOnly: readOnly,
+			readOnly: readOnly ?? false,
 			automaticLayout: true
 		});
 	});
 
 	$effect(() => {
-		console.log('theme:', editorTheme, 'fontSize:', fontSize);
+		console.log('theme:', editorTheme, 'fontSize:', editorFontSize);
 
 		if (editor && monaco) {
 			monaco.editor.setTheme(editorTheme);
 
 			editor.updateOptions({
-				fontSize: fontSize
+				fontSize: editorFontSize
 			});
 		}
 	});
@@ -59,9 +66,10 @@
 		if (browser && monaco && editor) {
 			// monaco.editor.getModels().forEach((model) => model.dispose());
 			editor.dispose();
-			unsubscribe();
+			unsubscribeTheme();
+			unsubscribeFont();
 		}
 	});
 </script>
 
-<main class="w-full h-full bg-ide-card" bind:this={editorContainer}></main>
+<main class="w-full h-full" bind:this={editorContainer}></main>

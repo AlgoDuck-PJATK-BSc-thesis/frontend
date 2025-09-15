@@ -8,7 +8,7 @@
 	import ResizeableComponent from './GenericComponents/ResizeableComponent.svelte';
 
 	import type { Problem, TestCase } from './Types/Problem';
-	import type { ResizeableComponentArg } from './GenericComponents/ResizeableComponentArg';
+	import type { ResizeableComponentArg } from './GenericComponents/Types/ResizeableComponentArg';
 	import type { CodeEditorArg } from './CodeEditor/Types/CodeEditorArg';
 	import type { EditorBottomPanelArg } from './CodeEditor/Types/EditorBottomPanelArg';
 
@@ -57,17 +57,26 @@
 		initialComp1Proportions: 0.25,
 	}
 
+	// placeholders for now
+	const executeCode = (): void => {
+		isExecutingCode = true;
+	}
+
+	const submitCode = (): void => {
+		isExecutingCode = true;
+	}
+
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">
 	{#if isSettingsPanelShown}
-		<SettingsPanel bind:fontSize bind:theme bind:isSettingsPanelShown />
+		<SettingsPanel bind:isSettingsPanelShown />
 	{/if}
 
 	<div class="w-full h-[5%]">
 		<TopPanel
-			executeCallback={() => (isExecutingCode = true)}
-			submitCallback={() => (isExecutingCode = true)}
+			executeCallback={executeCode}
+			submitCallback={submitCode}
 			isExecuting={isExecutingCode}
 			bind:isSettingsPanelShown
 		/>

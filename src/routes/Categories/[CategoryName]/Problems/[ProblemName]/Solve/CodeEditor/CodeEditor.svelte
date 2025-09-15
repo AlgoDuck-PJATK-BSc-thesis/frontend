@@ -6,5 +6,5 @@
 </script>
 
 <main class="w-full h-full">
-	<Monaco editorContents={options.editorContents} fontSize={options.fontSize} readOnly={false} />
+	<Monaco editorContents={options.editorContents} />
 </main>

@@ -1,5 +1,5 @@
 import type { svgArg } from "../../svg/Types/SvgIcon";
-import type { ComponentConfig } from "./ComponentConfig";
+import type { ComponentConfig } from "../../GenericComponents/Types/ComponentConfig";
 
 export interface TabConfig<P extends {}> {
     id: TabId
@@ -8,7 +8,4 @@ export interface TabConfig<P extends {}> {
     comp: ComponentConfig<P>;
 };
 
-export	type TabId = 'editor';
-
-
-
+export type TabId = 'editor';

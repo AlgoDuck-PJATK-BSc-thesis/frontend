@@ -1,4 +1,4 @@
-import type { ComponentConfig } from "../Settings/Types/ComponentConfig";
+import type { ComponentConfig } from "./ComponentConfig";
 
 export type ResizeAxis = 0 | 1;
 
