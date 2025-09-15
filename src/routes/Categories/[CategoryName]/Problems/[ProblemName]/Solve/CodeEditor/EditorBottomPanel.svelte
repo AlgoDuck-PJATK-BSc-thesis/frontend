@@ -1,25 +1,15 @@
 <script lang="ts">
-	import type { TestCase } from '../Types/Problem';
 	import Terminal from './BottomPanelComponents/Terminal.svelte';
 	import TestCases from './BottomPanelComponents/TestCases.svelte';
+	import type { EditorBottomPanelArg } from './Types/EditorBottomPanelArg';
 
-	let {
-		isTerminalShown,
-		isTestCasesShown,
-		testCases,
-		terminalContents = $bindable()
-	}: {
-		isTerminalShown: boolean;
-		isTestCasesShown: boolean;
-		testCases: TestCase[];
-		terminalContents: string;
-	} = $props();
+	let { options }: { options: EditorBottomPanelArg } = $props();
 </script>
 
 <main class="w-full h-full">
-	{#if isTerminalShown}
-		<Terminal bind:terminalContents />
-	{:else if isTestCasesShown}
-		<TestCases {testCases} />
+	{#if options.isTerminalShown}
+		<Terminal terminalContents={options.terminalContents} />
+	{:else if options.isTestCasesShown}
+		<TestCases testCases={options.testCases} />
 	{/if}
 </main>

@@ -2,22 +2,22 @@
 	import MarkdownRenderer from './GenericComponents/MarkdownRenderer.svelte';
 	import type { Problem } from './Types/Problem';
 
-	let { problemDto }: { problemDto: Problem } = $props();
+	let { options }: { options: Problem } = $props();
 </script>
 
 <main
 	class="w-full h-full flex flex-col justify-start bg-ide-card overflow-y-scroll overflow-x-clip"
 >
 	<div class="h-[10%] flex flex-col-reverse text-4xl p-5 font-bold">
-		<h2 class="select-none text-text-secondary">{problemDto.title}</h2>
+		<h2 class="select-none text-text-secondary">{options.title}</h2>
 	</div>
 	<div class="flex justify-start flex-wrap overflow-clip p-3">
-		{@render TagPill(problemDto.difficulty.name)}
-		{#each problemDto.tags as tag}
+		{@render TagPill(options.difficulty.name)}
+		{#each options.tags as tag}
 			{@render TagPill(tag)}
 		{/each}
 	</div>
-	<MarkdownRenderer markdown={problemDto.description} />
+	<MarkdownRenderer markdown={options.description} />
 </main>
 
 {#snippet TagPill(tagContents: string)}

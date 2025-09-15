@@ -1,12 +1,10 @@
 <script lang="ts">
 	import Monaco from '../Monaco/monaco.svelte';
+	import type { CodeEditorArg } from './Types/CodeEditorArg';
 
-	let {
-		editorContents = $bindable(),
-		fontSize
-	}: { editorContents: string; fontSize: number } = $props();
+	let { options }: { options: CodeEditorArg } = $props();
 </script>
 
 <main class="w-full h-full">
-	<Monaco {editorContents} {fontSize} readOnly={false} />
+	<Monaco editorContents={options.editorContents} fontSize={options.fontSize} readOnly={false} />
 </main>
