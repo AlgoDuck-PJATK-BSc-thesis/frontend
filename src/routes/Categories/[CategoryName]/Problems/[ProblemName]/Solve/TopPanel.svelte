@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import Account from './svg/account.svelte';
-	import Gear from './svg/gear.svelte';
-	import Run from './svg/run.svelte';
-	import Runner from './svg/runner.svelte';
-	import Upload from './svg/upload.svelte';
+	import Account from '$lib/svg/account.svelte';
+	import Gear from '$lib/svg/gear.svelte';
+	import Run from '$lib/svg/run.svelte';
+	import Runner from '$lib/svg/runner.svelte';
+	import Upload from '$lib/svg/upload.svelte';
+
 
 	let executeButton: HTMLButtonElement;
 	let submitButton: HTMLButtonElement;

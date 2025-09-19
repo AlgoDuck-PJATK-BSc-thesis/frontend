@@ -3,7 +3,6 @@
   
   import Island from '$lib/images/Categories/Wysepka2.png'
 	import type { CategoriesPageLoad } from '$lib/types/CategoriesPageLoad';
-  
 	import { onMount } from 'svelte';
 
   let { data } : { data: CategoriesPageLoad } = $props();
@@ -156,7 +155,7 @@
   }
 
   const selectCategory = (categoryName: string) : void => {
-    goto(`./categories/${categoryName}/Problems`);
+    goto(`/Categories/${categoryName}/Problems`);
   }
 
 

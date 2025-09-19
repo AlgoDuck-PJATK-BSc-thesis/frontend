@@ -1,16 +1,16 @@
 <script lang="ts">
-	import InfoPanel from './InfoPanel.svelte';
-	import CodeEditor from './CodeEditor/CodeEditor.svelte';
+	import InfoPanel from './Ide/InfoPanel.svelte';
+	import CodeEditor from './CodeEditor.svelte';
 	import RightGutter from './RightGutter.svelte';
 	import TopPanel from './TopPanel.svelte';
-	import EditorBottomPanel from './CodeEditor/EditorBottomPanel.svelte';
-	import SettingsPanel from './Settings/SettingsPanel.svelte';
-	import ResizeableComponent from './GenericComponents/ResizeableComponent.svelte';
+	import EditorBottomPanel from './EditorBottomPanel.svelte';
+	import SettingsPanel from './SettingsPanel.svelte';
+	import ResizeableComponent from './ResizeableComponent.svelte';
+	import type { ResizeableComponentArg } from '$lib/types/ResizeableComponentArg';
+	import type { Problem, TestCase } from '$lib/types/Problem';
+	import type { CodeEditorArg } from '$lib/types/CodeEditorArg';
+	import type { EditorBottomPanelArg } from '$lib/types/EditorBottomPanelArg';
 
-	import type { Problem, TestCase } from './Types/Problem';
-	import type { ResizeableComponentArg } from './GenericComponents/Types/ResizeableComponentArg';
-	import type { CodeEditorArg } from './CodeEditor/Types/CodeEditorArg';
-	import type { EditorBottomPanelArg } from './CodeEditor/Types/EditorBottomPanelArg';
 
 	let { problemDto }: { problemDto: Problem } = $props();
 

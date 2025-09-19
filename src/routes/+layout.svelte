@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import '../app.css';
-
 	import HeaderGuest from './headers/HeaderGuest.svelte';
 	import HeaderUser from './headers/HeaderUser.svelte';
-
 	import AccessibilitySquareButton from '$lib/Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
 	import AccessibilityPanel from '$lib/Components/AccessibilityComponents/AccessibilityPanel.svelte';
 	import ThemeInitializer from '$lib/Components/ThemeInitializer.svelte';
@@ -16,9 +14,7 @@
 	}
 
 	let { children } = $props();
-
 	let path = page.url.pathname;
-
 	let isLoggedIn =
 		path.startsWith('/home') ||
 		path.startsWith('/problems') ||
@@ -27,20 +23,20 @@
 		path.startsWith('/store') ||
 		path.startsWith('/leaderboard') ||
 		path.startsWith('/settings');
-
 	let hideHeader = $derived(page.data.hideHeader);
 </script>
-<ThemeInitializer/>
+
+<ThemeInitializer />
 <div
 	class="font-body flex min-h-screen flex-col bg-[color:var(--color-bg)] text-[color:var(--color-text)] transition-colors duration-300"
 >
 	{#if !hideHeader}
-    {#if isLoggedIn}
-      <HeaderUser />
-    {:else}
-      <HeaderGuest />
-    {/if}
-  {/if}
+		{#if isLoggedIn}
+			<HeaderUser />
+		{:else}
+			<HeaderGuest />
+		{/if}
+	{/if}
 
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />

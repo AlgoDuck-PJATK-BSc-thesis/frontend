@@ -59,7 +59,7 @@
 				</li>
 				<li>
 					<a
-						href="/Categories"
+						href="/categories"
 						aria-current={page.url.pathname === '/Categories' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>

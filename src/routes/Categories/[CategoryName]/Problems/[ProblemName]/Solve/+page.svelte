@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Problem } from '$lib/types/Problem';
 	import Ide from './Ide.svelte';
-	import type { Problem } from './Types/Problem';
 	
 	let { data }: { data: {hideHeader:boolean, problem: Problem} } = $props();
 </script>

@@ -1,6 +1,6 @@
 import type { PageLoad } from "../$types";
-  import type { CategoriesPageLoad } from '$lib/types/CategoriesPageLoad';
-  import type { CategoryDto } from "$lib/types/CategoryDto";
+import type { CategoriesPageLoad } from "../../Types/CategoriesPageLoad";
+import type { CategoryDto } from "../../Types/CategoryDto";
 
 export const load: PageLoad = async ({ params }) : Promise<CategoriesPageLoad> => {    
     let fetched: Array<CategoryDto> = []; 

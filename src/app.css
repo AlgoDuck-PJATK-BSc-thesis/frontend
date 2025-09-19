@@ -61,14 +61,15 @@
 	--font-newmonzane: 'New Mozane', sans-serif;
 	--font-ariw9500: 'Ari W9500 Bold', sans-serif;
 	--font-opensans: 'Open Sans', sans-serif;
-
 }
 
 html {
 	font-family: var(--font-opensans);
 	background-color: var(--color-bg);
 	color: var(--color-text);
-	transition: background-color 0.3s ease, color 0.3s ease;
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
 }
 
 [data-underline-links='true'] a {

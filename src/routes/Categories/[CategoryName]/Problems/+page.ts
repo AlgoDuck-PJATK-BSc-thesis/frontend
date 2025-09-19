@@ -1,5 +1,5 @@
-import type { PageLoad } from "../../$types";
-import type { Category } from "./Types/Category";
+import type { Category } from "$lib/types/Category";
+import type { PageLoad } from "../../../$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
 
