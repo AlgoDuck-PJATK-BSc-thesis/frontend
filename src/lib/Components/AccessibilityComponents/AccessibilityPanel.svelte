@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { stopPropagation } from '$lib/actions/stopPropagation';
+	import { applyContrast } from '$lib/Themes/UserThemes';
 
 	export let toggleRef: ((fn: () => void) => void) | undefined;
 
 	let isOpen = false;
-
 	let textSize = 100;
 	let contrast = 0;
 	let underlineLinks = false;
@@ -26,6 +25,8 @@
 		document.documentElement.dataset.contrast = contrast.toString();
 		document.documentElement.dataset.underlineLinks = underlineLinks ? 'true' : 'false';
 		document.documentElement.dataset.reduceMotion = reduceMotion ? 'true' : 'false';
+
+		applyContrast(contrast === 1 ? '1' : contrast === 2 ? '2' : '0');
 	}
 </script>
 

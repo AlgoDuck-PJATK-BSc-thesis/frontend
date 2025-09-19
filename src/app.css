@@ -71,56 +71,6 @@ html {
 	transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-html[data-contrast='1'] {
-
-	--color-bg-a11y: var(--color-access-black);
-	--color-text-a11y: var(--color-access-yellow);
-
-	--color-bg: var(--color-access-black);
-	--color-bg-2: var(--color-access-black);
-	--color-text: var(--color-access-yellow);
-	--color-primary: var(--color-access-yellow);
-
-	--color-tile: var(--color-access-black);
-	--color-accent-1: var(--color-access-yellow);
-	--color-accent-2: var(--color-access-yellow);
-	--color-accent-3: var(--color-access-black);
-	--color-accent-4: var(--color-access-black);
-
-	--color-text-button: var(--color-access-black);
-	--color-grass-green: var(--color-access-black);
-
-	--color-chat-left: var(--color-access-black);
-	--color-chat-right: var(--color-access-black);
-	--color-chat-border-left: var(--color-access-yellow);
-	--color-chat-border-right: var(--color-access-yellow);
-}
-
-html[data-contrast='2'] {
-	--color-bg-a11y: var(--color-access-yellow);
-	--color-text-a11y: var(--color-access-black);
-
-	--color-bg: var(--color-access-yellow);
-	--color-bg-2: var(--color-access-yellow);
-	--color-text: var(--color-access-black);
-	--color-primary: var(--color-access-black);
-
-	--color-tile: var(--color-access-yellow);
-	--color-accent-1: var(--color-access-black);
-	--color-accent-2: var(--color-access-black);
-	--color-accent-3: var(--color-access-yellow);
-	--color-accent-4: var(--color-access-yellow);
-
-	--color-text-button: var(--color-access-black);
-	--color-grass-green: var(--color-access-yellow);
-
-	--color-chat-left: var(--color-access-yellow);
-	--color-chat-right: var(--color-access-yellow);
-	--color-chat-border-left: var(--color-access-black);
-	--color-chat-border-right: var(--color-access-black);
-
-}
-
 [data-underline-links='true'] a {
 	text-decoration: underline !important;
 	text-decoration-thickness: 2px !important;

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PixelFrame from '../../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import PixelFrameMini from '../../../Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
 
 	import gold from '$lib/images/leaderboard/Gold.png';
 	import silver from '$lib/images/leaderboard/Silver.png';

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import '../app.css';
 
 	import HeaderGuest from './headers/HeaderGuest.svelte';
 	import HeaderUser from './headers/HeaderUser.svelte';
 
-	import AccessibilitySquareButton from '../Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
-	import AccessibilityPanel from '../Components/AccessibilityComponents/AccessibilityPanel.svelte';
+	import AccessibilitySquareButton from '$lib/Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
+	import AccessibilityPanel from '$lib/Components/AccessibilityComponents/AccessibilityPanel.svelte';
 	import ThemeInitializer from '$lib/Components/ThemeInitializer.svelte';
 
 	let togglePanelFn: () => void;
@@ -17,7 +17,7 @@
 
 	let { children } = $props();
 
-	let path = $page.url.pathname;
+	let path = page.url.pathname;
 
 	let isLoggedIn =
 		path.startsWith('/home') ||
@@ -28,7 +28,7 @@
 		path.startsWith('/leaderboard') ||
 		path.startsWith('/settings');
 
-	let hideHeader = $derived($page.data.hideHeader);
+	let hideHeader = $derived(page.data.hideHeader);
 </script>
 <ThemeInitializer/>
 <div

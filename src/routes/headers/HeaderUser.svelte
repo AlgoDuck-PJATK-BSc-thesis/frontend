@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import ThemeToggle from '../../Components/LayoutComponents/ThemeToggle.svelte';
+	import { page } from '$app/state';
+	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggle.svelte';
 	import coin from '$lib/images/headers/Coin.png';
 
 	let coins = 5000;
@@ -23,7 +23,7 @@
 	>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
-				BEETCODE</a
+				AlgoDuck</a
 			>
 
 			<div
@@ -51,7 +51,7 @@
 				<li>
 					<a
 						href="/home"
-						aria-current={$page.url.pathname === '/home' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/home' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Home
@@ -60,7 +60,7 @@
 				<li>
 					<a
 						href="/Categories"
-						aria-current={$page.url.pathname === '/Categories' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/Categories' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Problems
@@ -69,7 +69,7 @@
 				<li>
 					<a
 						href="/Shop"
-						aria-current={$page.url.pathname === '/Shop' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/Shop' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Shop
@@ -78,7 +78,7 @@
 				<li>
 					<a
 						href="/contest"
-						aria-current={$page.url.pathname === '/contest' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/contest' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Contest
@@ -87,7 +87,7 @@
 				<li>
 					<a
 						href="/cohort"
-						aria-current={$page.url.pathname === '/cohort' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/cohort' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Cohort
@@ -96,7 +96,7 @@
 				<li>
 					<a
 						href="/leaderboard"
-						aria-current={$page.url.pathname === '/leaderboard' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/leaderboard' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Leaderboard
@@ -105,7 +105,7 @@
 				<li>
 					<a
 						href="/settings"
-						aria-current={$page.url.pathname === '/settings' ? 'page' : undefined}
+						aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Settings

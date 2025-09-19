@@ -1,9 +1,9 @@
 <script>
-	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 </script>
 
 <svelte:head>
-	<title>Learn more – Beetcode</title>
+	<title>Learn more – AlgoDuck</title>
 </svelte:head>
 
 <section class="mx-auto mt-16 max-w-4xl px-4">

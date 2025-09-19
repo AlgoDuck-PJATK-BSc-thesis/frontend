@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import HelperDuck from '../../Components/LayoutComponents/HelperDuck.svelte';
+	import HelperDuck from '$lib/Components/LayoutComponents/HelperDuck.svelte';
 
 	import lightPond1 from '$lib/images/ponds/JasnyStaw_1_2.png';
 	import lightPond2 from '$lib/images/ponds/JasnyStaw_2_2.png';
@@ -118,7 +118,7 @@
 </script>
 
 <svelte:head>
-	<title>Home – Beetcode</title>
+	<title>Home – AlgoDuck</title>
 </svelte:head>
 
 <section

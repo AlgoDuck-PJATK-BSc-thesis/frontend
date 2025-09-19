@@ -1,6 +1,4 @@
 export const light = {
-    '--color-access-yellow': '#f2b500',
-	'--color-access-black': '#000000',
 	'--color-bg-a11y': '#ffffff',
 	'--color-text-a11y': '#000000',
 	'--color-bg': '#e3f7ff',

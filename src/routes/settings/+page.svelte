@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '../../Components/ButtonComponents/Button.svelte';
-	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 
 	let username = 'OrbitOwl';
 	let email = 'orbitowl@gmail.com';
@@ -75,7 +75,7 @@
 </script>
 
 <svelte:head>
-	<title>Settings – Beetcode</title>
+	<title>Settings – AlgoDuck</title>
 </svelte:head>
 
 <section class="mt-2 flex h-[calc(100vh-5rem)] justify-left gap-10 overflow-hidden px-12 pt-7">

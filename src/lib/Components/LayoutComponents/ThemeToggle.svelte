@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ThemeName } from '$lib/Themes';
-	import { userPreferences } from '../../Stores/theme';
+	import { userPreferences } from '../../../Stores/theme';
 	import { onMount } from 'svelte';
 
 	let current: ThemeName = 'dark';

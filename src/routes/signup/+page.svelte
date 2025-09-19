@@ -1,10 +1,10 @@
 <script>
-	import Button from '../../Components/ButtonComponents/Button.svelte';
-	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 </script>
 
 <svelte:head>
-	<title>Sign up – Beetcode</title>
+	<title>Sign up – AlgoDuck</title>
 </svelte:head>
 
 <section class="mx-auto mt-14 max-w-90 text-center">

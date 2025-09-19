@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import Button from '../Components/ButtonComponents/Button.svelte';
-
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import landingPageBackground from '$lib/images/LandingPage/Landing_page.png';
 </script>
 
@@ -17,7 +15,7 @@
 			class="mt-2 mb-4 ml-2 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
 			style="font-family: var(--font-ariw9500);"
 		>
-			BEETCODE
+			AlgoDuck
 		</h1>
 		<p
 			class="mb-10 text-2xl font-black tracking-widest text-[color:var(--color-landingpage)] [text-shadow:1.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
@@ -49,3 +47,7 @@
 		</div>
 	</div>
 </section>
+
+<svelte:head>
+	<title>AlgoDuck</title>
+</svelte:head>

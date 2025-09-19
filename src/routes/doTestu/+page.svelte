@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PixelFrame from '../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-    import PixelFrameSimple from '../../Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+    import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 </script>
 
 <div class="w-[30rem] h-[30rem] p-4">

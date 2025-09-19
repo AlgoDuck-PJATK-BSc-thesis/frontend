@@ -1,6 +1,4 @@
 export const dark = {
-    '--color-access-yellow': '#f2b500',
-	'--color-access-black': '#000000',
     '--color-bg-a11y': '#000000',
 	'--color-text-a11y': '#ffffff',
 	'--color-bg': '#192850',

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { highlightJava } from '../../../Utils/highlight';
-	import PixelFrame from '../../../Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import PixelFrameChat from '../../../Components/LayoutComponents/PixelFrames/PixelFrameChat.svelte';
-	import Button from '../../../Components/ButtonComponents/Button.svelte';
+	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import PixelFrameChat from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameChat.svelte';
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 
 	import duck from '$lib/images/ducks/duck.png';
 
