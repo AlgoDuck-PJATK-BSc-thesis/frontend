@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { TestCaseComponentArgs } from '$lib/types/ComponentLoadArgs';
 	import type { FileTreeRootType } from '$lib/types/FileTreeTypes';
 	import type { TestCase } from '$lib/types/Problem';
 	import Monaco from './monaco.svelte';
@@ -6,15 +7,15 @@
 	
 
 
-	let { testCases }: { testCases: TestCase[] } = $props();
+	let { options }: { options: TestCaseComponentArgs } = $props();
 
-	let publicTestCases: TestCase[] = $derived(testCases.filter((tc) => tc.isPublic));
-	let nonPublicTestCases: TestCase[] = $derived(testCases.filter((tc) => !tc.isPublic));
+	let publicTestCases: TestCase[] | undefined = $derived(options.testCases.filter((tc) => tc.isPublic));
+	let nonPublicTestCases: TestCase[] | undefined = $derived(options.testCases.filter((tc) => !tc.isPublic));
 
 	// svelte-ignore state_referenced_locally
-	let previewedTestCase: TestCase = $state(publicTestCases[0]);
+	let previewedTestCase: TestCase | undefined = $state(publicTestCases![0] );
 
-	let root: FileTreeRootType = $derived.by(() => {
+	let root: FileTreeRootType | undefined = $derived.by(() => {
 		return {
 			depth: 0,
 			label: 'Test cases',
@@ -22,7 +23,7 @@
 				{
 					depth: 1,
 					label: 'Public test cases',
-					leaves: publicTestCases.map((tc) => {
+					leaves: publicTestCases!.map((tc) => {
 						return {
 							depth: 2,
 							label: 'test case',
@@ -35,7 +36,7 @@
 				{
 					depth: 1,
 					label: 'Non public test cases',
-					leaves: nonPublicTestCases.map((tc) => {
+					leaves: nonPublicTestCases!.map((tc) => {
 						return {
 							depth: 2,
 							label: 'test case',
@@ -60,12 +61,12 @@
 		>
 			<span class="flex justify-center items-center text-ide-text-secondary">Testing results</span>
 		</div>
-		{#if previewedTestCase.isPublic}
+		{#if previewedTestCase!.isPublic}
 			<div class="h-[calc(100%-2.5rem)] w-full flex overflow-y-hidden">
 				<div class="h-full w-[50%] bg-ide-bg flex flex-col justify-start">
 					<div class="w-full h-10 flex justify-center items-center text center">
 						<span class="flex justify-center items-center text-ide-text-secondary select-none"
-							>{`${previewedTestCase.testCaseId.substring(0, 8)} preview`}</span
+							>{`${previewedTestCase!.testCaseId.substring(0, 8)} preview`}</span
 						>
 					</div>
 					<div class="w-full h-[calc(100%-2.5rem)] p-1.5">
@@ -80,12 +81,12 @@
 				</div>
 				<div class="h-full w-[50%] flex flex-col px-2 pt-4 justify-between">
 					<div class="overflow-hidden">
-						{@render TestCaseCard('Test input', previewedTestCase.display)}
-						{@render TestCaseCard('Expected output', previewedTestCase.displayRes)}
+						{@render TestCaseCard('Test input', previewedTestCase!.display)}
+						{@render TestCaseCard('Expected output', previewedTestCase!.displayRes)}
 					</div>
 					<div class="h-10 min-h-10 w-full flex justify-between items-center px-3 my-2">
 						<span class="flex justify-center items-center"
-							>Passed: {previewedTestCase.isPassed ? previewedTestCase.isPassed : 'N/A'}</span
+							>Passed: {previewedTestCase!.isPassed ? previewedTestCase!.isPassed : 'N/A'}</span
 						>
 						<button
 							class="hover:cursor-pointer h-[90%] px-2 rounded-md border-2 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"

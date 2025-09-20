@@ -1,5 +1,6 @@
 import type { EditorThemeName, ThemeName } from '$lib/Themes';
 import { writable } from 'svelte/store';
+import type { ComponentConfig } from '../routes/editor/ResizableComponentArg';
 
 export const userPreferences = writable<{ theme : ThemeName}>({
     theme: 'dark'
@@ -11,4 +12,8 @@ export const userEditorThemePreferences = writable< {editorTheme: EditorThemeNam
 
 export const userEditorFontSizePreferences = writable<{ fontSize: number }>({
     fontSize: 16
+})
+
+export const userEditorLayoutPreferences = writable<{ layouts: ComponentConfig<any>[]}>({
+    layouts: []
 })

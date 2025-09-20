@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { TabConfig } from '$lib/types/TabConfig';
 	import EditorSettings from './EditorSettings.svelte';
-	import Editor from '$lib/svg/editor.svelte';
+	import Editor from '$lib/svg/EditorIconSvg.svelte';
 	import Cross from '$lib/svg/cross.svelte';
 
 	let {

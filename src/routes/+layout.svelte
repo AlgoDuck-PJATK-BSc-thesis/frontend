@@ -6,6 +6,7 @@
 	import AccessibilitySquareButton from '$lib/Components/AccessibilityComponents/AccessibilitySquareButtonStatic.svelte';
 	import AccessibilityPanel from '$lib/Components/AccessibilityComponents/AccessibilityPanel.svelte';
 	import ThemeInitializer from '$lib/Components/ThemeInitializer.svelte';
+	import RegistryInitializer from '$lib/Components/RegistryInitializer.svelte';
 
 	let togglePanelFn: () => void;
 
@@ -27,6 +28,7 @@
 </script>
 
 <ThemeInitializer />
+<RegistryInitializer />
 <div
 	class="font-body flex min-h-screen flex-col bg-[color:var(--color-bg)] text-[color:var(--color-text)] transition-colors duration-300"
 >

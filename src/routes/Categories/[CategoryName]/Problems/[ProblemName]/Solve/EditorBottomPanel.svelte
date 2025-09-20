@@ -8,8 +8,8 @@
 
 <main class="w-full h-full">
 	{#if options.isTerminalShown}
-		<Terminal terminalContents={options.terminalContents} />
+		<Terminal options={{terminalContents: options.terminalContents}} />
 	{:else if options.isTestCasesShown}
-		<TestCases testCases={options.testCases} />
+		<TestCases options={{testCases: options.testCases}} />
 	{/if}
 </main>

@@ -1,5 +1,7 @@
 <script lang="ts">
-	let { terminalContents = $bindable() }: { terminalContents: string } = $props();
+	import type { TerminalComponentArgs } from "$lib/types/ComponentLoadArgs";
+
+	let { options = $bindable() }: { options: TerminalComponentArgs } = $props();
 
 	let frameCounter = 0;
 
@@ -14,6 +16,6 @@
 		>
 	</div>
 	<div class="w-full overflow-x-hidden overflow-y-scroll bg-ide-card flex-grow whitespace-pre">
-		<p>{terminalContents}</p>
+		<p>{options.terminalContents}</p>
 	</div>
 </main>

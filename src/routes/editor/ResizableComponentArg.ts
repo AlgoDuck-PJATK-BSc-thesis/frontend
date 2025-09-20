@@ -2,7 +2,7 @@ export type ResizeAxis = 0 | 1;
 
 export type tabSide = 0 | 1 | 2 | 3;
 
-export type ComponentType = 'SplitPanel' | 'WizardPanel' | 'TopLevelComponent' | 'GreenPanel' | 'BluePanel' | 'RedPanel' | 'PlaceholderPanel'
+export type ComponentType = 'SplitPanel' | 'WizardPanel' | 'TopLevelComponent' | 'Terminal' | 'TestCases' | 'InfoPanel' | 'Editor' | 'PlaceholderPanel'
 
 export interface ComponentConfig<P> {
     component: ComponentType;
@@ -18,7 +18,7 @@ export interface ResizeableComponentArg<T1, T2>{
 }
 
 export interface WizardComponentArg{
-    components: ComponentConfig<{}>[];
+    components: ComponentConfig<any>[];
     componentsContainer: HTMLDivElement | undefined;
     side: tabSide;
 }

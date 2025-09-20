@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TerminalSvg from "$lib/svg/terminalSvg.svelte";
-	import TestCaseSvg from "$lib/svg/testCaseSvg.svelte";
+	import TerminalSvg from "$lib/svg/TerminalIconSvg.svelte";
+	import TestCaseSvg from "$lib/svg/TestCasesIconSvg.svelte";
 
 	let { isTestCasesShown = $bindable(), isTerminalShown = $bindable() } = $props();
 </script>

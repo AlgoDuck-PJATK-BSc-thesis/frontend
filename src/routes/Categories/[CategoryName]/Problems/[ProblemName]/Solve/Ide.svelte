@@ -24,38 +24,38 @@
 	let theme: string = $state('vs-dark');
 	let isSettingsPanelShown = $state(false);
 
-	let resizeableComponentConfig: ResizeableComponentArg<Problem, ResizeableComponentArg<CodeEditorArg, EditorBottomPanelArg>> = {
-		axis: 0,
-		comp1: {
-			component: InfoPanel,
-			options: problemDto 
-		},
-		comp2: {
-			component: ResizeableComponent,
-			options: {
-				axis: 1,
-				comp1: {
-					component: CodeEditor,
-					options: {
-						get editorContents() { return editorContents },
-						set editorContents(editorContents: string) { editorContents = editorContents },
-						get fontSize() { return fontSize },
-					}
-				},
-				comp2: {
-					component: EditorBottomPanel,
-					options: {
-						get isTerminalShown() { return isTerminalShown },
-						get isTestCasesShown() { return isTestCasesShown },
-						get testCases() { return testCases },
-						get terminalContents() { return terminalContents }
-					}
-				},
-				initialComp1Proportions: 0.75
-			}
-		},
-		initialComp1Proportions: 0.25,
-	}
+	// let resizeableComponentConfig: ResizeableComponentArg<Problem, ResizeableComponentArg<CodeEditorArg, EditorBottomPanelArg>> = {
+	// 	axis: 0,
+	// 	comp1: {
+	// 		component: InfoPanel,
+	// 		options: problemDto 
+	// 	},
+	// 	comp2: {
+	// 		component: ResizeableComponent,
+	// 		options: {
+	// 			axis: 1,
+	// 			comp1: {
+	// 				component: CodeEditor,
+	// 				options: {
+	// 					get editorContents() { return editorContents },
+	// 					set editorContents(editorContents: string) { editorContents = editorContents },
+	// 					get fontSize() { return fontSize },
+	// 				}
+	// 			},
+	// 			comp2: {
+	// 				component: EditorBottomPanel,
+	// 				options: {
+	// 					get isTerminalShown() { return isTerminalShown },
+	// 					get isTestCasesShown() { return isTestCasesShown },
+	// 					get testCases() { return testCases },
+	// 					get terminalContents() { return terminalContents }
+	// 				}
+	// 			},
+	// 			initialComp1Proportions: 0.75
+	// 		}
+	// 	},
+	// 	initialComp1Proportions: 0.25,
+	// }
 
 	// placeholders for now
 	const executeCode = (): void => {
@@ -84,7 +84,7 @@
 
 	<div class="w-full h-[95%] flex">
 		<div class="w-[97.5%] h-full">
-			<ResizeableComponent options={ resizeableComponentConfig }/>
+			<!-- <ResizeableComponent options={ resizeableComponentConfig }/> -->
 		</div>
 
 		<div class="h-full w-[2.5%]">

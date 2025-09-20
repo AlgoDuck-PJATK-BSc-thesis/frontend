@@ -1,22 +1,40 @@
 <script lang="ts">
-	import type { ComponentConfig, MyTopLevelComponentArg, ResizeAxis, ComponentType, tabSide } from "./ResizableComponentArg";
-	import { onMount, type Component } from "svelte";
-	import { ComponentRegistry } from "./ComponentRegistry";
-	import type { BlueComponentArgs, GreenComponentArgs, RedComponentArgs } from "./Colors/TerminalComponentArgs";
+  import { ComponentRegistry } from "./ComponentRegistry";
 
-  type windowType = 'wizard' | 'resize' | 'blue' | 'red' | 'green'
+	import type { ComponentConfig, MyTopLevelComponentArg, ResizeAxis, ComponentType, tabSide } from "./ResizableComponentArg";
+	import type { InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from "$lib/types/ComponentLoadArgs";
+	import type { CodeEditorArg } from "$lib/types/CodeEditorArg";
+	import type { Component } from "svelte";
+	import type { Problem } from "$lib/types/Problem";
+	import { userEditorLayoutPreferences } from "../../Stores";
+
+  let { data } : { data: { hideHeader: boolean, data: Problem } } = $props();
+  
+  let problem: Problem = $derived(data.data);
 
   let wizardPipPosition: number = $state(0);
+  let editorLayouts: ComponentConfig<any>[] = $state([]);
 
-  let blueArg: BlueComponentArgs = $state({
-    num: 67,
+    $inspect(editorLayouts);
+
+  userEditorLayoutPreferences.subscribe((pref) => {
+		editorLayouts = pref.layouts;
+	});
+
+  let terminalArg: TerminalComponentArgs = $state({
+    terminalContents: ''
   });
-  let redArg: RedComponentArgs = $state({
-    message: 'huh',
-    num: 67,
+
+  let infoPanelArg: InfoPanelComponentArgs = $state({
+    problem: problem
   });
-  let greenArg: GreenComponentArgs = $state({
-    message: 'huh',
+  let testCaseArgs: TestCaseComponentArgs = $state({
+    testCases: problem.testCases,
+  });
+
+  let editorContents: CodeEditorArg = $state({
+    editorContents: problem.templateContents, 
+    fontSize: 16
   });
 
   const saveTree = (): void => {
@@ -39,7 +57,7 @@
       toBeExplored = frontier;
     }
 
-    console.log(JSON.stringify(rootConfig));
+    userEditorLayoutPreferences.set({ layouts: [...editorLayouts, rootConfig]})
   };
 
 
@@ -54,13 +72,14 @@
     isDragging: boolean,
     draggedButton: HTMLButtonElement | undefined,
     initCoords: coords | undefined,
-    draggedTileType: windowType | undefined,
+    draggedTileType: ComponentType | undefined,
   }
 
   let resizableComp: HTMLButtonElement;
   let wiardComp: HTMLButtonElement;
 
   let blueComp: HTMLButtonElement;
+  let amberComp: HTMLButtonElement;
   let redComp: HTMLButtonElement;
   let greenComp: HTMLButtonElement;
 
@@ -74,14 +93,14 @@
     draggedTileType: undefined,
   });
 
-  const handleMouseDown = (button: HTMLButtonElement, type: windowType) => {
+  const handleMouseDown = (button: HTMLButtonElement, type: ComponentType) => {
 		dragging.isDragging = true;
     dragging.draggedButton = button;
     dragging.draggedButton.style.position = 'fixed';
     dragging.draggedTileType = type;
 
 		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', dragging.draggedTileType === 'resize' ? handleMouseUpResize :  handleMouseUp);
+		document.addEventListener('mouseup', dragging.draggedTileType === 'SplitPanel' ? handleMouseUpResize :  handleMouseUp);
 
 		document.body.style.cursor = 'grabbing';
 		document.body.style.userSelect = 'none';
@@ -100,7 +119,7 @@
       const dx: number = e.clientX - dragging.initCoords.x;
       const dy: number = e.clientY - dragging.initCoords.y;
 
-      if (isResizablePipRotated && dragging.draggedTileType === 'resize'){
+      if (isResizablePipRotated && dragging.draggedTileType === 'SplitPanel'){
         dragging.draggedButton.style.transform = `translateX(${dy}px) translateY(${-dx}px)`;
       }else{
         dragging.draggedButton.style.transform = `translateX(${dx}px) translateY(${dy}px)`;
@@ -129,6 +148,11 @@
 
     checkCollisionWithPossibleTargets({x: lastMouseX!, y: lastMouseY!})    
 
+
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener('mouseup', handleMouseUpResize);
+
     dragging = {
       isDragging: false,
       draggedButton: undefined,
@@ -142,7 +166,9 @@
 
   let rootCompType: ComponentType = $state('TopLevelComponent');
 
-  const startingRootArgs: MyTopLevelComponentArg<any> = {
+  let RootComp: Component<any> = $derived(ComponentRegistry.get(rootCompType)!);
+
+  const baselineRootArgs: MyTopLevelComponentArg<any> = {
     component: {
       component: 'PlaceholderPanel',
       options: {},
@@ -150,11 +176,10 @@
     }
   }
 
-  let RootComp: Component<any> = $derived(ComponentRegistry.get(rootCompType)!);
-  let loadedConfig: ComponentConfig<any> = $state(JSON.parse('{"component":"TopLevelComponent","options":{"component":{"component":"SplitPanel","options":{"axis":0,"comp1":{"component":"TopLevelComponent","options":{"component":{"component":"WizardPanel","options":{"components":[{"component":"TopLevelComponent","options":{"component":{"component":"GreenPanel","options":{"message":"hmmmm","num":67}}}},{"component":"TopLevelComponent","options":{"component":{"component":"BluePanel","options":{"num":67}}}}],"side":0}}}},"comp2":{"component":"TopLevelComponent","options":{"component":{"component":"GreenPanel","options":{"message":"hmmmm","num":67}}}},"initialComp1Proportions":0.5}}}}')) as ComponentConfig<any>;
-  let loadedRootArgs: ComponentConfig<any> = $derived(loadedConfig.options);
+  let loadedConfig: ComponentConfig<any> = JSON.parse('{"component":"TopLevelComponent","options":{"component":{"component":"SplitPanel","options":{"axis":0,"comp1":{"component":"TopLevelComponent","options":{"component":{"component":"InfoPanel","options":{"problem":{"problemId":"3152daea-43cd-426b-be3b-a7e6d0e376e1","title":"Linked List Cycle Detection","description":"In many applications, linked lists are used to represent dynamic data structures.  \\nHowever, faulty logic or unintended pointer manipulations can sometimes cause a **cycle** to appear in the list, meaning that traversal never reaches a `null` terminator.  \\n\\nYour task is to implement a cycle detection algorithm for a **doubly linked list**. Specifically, you should: \\n1. **Define a `Node` class**  \\n- Contains an integer value  \\n- Has both `next` and `prev` references  \\n\\n2. **Implement a method `hasCycle(Node start)`**  \\n- Determines whether a cycle exists starting from the provided node  \\n3. **Use Floyd’s Tortoise and Hare algorithm**  \\n- A classic two-pointer technique  \\n- Detects the cycle efficiently in **O(n) time** and **O(1) space**  \\nA correct solution should be able to identify both the **presence and absence of cycles** for lists of varying sizes.  \\n### Edge Cases to Consider\\n- Empty list (`null` start node)  \\n- Single-node list without a cycle  \\n- Single-node list that links to itself","category":{"name":"test category 4"},"difficulty":{"name":"MEDIUM"},"type":{"name":"test2"},"templateContents":"public class Main {\\n    private static class Node {\\n        int data;\\n        Node next;\\n        Node prev;\\n\\n        public Node(int data) {\\n            this.data = data;\\n            this.next = null;\\n            this.prev = null;\\n        }\\n    }\\n\\n    public static boolean hasCycle(Node start) {\\n        // Implement the tortoise and hare algorithm here\\n        return false;\\n    }\\n}\\n","testCases":[{"testCaseId":"7a2264fa-b7a2-4250-ac4b-a868f746c978","display":"Linear list: 1 → 2 → 3 → 4 → null","displayRes":"false (no cycle)","isPublic":true,"isPassed":null},{"testCaseId":"2ed6b7ae-4dd0-4c26-84ee-ce849dd9ce13","display":"Cyclic list: 1 → 2 → 3 → 4 → (back to 2)","displayRes":"true (cycle detected)","isPublic":true,"isPassed":null},{"testCaseId":"c2031e76-abf0-4840-8f12-f404df11bb32","display":"","displayRes":"","isPublic":false,"isPassed":null},{"testCaseId":"acb062e7-922f-4ed0-b86c-ac2562a4b959","display":"","displayRes":"","isPublic":false,"isPassed":null}],"tags":["cycle-detection","linked-list","pointer-manipulation","two-pointers","graph-theory-in-disguise"]}}}}},"comp2":{"component":"TopLevelComponent","options":{"component":{"component":"SplitPanel","options":{"axis":1,"comp1":{"component":"TopLevelComponent","options":{"component":{"component":"Editor","options":{"editorContents":"public class Main {\\n    private static class Node {\\n        int data;\\n        Node next;\\n        Node prev;\\n\\n        public Node(int data) {\\n            this.data = data;\\n            this.next = null;\\n            this.prev = null;\\n        }\\n    }\\n\\n    public static boolean hasCycle(Node start) {\\n        // Implement the tortoise and hare algorithm here\\n        return false;\\n    }\\n}\\n","fontSize":16}}}},"comp2":{"component":"TopLevelComponent","options":{"component":{"component":"WizardPanel","options":{"components":[{"component":"TopLevelComponent","options":{"component":{"component":"TestCases","options":{"testCases":[{"testCaseId":"7a2264fa-b7a2-4250-ac4b-a868f746c978","display":"Linear list: 1 → 2 → 3 → 4 → null","displayRes":"false (no cycle)","isPublic":true,"isPassed":null},{"testCaseId":"2ed6b7ae-4dd0-4c26-84ee-ce849dd9ce13","display":"Cyclic list: 1 → 2 → 3 → 4 → (back to 2)","displayRes":"true (cycle detected)","isPublic":true,"isPassed":null},{"testCaseId":"c2031e76-abf0-4840-8f12-f404df11bb32","display":"","displayRes":"","isPublic":false,"isPassed":null},{"testCaseId":"acb062e7-922f-4ed0-b86c-ac2562a4b959","display":"","displayRes":"","isPublic":false,"isPassed":null}]}}}},{"component":"TopLevelComponent","options":{"component":{"component":"Terminal","options":{"terminalContents":""}}}}],"side":1}}}},"initialComp1Proportions":0.7827476038338657}}}},"initialComp1Proportions":0.2845804988662132}}}}') as ComponentConfig<any>;
+  let loadedRootArgs: ComponentConfig<any> = loadedConfig.options;
 
-  let rootArgs = $state(startingRootArgs);
+  let rootArgs = $state(baselineRootArgs);
 
   let rootConfig: ComponentConfig<any> = $derived({
     component: rootCompType,
@@ -199,7 +224,6 @@
           Then when in the add function check whether the component we've been given as a target is a placeholder (like in empty root or splitComponent size), or wizard and act accordingly
 
         */
-        
         target: target.options.component, 
       }];
     }else if (nodeStripped.component === 'PlaceholderPanel'){
@@ -225,7 +249,6 @@
         })
       toBeExplored = frontier;
     }
-    console.log(targets);
     return targets;
   });
 
@@ -239,19 +262,23 @@
       }
   }
 
-  const makeIntoTerminalComponent = (target: ComponentConfig<any>, windowType: windowType): void => {    
+  const makeIntoTerminalComponent = (target: ComponentConfig<any>, windowType: ComponentType): void => {    
     switch (windowType){
-      case 'blue':
-        target.component = 'BluePanel';
-        target.options = blueArg;
+      case 'TestCases':
+        target.component = 'TestCases';
+        target.options = testCaseArgs;
         break;
-      case 'red':
-        target.component = 'RedPanel';
-        target.options = redArg;
+      case 'InfoPanel':
+        target.component = 'InfoPanel';
+        target.options = infoPanelArg;
         break;
-      case 'green':
-        target.component = 'GreenPanel';
-        target.options = redArg;
+      case 'Terminal':
+        target.component = 'Terminal';
+        target.options = terminalArg;
+        break;
+      case 'Editor':
+        target.component = 'Editor'
+        target.options = editorContents;
         break;
     }
   }
@@ -276,10 +303,10 @@
   const makeTargetIntoComponent = (target: ComponentConfig<any>): void => {
     target = wizardRerouteGuard(target);
     switch (dragging.draggedTileType){
-      case 'resize':
+      case 'SplitPanel':
         makeIntoSplitPane(target, isResizablePipRotated ? 1 : 0);
         break;
-      case 'wizard':
+      case 'WizardPanel':
         makeIntoWizard(target);
         break;
       default:
@@ -305,9 +332,9 @@
 </script>
 
 <main class="w-[100vw] h-[100vh] flex flex-col justify-start items-center">
-  <!-- <button class="fixed top-3 left-3 border-2 border-black rounded-lg w-64 h-32" onclick="{}">clear</button> -->
-  <div class="w-full h-[60%] flex justify-center">
-    <div class="w-[60%] h-full bg-gray-800">
+  <button class="fixed top-3 left-3 border-2 border-black rounded-lg w-64 h-32" onclick="{saveTree}">save</button>
+  <div class="w-full  h-[60%] flex justify-center">
+    <div class="w-[60%] h-full rounded-xl overflow-hidden">
       <RootComp bind:options={rootArgs}/>
     </div>
   </div>
@@ -318,20 +345,17 @@
       {@render WizardPip()}
     </div>
     <div class="w-full h-[50%] p-5 flex justify-center gap-10">
-      <div class="w-72 h-36"><button bind:this={redComp} class="w-72 h-36 bg-red-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(redComp, 'red')}}" aria-label="red"></button></div>
-      <div class="w-72 h-36"><button bind:this={greenComp} class="w-72 h-36 bg-green-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(greenComp, 'green')}}" aria-label="green"></button></div>
-      <div class="w-72 h-36"><button bind:this={blueComp} class="w-72 h-36 bg-blue-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(blueComp, 'blue')}}" aria-label="blue"></button></div>
+      <div class="w-72 h-36"><button bind:this={redComp} class="w-72 h-36 bg-red-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(redComp, 'InfoPanel')}}" aria-label="red">info panel</button></div>
+      <div class="w-72 h-36"><button bind:this={greenComp} class="w-72 h-36 bg-green-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(greenComp, 'Terminal')}}" aria-label="green">terminal</button></div>
+      <div class="w-72 h-36"><button bind:this={blueComp} class="w-72 h-36 bg-blue-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(blueComp, 'TestCases')}}" aria-label="blue">test cases</button></div>
+      <div class="w-72 h-36"><button bind:this={amberComp} class="w-72 h-36 bg-amber-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(amberComp, 'Editor')}}" aria-label="blue"> editor</button></div>
     </div>
   </div>
-
-  <!-- <ResizableWrapper/> -->
-  <!-- <ResizeableComponent options={resizable}/> -->
-   <!-- <WizardComponent options={arg}/> -->
 </main>
 
 {#snippet ResizablePip()}
   <div class="w-40 h-24 p-1 bg-[#434343] rounded-md ">
-      <button bind:this={resizableComp} class="w-38 h-22 rounded-md border-2 flex border-black {!dragging.isDragging ?  'transition-transform duration-200 ease-out' : ''} {isResizablePipRotated ? 'rotate-90' : ''}" onmousedown="{()=>{handleMouseDown(resizableComp, 'resize')}}" aria-label="resizable-pip">
+      <button bind:this={resizableComp} class="w-38 h-22 rounded-md border-2 flex border-black {!dragging.isDragging ?  'transition-transform duration-200 ease-out' : ''} {isResizablePipRotated ? 'rotate-90' : ''}" onmousedown="{()=>{handleMouseDown(resizableComp, 'SplitPanel')}}" aria-label="resizable-pip">
         <div class="w-19 h-22 border-2 border-black"></div>
         <div class="w-19 h-22 border-2 border-black"></div>
       </button>
@@ -340,7 +364,7 @@
 
 {#snippet WizardPip()}
   <div class="w-40 h-24 p-1 bg-[#434343] rounded-md ">
-      <button bind:this={wiardComp} class="w-38 h-22 rounded-md border-2 flex border-black" onclick="{()=>{wizardPipPosition = (wizardPipPosition + 1) % 4}}" onmousedown="{()=>{handleMouseDown(wiardComp, 'wizard')}}" aria-label="resizable-pip">
+      <button bind:this={wiardComp} class="w-38 h-22 rounded-md border-2 flex border-black" onclick="{()=>{wizardPipPosition = (wizardPipPosition + 1) % 4}}" onmousedown="{()=>{handleMouseDown(wiardComp, 'WizardPanel')}}" aria-label="resizable-pip">
         <div class="w-38 h-22 flex {wizardPipPosition === 0 ? 'flex-col justify-start' : ''} {wizardPipPosition === 1 ? 'flex justify-end' : ''} {wizardPipPosition === 2 ? 'flex-col-reverse justify-start' : ''} {wizardPipPosition === 3 ? 'justify-start' : ''} items-center">
           <div class="w-4 h-4 bg-red-500"></div>
         </div>
