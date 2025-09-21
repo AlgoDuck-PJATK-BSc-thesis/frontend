@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TerminalSvg from "$lib/svg/TerminalIconSvg.svelte";
-	import TestCaseSvg from "$lib/svg/TestCasesIconSvg.svelte";
+	import TerminalIconSvg from "$lib/svg/EditorComponentIcons/TerminalIconSvg.svelte";
+	import TestCasesIconSvg from "$lib/svg/EditorComponentIcons/TestCasesIconSvg.svelte";
 
 	let { isTestCasesShown = $bindable(), isTerminalShown = $bindable() } = $props();
 </script>
@@ -17,7 +17,7 @@
 			: 'bg-ide-bg'} flex justify-center items-center mb-2 rounded-md"
 	>
 		<div class="w-[80%] aspect-square flex justify-center items-center">
-			<TerminalSvg args={{ color: '#ffffff' }} />
+			<TerminalIconSvg options={{ color: '#ffffff' }} />
 		</div>
 	</button>
 	<button
@@ -30,6 +30,6 @@
 			? 'border-ide-accent bg-ide-bg shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'
 			: 'bg-ide-bg'} flex justify-center items-center mb-1 rounded-md"
 	>
-		<TestCaseSvg args={{ color: '#ffffff' }} />
+		<TestCasesIconSvg options={{ color: '#ffffff' }} />
 	</button>
 </main>

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { TabConfig } from '$lib/types/TabConfig';
 	import EditorSettings from './EditorSettings.svelte';
-	import Editor from '$lib/svg/EditorIconSvg.svelte';
+	import EditorIconSvg from '$lib/svg/EditorComponentIcons/EditorIconSvg.svelte';
 	import Cross from '$lib/svg/cross.svelte';
+	import LayoutIconSvg from '$lib/svg/LayoutIconSvg.svelte';
+	import LayoutSettings from './LayoutSettings.svelte';
 
 	let {
 		isSettingsPanelShown = $bindable()
@@ -13,13 +15,27 @@
 			id: 'editor',
 			label: 'Editor',
 			icon: {
-				component: Editor,
+				component: EditorIconSvg,
 				options: {
 					color: '#9290C3'
 				}
 			},
 			comp: {
 				component: EditorSettings,
+				options: {}
+			}
+		},
+		{
+			id: 'layout',
+			label: 'Layouts',
+			icon: {
+				component: LayoutIconSvg,
+				options: {
+					color: '#9290C3'
+				}
+			},
+			comp: {
+				component: LayoutSettings,
 				options: {}
 			}
 		}
@@ -39,7 +55,6 @@
 	const activeTab = $derived(tabs.find((tab) => tab.id === activeTabId) || tabs[0]);
 	const ActiveComponent = $derived(activeTab.comp.component);
 	const activeComponentOptions = $derived(activeTab.comp.options);
-	const ActiveIcon = $derived(activeTab.icon.component);
 </script>
 
 <div
@@ -77,17 +92,16 @@
 </div>
 
 {#snippet TabButton<P extends {}>(tab: TabConfig<P>)}
+	{@const Icon = tab.icon.component}
 	<button
-		class="w-full h-[15%] flex justify-center items-center rounded-lg hover:cursor-pointer hover:bg-ide-dcard mb-1.5 {activeTabId ===
+		class="w-full h-[15%] flex justify-center items-center py-[2.5%] px-[10%] rounded-lg hover:cursor-pointer hover:bg-ide-dcard mb-1.5 {activeTabId ===
 		tab.id
 			? 'bg-ide-dcard'
 			: ''}"
 		onclick={() => (activeTabId = tab.id)}
 	>
-		<div class="h-[60%] aspect-square">
-			<ActiveIcon options={{ color: '#9290C3' }} />
-		</div>
-		<span class="flex justify-center items-center text-xl select-none text-ide-text-primary mx-4 my-2">
+		<Icon options={{color: '#ffffff'}}/>
+		<span class="flex justify-center flex-grow items-center text-xl select-none text-ide-text-primary">
 			{tab.label}
 		</span>
 	</button>

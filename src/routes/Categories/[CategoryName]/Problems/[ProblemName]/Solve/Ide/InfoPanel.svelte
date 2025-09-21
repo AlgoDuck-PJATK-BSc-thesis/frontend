@@ -2,7 +2,7 @@
 	import MarkdownRenderer from '$lib/Components/MarkdownRenderer.svelte';
 	import type { InfoPanelComponentArgs } from '$lib/types/ComponentLoadArgs';
 
-	let { options }: { options: InfoPanelComponentArgs } = $props();
+	let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
 </script>
 
 <main

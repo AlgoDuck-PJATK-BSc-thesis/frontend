@@ -4,10 +4,9 @@
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../Stores';
 	import type { EditorThemeName } from '$lib/Themes';
-
 	
 	let {
-		editorContents,
+		editorContents = $bindable(),
 		fontSize,
 		readOnly
 	}: { editorContents: string; fontSize?: number; readOnly?: boolean;} = $props();
@@ -49,6 +48,11 @@
 			readOnly: readOnly ?? false,
 			automaticLayout: true
 		});
+
+		editor.onDidChangeModelContent(() => {
+      editorContents = editor.getValue();
+    });
+		
 	});
 
 	$effect(() => {

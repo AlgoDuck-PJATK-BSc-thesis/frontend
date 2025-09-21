@@ -1,61 +1,71 @@
 <script lang="ts">
-	import InfoPanel from './Ide/InfoPanel.svelte';
-	import CodeEditor from './CodeEditor.svelte';
 	import RightGutter from './RightGutter.svelte';
 	import TopPanel from './TopPanel.svelte';
-	import EditorBottomPanel from './EditorBottomPanel.svelte';
 	import SettingsPanel from './SettingsPanel.svelte';
-	import ResizeableComponent from './ResizeableComponent.svelte';
-	import type { ResizeableComponentArg } from '$lib/types/ResizeableComponentArg';
-	import type { Problem, TestCase } from '$lib/types/Problem';
-	import type { CodeEditorArg } from '$lib/types/CodeEditorArg';
-	import type { EditorBottomPanelArg } from '$lib/types/EditorBottomPanelArg';
-
+	import type { Problem } from '$lib/types/Problem';
+	import type { ComponentConfig, ComponentType } from '../../../../../editor/ResizableComponentArg';
+	import type { Component } from 'svelte';
+	import { ComponentRegistry } from '../../../../../editor/ComponentRegistry';
 
 	let { problemDto }: { problemDto: Problem } = $props();
 
-	let editorContents: string = $state(problemDto.templateContents);
 	let isTerminalShown: boolean = $state(true);
 	let isTestCasesShown: boolean = $state(false);
-	let terminalContents: string = $state('');
-	let testCases: TestCase[] = $state(problemDto.testCases);
 	let isExecutingCode: boolean = $state(false);
-	let fontSize: number = $state(16);
-	let theme: string = $state('vs-dark');
 	let isSettingsPanelShown = $state(false);
 
-	// let resizeableComponentConfig: ResizeableComponentArg<Problem, ResizeableComponentArg<CodeEditorArg, EditorBottomPanelArg>> = {
-	// 	axis: 0,
-	// 	comp1: {
-	// 		component: InfoPanel,
-	// 		options: problemDto 
-	// 	},
-	// 	comp2: {
-	// 		component: ResizeableComponent,
-	// 		options: {
-	// 			axis: 1,
-	// 			comp1: {
-	// 				component: CodeEditor,
-	// 				options: {
-	// 					get editorContents() { return editorContents },
-	// 					set editorContents(editorContents: string) { editorContents = editorContents },
-	// 					get fontSize() { return fontSize },
-	// 				}
-	// 			},
-	// 			comp2: {
-	// 				component: EditorBottomPanel,
-	// 				options: {
-	// 					get isTerminalShown() { return isTerminalShown },
-	// 					get isTestCasesShown() { return isTestCasesShown },
-	// 					get testCases() { return testCases },
-	// 					get terminalContents() { return terminalContents }
-	// 				}
-	// 			},
-	// 			initialComp1Proportions: 0.75
-	// 		}
-	// 	},
-	// 	initialComp1Proportions: 0.25,
-	// }
+	let rootCompType: ComponentType = $state('TopLevelComponent');
+  let RootComp: Component<any> = $derived(ComponentRegistry.get(rootCompType)!);
+
+	const exploreNode = (target: ComponentConfig<any>) : ComponentConfig<any>[] => {
+		if (target.options.component.component === 'SplitPanel'){
+			return [ target.options.component.options.comp1, target.options.component.options.comp2 ];
+		}else if (target.options.component.component === 'WizardPanel'){
+			return target.options.component.options.components;
+		}else{
+			return [];
+		}
+	}
+			
+	const consumeNode = (target: ComponentConfig<any>): void => {
+		const nodeStripped: ComponentConfig<any> = target.options.component;
+		if (nodeStripped.component === 'Editor'){
+			target.options.component.options = {
+  		  editorContents: problemDto.templateContents, 
+  		  fontSize: 16
+  		}
+		}else if (nodeStripped.component === 'Terminal'){
+			target.options.component.options = {
+  		  terminalContents: ''
+  		}
+		}else if (nodeStripped.component === 'InfoPanel'){
+			target.options.component.options = { 
+				problem: problemDto 
+			}
+		}else if (nodeStripped.component === 'TestCases'){
+			target.options.component.options = {
+				testCases: problemDto.testCases,
+			}
+    }
+  }
+
+	const hydrateLayout = () : void=>{
+		let toBeExplored: ComponentConfig<any>[] = [ loadedConfig2 ];
+		while (toBeExplored.length > 0){
+			let frontier: ComponentConfig<any>[] = []
+			toBeExplored.forEach(cc => {
+				consumeNode(cc);
+				frontier.push(...exploreNode(cc));
+			})
+		toBeExplored = frontier;
+		}
+	};
+
+	
+	
+  let loadedConfig2: ComponentConfig<any> = JSON.parse('{  \"component\": \"TopLevelComponent\",  \"options\": {    \"component\": {      \"component\": \"SplitPanel\",      \"options\": {        \"axis\": 0,        \"comp1\": {          \"component\": \"TopLevelComponent\",          \"options\": {            \"component\": {              \"component\": \"Editor\",              \"options\": {                \"editorContents\": \"\",                \"fontSize\": 32              }            }          }        },        \"comp2\": {          \"component\": \"TopLevelComponent\",          \"options\": {            \"component\": {              \"component\": \"WizardPanel\",              \"options\": {                \"components\": [                  {                    \"component\": \"TopLevelComponent\",                    \"options\": {                      \"component\": {                        \"component\": \"Terminal\",                        \"options\": {                          \"terminalContents\": \"\"                        }                      }                    }                  },                  {                    \"component\": \"TopLevelComponent\",                    \"options\": {                      \"component\": {                        \"component\": \"TestCases\",                        \"options\": {                          \"testCases\": []                        }                      }                    }                  },                  {                    \"component\": \"TopLevelComponent\",                    \"options\": {                      \"component\": {                        \"component\": \"InfoPanel\",                        \"options\": {                          \"problem\": {                            \"problemId\": \"\",                            \"title\": \"\",                            \"description\": \"\",                            \"category\": {                              \"name\": \"\"                            },                            \"difficulty\": {                              \"name\": \"\"                            },                            \"type\": {                              \"name\": \"\"                            },                            \"templateContents\": \"\",                            \"testCases\": [],                            \"tags\": []                          }                        }                      }                    }                  }                ],                \"side\": 3              }            }          }        },        \"initialComp1Proportions\": 0.5      }    }  }}') as ComponentConfig<any>;
+	hydrateLayout();
+	let config: ComponentConfig<any> = $state(loadedConfig2);
 
 	// placeholders for now
 	const executeCode = (): void => {
@@ -65,7 +75,7 @@
 	const submitCode = (): void => {
 		isExecutingCode = true;
 	}
-
+	
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">
@@ -83,12 +93,6 @@
 	</div>
 
 	<div class="w-full h-[95%] flex">
-		<div class="w-[97.5%] h-full">
-			<!-- <ResizeableComponent options={ resizeableComponentConfig }/> -->
-		</div>
-
-		<div class="h-full w-[2.5%]">
-			<RightGutter bind:isTerminalShown bind:isTestCasesShown />
-		</div>
+		<RootComp bind:options={config.options}/>
 	</div>
 </main>

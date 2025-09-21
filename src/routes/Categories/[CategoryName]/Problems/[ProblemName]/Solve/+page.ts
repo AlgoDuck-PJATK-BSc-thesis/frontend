@@ -1,7 +1,9 @@
 import type { Problem } from "$lib/types/Problem";
+import { ComponentRegistry, InitializeRegistryDefault } from "../../../../../editor/ComponentRegistry";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {
+  InitializeRegistryDefault();
     return {
         problem: fallback,
         hideHeader: true

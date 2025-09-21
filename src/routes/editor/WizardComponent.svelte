@@ -18,6 +18,8 @@
     );
   });
 
+  
+
 </script>
 
 <main class="w-full h-full rounded-xl overflow-hidden flex {options.side === 0 ? 'flex-col' : ''} {options.side === 1 ? 'flex-row-reverse' : ''} {options.side === 2 ? 'flex-col-reverse' : ''}">
@@ -26,9 +28,10 @@
     {:else}
       {@render VerticalTabDiv()}
     {/if}
+    
   <div bind:this={options.componentsContainer} class="w-full flex-grow bg-gray-300 relative">
+    
     {#each options.components as component, i}
-
       {@const Comp = ComponentRegistry.get(component.component)!}
       <!-- {@const options = component.options} -->
       <div class="w-full h-full absolute top-0 left-0 {i !== feturedElementIndex ? 'invisible' : ''}">

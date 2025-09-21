@@ -5,6 +5,7 @@
 
 	let { options = $bindable() }: { options: ResizeableComponentArg<T1, T2> } = $props();
 
+
 	let initialComp2Proportions: number = 1 - options.initialComp1Proportions;
 
 	let mainContainer: HTMLDivElement;

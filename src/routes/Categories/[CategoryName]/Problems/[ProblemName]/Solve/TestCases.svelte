@@ -5,17 +5,16 @@
 	import Monaco from './monaco.svelte';
 	import TestCaseFileTreeRoot from './TestCaseFileTreeRoot.svelte';
 	
+	let { options = $bindable() }: { options: TestCaseComponentArgs } = $props();
 
 
-	let { options }: { options: TestCaseComponentArgs } = $props();
-
-	let publicTestCases: TestCase[] | undefined = $derived(options.testCases.filter((tc) => tc.isPublic));
-	let nonPublicTestCases: TestCase[] | undefined = $derived(options.testCases.filter((tc) => !tc.isPublic));
+	let publicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => tc.isPublic));
+	let nonPublicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => !tc.isPublic));
 
 	// svelte-ignore state_referenced_locally
-	let previewedTestCase: TestCase | undefined = $state(publicTestCases![0] );
+	let previewedTestCase: TestCase = $state(publicTestCases[0] );
 
-	let root: FileTreeRootType | undefined = $derived.by(() => {
+	let root: FileTreeRootType = $derived.by(() => {
 		return {
 			depth: 0,
 			label: 'Test cases',
@@ -61,12 +60,12 @@
 		>
 			<span class="flex justify-center items-center text-ide-text-secondary">Testing results</span>
 		</div>
-		{#if previewedTestCase!.isPublic}
+		{#if previewedTestCase.isPublic}
 			<div class="h-[calc(100%-2.5rem)] w-full flex overflow-y-hidden">
 				<div class="h-full w-[50%] bg-ide-bg flex flex-col justify-start">
 					<div class="w-full h-10 flex justify-center items-center text center">
 						<span class="flex justify-center items-center text-ide-text-secondary select-none"
-							>{`${previewedTestCase!.testCaseId.substring(0, 8)} preview`}</span
+							>{`${previewedTestCase.testCaseId.substring(0, 8)} preview`}</span
 						>
 					</div>
 					<div class="w-full h-[calc(100%-2.5rem)] p-1.5">

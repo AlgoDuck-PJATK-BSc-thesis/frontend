@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Account from '$lib/svg/account.svelte';
-	import Gear from '$lib/svg/gear.svelte';
+	import SettingsIconSvg from '$lib/svg/SettingsIconSvg.svelte';
 	import Run from '$lib/svg/run.svelte';
 	import Runner from '$lib/svg/runner.svelte';
 	import Upload from '$lib/svg/upload.svelte';
-
 
 	let executeButton: HTMLButtonElement;
 	let submitButton: HTMLButtonElement;
@@ -93,9 +92,9 @@
 	<div class="w-[25%] h-full flex justify-end items-center px-5 gap-7">
 		<button
 			onclick={toggleSettingsPanel}
-			class="h-[75%] aspect-square hover:cursor-pointer hover:rotate-30 transition-transform duration-100 ease-out"
+			class="h-[75%] aspect-square hover:cursor-pointer hover:rotate-30 flex items-center justify-center transition-transform duration-100 ease-out"
 		>
-			<Gear args={{ color: '#d2d1fc' }} />
+			<SettingsIconSvg options={{ color: '#d2d1fc', class: 'stroke-[#d2d1fc]' }} />
 		</button>
 
 		<button class="h-[75%] aspect-square hover:cursor-pointer" onclick={() => {}}>
