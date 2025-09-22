@@ -4,8 +4,5 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
-	optimizeDeps: {
-    	include: ['@lucide/svelte']
-  	}
+	plugins: [tailwindcss(), sveltekit(), devtoolsJson()]
 });

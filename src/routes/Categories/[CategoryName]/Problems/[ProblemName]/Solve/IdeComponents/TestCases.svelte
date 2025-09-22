@@ -2,8 +2,8 @@
 	import type { TestCaseComponentArgs } from '$lib/types/ComponentLoadArgs';
 	import type { FileTreeRootType } from '$lib/types/FileTreeTypes';
 	import type { TestCase } from '$lib/types/Problem';
-	import Monaco from './monaco.svelte';
-	import TestCaseFileTreeRoot from './TestCaseFileTreeRoot.svelte';
+	import Monaco from './HelperComponents/monaco.svelte';
+	import TestCaseFileTreeRoot from './HelperComponents/TestCaseFileTreeRoot.svelte';
 	
 	let { options = $bindable() }: { options: TestCaseComponentArgs } = $props();
 

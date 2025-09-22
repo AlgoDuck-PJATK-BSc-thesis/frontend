@@ -1,3 +1,8 @@
+import type { ComponentType } from "../../routes/editor/ResizableComponentArg";
+
+export interface IdeComponentArgs{
+  ideComponents: Map<ComponentType, { options: any}>
+}
 export interface Problem {
   problemId: string;
   title: string;

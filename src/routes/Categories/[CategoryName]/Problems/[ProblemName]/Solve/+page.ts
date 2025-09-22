@@ -1,9 +1,9 @@
 import type { Problem } from "$lib/types/Problem";
-import { ComponentRegistry, InitializeRegistryDefault } from "../../../../../editor/ComponentRegistry";
-import type { PageLoad } from "./$types";
+import type { PageLoad } from "../../../../../$types";
+import type { ComponentType } from "../../../../../editor/ResizableComponentArg";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-  InitializeRegistryDefault();
+  new Map<ComponentType, { options: any} >([])
     return {
         problem: fallback,
         hideHeader: true

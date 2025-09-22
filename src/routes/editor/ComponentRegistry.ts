@@ -1,10 +1,10 @@
 import type { Component } from "svelte";
 import type { ComponentType } from "./ResizableComponentArg";
 
-import Terminal from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/Terminal.svelte";
-import TestCases from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/TestCases.svelte";
-import InfoPanel from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/Ide/InfoPanel.svelte";
-import CodeEditor from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/CodeEditor.svelte";
+import Terminal from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/IdeComponents/Terminal.svelte";
+import TestCases from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/IdeComponents/TestCases.svelte";
+import InfoPanel from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/IdeComponents/InfoPanel.svelte";
+import CodeEditor from "../categories/[CategoryName]/Problems/[ProblemName]/Solve/IdeComponents/CodeEditor.svelte";
 import TerminalPlaceHolder from "./Placeholders/TerminalPlaceHolder.svelte";
 import TestCasesPlaceholder from "./Placeholders/TestCasesPlaceholder.svelte";
 import InfoPanelPlaceholder from "./Placeholders/InfoPanelPlaceholder.svelte";

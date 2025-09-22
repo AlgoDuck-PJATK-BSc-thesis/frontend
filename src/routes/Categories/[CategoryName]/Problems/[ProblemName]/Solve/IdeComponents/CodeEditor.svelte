@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CodeEditorArg } from '$lib/types/CodeEditorArg';
-	import Monaco from './monaco.svelte';
+	import Monaco from './HelperComponents/monaco.svelte';
 
 	let { options = $bindable() }: { options: CodeEditorArg } = $props();
 </script>

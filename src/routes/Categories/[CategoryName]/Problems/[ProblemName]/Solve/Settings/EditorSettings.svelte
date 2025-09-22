@@ -3,8 +3,8 @@
 	import type { ComponentConfig } from '$lib/types/ComponentConfig';
 	import type { DropDownMenuOptions } from '$lib/types/DropDownSelectOptions';
 	import type { EditorCompArgs } from '$lib/types/EditorTabCompArgs';
-	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../Stores';
-	import DropDownSelect from './DropDownSelect.svelte';
+	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../../Stores';
+	import DropDownSelect from '../IdeComponents/HelperComponents/DropDownSelect.svelte';
 
 
 	let { options }: { options: EditorCompArgs } = $props();
