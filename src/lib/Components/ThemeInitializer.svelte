@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-	import { userPreferences } from '../../Stores';
 	import { applyTheme, applyThemeEditor, type EditorThemeName, type ThemeName } from '$lib/Themes';
+	import { userPreferences } from '$lib/stores/theme';
 
   const mapUserThemesToEditorThemes = (theme : ThemeName): EditorThemeName => {
     switch (theme) {

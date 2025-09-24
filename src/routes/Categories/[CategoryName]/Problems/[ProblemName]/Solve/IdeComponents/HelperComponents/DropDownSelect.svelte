@@ -39,7 +39,7 @@
 		onclick={toggleDropDown}
 		class="w-full h-full flex justify-between px-4 py-2 items-center absolute top-0 hover:cursor-pointer"
 	>
-		<span class="text-ide-text-secondary">{label}</span>
+		<span class="text-ide-text-secondary flex justify-start items-center overflow-hidden">{label}</span>
 		<div bind:this={chevronIcon} class="h-[33%] aspect-square">
 			<Chevron args={{ color: '#FFFFFF' }} />
 		</div>
@@ -57,7 +57,7 @@
 					: ''} hover:bg-ide-dcard"
 				onclick={() => onSelect(selectionOption)}
 			>
-				<span class="w-full h-full px-4 flex justify-start items-center text-ide-text-primary"
+				<span class="w-full h-full px-4 flex justify-start items-center text-ide-text-primary overflow-hidden"
 					>{selectionOption}</span
 				>
 			</button>

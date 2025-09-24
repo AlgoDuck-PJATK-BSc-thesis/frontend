@@ -6,7 +6,7 @@
 </script>
 
 <main
-	class="w-full h-full flex flex-col justify-start bg-ide-card overflow-y-scroll overflow-x-clip"
+	class="w-full h-full flex flex-col justify-start bg-ide-card overflow-y-scroll overflow-x-clip px-[2%] py-[4%]"
 >
 		
 	<div class="h-[10%] flex flex-col-reverse text-4xl p-5 font-bold">

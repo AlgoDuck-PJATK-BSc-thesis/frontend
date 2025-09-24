@@ -6,7 +6,7 @@
 	import type { CodeEditorArg } from "$lib/types/CodeEditorArg";
 	import type { Component } from "svelte";
 	import type { Problem } from "$lib/types/Problem";
-	import { addLayout, userEditorLayoutPreferences } from "../../Stores";
+	import { LayoutStoreId, saveLayout, userEditorLayoutPreferences } from "$lib/stores/theme";
 
   let { data } : { data: { hideHeader: boolean, data: Problem } } = $props();
   
@@ -14,6 +14,12 @@
 
   let wizardPipPosition: number = $state(0);
 
+  let availableLayouts: Record<string, string> = $state({});
+
+  userEditorLayoutPreferences.subscribe((pref) => {
+    availableLayouts = pref.layouts
+  })
+  
   let terminalArg: TerminalComponentArgs = $state({
     terminalContents: ''
   });
@@ -49,8 +55,9 @@
 
       toBeExplored = frontier;
     }
-    console.log(JSON.stringify(rootConfig));
-    addLayout(`layout-${Math.floor(Math.random() * 1000)}`, rootConfig);
+
+	   const layoutName = `layout-${Date.now()}`;
+      saveLayout(layoutName, JSON.stringify(rootConfig));
   };
 
 

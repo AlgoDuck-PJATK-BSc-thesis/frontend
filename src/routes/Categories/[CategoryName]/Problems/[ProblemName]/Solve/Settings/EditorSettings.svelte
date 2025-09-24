@@ -1,14 +1,12 @@
 <script lang="ts">
+	import { userEditorFontSizePreferences, userEditorThemePreferences } from '$lib/stores/theme';
 	import { applyThemeEditor, editorThemes, type EditorThemeName } from '$lib/Themes';
 	import type { ComponentConfig } from '$lib/types/ComponentConfig';
 	import type { DropDownMenuOptions } from '$lib/types/DropDownSelectOptions';
 	import type { EditorCompArgs } from '$lib/types/EditorTabCompArgs';
-	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../../Stores';
 	import DropDownSelect from '../IdeComponents/HelperComponents/DropDownSelect.svelte';
 
-
 	let { options }: { options: EditorCompArgs } = $props();
-
 
 	let fontSize: number = $state(16);
 	let editorTheme: EditorThemeName = $state('vs-dark'); 

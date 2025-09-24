@@ -1,41 +1,34 @@
 <script lang="ts">
 	import type { DropDownMenuOptions } from "$lib/types/DropDownSelectOptions";
 	import type { EditorCompArgs } from "$lib/types/EditorTabCompArgs";
-	import { userEditorLayoutChosenPreference, userEditorLayoutPreferences } from "../../../../../../../Stores";
-	import type { ComponentConfig } from "../../../../../../editor/ResizableComponentArg";
   import type { ComponentConfig as ComponentConfigStatic } from "$lib/types/ComponentConfig";
 
 	import DropDownSelect from "../IdeComponents/HelperComponents/DropDownSelect.svelte";
+	import { loadLayouts, userEditorLayoutChosenPreference } from "$lib/stores/theme";
 
   let { options }: { options: EditorCompArgs } = $props();
 
-  let editorLayouts: Map<string, ComponentConfig<any>> = $state(new Map<string, ComponentConfig<any>>());
-  let selectedLayout: ComponentConfig<any> | undefined = $derived(editorLayouts.get('default'));
+  let selectedLayout: string = $state("default");
 
-
-  $inspect(editorLayouts);
-
-  userEditorLayoutPreferences.subscribe((pref) => {
-    pref.layouts.forEach((v, k) => {
-      editorLayouts.set(k, v);
-    })
-	});
-  userEditorLayoutChosenPreference.subscribe((pref)=>{
-    selectedLayout = pref.layout
+  userEditorLayoutChosenPreference.subscribe(pref => {
+    selectedLayout = pref.layoutId;
   });
+
+  let availableLayouts: Record<string, string> = $state(loadLayouts());
 
   const layoutSelectOptions: ComponentConfigStatic<DropDownMenuOptions> = {
     component: DropDownSelect,
     options: {
-      label: selectedLayout!.layoutId!,
-      options: [...availableLayouts.map(lay => lay.layoutId)],
+      // svelte-ignore state_referenced_locally
+      label: $state.snapshot(selectedLayout),
+      options: Object.keys(availableLayouts),
       onSelectCallback: (selected: string) => {
-        userEditorLayoutChosenPreference.set({layout: availableLayouts[availableLayouts.findIndex((lay) => lay.layoutId === selected)]});
+        userEditorLayoutChosenPreference.set({layoutId: selected});
       }
     }
   }
 
-  $inspect(availableLayouts);
+  // $inspect(availableLayouts);
 
 </script>
 

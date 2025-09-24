@@ -2,8 +2,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
-	import { userEditorFontSizePreferences, userEditorThemePreferences } from '../../../../../../../../Stores';
 	import type { EditorThemeName } from '$lib/Themes';
+	import { userEditorFontSizePreferences, userEditorThemePreferences } from '$lib/stores/theme';
 	
 	let {
 		editorContents = $bindable(),

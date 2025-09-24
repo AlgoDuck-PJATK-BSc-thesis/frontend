@@ -3,21 +3,21 @@
 	import TopPanel from './IdeComponents/TopPanel.svelte';
 
 	import { ComponentRegistry } from '../../../../../editor/ComponentRegistry';
-	import { userEditorLayoutChosenPreference, userEditorLayoutPreferences } from '../../../../../../Stores';
-
+	
 	import type { ComponentConfig, ComponentType } from '../../../../../editor/ResizableComponentArg';
 	import type { Component } from 'svelte';
+	import { loadLayouts, userEditorLayoutChosenPreference, userEditorLayoutPreferences } from '$lib/stores/theme';
 
 	let { components = $bindable() }: { components: Record<string, object> } = $props();
+	
+	let availableLayouts: Record<string, string> = $state(loadLayouts());
 
-	let availableLayouts: Map<string, ComponentConfig<any>> = $state(new Map<string, ComponentConfig<any>>());
-
-	userEditorLayoutPreferences.subscribe((pref) => {
-		pref.layouts.forEach((v, k)=>{
-			availableLayouts.set(k, v);
-		});
-	})
-
+	$inspect(components);
+	
+	userEditorLayoutPreferences.subscribe( pref => {
+		availableLayouts = pref.layouts;
+	});
+	
 	let selectedLayout: string = $state('default');
 
 	userEditorLayoutChosenPreference.subscribe(pref => {
@@ -60,9 +60,9 @@
 	let hydratedLayout: ComponentConfig<any> | undefined = $state();
 
 	$effect(() => {
-	  const baseLayout = availableLayouts.get($userEditorLayoutChosenPreference.layoutId);
+	  const baseLayout = availableLayouts[selectedLayout];
 	  if (baseLayout) {
-	    hydratedLayout = hydrateLayout(baseLayout, components);
+	    hydratedLayout = hydrateLayout(JSON.parse(baseLayout) as ComponentConfig<any>, components);
 	  }
 	});
 
@@ -91,9 +91,11 @@
 		/>
 	</div>
 
-	<div class="w-full h-[95%] flex">
-		{#if hydratedLayout}
-			<RootComp bind:options={hydratedLayout.options}/>
-		{/if}
-	</div>
+<div class="w-full h-[95%] flex p-[0.5%]">
+  {#if hydratedLayout}
+    {#key selectedLayout}
+      <RootComp bind:options={hydratedLayout.options}/>
+    {/key}
+  {/if}
+</div>
 </main>
