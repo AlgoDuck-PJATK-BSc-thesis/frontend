@@ -39,15 +39,9 @@
 </svelte:head>
 
 <div
-	class="font-body relative mt-16 mr-5 mb-0 ml-12 flex max-h-[calc(100vh-12rem)] w-[67vw] flex-col items-center gap-6 overflow-y-auto px-5 pr-2 pl-2"
+	class="font-body relative mt-16 mr-5 mb-0 ml-12 flex max-h-[calc(100vh-11.6rem)] w-[65vw] flex-col items-center gap-6 overflow-y-auto px-5 pr-2 pl-2"
 >
 	<section class="relative w-full">
-		<img
-			src={duck}
-			alt="Duck"
-			class="pointer-events-none fixed top-[7.2rem] right-[calc(30vw+1rem)] z-[19] h-20 w-20 select-none"
-		/>
-
 		<PixelFrame
 			className="mb-10 relative flex flex-col h-max w-full max-w-full bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 text-[color:var(--color-text)]"
 		>
