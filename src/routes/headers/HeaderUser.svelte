@@ -19,7 +19,7 @@
 
 <div class="w-full overflow-x-auto">
 	<header
-		class="font-body sticky top-0 z-[100] flex min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
+		class="font-body h-16 sticky top-0 z-[100] flex min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
 	>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">

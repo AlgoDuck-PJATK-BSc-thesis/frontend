@@ -43,11 +43,7 @@
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
 
-	<main class="mx-auto box-border w-full max-w-full flex-1">
+	<main class="h-[calc(100vh-4rem)] w-full box-border"> <!-- This works on the presumption of the header being h-16 or 4rem -->
 		{@render children?.()}
 	</main>
-
-	<!-- <footer class="fixed bottom-0 left-0 w-full bg-[color:var(--color-bg)] text-center p-3 text-xs text-[color:var(--color-accent-2)] z-[100]">
-		<p>© {new Date().getFullYear()} Beetcode</p>
-	</footer> -->
 </div>

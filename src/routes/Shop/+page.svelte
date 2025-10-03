@@ -3,11 +3,11 @@
 	import type { PageData } from './$types';
 	import type { DuckDto, DuckShopPage } from './Dtos';
 	import { simulateFetchAsync } from './loadDucks';
+	import CloudfrontImage from '$lib/Components/CloudfrontImage.svelte';
 
   let { data } : {data: PageData} = $props();
 
   let selectedDuckImage: HTMLElement;
-
 
   let duckShopPage: DuckShopPage = $state(data as DuckShopPage);
   let duckNextPage: DuckShopPage | null = $state(null);
@@ -16,6 +16,7 @@
   let nextDucks: Array<DuckDto> | null = $derived.by(()=>{
     return duckNextPage ? duckNextPage.ducksPaged : null;
   });
+  
   let currentPreviewedDuck: DuckDto | undefined = $derived(currDucks.at(0))
 
   let isAnimating: boolean = $state(false);
@@ -26,18 +27,12 @@
     return rowType === "flex-col" ? -100 : 100;
   });
 
-  const cloudfrontDistributionDomainName: string = "d3018wbyyxg1xc.cloudfront.net";
-  
   const divs: Array<HTMLElement> = [];
     
   const hoverAnimationTime: number = 3000;
   let raf: number | null;
   let animationStartTime: number | null = null;
   const driftAmount = 15;
-
-  const wrapDuckIdInHttpsCloudfrontCall = (duckId: string) : string => {
-      return `https://${cloudfrontDistributionDomainName}/Ducks/Outfits/duck-${duckId}.png`
-  }
 
   const waitForTransition = (element: HTMLElement): Promise<void> => {
     return new Promise((resolve) => {
@@ -161,7 +156,9 @@
 
     </div>
     <div class="bg-blue-950 h-[75%] flex flex-col justify-centstart items-center">
-      <img bind:this={selectedDuckImage} class="w-full mb-[-10%]" src="{wrapDuckIdInHttpsCloudfrontCall(currentPreviewedDuck!.id)}" alt="{currentPreviewedDuck?.id}" srcset="">
+      <div bind:this={selectedDuckImage} class="w-full aspect-square m-[5%]">
+        <CloudfrontImage path={`Ducks/Outfits/duck-${currentPreviewedDuck!.id}.png`} cls="w-full aspect-square" alt="{currentPreviewedDuck!.id}"/>
+      </div>
       <div class="w-full h-[10%] bg-red-500"></div>
       <div class="w-full h-[10%] bg-transparent flex justify-center items-center text-center">
         <button class="bg-blue-500 w-[60%] h-[98%]" onclick="{()=>{window.alert("purchased")}}">
@@ -184,7 +181,7 @@
     </div>
     {#each ducksToBeRendered as duck, i}
       <button class="w-full h-full flex justify-center items-center hover:cursor-pointer {color}" onclick="{()=>{currentPreviewedDuck=duck}}">
-        <img class="h-full" src="{wrapDuckIdInHttpsCloudfrontCall(duck.id)}" alt="duck-{i}">
+        <CloudfrontImage path={`Ducks/Outfits/duck-${duck.id}.png`} cls="h-full aspect-square" alt={duck.id}/>
       </button>
     {/each}
   </div>

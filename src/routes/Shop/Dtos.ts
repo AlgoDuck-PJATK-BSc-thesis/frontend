@@ -5,6 +5,6 @@ export interface DuckShopPage{
     totalPages: number,
 }
 
-export  interface DuckDto{
+export interface DuckDto{
     id: string,
 }

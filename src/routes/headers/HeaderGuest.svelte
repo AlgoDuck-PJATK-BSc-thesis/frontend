@@ -10,7 +10,7 @@
 </script>
 
 <header
-	class="font-body sticky top-0 z-50 flex items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-8 py-4 text-[color:var(--color-text)]"
+	class="font-body sticky h-16 top-0 z-50 flex items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-8 py-4 text-[color:var(--color-text)]"
 >
 	<a href="/" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
 		AlgoDuck
