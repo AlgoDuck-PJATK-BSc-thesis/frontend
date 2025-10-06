@@ -47,7 +47,7 @@
 		</div>
 
 		<nav class="ml-6">
-			<ul class="mr-35 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
+			<ul class="mr-30 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
 				<li>
 					<a
 						href="/home"
@@ -109,6 +109,15 @@
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Settings
+					</a>
+				</li>
+				<li>
+					<a
+						href="/studytimer"
+						aria-current={page.url.pathname === '/studytimer' ? 'page' : undefined}
+						class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					>
+						Study Timer
 					</a>
 				</li>
 				<li>

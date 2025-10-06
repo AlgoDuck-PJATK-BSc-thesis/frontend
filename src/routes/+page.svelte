@@ -26,13 +26,13 @@
 
 		<div class="mb-8 flex gap-4">
 			<Button
-				size="medium"
+				size="big"
 				label="START"
 				labelColor="[color:var(--color-text-button)]"
 				labelFontSize="1rem"
 				labelFontFamily="var(--font-ariw9500)"
 				labelFontWeight="bold"
-				onclick={() => (window.location.href = '/signup')}
+				onclick={() => (window.location.href = '/login')}
 			/>
 
 			<!-- <Button
