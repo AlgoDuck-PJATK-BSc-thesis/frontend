@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import landingPageBackground from '$lib/images/LandingPage/Landing_page.png';
+	import landingPageBackground from '$lib/images/LandingPage/Landing_page.gif';
 </script>
 
 <section class="relative h-[calc(100vh-4rem)] w-full overflow-hidden">
