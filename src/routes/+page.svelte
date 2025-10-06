@@ -12,7 +12,7 @@
 
 	<div class="relative z-20 flex flex-col items-center px-5 py-45 text-center">
 		<h1
-			class="mt-2 mb-4 ml-2 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
+			class="mt-2 mb-4 ml-2 text-6xl font-black tracking-widest text-[color:#fcd13f] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
 			style="font-family: var(--font-ariw9500);"
 		>
 			AlgoDuck

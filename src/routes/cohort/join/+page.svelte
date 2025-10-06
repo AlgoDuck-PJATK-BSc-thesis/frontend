@@ -15,6 +15,12 @@
 	}
 </script>
 
+
+<svelte:head>
+	<title>Join a Cohort - AlgoDuck</title>
+</svelte:head>
+
+
 <section class="mx-auto max-w-xl py-12 text-center">
 	<h1
 		class="mt-8 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"

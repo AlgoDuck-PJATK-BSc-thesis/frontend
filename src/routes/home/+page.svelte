@@ -118,7 +118,7 @@
 </script>
 
 <svelte:head>
-	<title>Home – AlgoDuck</title>
+	<title>Home - AlgoDuck</title>
 </svelte:head>
 
 <section

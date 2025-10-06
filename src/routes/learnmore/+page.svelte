@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Learn more – AlgoDuck</title>
+	<title>Learn more - AlgoDuck</title>
 </svelte:head>
 
 <section class="mx-auto mt-16 max-w-4xl px-4">

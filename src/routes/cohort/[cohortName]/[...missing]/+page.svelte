@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>404 – Not Found</title>
+	<title>404 - Not Found</title>
 </svelte:head>
 
 <section class="mt-16 flex h-full flex-col items-center justify-center text-center">

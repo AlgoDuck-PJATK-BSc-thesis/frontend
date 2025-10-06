@@ -75,7 +75,7 @@
 </script>
 
 <svelte:head>
-	<title>Settings – AlgoDuck</title>
+	<title>Settings - AlgoDuck</title>
 </svelte:head>
 
 <section class="mt-2 flex h-[calc(100vh-5rem)] justify-left gap-10 overflow-hidden px-12 pt-7">

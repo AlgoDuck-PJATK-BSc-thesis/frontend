@@ -48,7 +48,7 @@
 </script>
 
 <svelte:head>
-	<title>Leaderboard – AlgoDuck</title>
+	<title>Leaderboard - AlgoDuck</title>
 </svelte:head>
 
 <section

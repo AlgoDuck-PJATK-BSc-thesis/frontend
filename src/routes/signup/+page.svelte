@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign up – AlgoDuck</title>
+	<title>Sign up - AlgoDuck</title>
 </svelte:head>
 
 <section class="mx-auto mt-14 max-w-90 text-center">
