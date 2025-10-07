@@ -4,8 +4,6 @@
 	import PixelFrameChat from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameChat.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 
-	import duck from '$lib/images/ducks/duck.png';
-
 	let message = '';
 	let messages: { user: string; text: string }[] = [
 		{ user: 'duck', text: 'hej' },

@@ -48,14 +48,14 @@
   <div class="w-[70%] h-[95%] border-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)] shadow-white-500/50">
     <div class="w-full h-[93%] overflow-y-scroll relative">
       <div class="bg-transparent pointer-events-none z-[9999] absolute top-0 h-full w-[20%] left-0 border-r-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)]"></div>
-      <div class="bg-transparent pointer-events-none z-[9999] absolute top-0 h-full w-[18%] left-[20%]  border-r-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)]"></div>
-      <div class="bg-transparent pointer-events-none z-[9999] absolute top-0 h-full w-[62%] left-[38%] "></div>
+      <div class="bg-transparent pointer-events-none z-[9999] absolute top-0 h-full w-[38%] left-[20%]  border-r-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)]"></div>
+      <div class="bg-transparent pointer-events-none z-[9999] absolute top-0 h-full w-[42%] left-[38%] "></div>
       <div class="w-full h-full flex flex-col justify-start">
         <div class="flex flex-col justify-start py-8">
           <NonProblemButton data={{action: "../", command: "RET", description: "directory: GO UP", onClick: returnToCategories}}/>
           <NonProblemButton data={{action: "SELECT-RANDOM", command: "RAND", description: "coin-toss: SELECT AND OPEN RANDOM EXERCISE", onClick: ()=>{}}}/>
         </div>
-        <div class="w-[38%] h-1 bg-white shadow-[0_0_5px_3px_rgba(255,255,255,0.5)]"></div>
+        <div class="w-[58%] h-1 bg-white shadow-[0_0_5px_3px_rgba(255,255,255,0.5)]"></div>
 
         <div class="flex flex-col justify-start py-8 overflow-scroll">
           {#each data.problems as problem}

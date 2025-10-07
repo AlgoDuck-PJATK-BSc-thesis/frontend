@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Chevron from "$lib/svg/chevron.svelte";
 	import type { DropDownMenuOptions } from "$lib/types/DropDownSelectOptions";
-
+	import { hideGroupElem, registerGroupElem, showGroupElem, type DropDownData } from "./DropDownSelectGroups.svelte";
 
 	let { options }: { options: DropDownMenuOptions } = $props();
 
@@ -10,20 +10,16 @@
 	let dropDownMenuContents: HTMLDivElement;
 	let chevronIcon: HTMLDivElement;
 
+	let dropDownData: DropDownData | undefined = $state()
 	const targetOptionHeight: string = `${Math.min(800, options.options.length * 100)}%`;
 
 	let isDropDownMenuShown: boolean = $state(false);
 	const toggleDropDown = (): void => {
 		if (!isDropDownMenuShown) {
 			isDropDownMenuShown = true;
-			dropDownMenuContents.style.top = '110%';
-			dropDownMenuContents.style.height = targetOptionHeight;
-			chevronIcon.style.rotate = '90deg';
+			showGroupElem(dropDownData!.groupId!, dropDownData!.menuId!, targetOptionHeight, () => { isDropDownMenuShown = false; });
 		} else {
-			isDropDownMenuShown = false;
-			dropDownMenuContents.style.top = '';
-			dropDownMenuContents.style.height = '';
-			chevronIcon.style.rotate = '';
+			hideGroupElem(dropDownData!.groupId!);
 		}
 	};
 
@@ -32,9 +28,10 @@
 		toggleDropDown();
 		options.onSelectCallback(selected);
 	};
+
 </script>
 
-<main class="w-full h-full bg-ide-card rounded-md relative">
+<main {@attach () => {dropDownData = registerGroupElem(options.groupId, {dropDown: dropDownMenuContents, chevron: chevronIcon})}} class="w-full h-full bg-ide-card rounded-md relative">
 	<button
 		onclick={toggleDropDown}
 		class="w-full h-full flex justify-between px-4 py-2 items-center absolute top-0 hover:cursor-pointer"
@@ -57,7 +54,7 @@
 					: ''} hover:bg-ide-dcard"
 				onclick={() => onSelect(selectionOption)}
 			>
-				<span class="w-full h-full px-4 flex justify-start items-center text-ide-text-primary overflow-hidden"
+				<span class="w-full h-full px-4 flex-nowrap flex justify-start items-center text-ide-text-primary overflow-hidden"
 					>{selectionOption}</span
 				>
 			</button>

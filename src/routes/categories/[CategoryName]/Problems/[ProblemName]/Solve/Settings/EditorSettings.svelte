@@ -28,7 +28,8 @@ const fontSizeSelectOptions: ComponentConfig<DropDownMenuOptions> = {
 			options: ['10px', '12px', '16px', '20px'],
 			onSelectCallback: (selected: string) => {
 				userEditorFontSizePreferences.set({fontSize: parseInt(selected.replaceAll('px', ''))})
-			}
+			},
+			groupId: "huh"
 		}
 	};
 
@@ -42,7 +43,9 @@ const fontSizeSelectOptions: ComponentConfig<DropDownMenuOptions> = {
 			onSelectCallback: (selected: string) => {
 				userEditorThemePreferences.set({editorTheme: selected as EditorThemeName});
 				applyThemeEditor(selected as EditorThemeName)
-			}
+			},
+			groupId: "huh"
+
 		}
 	};
 </script>

@@ -42,12 +42,12 @@
             <span class="w-full h-full flex justify-start items-center px-[5%]">{data.action}</span>
         </div>
     </div>
-    <div class="h-full z-[1000] w-[18%] {isHovered? 'bg-red-900 shadow-[0_0_5px_5px_rgba(255,0,0,0.5)] shadow-red-500/50' : 'bg-ide-bg'} flex justify-center items-center text-center text-4xl relative">
+    <div class="h-full z-[1000] w-[38%] {isHovered? 'bg-red-900 shadow-[0_0_5px_5px_rgba(255,0,0,0.5)] shadow-red-500/50' : 'bg-ide-bg'} flex justify-center items-center text-center text-4xl relative">
         <span class="text-6xl" >{isHovered ? '<' : '>'}</span>
         <span class="flex justify-center items-center {isHovered ? 'bg-red-900' : 'bg-ide-bg'} px-2 py-1">{data.command}</span>
         <span class="text-6xl">{isHovered ? '>' : '<'}</span>
     </div>
-    <div class="h-full z-[1000] w-[62%] text-3xl flex justify-start items-center text-center pr-4">
+    <div class="h-full z-[1000] w-[42%] text-3xl flex justify-start items-center text-center pr-4">
         <div class="w-full h-full flex justify-start items-center px-[5%] {isHovered? 'bg-red-900 shadow-[0_0_5px_5px_rgba(255,0,0,0.5)] shadow-red-500/50' : 'bg-ide-bg'}">
             <span class="flex w-full justify-start items-center">{data.description}</span>
         </div>

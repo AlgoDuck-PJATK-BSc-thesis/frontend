@@ -63,6 +63,24 @@
 	--font-opensans: 'Open Sans', sans-serif;
 }
 
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgb(54, 54, 54);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: #555;
+}
+
+
 html {
 	font-family: var(--font-opensans);
 	background-color: var(--color-bg);
