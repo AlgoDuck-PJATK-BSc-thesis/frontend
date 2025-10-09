@@ -5,7 +5,7 @@ export const light = {
 	'--color-bg-2': '#fef8ff',
 	'--color-text': '#151115',
 	'--color-primary': '#fd9fff',
-	'--color-landingpage': '#fae0f0',
+	'--color-landingpage': '#b5f1f9',
 	'--color-tile': '#99e0ff',
 	'--color-accent-1': '#77c5e6',
 	'--color-accent-2': '#386682c5',

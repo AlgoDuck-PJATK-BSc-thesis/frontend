@@ -312,21 +312,21 @@
 		</div>
 		<div id="logout" class="flex w-full items-center mt-1 justify-between gap-4">
 			<Button
-				size="medium"
+				size="big"
 				label="LOG OUT"
 				labelColor="[color:var(--color-text-button)]"
-				labelFontSize="1rem"
-				labelFontFamily="var(--font-ariw9500)"
+				labelFontSize="1.2rem"
+				labelFontFamily="var(--font-lexenddeca)"
 				labelFontWeight="bold"
 				onclick={logout}
 			/>
 
 			<Button
-				size="small"
+				size="medium"
 				label="SAVE"
 				labelColor="[color:var(--color-text-button)]"
-				labelFontSize="1rem"
-				labelFontFamily="var(--font-ariw9500)"
+				labelFontSize="1.2rem"
+				labelFontFamily="var(--font-lexenddeca)"
 				labelFontWeight="bold"
 				onclick={saveAll}
 			/>

@@ -19,7 +19,7 @@
 		</h1>
 		<p
 			class="mb-10 text-2xl font-black tracking-widest text-[color:var(--color-landingpage)] [text-shadow:1.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
-			style="font-family: var(--font-ariw9500);"
+			style="font-family: var(--font-lexenddeca);"
 		>
 			Transform your coding skills, one problem at a time
 		</p>
@@ -29,8 +29,8 @@
 				size="big"
 				label="START"
 				labelColor="[color:var(--color-text-button)]"
-				labelFontSize="1rem"
-				labelFontFamily="var(--font-ariw9500)"
+				labelFontSize="1.2rem"
+				labelFontFamily="var(--font-lexenddeca)"
 				labelFontWeight="bold"
 				onclick={() => (window.location.href = '/login')}
 			/>

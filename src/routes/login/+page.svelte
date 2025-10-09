@@ -42,24 +42,25 @@
 				/>
 			</label>
 		</form>
+
+		<div class="mt-8 mb-5 flex justify-center">
+			<Button
+				size="big"
+				label="LOG IN"
+				labelColor="[color:var(--color-text-button)]"
+				labelFontSize="1.2rem"
+				labelFontFamily="var(--font-lexenddeca)"
+				labelFontWeight="bold"
+				onclick={() => document.querySelector('form')?.requestSubmit()}
+			/>
+		</div>
+
+		<p class="mt-2 text-center leading-snug">
+			<span>Don't have an account?</span>
+			<a
+				href="/signup"
+				class="ml-1 font-semibold text-[color:var(--color-accent-2)] hover:underline">Sign up</a
+			>
+		</p>
 	</PixelFrame>
-
-	<div class="mt-8 mb-5 flex justify-center">
-		<Button
-			size="big"
-			label="LOG IN"
-			labelColor="[color:var(--color-text-button)]"
-			labelFontSize="1.1rem"
-			labelFontFamily="var(--font-ariw9500)"
-			labelFontWeight="bold"
-			onclick={() => document.querySelector('form')?.requestSubmit()}
-		/>
-	</div>
-
-	<p class="mt-2 text-center leading-snug">
-		<span>Don't have an account?</span>
-		<a href="/signup" class="ml-1 font-semibold text-[color:var(--color-accent-2)] hover:underline"
-			>Sign up</a
-		>
-	</p>
 </section>
