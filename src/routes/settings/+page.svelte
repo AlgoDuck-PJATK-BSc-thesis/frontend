@@ -78,10 +78,10 @@
 	<title>Settings - AlgoDuck</title>
 </svelte:head>
 
-<section class="mt-2 flex h-[calc(100vh-5rem)] justify-left gap-10 overflow-hidden px-12 pt-7">
-	<div class="flex w-70 flex-shrink-0 flex-col overflow-auto">
+<section class="mt-2 flex h-[calc(100vh-5rem)] mr-25 justify-center gap-10 overflow-hidden px-12 pt-7">
+	<div class="flex w-60 flex-shrink-0 flex-col overflow-auto">
 		<PixelFrame
-			className="flex flex-col w-70 mt-8 gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-5 flex-shrink-0 "
+			className="flex flex-col w-59 mt-8 gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-5 flex-shrink-0 "
 		>
 			<ul>
 				<li class="mt-1 ml-3 text-xl font-bold text-[color:var(--color-accent-2)]">
