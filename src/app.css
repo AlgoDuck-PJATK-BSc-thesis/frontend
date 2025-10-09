@@ -61,10 +61,11 @@
 	--font-newmonzane: 'New Mozane', sans-serif;
 	--font-ariw9500: 'Ari W9500 Bold', sans-serif;
 	--font-opensans: 'Open Sans', sans-serif;
+	--font-lexenddeca: 'Lexend Deca', sans-serif;
 }
 
 html {
-	font-family: var(--font-opensans);
+	font-family: var(--font-lexenddeca);
 	background-color: var(--color-bg);
 	color: var(--color-text);
 	transition:
