@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ComponentRegistry } from "./ComponentRegistry";
+	import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
 	import PlaceholderPanelIconSvg from "$lib/svg/EditorComponentIcons/PlaceholderPanelIconSvg.svelte";
 
 	import type { svgArg } from "$lib/types/SvgIcon";
@@ -30,7 +30,7 @@
   <div bind:this={options.componentsContainer} class="w-full flex-grow bg-ide-bg relative">
     
     {#each options.components as component, i}
-      {@const Comp = ComponentRegistry.get(component.component)!}
+      {@const Comp = ComponentRegistry.get(activeProfile.profile)!.get(component.component)!}
       <div class="w-full h-full absolute top-0 left-0 {i !== feturedElementIndex ? 'invisible' : ''}">
         <Comp bind:options={component.options}/>
       </div>

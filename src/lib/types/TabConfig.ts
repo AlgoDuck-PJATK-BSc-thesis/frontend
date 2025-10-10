@@ -8,4 +8,4 @@ export interface TabConfig<P extends {}> {
     comp: ComponentConfig<P>;
 };
 
-export type TabId = 'editor' | 'layout';
+export type TabId = 'editor' | 'layout' | 'dragAndDrop';

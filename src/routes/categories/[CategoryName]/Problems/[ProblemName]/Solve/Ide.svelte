@@ -2,33 +2,19 @@
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
 	import TopPanel from './IdeComponents/TopPanel.svelte';
 
-	import { ComponentRegistry } from '../../../../../editor/ComponentRegistry';
-	
-	import type { ComponentConfig, ComponentType } from '../../../../../editor/ResizableComponentArg';
-	import type { Component } from 'svelte';
-	import { loadLayouts, userEditorLayoutChosenPreference, userEditorLayoutPreferences } from '$lib/stores/theme';
+	import { type Component } from 'svelte';
+	import { activeProfile, ComponentRegistry } from './editor/ComponentRegistry.svelte';
+	import type { ComponentConfig, ComponentType } from './editor/ResizableComponentArg';
+	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 
 	let { components = $bindable() }: { components: Record<string, object> } = $props();
 	
-	let availableLayouts: Record<string, string> = $state(loadLayouts());
-
-	$inspect(components);
-	
-	userEditorLayoutPreferences.subscribe( pref => {
-		availableLayouts = pref.layouts;
-	});
-	
-	let selectedLayout: string = $state('default');
-
-	userEditorLayoutChosenPreference.subscribe(pref => {
-		selectedLayout = pref.layoutId
-	});
-
 	let isExecutingCode: boolean = $state(false);
 	let isSettingsPanelShown = $state(false);
 
 	let rootCompType: ComponentType = $state('TopLevelComponent');
-  let RootComp: Component<any> = $derived(ComponentRegistry.get(rootCompType)!);
+	
+	let RootComp: Component<any> = $derived(ComponentRegistry.get(activeProfile.profile)!.get(rootCompType)!);
 
 	const hydrateLayout = (layout: ComponentConfig<any>, componentConfigurations: Record<string, object>): ComponentConfig<any> => {
  	 const node = { ...layout };
@@ -57,16 +43,15 @@
 	  return node;
 	}
 
-	let hydratedLayout: ComponentConfig<any> | undefined = $state();
+	let hydratedLayout = $state<ComponentConfig<any>>();
 
 	$effect(() => {
-	  const baseLayout = availableLayouts[selectedLayout];
-	  if (baseLayout) {
-	    hydratedLayout = hydrateLayout(JSON.parse(baseLayout) as ComponentConfig<any>, components);
+	  const layout = userEditorPreferences.savedLayouts[userEditorPreferences.selectedLayout];
+	  if (layout) {
+	    hydratedLayout = hydrateLayout(JSON.parse(layout), components);
 	  }
 	});
 
-	
 	const executeCode = (): void => {
 		isExecutingCode = true;
 	}
@@ -93,9 +78,7 @@
 
 <div class="w-full h-[95%] flex p-[0.5%]">
   {#if hydratedLayout}
-    {#key selectedLayout}
-      <RootComp bind:options={hydratedLayout.options}/>
-    {/key}
+		<RootComp bind:options={hydratedLayout.options}/>
   {/if}
 </div>
 </main>

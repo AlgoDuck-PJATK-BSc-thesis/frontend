@@ -1,16 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import type { DuckDto } from "../../routes/Shop/Dtos";
-	import { userPreferences } from "$lib/stores/theme";
-	import type { ThemeName } from "$lib/Themes";
+	import { userThemePreference } from "$lib/stores/theme.svelte";
 
   let { userDucks }: { userDucks: DuckDto[] } = $props();
-
-  let mode: ThemeName = $state('dark');
-
-  userPreferences.subscribe((pref) => {
-    mode = pref.theme;
-  });
 
   interface rgba {
     r: number,
@@ -73,7 +66,7 @@
 
   let raf: number;
 
-  let pondPath: string = $derived(`/src/lib/images/ponds/${mode}Pond0.png`);
+  let pondPath: string = $derived(`/src/lib/images/ponds/${userThemePreference.theme}Pond0.png`);
 
   $inspect(pondPath);
 

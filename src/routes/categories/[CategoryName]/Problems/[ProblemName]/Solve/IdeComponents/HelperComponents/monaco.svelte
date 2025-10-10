@@ -2,8 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
-	import type { EditorThemeName } from '$lib/Themes';
-	import { userEditorFontSizePreferences, userEditorThemePreferences } from '$lib/stores/theme';
+	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 	
 	let {
 		editorContents = $bindable(),
@@ -14,19 +13,6 @@
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
 	let editorContainer: HTMLElement;
-
-	let editorTheme: EditorThemeName = $state('vs-dark')
-	let editorFontSize: number = $state(fontSize ?? 16)
-
-	const unsubscribeTheme = userEditorThemePreferences.subscribe(value => {
-    editorTheme = value.editorTheme;
-  });
-
-	const unsubscribeFont = userEditorFontSizePreferences.subscribe(pref => {
-		if (!fontSize){
-			editorFontSize = pref.fontSize;
-		}
-	});
 
 	onMount(async () => {
 		if (!browser) return;
@@ -40,8 +26,8 @@
 		editor = monaco.editor.create(editorContainer, {
 			value: editorContents,
 			language: 'java',
-			theme: editorTheme,
-			fontSize: fontSize,
+			theme: userEditorPreferences.theme,
+			fontSize: userEditorPreferences.fontSize,
 			minimap: {
 				enabled: false
 			},
@@ -56,13 +42,13 @@
 	});
 
 	$effect(() => {
-		console.log('theme:', editorTheme, 'fontSize:', editorFontSize);
+		console.log('theme:', userEditorPreferences.theme, 'fontSize:', userEditorPreferences.fontSize);
 
 		if (editor && monaco) {
-			monaco.editor.setTheme(editorTheme);
+			monaco.editor.setTheme(userEditorPreferences.theme);
 
 			editor.updateOptions({
-				fontSize: editorFontSize
+				fontSize: userEditorPreferences.fontSize
 			});
 		}
 	});
@@ -71,8 +57,6 @@
 		if (browser && monaco && editor) {
 			// monaco.editor.getModels().forEach((model) => model.dispose());
 			editor.dispose();
-			unsubscribeTheme();
-			unsubscribeFont();
 		}
 	});
 </script>

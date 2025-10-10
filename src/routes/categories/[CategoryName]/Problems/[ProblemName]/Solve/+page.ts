@@ -1,9 +1,9 @@
 import type { Problem } from "$lib/types/Problem";
 import type { PageLoad } from "../../../../../$types";
-import type { ComponentType } from "../../../../../editor/ResizableComponentArg";
+import { activeProfile } from "./editor/ComponentRegistry.svelte";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-  new Map<ComponentType, { options: any} >([])
+    activeProfile.profile = 'default';  
     return {
         problem: fallback,
         hideHeader: true

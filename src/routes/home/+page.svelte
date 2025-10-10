@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { userPreferences } from '$lib/stores/theme';
 	import AnimatedPond from '$lib/Components/AnimatedPond.svelte';
 	import HelperDuck from '$lib/Components/LayoutComponents/HelperDuck.svelte';
 
@@ -10,12 +9,6 @@
 	if (typeof window !== 'undefined') {
 		reduceMotion = document.documentElement.dataset.reduceMotion === 'true';
 	}
-
-	let theme = $state('light');
-
-	userPreferences.subscribe((pref) => {
-		theme = pref.theme;
-	});
 
 </script>
 

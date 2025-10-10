@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 	import { applyTheme, applyThemeEditor, type EditorThemeName, type ThemeName } from '$lib/Themes';
-	import { userPreferences } from '$lib/stores/theme';
+	import { userThemePreference } from '$lib/stores/theme.svelte';
 
   const mapUserThemesToEditorThemes = (theme : ThemeName): EditorThemeName => {
     switch (theme) {
@@ -11,11 +11,8 @@
   } 
 
   onMount(() => {
-    const unsubscribe = userPreferences.subscribe((prefs) => {
-      applyTheme(prefs.theme as ThemeName);
-      applyThemeEditor(mapUserThemesToEditorThemes(prefs.theme))
-    });
-    return unsubscribe;
+    applyTheme(userThemePreference.theme as ThemeName);
+    applyThemeEditor(mapUserThemesToEditorThemes(userThemePreference.theme))
   });
 </script>
 

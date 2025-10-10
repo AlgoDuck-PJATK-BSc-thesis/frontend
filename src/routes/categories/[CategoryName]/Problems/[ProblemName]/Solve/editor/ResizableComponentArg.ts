@@ -26,3 +26,9 @@ export interface WizardComponentArg{
 export interface MyTopLevelComponentArg<T>{
     component: ComponentConfig<T>
 }
+
+
+export type Coords = {
+    x: number,
+    y: number,
+}

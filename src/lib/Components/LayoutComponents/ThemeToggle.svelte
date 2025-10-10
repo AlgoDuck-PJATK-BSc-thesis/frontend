@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { userPreferences } from '$lib/stores/theme';
+	import { userThemePreference } from '$lib/stores/theme.svelte';
 	import type { ThemeName } from '$lib/Themes';
 	import { onMount } from 'svelte';
 
@@ -47,7 +47,7 @@
 				isAnimating = false;
 				current = isCurrentlyLight ? 'dark' : 'light';
 				document.documentElement.setAttribute('data-theme', current);
-				userPreferences.set({ theme: current });
+				userThemePreference.theme = current;
 			}
 		}, 50);
 	}

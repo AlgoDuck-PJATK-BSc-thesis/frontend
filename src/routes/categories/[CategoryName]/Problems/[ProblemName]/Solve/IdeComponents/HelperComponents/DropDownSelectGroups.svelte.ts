@@ -1,5 +1,6 @@
-let registeredGroups: Record<string, Record<string, GroupElements>> = $state({});
-let groupHighlightedMember: Record<string, GroupElements | undefined> = $state({});
+const registeredGroups: Record<string, Record<string, GroupElements>> = {};
+const groupHighlightedMember: Record<string, GroupElements | undefined> = {};
+
 let hideCallbacks: Record<string, () => void> = {};
 
 export interface GroupElements {

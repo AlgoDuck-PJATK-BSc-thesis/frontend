@@ -1,5 +1,5 @@
 import type { PageLoad } from "./$types";
-import { InitializeRegistryPlaceholder } from "./ComponentRegistry";
+import { InitializeRegistryPlaceholder } from "./ComponentRegistry.svelte";
 
 export const load: PageLoad = async ({ params, fetch }) => {
   InitializeRegistryPlaceholder();

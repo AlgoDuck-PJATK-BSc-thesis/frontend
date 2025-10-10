@@ -1,7 +1,7 @@
 <script lang="ts" generics="T1 extends ComponentConfig<any>, T2 extends ComponentConfig<any>">
 	import { onMount, type Component } from 'svelte';
   import type { ComponentConfig, ResizeableComponentArg } from './ResizableComponentArg';
-  import { ComponentRegistry } from './ComponentRegistry';
+  import { activeProfile, ComponentRegistry } from './ComponentRegistry.svelte';
   
   let { options = $bindable() }: { options: ResizeableComponentArg<T1, T2> } = $props();
   
@@ -23,11 +23,11 @@
   let comp2Options: T2 | undefined = $derived(comp2Config?.options);
   
   let Component1: Component<{ options: T1 }> | undefined = $derived(
-    comp1Config ? ComponentRegistry.get(comp1Config.component) as Component<{ options: T1 }> : undefined
+    comp1Config ? ComponentRegistry.get(activeProfile.profile)!.get(comp1Config.component) as Component<{ options: T1 }> : undefined
   );
 	
   let Component2: Component<{ options: T2 }> | undefined = $derived(
-    comp2Config ? ComponentRegistry.get(comp2Config.component) as Component<{ options: T2 }> : undefined
+    comp2Config ? ComponentRegistry.get(activeProfile.profile)!.get(comp2Config.component) as Component<{ options: T2 }> : undefined
   );
 
 	const handleMouseDown = () => {

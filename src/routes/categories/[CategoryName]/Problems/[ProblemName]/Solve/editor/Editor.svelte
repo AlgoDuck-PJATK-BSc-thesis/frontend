@@ -1,40 +1,20 @@
 <script lang="ts">
-  import { ComponentRegistry } from "./ComponentRegistry";
+  import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
 
-	import type { ComponentConfig, MyTopLevelComponentArg, ResizeAxis, ComponentType, tabSide } from "./ResizableComponentArg";
-	import type { InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from "$lib/types/ComponentLoadArgs";
-	import type { CodeEditorArg } from "$lib/types/CodeEditorArg";
-	import type { Component } from "svelte";
-	import type { Problem } from "$lib/types/Problem";
-	import { saveLayout, userEditorLayoutPreferences } from "$lib/stores/theme";
+	import type { ComponentConfig, MyTopLevelComponentArg, ResizeAxis, ComponentType, tabSide, Coords } from "./ResizableComponentArg";;
+	import { onDestroy, type Component, type Snippet } from "svelte";
+	import type { svgArg } from "$lib/types/SvgIcon";
 
-  let { data } : { data: { hideHeader: boolean, data: Problem } } = $props();
+	import { saveLayout } from "$lib/stores/theme.svelte";
+	import PlaceholderPanelIconSvg from "$lib/svg/EditorComponentIcons/PlaceholderPanelIconSvg.svelte";
+
+  let { registeredComponents } : { registeredComponents: Record<ComponentType, object> } = $props();
   
-  let problem: Problem = $derived(data.data);
-
   let wizardPipPosition: number = $state(0);
-
-  let availableLayouts: Record<string, string> = $state({});
-
-  userEditorLayoutPreferences.subscribe((pref) => {
-    availableLayouts = pref.layouts
-  })
   
-  let terminalArg: TerminalComponentArgs = $state({
-    terminalContents: ''
-  });
-
-  let infoPanelArg: InfoPanelComponentArgs = $state({
-    problem: problem
-  });
-  let testCaseArgs: TestCaseComponentArgs = $state({
-    testCases: problem.testCases,
-  });
-
-  let editorContents: CodeEditorArg = $state({
-    editorContents: problem.templateContents, 
-    fontSize: 16
-  });
+  onDestroy(()=>{
+    activeProfile.profile = 'default';
+  })
 
   const saveTree = (): void => {
     let toBeExplored: ComponentConfig<any>[] = [rootConfig];
@@ -56,32 +36,18 @@
       toBeExplored = frontier;
     }
 
-	   const layoutName = `layout-${Date.now()}`;
-      saveLayout(layoutName, JSON.stringify(rootConfig));
+    const layoutName = `layout-${Date.now()}`;
+    saveLayout(layoutName, JSON.stringify(rootConfig));
   };
-
-
-  type coords = {
-    x: number,
-    y: number,
-  }
 
   let isResizablePipRotated: boolean = $state(false);
 
   type draggingData = {
     isDragging: boolean,
     draggedButton: HTMLButtonElement | undefined,
-    initCoords: coords | undefined,
-    draggedTileType: ComponentType | undefined,
+    initCoords: Coords | undefined,
+    draggedTileType: ComponentType | undefined
   }
-
-  let resizableComp: HTMLButtonElement;
-  let wiardComp: HTMLButtonElement;
-
-  let blueComp: HTMLButtonElement;
-  let amberComp: HTMLButtonElement;
-  let redComp: HTMLButtonElement;
-  let greenComp: HTMLButtonElement;
 
   let lastMouseX: number | null = null;
   let lastMouseY: number | null = null;
@@ -93,14 +59,26 @@
     draggedTileType: undefined,
   });
 
+  const DEFAULT_SIZE = { w: 160, h: 96 };
+
   const handleMouseDown = (button: HTMLButtonElement, type: ComponentType) => {
+    const rect = button.getBoundingClientRect();
+    const w = rect.width || DEFAULT_SIZE.w;
+    const h = rect.height || DEFAULT_SIZE.h;
+    lastMouseX = null;
+		lastMouseY = null;
+    button.style.width = `${w}px`;
+    button.style.height = `${h}px`;
+    button.style.left = `${rect.left}px`;
+    button.style.top = `${rect.top}px`;
+
 		dragging.isDragging = true;
     dragging.draggedButton = button;
     dragging.draggedButton.style.position = 'fixed';
     dragging.draggedTileType = type;
 
 		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', dragging.draggedTileType === 'SplitPanel' ? handleMouseUpResize :  handleMouseUp);
+		document.addEventListener('mouseup',  handleMouseUp);
 
 		document.body.style.cursor = 'grabbing';
 		document.body.style.userSelect = 'none';
@@ -119,53 +97,45 @@
       const dx: number = e.clientX - dragging.initCoords.x;
       const dy: number = e.clientY - dragging.initCoords.y;
 
-      if (isResizablePipRotated && dragging.draggedTileType === 'SplitPanel'){
-        dragging.draggedButton.style.transform = `translateX(${dy}px) translateY(${-dx}px)`;
-      }else{
-        dragging.draggedButton.style.transform = `translateX(${dx}px) translateY(${dy}px)`;
-      }
-
+      dragging.draggedButton.style.transform = `translateX(${dx}px) translateY(${dy}px)`;
+      
       lastMouseX = e.clientX;
       lastMouseY = e.clientY;
     }
 	};
 
-  const handleMouseUpResize = (e: MouseEvent): void => {
-    if (!dragging.initCoords || (Math.abs(dragging.initCoords?.x - e.clientX) < 5 && Math.abs(dragging.initCoords?.y - e.clientY) < 5)){
-      isResizablePipRotated = !isResizablePipRotated;
+  const handleMouseOutLayoutComp = (defaultBehaviour: () => void): void => {
+    if (!dragging.initCoords || (Math.abs(dragging.initCoords?.x - lastMouseX!) < 5 && Math.abs(dragging.initCoords?.y - lastMouseY!) < 5)){
+      defaultBehaviour();
     }
-
-    handleMouseUp();
   }
 
   const handleMouseUp = () => {
     if (dragging.draggedButton){
       dragging.draggedButton.style.position = '';
       dragging.draggedButton.style.transform = '';
+      dragging.draggedButton.style.width = '';
+      dragging.draggedButton.style.height = '';
       document.body.style.cursor = '';
 		  document.body.style.userSelect = '';
     }
 
     checkCollisionWithPossibleTargets({x: lastMouseX!, y: lastMouseY!})    
 
-
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
-    document.removeEventListener('mouseup', handleMouseUpResize);
-
+    
     dragging = {
       isDragging: false,
       draggedButton: undefined,
       initCoords: undefined,
       draggedTileType: undefined,
     }
-		lastMouseX = null;
-		lastMouseY = null;
 	};
 
 
   let rootCompType: ComponentType = $state('TopLevelComponent');
-  let RootComp: Component<any> = $derived(ComponentRegistry.get(rootCompType)!);
+  let RootComp: Component<any> = $derived(ComponentRegistry.get(activeProfile.profile)!.get(rootCompType)!);
 
   let rootArgs: MyTopLevelComponentArg<any> = $state({
     component: {
@@ -257,23 +227,9 @@
   }
 
   const makeIntoTerminalComponent = (target: ComponentConfig<any>, windowType: ComponentType): void => {    
-    switch (windowType){
-      case 'TestCases':
-        target.component = 'TestCases';
-        target.options = testCaseArgs;
-        break;
-      case 'InfoPanel':
-        target.component = 'InfoPanel';
-        target.options = infoPanelArg;
-        break;
-      case 'Terminal':
-        target.component = 'Terminal';
-        target.options = terminalArg;
-        break;
-      case 'Editor':
-        target.component = 'Editor'
-        target.options = editorContents;
-        break;
+    if (registeredComponents[windowType]){
+      target.component = windowType;
+      target.options = registeredComponents[windowType];
     }
   }
 
@@ -308,7 +264,7 @@
     }
   }
 
-  const checkCollisionWithPossibleTargets = (cursorPosition: coords): void => {
+  const checkCollisionWithPossibleTargets = (cursorPosition: Coords): void => {
     for (let i = availableTargets.length - 1; i >= 0; i--){
       if (isCursorWithinBounds(cursorPosition, availableTargets[i].wrapper) && getComputedStyle(availableTargets[i].wrapper!).visibility === 'visible'){
         makeTargetIntoComponent(availableTargets[i].target);
@@ -317,51 +273,117 @@
     }
   }
 
-  const isCursorWithinBounds = (cursorPosition: coords, div: HTMLDivElement | undefined) => {
+  const isCursorWithinBounds = (cursorPosition: Coords, div: HTMLDivElement | undefined) => {
     if (!div) return false;
     const divDomRect: DOMRect = div.getBoundingClientRect();
     return (cursorPosition.x >= divDomRect.left && cursorPosition.x <= divDomRect.right && cursorPosition.y >= divDomRect.top && cursorPosition.y <= divDomRect.bottom)
   }
 
+  interface ComponentPipConfig {
+    attachable: (elem: HTMLButtonElement) => void,
+    display: Snippet<[any]>,
+    displayArgs: object
+  }
 </script>
 
-<main class="w-full h-full flex flex-col justify-start items-center">
-  <button class="fixed top-3 left-3 border-2 border-black rounded-lg w-64 h-32" onclick="{saveTree}">save</button>
-  <div class="w-full  h-[60%] flex justify-center">
-    <div class="w-[60%] h-full rounded-xl overflow-hidden">
+<main class="w-full h-full flex bg-ide-dcard flex-col justify-start items-center overflow-x-hidden overflow-y-scroll">
+  <div class="w-full h-[80%] flex flex-col justify-start items-center px-6 py-3 flex-shrink-0">
+    <div class="w-full h-[8%]">
+      <span class="w-full h-full flex justify-center items-center text-2xl">
+        Preview:
+      </span>
+    </div>
+    <div class="w-full h-[92%] rounded-xl overflow-hidden">
       <RootComp bind:options={rootArgs}/>
     </div>
   </div>
 
-  <div class="w-full h-[40%] flex flex-col">
-    <div class="w-full h-[50%] p-5 flex justify-center gap-10">
-      {@render ResizablePip()}
-      {@render WizardPip()}
+  <div class="w-full h-[40%] flex flex-col flex-shrink-0">
+    <div class="w-full h-[50%] flex flex-col justify-start">
+      {@render ComponentList("Layout components:", [
+        {
+          attachable: (node) => {
+            node.onmousedown = () => {handleMouseDown(node, 'WizardPanel')};
+            node.onmouseup = () => handleMouseOutLayoutComp(() => wizardPipPosition = (wizardPipPosition + 1) % 4)
+          },
+          display: WizardContents,
+          displayArgs: {}
+        },
+        {
+          attachable: (node) => {
+            node.onmousedown = () => handleMouseDown(node, 'SplitPanel'),
+            node.onmouseup = () => handleMouseOutLayoutComp(() => isResizablePipRotated = !isResizablePipRotated)
+          },
+          display: SplitPaneContents,
+          displayArgs: {}
+        }
+      ])}
     </div>
-    <div class="w-full h-[50%] p-5 flex justify-center gap-10">
-      <div class="w-72 h-36"><button bind:this={redComp} class="w-72 h-36 bg-red-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(redComp, 'InfoPanel')}}" aria-label="red">info panel</button></div>
-      <div class="w-72 h-36"><button bind:this={greenComp} class="w-72 h-36 bg-green-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(greenComp, 'Terminal')}}" aria-label="green">terminal</button></div>
-      <div class="w-72 h-36"><button bind:this={blueComp} class="w-72 h-36 bg-blue-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(blueComp, 'TestCases')}}" aria-label="blue">test cases</button></div>
-      <div class="w-72 h-36"><button bind:this={amberComp} class="w-72 h-36 bg-amber-500 rounded-md border-2 border-black" onmousedown="{()=>{handleMouseDown(amberComp, 'Editor')}}" aria-label="blue"> editor</button></div>
+    <div class="w-full h-[50%] flex flex-col justify-start">
+      {@render ComponentList("Layout components:", Object.keys(registeredComponents).map<ComponentPipConfig>((key) => {
+        return {
+          attachable: (node) => {
+            node.onmousedown = () => {
+              handleMouseDown(node, key as ComponentType);
+            }
+          },
+          display:  TerminalContents, 
+          displayArgs:  { componentType: key }
+        }
+      }))}
+    </div>
+  </div>
+  <div class="w-full h-[10%] flex flex-col px-6 py-3 flex-shrink-0">
+    <div class="w-full h-full bg-ide-card flex justify-end items-center">
+      <button class="h-[80%] w-[15%] bg-[#434343] rounded-xl text-2xl hover:cursor-pointer" onclick="{saveTree}">save</button>
     </div>
   </div>
 </main>
 
-{#snippet ResizablePip()}
-  <div class="w-40 h-24 p-1 bg-[#434343] rounded-md ">
-      <button bind:this={resizableComp} class="w-38 h-22 rounded-md border-2 flex border-black {!dragging.isDragging ?  'transition-transform duration-200 ease-out' : ''} {isResizablePipRotated ? 'rotate-90' : ''}" onmousedown="{()=>{handleMouseDown(resizableComp, 'SplitPanel')}}" aria-label="resizable-pip">
-        <div class="w-19 h-22 border-2 border-black"></div>
-        <div class="w-19 h-22 border-2 border-black"></div>
-      </button>
+{#snippet ComponentList(label: string, displayablePips: ComponentPipConfig[])}
+  <div class="w-full h-full flex flex-col justify-start">
+    <div class="w-full h-[25%] items-center bg-ide-card flex justify-start">
+      <span class="flex justify-start items-center text-xl px-10">{label}</span>
+    </div>
+    <div class="w-full h-[75%] flex justify-start px-10 py-2 gap-5 bg-ide-dcard">
+      {#each displayablePips as pip}
+        {@render draggablePip(pip.attachable, pip.display, pip.displayArgs)}
+      {/each}
+    </div>
   </div>
 {/snippet}
 
-{#snippet WizardPip()}
-  <div class="w-40 h-24 p-1 bg-[#434343] rounded-md ">
-      <button bind:this={wiardComp} class="w-38 h-22 rounded-md border-2 flex border-black" onclick="{()=>{wizardPipPosition = (wizardPipPosition + 1) % 4}}" onmousedown="{()=>{handleMouseDown(wiardComp, 'WizardPanel')}}" aria-label="resizable-pip">
-        <div class="w-38 h-22 flex {wizardPipPosition === 0 ? 'flex-col justify-start' : ''} {wizardPipPosition === 1 ? 'flex justify-end' : ''} {wizardPipPosition === 2 ? 'flex-col-reverse justify-start' : ''} {wizardPipPosition === 3 ? 'justify-start' : ''} items-center">
-          <div class="w-4 h-4 bg-red-500"></div>
-        </div>
+{#snippet TerminalContents(args: { componentType: string })}
+  <div class="w-full bg-[#434343] h-full rounded-lg overflow-hidden flex flex-col justify-center items-center">
+    {#await import(`/src/lib/svg/EditorComponentIcons/${args.componentType}IconSvg.svelte`)}
+      <PlaceholderPanelIconSvg options={{color: "#ffffff", class: "w-24 h-24"}}/>
+    {:then module} 
+      {@const Svg: Component<{options: svgArg}, {}, ""> = module.default}
+      <Svg options={{color: "#ffffff"}}/>
+      <span class="w-full flex justify-center items-center text-lg">{args.componentType}</span>
+    {/await}
+  </div>
+{/snippet}
+
+{#snippet WizardContents()}
+  <div class="w-full h-full bg-[#434343] flex {wizardPipPosition === 0 ? 'flex-col justify-start' : ''} {wizardPipPosition === 1 ? 'flex justify-end' : ''} {wizardPipPosition === 2 ? 'flex-col-reverse justify-start' : ''} {wizardPipPosition === 3 ? 'justify-start' : ''} items-center">
+    <div class="w-4 h-4 bg-red-500"></div>
+  </div>
+{/snippet}
+
+{#snippet SplitPaneContents()}
+  <div class="w-full h-full bg-transparent flex transition-transform duration-200 ease-out {isResizablePipRotated ? 'rotate-90' : ''}">
+    <div class="w-[50%] h-full border-2 bg-[#434343] rounded-md border-red-500"></div>
+    <div class="w-[50%] h-full border-2 bg-[#434343] rounded-md border-red-500"></div>
+  </div>
+{/snippet}
+
+{#snippet draggablePip(attachable: (elem: HTMLButtonElement) => void, display: Snippet<[any]>, diplayArgs: object)}
+  <div class="w-[15%] h-full">
+    <div class="w-full h-full p-2 flex border-2 border-red-500 rounded-xl">
+      <button {@attach attachable} class="flex-grow rounded-lg">
+        {@render display(diplayArgs)}
       </button>
+    </div>
   </div>
 {/snippet}

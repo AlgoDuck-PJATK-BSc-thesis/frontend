@@ -5,6 +5,7 @@
 	import Cross from '$lib/svg/cross.svelte';
 	import LayoutIconSvg from '$lib/svg/LayoutIconSvg.svelte';
 	import LayoutSettings from './LayoutSettings.svelte';
+	import EditorUiEditor from './EditorUiEditor.svelte';
 
 	let {
 		isSettingsPanelShown = $bindable()
@@ -36,6 +37,20 @@
 			},
 			comp: {
 				component: LayoutSettings,
+				options: {}
+			}
+		},
+		{
+			id: 'dragAndDrop',
+			label: 'drag And Drop',
+			icon: {
+				component: LayoutIconSvg,
+				options: {
+					color: '#9290C3'
+				}
+			},
+			comp: {
+				component: EditorUiEditor,
 				options: {}
 			}
 		}
