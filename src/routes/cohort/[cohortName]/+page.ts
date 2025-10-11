@@ -13,7 +13,6 @@ export const load: PageLoad = ({ params, url }) => {
 		cohortName !== userCohort ||
 		userCohort === '' ||
 		userCohort === null
-
 	) {
 		throw redirect(302, '/cohort/join');
 	}
