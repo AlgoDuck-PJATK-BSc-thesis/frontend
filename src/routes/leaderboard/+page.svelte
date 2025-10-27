@@ -6,7 +6,7 @@
 	import silver from '$lib/images/leaderboard/Silver.png';
 	import bronze from '$lib/images/leaderboard/Bronze.png';
 	import trophy from '$lib/images/leaderboard/trophy.png';
-	import duck from '$lib/images/ducks/duck.png';
+	import CloudfrontImage from '$lib/Components/CloudfrontImage.svelte';
 
 	const medals = [gold, silver, bronze];
 
@@ -116,11 +116,7 @@
 					<div
 						class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
 					>
-						<img
-							src={duck}
-							alt="duck"
-							class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
-						/>
+						<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"/>
 					</div>
 
 					<span

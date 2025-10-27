@@ -7,7 +7,7 @@
 
 	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
-	import duck from '$lib/images/ducks/duck.png';
+	import CloudfrontImage from '$lib/Components/CloudfrontImage.svelte';
 
 	let view = '';
 	let cohortName = '';
@@ -199,9 +199,9 @@
 	<PixelFrame
 		className="h-[74vh] mt-[4rem] w-[24vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
-		<div class="absolute -top-[4.4rem] left-1/2 z-10 flex -translate-x-1/3 gap-2">
-			<img src={duck} alt="duck" class="h-[5rem] w-[5.1rem] -scale-x-100 drop-shadow-md" />
-			<img src={duck} alt="duck" class="h-[5rem] w-[5.1rem] drop-shadow-md" />
+		<div class="absolute -top-[5.2rem] left-[45%] z-10 flex -translate-x-1/3 gap-2">
+			<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-[7rem] w-[7.2rem] -scale-x-100 drop-shadow-md"/>
+			<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-[7rem] w-[7.2rem] drop-shadow-md"/>
 		</div>
 
 		<h1
@@ -217,11 +217,7 @@
 					<div
 						class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
 					>
-						<img
-							src={duck}
-							alt="duck"
-							class="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
-						/>
+					<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"/>
 					</div>
 					<PixelFrameSimple
 						className="flex-1 rounded-2xl bg-[color:var(--color-bg)] px-4 py-3 text-sm text-[color:var(--color-text)]"
