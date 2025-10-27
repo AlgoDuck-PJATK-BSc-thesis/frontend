@@ -5,7 +5,8 @@ export const light = {
 	'--color-bg-2': '#fef8ff',
 	'--color-text': '#151115',
 	'--color-primary': '#fd9fff',
-	'--color-landingpage': '#fae0f0',
+	'--color-landingpage-title': '#fcd13f',
+	'--color-landingpage-description': '#b8f1fc',
 	'--color-tile': '#99e0ff',
 	'--color-accent-1': '#77c5e6',
 	'--color-accent-2': '#386682c5',
@@ -17,4 +18,5 @@ export const light = {
 	'--color-chat-right': '#fbc2fc',
 	'--color-chat-border-left': '#62bbd6',
 	'--color-chat-border-right': '#de9acf',
-}
+	'--shadow-header': '#74005c'
+};

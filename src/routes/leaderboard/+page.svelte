@@ -48,15 +48,22 @@
 </script>
 
 <svelte:head>
-	<title>Leaderboard – AlgoDuck</title>
+	<title>Leaderboard - AlgoDuck</title>
 </svelte:head>
 
 <section
 	class="font-body flex max-h-[calc(100vh-4rem)] flex-col items-center gap-6 overflow-y-auto pt-12 pr-8 pb-0 pl-8"
 >
 	<h1
-		class="mt-8 mb-4 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
-		style="font-family: var(--font-ariw9500);"
+		class="isolate mt-8 mb-4 [font-family:var(--font-ariw9500)] text-6xl
+       font-black tracking-widest text-[var(--color-primary)]
+       shadow-none drop-shadow-none filter-none backdrop-filter-none
+       [--dx:6px] [--dy:4px] [--stroke:5px]
+       [-webkit-text-stroke-color:var(--shadow-header)]
+       [-webkit-text-stroke-width:var(--stroke)]
+       [paint-order:stroke_fill]
+       [text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header)]
+       supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header),0_1px_0_var(--shadow-header),0_-1px_0_var(--shadow-header),1px_0_0_var(--shadow-header),-1px_0_0_var(--shadow-header),1px_1px_0_var(--shadow-header),1px_-1px_0_var(--shadow-header),-1px_1px_0_var(--shadow-header),-1px_-1px_0_var(--shadow-header),0_2px_0_var(--shadow-header),0_-2px_0_var(--shadow-header),2px_0_0_var(--shadow-header),-2px_0_0_var(--shadow-header),2px_2px_0_var(--shadow-header),2px_-2px_0_var(--shadow-header),-2px_2px_0_var(--shadow-header),-2px_-2px_0_var(--shadow-header)]"
 	>
 		Leaderboard
 	</h1>

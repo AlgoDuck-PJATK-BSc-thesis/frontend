@@ -19,11 +19,12 @@
 	let isLoggedIn =
 		path.startsWith('/home') ||
 		path.startsWith('/problems') ||
-		path.startsWith('/cohort') ||
+		path.startsWith('/Shop') ||
 		path.startsWith('/contest') ||
-		path.startsWith('/store') ||
+		path.startsWith('/cohort') ||
 		path.startsWith('/leaderboard') ||
-		path.startsWith('/settings');
+		path.startsWith('/settings') ||
+		path.startsWith('/studytimer');
 	let hideHeader = $derived(page.data.hideHeader);
 </script>
 

@@ -141,7 +141,7 @@
 			</button>
 			<div class="relative">
 				<button
-					class="scale-y-[-1] rounded px-1 py-1 text-xl font-bold transition hover:bg-[color:var(--color-accent-1)]"
+					class="scale-y-[-1] rounded py-1 text-xl font-bold transition hover:bg-[color:var(--color-accent-1)]"
 					onclick={toggleOptions}
 					aria-label="Cohort options"
 				>
@@ -205,7 +205,7 @@
 		</div>
 
 		<h1
-			class="m-5 mt-2 ml-4 overflow-auto p-4 text-5xl font-bold text-[color:var(--color-accent-2)]"
+			class="m-5 mt-2 ml-4 overflow-auto p-4 text-5xl font-bold tracking-wide text-[color:var(--color-accent-2)]"
 			style="font-family: var(--font-ariw9500);"
 		>
 			Members

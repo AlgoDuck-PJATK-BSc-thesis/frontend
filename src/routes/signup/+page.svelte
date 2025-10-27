@@ -4,15 +4,22 @@
 </script>
 
 <svelte:head>
-	<title>Sign up – AlgoDuck</title>
+	<title>Sign up - AlgoDuck</title>
 </svelte:head>
 
 <section class="mx-auto mt-14 max-w-90 text-center">
 	<h1
-		class="mt-2 mb-10 ml-2 text-6xl font-black tracking-widest text-[color:var(--color-primary)] [text-shadow:5.5px_1.5px_0_#000,-2px_-1.5px_0_#000,1.5px_-1.5px_0_#000,-1.5px_2px_0_#000]"
-		style="font-family: var(--font-ariw9500);"
+		class="isolate mt-2 mb-10 ml-2 [font-family:var(--font-ariw9500)] text-6xl
+       font-black tracking-widest text-[var(--color-primary)]
+       shadow-none drop-shadow-none filter-none backdrop-filter-none
+       [--dx:6px] [--dy:4px] [--stroke:5px]
+       [-webkit-text-stroke-color:var(--shadow-header)]
+       [-webkit-text-stroke-width:var(--stroke)]
+       [paint-order:stroke_fill]
+       [text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header)]
+       supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header),0_1px_0_var(--shadow-header),0_-1px_0_var(--shadow-header),1px_0_0_var(--shadow-header),-1px_0_0_var(--shadow-header),1px_1px_0_var(--shadow-header),1px_-1px_0_var(--shadow-header),-1px_1px_0_var(--shadow-header),-1px_-1px_0_var(--shadow-header),0_2px_0_var(--shadow-header),0_-2px_0_var(--shadow-header),2px_0_0_var(--shadow-header),-2px_0_0_var(--shadow-header),2px_2px_0_var(--shadow-header),2px_-2px_0_var(--shadow-header),-2px_2px_0_var(--shadow-header),-2px_-2px_0_var(--shadow-header)]"
 	>
-		Sign up
+		Sign Up
 	</h1>
 
 	<PixelFrame
@@ -49,23 +56,24 @@
 				/>
 			</label>
 		</form>
-	</PixelFrame>
-	<div class="mt-8 mb-5 flex justify-center">
-		<Button
-			size="big"
-			label="CREATE"
-			labelColor="[color:var(--color-text-button)]"
-			labelFontSize="1.1rem"
-			labelFontFamily="var(--font-ariw9500)"
-			labelFontWeight="bold"
-			onclick={() => document.querySelector('form')?.requestSubmit()}
-		/>
-	</div>
 
-	<p class="mt-2 text-center leading-snug">
-		<span>Already have an account?</span>
-		<a href="/login" class="ml-1 font-semibold text-[color:var(--color-accent-2)] hover:underline"
-			>Log in</a
-		>
-	</p>
+		<div class="mt-8 mb-5 flex justify-center">
+			<Button
+				size="big"
+				label="CREATE"
+				labelColor="[color:var(--color-text-button)]"
+				labelFontSize="1.2rem"
+				labelFontFamily="var(--font-lexenddeca)"
+				labelFontWeight="bold"
+				onclick={() => document.querySelector('form')?.requestSubmit()}
+			/>
+		</div>
+
+		<p class="mt-2 text-center leading-snug">
+			<span>Already have an account?</span>
+			<a href="/login" class="ml-1 font-semibold text-[color:var(--color-accent-2)] hover:underline"
+				>Log in</a
+			>
+		</p>
+	</PixelFrame>
 </section>

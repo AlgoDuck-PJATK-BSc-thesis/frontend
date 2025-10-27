@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>Home – AlgoDuck</title>
+	<title>Home - AlgoDuck</title>
 </svelte:head>
 
 <main class="w-full h-full flex justify-center items-center overflow-auto">

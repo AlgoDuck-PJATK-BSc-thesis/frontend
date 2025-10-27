@@ -196,12 +196,12 @@
 				</div>
 
 				<Button
-					size="small"
+					size="medium"
 					label="SEND"
 					labelColor="[color:var(--color-text-button)]"
-					labelFontSize="1rem"
-					labelFontFamily="var(--font-ariw9500)"
-					labelFontWeight="normal"
+					labelFontSize="1.2rem"
+					labelFontFamily="var(--font-lexenddeca)"
+					labelFontWeight="bold"
 					onclick={send}
 				/>
 			</div>

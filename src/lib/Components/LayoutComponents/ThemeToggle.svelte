@@ -22,10 +22,10 @@
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
-			if (!document.documentElement.getAttribute('data-theme')){
+			if (!document.documentElement.getAttribute('data-theme')) {
 				document.documentElement.setAttribute('data-theme', 'dark');
 			}
-			current = (document.documentElement.getAttribute('data-theme') as ThemeName);
+			current = document.documentElement.getAttribute('data-theme') as ThemeName;
 		}
 	});
 

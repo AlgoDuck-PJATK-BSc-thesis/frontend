@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	type SizeType = 'small' | 'medium' | 'big' | 'square';
+	type SizeType = 'small' | 'medium' | 'big' | 'square' | 'bigger';
 	type ThemeType = 'light' | 'dark';
 
 	let {
@@ -51,7 +51,9 @@
 					? 'sredni'
 					: size === 'small'
 						? 'maly'
-						: 'kwadratowy';
+						: size === 'bigger'
+							? 'najwiekszy'
+							: 'kwadratowy';
 		return `${imagesPath}/${currentTheme}/${size}/${color}_guzik_${sizeName}1.png`;
 	});
 
@@ -64,7 +66,9 @@
 					? 'sredni'
 					: size === 'small'
 						? 'maly'
-						: 'kwadratowy';
+						: size === 'bigger'
+							? 'najwiekszy'
+							: 'kwadratowy';
 		return `${imagesPath}/${currentTheme}/${size}/${color}_guzik_${sizeName}2.png`;
 	});
 

@@ -6,7 +6,6 @@
 	function toggleLang() {
 		currentLang = currentLang === '🇺🇸' ? '🇵🇱' : '🇺🇸';
 	}
-	
 </script>
 
 <header
