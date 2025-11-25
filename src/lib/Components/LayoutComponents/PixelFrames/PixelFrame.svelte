@@ -51,32 +51,32 @@
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="top: 4px; right: {8 + i * 4}px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="top: 4px; right: {8 + i * 4}px"
 		></span>
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="top: {8 + i * 4}px; right: 4px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="top: {8 + i * 4}px; right: 4px"
 		></span>
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: 4px; left: {8 + i * 4}px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="bottom: 4px; left: {8 + i * 4}px"
 		></span>
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: {8 + i * 4}px; left: 4px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="bottom: {8 + i * 4}px; left: 4px"
 		></span>
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: 4px; right: {8 + i * 4}px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="bottom: 4px; right: {8 + i * 4}px"
 		></span>
 	{/each}
 
 	{#each Array(3) as _, i}
-		<span class="absolute h-[4px] w-[4px] bg-white/50" style="bottom: {8 + i * 4}px; right: 4px"
+		<span class="absolute h-[4px] w-[4px] bg-white/40" style="bottom: {8 + i * 4}px; right: 4px"
 		></span>
 	{/each}
 	<div class="relative z-10">

@@ -102,7 +102,7 @@
 
 	{#if label}
 		<span
-			class={`pointer-events-none absolute inset-0 z-10 flex translate-y-[-3px] items-center justify-center tracking-widest transition-transform duration-100 select-none group-hover:translate-y-[2px] ${labelColorClass()}`}
+			class={`pointer-events-none absolute inset-0 z-10 flex translate-y-[-2px] items-center justify-center tracking-widest transition-transform duration-100 select-none group-hover:translate-y-[2px] ${labelColorClass()}`}
 			style={`font-size: ${labelFontSize}; font-family: ${labelFontFamily}; font-weight: ${labelFontWeight}; ${labelColorStyle()}`}
 		>
 			{label}
