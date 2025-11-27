@@ -1,5 +1,6 @@
 <script>
 	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
+	import landingPageBackground from '$lib/images/LandingPage/Landing_page.gif';
 </script>
 
 <svelte:head>
@@ -7,23 +8,19 @@
 </svelte:head>
 
 <section class="mx-auto mt-16 max-w-3xl px-4 text-center">
+	<img
+		src={landingPageBackground}
+		alt="landing page background"
+		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+	/>
+
 	<h1
-		class="isolate mt-2 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl
-       font-black tracking-widest text-[var(--color-primary)]
-       shadow-none drop-shadow-none filter-none backdrop-filter-none
-       [--dx:6px] [--dy:4px] [--stroke:5px]
-       [-webkit-text-stroke-color:var(--shadow-header)]
-       [-webkit-text-stroke-width:var(--stroke)]
-       [paint-order:stroke_fill]
-       [text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header)]
-       supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header),0_1px_0_var(--shadow-header),0_-1px_0_var(--shadow-header),1px_0_0_var(--shadow-header),-1px_0_0_var(--shadow-header),1px_1px_0_var(--shadow-header),1px_-1px_0_var(--shadow-header),-1px_1px_0_var(--shadow-header),-1px_-1px_0_var(--shadow-header),0_2px_0_var(--shadow-header),0_-2px_0_var(--shadow-header),2px_0_0_var(--shadow-header),-2px_0_0_var(--shadow-header),2px_2px_0_var(--shadow-header),2px_-2px_0_var(--shadow-header),-2px_2px_0_var(--shadow-header),-2px_-2px_0_var(--shadow-header)]"
+		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 	>
 		About us
 	</h1>
 
-	<PixelFrame
-		className="w-full px-10 pt-10 pb-10 text-left bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
-	>
+	<PixelFrame className="w-full px-18 pt-14 pb-14 text-left bg-black/60">
 		<p class="text-base leading-relaxed text-[color:var(--color-text)]">
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin fringilla feugiat elementum.
 			Aliquam auctor justo leo, ut egestas metus viverra ac. Cras in ornare lacus, quis aliquet

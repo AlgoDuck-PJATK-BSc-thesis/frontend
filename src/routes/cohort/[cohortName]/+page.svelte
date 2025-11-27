@@ -13,22 +13,36 @@
 	let cohortName = '';
 	let showOptions = false;
 	let copied = false;
+	type User = {
+		name: string;
+		points: number;
+		isOnline: boolean;
+	};
 
-	const allUsers = [
-		{ name: 'FrostedFalcon', points: 15000 },
-		{ name: 'EchoOrbit', points: 100 },
-		{ name: 'PixelPenguin', points: 9000 },
-		{ name: 'NovaNebula', points: 80 },
-		{ name: 'CrimsonCoyote', points: 7000 },
-		{ name: 'BlueBird', points: 4000 },
-		{ name: 'HarshHistory', points: 40 },
-		{ name: 'TurboTurtle', points: 30 },
-		{ name: 'SilentShadow', points: 20 },
-		{ name: 'SlySpeed', points: 10 },
-		{ name: 'SlySpeeding', points: 9 },
-		{ name: 'SlySpeeder', points: 8 },
-		{ name: 'SlySpider', points: 7 }
+	const allUsers: User[] = [
+		{ name: 'FrostedFalcon', points: 15000, isOnline: true },
+		{ name: 'EchoOrbit', points: 100, isOnline: false },
+		{ name: 'PixelPenguin', points: 9000, isOnline: true },
+		{ name: 'NovaNebula', points: 80, isOnline: false },
+		{ name: 'CrimsonCoyote', points: 7000, isOnline: true },
+		{ name: 'BlueBird', points: 4000, isOnline: false },
+		{ name: 'HarshHistory', points: 40, isOnline: true },
+		{ name: 'TurboTurtle', points: 30, isOnline: false },
+		{ name: 'SilentShadow', points: 20, isOnline: true },
+		{ name: 'SlySpeed', points: 10, isOnline: false },
+		{ name: 'SlySpeeding', points: 9, isOnline: true },
+		{ name: 'SlySpeeder', points: 8, isOnline: false },
+		{ name: 'SlySpider', points: 7, isOnline: true }
 	];
+
+	let sortedUsers: User[] = [];
+
+	$: sortedUsers = [...allUsers].sort((a, b) => {
+		if (a.isOnline !== b.isOnline) {
+			return a.isOnline ? -1 : 1;
+		}
+		return a.name.localeCompare(b.name);
+	});
 
 	onMount(() => {
 		view = page.url.searchParams.get('view') ?? '';
@@ -109,16 +123,9 @@
 
 <div
 	class="fixed top-[5rem] left-[24rem] z-[9] w-[calc(42vw)] overflow-y-hidden whitespace-nowrap select-none"
->
-	<h1
-		class="inline-block text-6xl leading-[1.5] font-bold text-[color:var(--color-accent-2)]"
-		style="font-family: var(--font-ariw9500);"
-	>
-		{cohortName} Cohort
-	</h1>
-</div>
+></div>
 
-<div class="-mt-[3px] flex w-[18rem] pr-100 pl-20">
+<div class="-mt-[9px] flex w-[18rem] pr-100 pl-20">
 	<PixelFrameSimple
 		className="flex-1 px-6 py-2 flex items-center justify-start bg-[linear-gradient(to_bottom,var(--color-tile),var(--color-accent-3))]"
 	>
@@ -151,7 +158,7 @@
 				{#if showOptions}
 					<button
 						type="button"
-						class="fixed top-0 left-0 z-40 h-screen w-screen border-none bg-transparent"
+						class="fixed top-0 left-0 z-99 h-screen w-screen border-none bg-transparent"
 						aria-label="Close dropdown"
 						onclick={toggleOptions}
 					></button>
@@ -197,28 +204,53 @@
 	</div>
 
 	<PixelFrame
-		className="h-[74vh] mt-[4rem] w-[24vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+		className="h-[74vh] mt-[3rem] w-[25vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
-		<div class="absolute -top-[5.2rem] left-[45%] z-10 flex -translate-x-1/3 gap-2">
-			<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-[7rem] w-[7.2rem] -scale-x-100 drop-shadow-md"/>
-			<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-[7rem] w-[7.2rem] drop-shadow-md"/>
+		<div class="absolute -top-[5.3rem] left-[10%] z-10 -translate-x-1/3">
+			<div class="flex items-center gap-1">
+				<div class="relative ml-2 translate-y-[-12px]">
+					<div
+						class="w-[12rem] overflow-auto rounded-3xl border-2 border-black bg-white/100 px-5 py-2 text-sm font-semibold text-black shadow-lg"
+					>
+						<p class="leading-snug">Welcome to <br /> {cohortName} Cohort!</p>
+					</div>
+					<div
+						class="absolute top-1/2 -right-1.5 h-3 w-3 -translate-y-1/4 rotate-45 border-t-2 border-r-2 border-black bg-white/100"
+					></div>
+				</div>
+
+				<CloudfrontImage
+					path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`}
+					cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
+				/>
+			</div>
 		</div>
 
 		<h1
-			class="m-5 mt-2 ml-4 overflow-auto p-4 text-5xl font-bold tracking-wide text-[color:var(--color-accent-2)]"
-			style="font-family: var(--font-ariw9500);"
+			class="ocr-outline ocr-title isolate m-4 mx-auto mt-1 mb-0 ml-3 block max-w-[20rem] overflow-x-auto p-4 text-left [font-family:var(--font-ocra)] text-5xl leading-[1.5] font-bold tracking-wide whitespace-nowrap text-[var(--color-landingpage-title)]"
 		>
-			Members
+			Activity
 		</h1>
 
 		<div class="mt-2 ml-[1rem] h-[58vh] w-full flex-1 overflow-auto px-5">
-			{#each allUsers as user}
-				<div class="mb-3 flex w-[90%] items-center gap-3">
-					<div
-						class="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
-					>
-					<CloudfrontImage path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`} cls="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"/>
+			{#each sortedUsers as user}
+				<div class="mb-4 flex w-[90%] items-center gap-3">
+					<div class="relative h-12 w-12 shrink-0">
+						<div
+							class="h-full w-full overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
+						>
+							<CloudfrontImage
+								path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`}
+								cls="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+							/>
+						</div>
+						<span
+							class={`absolute right-0 bottom-0 h-4 w-4 rounded-full border-[3px] border-[color:var(--color-bg)] ${
+								user.isOnline ? 'bg-green-400' : 'bg-gray-500'
+							}`}
+						></span>
 					</div>
+
 					<PixelFrameSimple
 						className="flex-1 rounded-2xl bg-[color:var(--color-bg)] px-4 py-3 text-sm text-[color:var(--color-text)]"
 					>

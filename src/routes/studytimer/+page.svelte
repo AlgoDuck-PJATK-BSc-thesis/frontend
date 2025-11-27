@@ -314,22 +314,14 @@
     color: var(--color-text);"
 >
 	<div class={rewardOpen ? 'blur-sm transition' : ''}>
-		<header class="mx-auto w-full max-w-3xl">
+		<header class="mx-auto w-full max-w-3xl text-center">
 			{#if stage === 'menu'}
 				<h1
-					class="isolate mt-8 mb-8 text-center [font-family:var(--font-ariw9500)] text-6xl
-					font-black tracking-widest text-[var(--color-primary)]
-					shadow-none drop-shadow-none filter-none backdrop-filter-none
-					[--dx:6px] [--dy:4px] [--stroke:5px]
-					[-webkit-text-stroke-color:var(--shadow-header)]
-					[-webkit-text-stroke-width:var(--stroke)]
-					[paint-order:stroke_fill]
-					[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header)]
-					supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header),0_1px_0_var(--shadow-header),0_-1px_0_var(--shadow-header),1px_0_0_var(--shadow-header),-1px_0_0_var(--shadow-header),1px_1px_0_var(--shadow-header),1px_-1px_0_var(--shadow-header),-1px_1px_0_var(--shadow-header),-1px_-1px_0_var(--shadow-header),0_2px_0_var(--shadow-header),0_-2px_0_var(--shadow-header),2px_0_0_var(--shadow-header),-2px_0_0_var(--shadow-header),2px_2px_0_var(--shadow-header),2px_-2px_0_var(--shadow-header),-2px_2px_0_var(--shadow-header),-2px_-2px_0_var(--shadow-header)]"
+					class="ocr-outline ocr-title isolate mt-6 mb-8 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 				>
 					Study Timer
 				</h1>
-				<p class="mt-2 text-center text-[var(--color-text)] opacity-80">Pick a mode to begin</p>
+				<!-- <p class="mt-2 text-center text-[var(--color-text)] opacity-80">Pick a mode to begin</p> -->
 			{/if}
 		</header>
 
@@ -349,48 +341,16 @@
 						></div>
 						<div class="flex items-center gap-3">
 							<div
-								class="grid h-12 w-12 place-items-center rounded-xl
-              					bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-             					text-2xl"
-							>
-								🌞
-							</div>
-							<h2 class="text-xl font-bold">Day timer</h2>
-						</div>
-						<p class="mt-2 text-sm text-[color:var(--color-text)] opacity-70">
-							Track remaining time until midnight
-						</p>
-						<button
-							type="button"
-							class="mt-4 inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition active:scale-[0.98]"
-							onclick={startDay}>Start</button
-						>
-					</article>
-
-					<article
-						class="group relative overflow-hidden rounded-2xl border [border-color:var(--border-10)] p-6
-						shadow-[0_10px_30px_-10px_var(--shadow-ambient)] transition
-						hover:[border-color:var(--border-15)]
-						hover:shadow-[0_12px_34px_-12px_var(--shadow-ambient-hover)]"
-						style="background: var(--tile-grad);"
-					>
-						<div
-							class="absolute -top-24 -right-24 h-48 w-48 rounded-full opacity-20 blur-2xl"
-							style="background:radial-gradient(closest-side, var(--accent-bg), transparent)"
-						></div>
-						<div class="flex items-center gap-3">
-							<div
 								class="grid h-12 w-12 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-2xl"
 							>
 								⏱️
 							</div>
-							<h2 class="text-xl font-bold">Custom timer</h2>
+							<h2 class="text-xl font-bold">Set a timer</h2>
 						</div>
-						<p class="mt-2 text-sm text-[color:var(--color-text)] opacity-70">
-							Set a deadline or a duration
-						</p>
 
-						<div class="mt-4 inline-flex overflow-hidden rounded-xl ring-1 ring-[var(--border-15)]">
+						<div
+							class="mt-4 mb-2 inline-flex overflow-hidden rounded-xl ring-1 ring-[var(--border-15)]"
+						>
 							<button
 								type="button"
 								class={`px-3 py-1.5 text-xs transition md:text-sm ${entryType === 'deadline' ? 'bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)]' : ''}`}
@@ -404,7 +364,7 @@
 						</div>
 
 						<div class="mt-3 grid gap-3" hidden={entryType !== 'deadline'}>
-							<p class="text-xs opacity-80 md:text-sm">Pick date & time</p>
+							<!-- <p class="text-xs opacity-80 md:text-sm">Pick date & time</p> -->
 
 							<div class="rounded-xl border border-[var(--border-10)] p-3">
 								<div class="mb-2 flex items-center justify-between">
@@ -508,7 +468,7 @@
 
 						<div class="mt-3 grid gap-3" hidden={entryType !== 'duration'}>
 							<label for="durationInput" class="text-xs opacity-80 md:text-sm"
-								>Duration (minutes)</label
+								>Duration in minutes:</label
 							>
 							<div class="flex items-center gap-2">
 								<input
@@ -520,7 +480,7 @@
 									outline-none focus:ring-2 focus:ring-[var(--accent)]"
 									bind:value={durationMin}
 								/>
-								<div class="flex gap-1">
+								<!-- <div class="flex gap-1">
 									<button
 										type="button"
 										class="rounded-lg px-2 py-1 text-xs ring-1 ring-[var(--border-15)] transition
@@ -566,14 +526,44 @@
 										focus-visible:ring-[var(--accent)] focus-visible:outline-none active:scale-[0.98]"
 										onclick={() => (durationMin = 90)}>90</button
 									>
-								</div>
+								</div> -->
 							</div>
 							<button
 								type="button"
-								class="inline-flex w-fit items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition active:scale-[0.98]"
+								class="mt-2 inline-flex w-fit items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition active:scale-[0.98]"
 								onclick={startCustomFromDuration}>Start</button
 							>
 						</div>
+					</article>
+					<article
+						class="group relative overflow-hidden rounded-2xl border [border-color:var(--border-10)] p-6
+						shadow-[0_10px_30px_-10px_var(--shadow-ambient)] transition
+						hover:[border-color:var(--border-15)]
+						hover:shadow-[0_12px_34px_-12px_var(--shadow-ambient-hover)]"
+						style="background: var(--tile-grad);"
+					>
+						<div
+							class="absolute -top-24 -right-24 h-48 w-48 rounded-full opacity-20 blur-2xl"
+							style="background:radial-gradient(closest-side, var(--accent-bg), transparent)"
+						></div>
+						<div class="flex items-center gap-3">
+							<div
+								class="grid h-12 w-12 place-items-center rounded-xl
+              					bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+             					text-2xl"
+							>
+								🌞
+							</div>
+							<h2 class="text-xl font-bold">Day timer</h2>
+						</div>
+						<p class="mt-2 text-sm text-[color:var(--color-text)] opacity-70">
+							Track remaining time until midnight
+						</p>
+						<button
+							type="button"
+							class="mt-4 inline-flex items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition active:scale-[0.98]"
+							onclick={startDay}>Start</button
+						>
 					</article>
 				</div>
 			</section>
@@ -645,11 +635,11 @@
 			</main>
 		{/if}
 
-		<footer
+		<!-- <footer
 			class="mt-10 grid place-items-center pt-1 text-[0.95rem] text-[color:var(--color-text)] opacity-80"
 		>
 			<small>Local time: {now.toLocaleTimeString()} • {now.toLocaleDateString()}</small>
-		</footer>
+		</footer> -->
 	</div>
 
 	<RewardModal open={rewardOpen} coins={rewardCoins} onClose={() => (rewardOpen = false)} />

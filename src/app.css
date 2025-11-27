@@ -49,6 +49,13 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'OCR A';
+	src: url('/fonts/ocr-a.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
 :root {
 	--font-pressstart2p: 'Press Start 2P', normal;
 	--font-blockblueprint: 'Block Blueprint', sans-serif;
@@ -62,25 +69,108 @@
 	--font-ariw9500: 'Ari W9500 Bold', sans-serif;
 	--font-opensans: 'Open Sans', sans-serif;
 	--font-lexenddeca: 'Lexend Deca', sans-serif;
+	--font-ocra: 'OCR A', monospace;
+}
+
+@layer components {
+	.ocr-outline {
+		font-family: var(--font-ocra);
+		font-weight: 900;
+		--stroke: 5px;
+		-webkit-text-stroke: var(--stroke) var(--stroke-color);
+		paint-order: stroke fill;
+	}
+
+	.ocr-subtitle {
+		--stroke-color: rgba(0, 0, 0, 0.8);
+		color: var(--color-landingpage-description);
+	}
+
+	.ocr-title {
+		--dx: 6px;
+		--dy: 5px;
+		--shadow: rgba(0, 0, 0, 0.7);
+		--stroke-color: rgba(0, 0, 0, 0.7);
+		color: var(--color-landingpage-title);
+		text-shadow: var(--dx) var(--dy) 0 var(--shadow);
+	}
+
+	.ocr-subtitle-white {
+		--stroke-color: rgba(0, 0, 0, 0.9);
+	}
+
+	.ocr-outline-wide {
+		letter-spacing: 0.3em;
+	}
+
+	@supports not (-webkit-text-stroke: 1px black) {
+		.ocr-subtitle {
+			text-shadow:
+				0 1px 0 var(--stroke-color),
+				0 -1px 0 var(--stroke-color),
+				1px 0 0 var(--stroke-color),
+				-1px 0 0 var(--stroke-color),
+				1px 1px 0 var(--stroke-color),
+				1px -1px 0 var(--stroke-color),
+				-1px 1px 0 var(--stroke-color),
+				-1px -1px 0 var(--stroke-color);
+		}
+
+		.ocr-title {
+			text-shadow:
+				var(--dx) var(--dy) 0 var(--shadow),
+				0 1px 0 var(--stroke-color),
+				0 -1px 0 var(--stroke-color),
+				1px 0 0 var(--stroke-color),
+				-1px 0 0 var(--stroke-color),
+				1px 1px 0 var(--stroke-color),
+				1px -1px 0 var(--stroke-color),
+				-1px 1px 0 var(--stroke-color),
+				-1px -1px 0 var(--stroke-color),
+				0 2px 0 var(--stroke-color),
+				0 -2px 0 var(--stroke-color),
+				2px 0 0 var(--stroke-color),
+				-2px 0 0 var(--stroke-color),
+				2px 2px 0 var(--stroke-color),
+				2px -2px 0 var(--stroke-color),
+				-2px 2px 0 var(--stroke-color),
+				-2px -2px 0 var(--stroke-color);
+		}
+	}
+}
+
+@keyframes side-bounce {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(6px);
+	}
+}
+
+@layer utilities {
+	.animate-side-bounce {
+		animation: side-bounce 0.8s ease-in-out infinite;
+	}
 }
 
 ::-webkit-scrollbar {
-    width: 8px;
+	width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: transparent;
+	background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgb(54, 54, 54);
-    border-radius: 10px;
+	background-color: rgb(54, 54, 54);
+	border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
 	background-color: #555;
 }
-
 
 html {
 	font-family: var(--font-lexenddeca);

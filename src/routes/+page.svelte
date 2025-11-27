@@ -12,53 +12,39 @@
 
 	<div class="relative z-20 flex flex-col items-center px-5 py-45 text-center">
 		<h1
-			class="isolate mt-2 mb-10 ml-2
-		[font-family:var(--font-ariw9500)]
-		text-6xl font-black tracking-widest
-		text-[var(--color-landingpage-title)]
-		shadow-none drop-shadow-none filter-none backdrop-filter-none
-		[--dx:6px] [--dy:5px]
-		[--shadow:rgba(0,0,0,0.7)]
-		[--stroke-color:rgba(0,0,0,0.7)]
-		[--stroke:5px]
-		[-webkit-text-stroke:var(--stroke)_var(--stroke-color)]
-		[paint-order:stroke_fill]
-		[text-shadow:var(--dx)_var(--dy)_0_var(--shadow)]
-		supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow),0_1px_0_var(--stroke-color),0_-1px_0_var(--stroke-color),1px_0_0_var(--stroke-color),-1px_0_0_var(--stroke-color),1px_1px_0_var(--stroke-color),1px_-1px_0_var(--stroke-color),-1px_1px_0_var(--stroke-color),-1px_-1px_0_var(--stroke-color),0_2px_0_var(--stroke-color),0_-2px_0_var(--stroke-color),2px_0_0_var(--stroke-color),-2px_0_0_var(--stroke-color),2px_2px_0_var(--stroke-color),2px_-2px_0_var(--stroke-color),-2px_2px_0_var(--stroke-color),-2px_-2px_0_var(--stroke-color)]"
+			class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-7xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 		>
 			AlgoDuck
 		</h1>
 		<p
-			class="mt-1 mb-10
-		[font-family:var(--font-lexenddeca)]
-		text-2xl font-black tracking-widest
-		text-[var(--color-landingpage-description)]
-		[--stroke-color:rgba(0,0,0,0.7)] [--stroke:5px]
-		[-webkit-text-stroke:var(--stroke)_var(--stroke-color)]
-		[paint-order:stroke_fill]
-		supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:0_1px_0_var(--stroke-color),0_-1px_0_var(--stroke-color),1px_0_0_var(--stroke-color),-1px_0_0_var(--stroke-color),1px_1px_0_var(--stroke-color),1px_-1px_0_var(--stroke-color),-1px_1px_0_var(--stroke-color),-1px_-1px_0_var(--stroke-color)]"
+			class="ocr-subtitle ocr-outline mt-1 mb-10 [font-family:var(--font-ocra)] text-2xl font-black tracking-widest text-[var(--color-landingpage-description)]"
 		>
-			Transform your coding skills, one problem at a time
+			Click to start your journey to mastering<br /> Data Structures and Algorithms
 		</p>
 
 		<div class="mb-8 flex gap-4">
-			<Button
-				size="big"
-				label="START"
-				labelColor="rgba(0, 0, 0, 0.7)"
-				labelFontSize="1.2rem"
-				labelFontFamily="var(--font-lexenddeca)"
-				labelFontWeight="bold"
-				onclick={() => (window.location.href = '/login')}
-			/>
+			<div class="animate-side-bounce inline-block">
+				<Button
+					size="medium"
+					label="→"
+					labelFontFamily="var(--font-ariw9500)"
+					labelColor="rgba(0,0,0,0.7)"
+					labelFontSize="2rem"
+					labelFontWeight="normal"
+					labelTracking="extra"
+					labelClass=""
+					onclick={() => (window.location.href = '/signup')}
+				/>
+			</div>
 
 			<!-- <Button
-				size="big"
-				label="LEARN MORE"
-				labelColor="rgba(0, 0, 0, 0.7)"
-				labelFontSize="1rem"
-				labelFontFamily="var(--font-ariw9500)"
-				labelFontWeight="normal"
+				size="bigger"
+				label="Learn more"
+				labelColor="#ffffff"
+				labelFontSize="1.25rem"
+				labelFontFamily="var(--font-ocra)"
+				labelFontWeight="bold"
+				labelClass="ocr-outline ocr-subtitle"
 				onclick={() => (window.location.href = '/learnmore')}
 			/> -->
 		</div>

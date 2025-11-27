@@ -142,9 +142,9 @@
 	}
 </script>
 
-<div class="relative mt-16 mr-2 ml-13 w-fit">
+<div class="relative mt-[3rem] mr-2 ml-[3rem] w-fit">
 	<PixelFrame
-		className="h-[74vh] w-[66vw] ml-1 mt-8 mr-6 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+		className="h-[74vh] w-[62vw] ml-1 mt-8 mr-6 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
 		<div class="flex h-full w-full flex-col">
 			<div
@@ -194,16 +194,19 @@
 						}}
 					></textarea>
 				</div>
-
-				<Button
-					size="medium"
-					label="SEND"
-					labelColor="[color:var(--color-text-button)]"
-					labelFontSize="1.2rem"
-					labelFontFamily="var(--font-lexenddeca)"
-					labelFontWeight="bold"
-					onclick={send}
-				/>
+				<div class="translate-y-[-2px]">
+					<Button
+						size="small"
+						label="→"
+						labelFontFamily="var(--font-ariw9500)"
+						labelColor="rgba(0,0,0,0.7)"
+						labelFontSize="2rem"
+						labelFontWeight="normal"
+						labelTracking="extra"
+						labelClass=""
+						onclick={send}
+					/>
+				</div>
 			</div>
 		</div>
 	</PixelFrame>

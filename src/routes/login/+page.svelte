@@ -8,31 +8,19 @@
 	<title>Log in - AlgoDuck</title>
 </svelte:head>
 
-<section class="mx-auto mt-14 max-w-90 text-center">
+<section class="mx-auto mt-16 max-w-100 text-center">
 	<img
 		src={landingPageBackground}
 		alt="landing page background"
 		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
 	/>
 	<h1
-		class="isolate mt-2 mb-10 ml-2
-		[font-family:var(--font-ariw9500)]
-		text-6xl font-black tracking-widest
-		text-[var(--color-landingpage-title)]
-		shadow-none drop-shadow-none filter-none backdrop-filter-none
-		[--dx:6px] [--dy:5px]
-		[--shadow:rgba(0,0,0,0.7)]
-		[--stroke-color:rgba(0,0,0,0.7)]
-		[--stroke:5px]
-		[-webkit-text-stroke:var(--stroke)_var(--stroke-color)]
-		[paint-order:stroke_fill]
-		[text-shadow:var(--dx)_var(--dy)_0_var(--shadow)]
-		supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow),0_1px_0_var(--stroke-color),0_-1px_0_var(--stroke-color),1px_0_0_var(--stroke-color),-1px_0_0_var(--stroke-color),1px_1px_0_var(--stroke-color),1px_-1px_0_var(--stroke-color),-1px_1px_0_var(--stroke-color),-1px_-1px_0_var(--stroke-color),0_2px_0_var(--stroke-color),0_-2px_0_var(--stroke-color),2px_0_0_var(--stroke-color),-2px_0_0_var(--stroke-color),2px_2px_0_var(--stroke-color),2px_-2px_0_var(--stroke-color),-2px_2px_0_var(--stroke-color),-2px_-2px_0_var(--stroke-color)]"
+		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 	>
 		Log In
 	</h1>
 
-	<PixelFrame className="flex w-full flex-col items-center bg-black/50 px-12 pt-4 pb-10">
+	<PixelFrame className="flex w-full flex-col items-center bg-black/60 px-14 pt-10 pb-14">
 		<form
 			method="POST"
 			class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-text)]"
@@ -58,21 +46,54 @@
 			</label>
 		</form>
 
-		<div class="mt-8 mb-5 flex justify-center">
+		<p class="mt-6 text-center leading-snug">
+			<a href="/signup" class="inline-flex hover:text-[color:var(--color-accent-2)]">
+				<span>Don't have an account?</span>
+				<span class="ml-1 font-semibold">Sign Up</span>
+			</a>
+		</p>
+
+		<div class="mt-8 mb-2 flex justify-center">
 			<Button
-				size="big"
-				label="LOG IN"
-				labelColor="rgba(0, 0, 0, 0.7)"
-				labelFontSize="1.2rem"
-				labelFontFamily="var(--font-lexenddeca)"
-				labelFontWeight="bold"
+				size="medium"
+				label="→"
+				labelFontFamily="var(--font-ariw9500)"
+				labelColor="rgba(0,0,0,0.7)"
+				labelFontSize="2rem"
+				labelFontWeight="normal"
+				labelTracking="extra"
+				labelClass=""
 				onclick={() => document.querySelector('form')?.requestSubmit()}
 			/>
 		</div>
 
-		<p class="mt-2 text-center leading-snug">
-			<span>Don't have an account?</span>
-			<a href="/signup" class="ml-1 font-semibold underline">Sign up</a>
-		</p>
+		<div class="mt-8 flex flex-col items-center gap-3">
+			<div class="flex items-center justify-center gap-4">
+				<a
+					href="/auth/oauth/google"
+					class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+				>
+					<img src="/oauth/google.png" alt="Sign up with Google" class="h-12 w-12 object-contain" />
+				</a>
+
+				<a
+					href="/auth/oauth/github"
+					class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+				>
+					<img src="/oauth/github.png" alt="Sign up with GitHub" class="h-12 w-12 object-contain" />
+				</a>
+
+				<a
+					href="/auth/oauth/facebook"
+					class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+				>
+					<img
+						src="/oauth/facebook.png"
+						alt="Sign up with Facebook"
+						class="h-12 w-12 object-contain"
+					/>
+				</a>
+			</div>
+		</div>
 	</PixelFrame>
 </section>

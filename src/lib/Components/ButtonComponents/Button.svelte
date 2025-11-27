@@ -3,6 +3,7 @@
 
 	type SizeType = 'small' | 'medium' | 'big' | 'square' | 'bigger';
 	type ThemeType = 'light' | 'dark';
+	type TrackingType = 'normal' | 'wide' | 'wider' | 'widest' | 'extra';
 
 	let {
 		size = 'medium',
@@ -12,7 +13,9 @@
 		labelColor = 'white',
 		labelFontSize = '0.875rem',
 		labelFontFamily = 'inherit',
-		labelFontWeight = 'normal'
+		labelFontWeight = 'normal',
+		labelClass = '',
+		labelTracking = 'normal'
 	} = $props<{
 		size?: SizeType;
 		onclick?: () => void;
@@ -22,6 +25,8 @@
 		labelFontSize?: string;
 		labelFontFamily?: string;
 		labelFontWeight?: string;
+		labelClass?: string;
+		labelTracking?: TrackingType;
 	}>();
 
 	let currentTheme = $state<ThemeType>('light');
@@ -79,6 +84,16 @@
 	const labelColorStyle = $derived(() => {
 		return labelColor.startsWith('[') ? '' : `color: ${labelColor};`;
 	});
+
+	const trackingClassMap: Record<TrackingType, string> = {
+		normal: '',
+		wide: 'tracking-wide',
+		wider: 'tracking-wider',
+		widest: 'tracking-widest',
+		extra: 'tracking-[0.25em]'
+	};
+
+	const labelTrackingClass = $derived(() => trackingClassMap[labelTracking as TrackingType] ?? '');
 </script>
 
 <button
@@ -102,7 +117,7 @@
 
 	{#if label}
 		<span
-			class={`pointer-events-none absolute inset-0 z-10 flex translate-y-[-2px] items-center justify-center tracking-widest transition-transform duration-100 select-none group-hover:translate-y-[2px] ${labelColorClass()}`}
+			class={`pointer-events-none absolute inset-0 z-10 flex translate-y-[-4px] items-center justify-center transition-transform duration-50 select-none group-hover:translate-y-[4px] ${labelTrackingClass()} ${labelColorClass()} ${labelClass}`}
 			style={`font-size: ${labelFontSize}; font-family: ${labelFontFamily}; font-weight: ${labelFontWeight}; ${labelColorStyle()}`}
 		>
 			{label}

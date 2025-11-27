@@ -9,14 +9,14 @@
 </script>
 
 <header
-	class="font-body sticky h-16 top-0 z-50 flex items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-8 py-4 text-[color:var(--color-text)]"
+	class="font-body sticky top-0 z-50 flex h-16 items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] px-8 py-4 text-[color:var(--color-text)]"
 >
 	<a href="/" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
 		AlgoDuck
 	</a>
 
 	<nav>
-		<ul class="mr-16 flex list-none gap-7 p-0 font-semibold tracking-wide">
+		<ul class="ml-24 flex list-none gap-7 p-0 font-semibold tracking-wide">
 			<li>
 				<a
 					href="/"
@@ -26,7 +26,7 @@
 					Home
 				</a>
 			</li>
-			<li>
+			<!-- <li>
 				<a
 					href="/learnmore"
 					aria-current={page.url.pathname === '/learnmore' ? 'page' : undefined}
@@ -34,7 +34,7 @@
 				>
 					Learn More
 				</a>
-			</li>
+			</li> -->
 			<li>
 				<a
 					href="/aboutus"
@@ -62,15 +62,13 @@
 					Sign Up
 				</a>
 			</li>
-			<li>
-				<div class="relative h-[1rem] w-[1rem]">
-					<ThemeToggle />
-				</div>
-			</li>
 		</ul>
 	</nav>
 
 	<div class="flex items-center gap-4">
+		<div class="relative mr-18 ml-16 h-[1rem] w-[1rem] translate-y-[-3px]">
+			<ThemeToggle />
+		</div>
 		<button
 			onclick={toggleLang}
 			class="cursor-pointer border-none bg-transparent text-2xl leading-none"

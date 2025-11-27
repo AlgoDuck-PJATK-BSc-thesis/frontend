@@ -79,10 +79,10 @@
 </svelte:head>
 
 <section
-	class="mt-2 mr-25 flex h-[calc(100vh-5rem)] justify-center gap-10 overflow-hidden px-12 pt-7"
+	class="mt-2 mr-60 flex h-[calc(100vh-5rem)] justify-center gap-10 overflow-hidden px-12 pt-7"
 >
 	<div class="flex w-60 flex-shrink-0 flex-col overflow-auto">
-		<PixelFrame
+		<!-- <PixelFrame
 			className="flex flex-col w-59 mt-8 gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-4 flex-shrink-0 "
 		>
 			<ul>
@@ -148,22 +148,14 @@
 					</button>
 				</li>
 			</ul>
-		</PixelFrame>
+		</PixelFrame> -->
 	</div>
 
 	<div class="flex h-full flex-[0.5] flex-col justify-between gap-5 overflow-y-auto">
 		<div class="flex flex-col gap-5 overflow-y-auto pb-4">
 			<div class="mr-10 text-center">
 				<h2
-					class="isolate mt-2 mb-4 ml-6 [font-family:var(--font-ariw9500)] text-6xl
-       font-black tracking-widest text-[var(--color-primary)]
-       shadow-none drop-shadow-none filter-none backdrop-filter-none
-       [--dx:6px] [--dy:4px] [--stroke:5px]
-       [-webkit-text-stroke-color:var(--shadow-header)]
-       [-webkit-text-stroke-width:var(--stroke)]
-       [paint-order:stroke_fill]
-       [text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header)]
-       supports-[not(-webkit-text-stroke:1px_black)]:[text-shadow:var(--dx)_var(--dy)_0_var(--shadow-header),0_1px_0_var(--shadow-header),0_-1px_0_var(--shadow-header),1px_0_0_var(--shadow-header),-1px_0_0_var(--shadow-header),1px_1px_0_var(--shadow-header),1px_-1px_0_var(--shadow-header),-1px_1px_0_var(--shadow-header),-1px_-1px_0_var(--shadow-header),0_2px_0_var(--shadow-header),0_-2px_0_var(--shadow-header),2px_0_0_var(--shadow-header),-2px_0_0_var(--shadow-header),2px_2px_0_var(--shadow-header),2px_-2px_0_var(--shadow-header),-2px_2px_0_var(--shadow-header),-2px_-2px_0_var(--shadow-header)]"
+					class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 				>
 					Settings
 				</h2>
@@ -323,22 +315,26 @@
 		</div>
 		<div id="logout" class="mt-1 flex w-full items-center justify-between gap-4">
 			<Button
-				size="medium"
-				label="LOG OUT"
-				labelColor="[color:var(--color-text-button)]"
+				size="big"
+				label="Log Out"
+				labelFontFamily="var(--font-ariw9500)"
+				labelColor="rgba(0,0,0,0.7)"
 				labelFontSize="1.2rem"
-				labelFontFamily="var(--font-lexenddeca)"
-				labelFontWeight="bold"
+				labelFontWeight="normal"
+				labelTracking="extra"
+				labelClass=""
 				onclick={logout}
 			/>
 
 			<Button
-				size="medium"
-				label="SAVE"
-				labelColor="[color:var(--color-text-button)]"
+				size="big"
+				label="Save All"
+				labelFontFamily="var(--font-ariw9500)"
+				labelColor="rgba(0,0,0,0.7)"
 				labelFontSize="1.2rem"
-				labelFontFamily="var(--font-lexenddeca)"
-				labelFontWeight="bold"
+				labelFontWeight="normal"
+				labelTracking="extra"
+				labelClass=""
 				onclick={saveAll}
 			/>
 		</div>

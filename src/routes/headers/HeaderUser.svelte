@@ -7,9 +7,12 @@
 	let level = 5;
 
 	let currentLanguage = 'en';
-	const toggleLanguage = () => {
+	let currentLang = '🇺🇸';
+
+	function toggleLang() {
 		currentLanguage = currentLanguage === 'en' ? 'pl' : 'en';
-	};
+		currentLang = currentLanguage === 'en' ? '🇺🇸' : '🇵🇱';
+	}
 
 	const logout = () => {
 		alert('Logging out...');
@@ -19,7 +22,7 @@
 
 <div class="w-full overflow-x-auto">
 	<header
-		class="font-body h-16 sticky top-0 z-[100] flex min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
+		class="font-body sticky top-0 z-[100] flex h-16 min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
 	>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
@@ -27,10 +30,10 @@
 			>
 
 			<div
-				class="relative inline-flex items-center overflow-hidden rounded-full px-1 text-[0.85rem] tracking-widest"
+				class="relative inline-flex items-center overflow-hidden rounded-full px-1 text-[1rem] tracking-widest"
 			>
 				<div
-					class="pointer-events-none absolute inset-0 z-0 rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-bg-2)]"
+					class="pointer-events-none absolute inset-0 z-0 rounded-full border-2 border-[color:var(--color-primary)]"
 				></div>
 
 				<div
@@ -68,13 +71,14 @@
 				</li>
 				<li>
 					<a
-						href="/Shop"
-						aria-current={page.url.pathname === '/Shop' ? 'page' : undefined}
+						href="/cohort"
+						aria-current={page.url.pathname === '/cohort' ? 'page' : undefined}
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
-						Shop
+						Cohort
 					</a>
 				</li>
+
 				<li>
 					<a
 						href="/contest"
@@ -82,15 +86,6 @@
 						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
 					>
 						Contest
-					</a>
-				</li>
-				<li>
-					<a
-						href="/cohort"
-						aria-current={page.url.pathname === '/cohort' ? 'page' : undefined}
-						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
-					>
-						Cohort
 					</a>
 				</li>
 				<li>
@@ -104,15 +99,6 @@
 				</li>
 				<li>
 					<a
-						href="/settings"
-						aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
-						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
-					>
-						Settings
-					</a>
-				</li>
-				<li>
-					<a
 						href="/studytimer"
 						aria-current={page.url.pathname === '/studytimer' ? 'page' : undefined}
 						class="tracking-tight text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
@@ -121,16 +107,36 @@
 					</a>
 				</li>
 				<li>
-					<div class="relative h-[1rem] w-[1rem]">
-						<ThemeToggle />
-					</div>
+					<a
+						href="/Shop"
+						aria-current={page.url.pathname === '/Shop' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					>
+						Shop
+					</a>
+				</li>
+				<li>
+					<a
+						href="/settings"
+						aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
+						class="text-[color:var(--color-text)] no-underline hover:text-[color:var(--color-primary)]"
+					>
+						Settings
+					</a>
 				</li>
 			</ul>
 		</nav>
 
-		<div class="mr-26 ml-6 flex items-center gap-4 whitespace-nowrap">
-			<!-- <button onclick={logout} class=" cursor-pointer px-2" aria-label="Logout">
-				<img src={logoutButton} alt="Logout" class="inline-block h-7 w-7" />
+		<div class="mr-2 gap-2">
+			<div class="relative mr-10 ml-12 h-[1rem] w-[1rem] translate-y-[-4px]">
+				<ThemeToggle />
+			</div>
+			<!-- <button
+				onclick={toggleLang}
+				class="translate-y-[-4px] cursor-pointer border-none bg-transparent text-2xl leading-none"
+				aria-label="Toggle Language"
+			>
+				{currentLang}
 			</button> -->
 		</div>
 	</header>
