@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { userThemePreference } from '$lib/stores/theme.svelte';
-	import type { ThemeName } from '$lib/Themes';
+	import { applyTheme, type ThemeName } from '$lib/Themes';
 	import { onMount } from 'svelte';
 
 	let current: ThemeName = 'dark';
@@ -47,6 +47,7 @@
 				isAnimating = false;
 				current = isCurrentlyLight ? 'dark' : 'light';
 				document.documentElement.setAttribute('data-theme', current);
+				applyTheme(current as ThemeName)
 				userThemePreference.theme = current;
 			}
 		}, 50);
