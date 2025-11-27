@@ -1,0 +1,51 @@
+{
+    "compId": "root-wrapper",
+    "component": "TopLevelComponent",
+    "options": {
+        "component": {
+            "compId": "root",
+            "component": "WizardPanel",
+            "options": {
+                "components": [
+                    {
+                        "compId": "editor-settings-wrapper",
+                        "component" : "TopLevelComponent",
+                        "options": {
+                            "component":{
+                                "compId": "editor-settings",
+                                "component": "EditorSettings",
+                                "options": {}
+                            },
+                            "meta": {
+                                "label": {
+                                    "commonName": "editor",
+                                    "labelFor": "editor-settings-wrapper",
+                                    "icon": {
+                                        "component": "TerminalIconSvg",
+                                        "options": {}
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                ],
+                "side": 3,
+                "control": {
+                    "compId": "control-panel",
+                    "component": "SettingsControlPanel",
+                    "options": {}
+                },
+                "groups": [
+                    {
+                        "groupId" : "group1",
+                        "label": {
+                            "commonName": "Editor text"
+                        },
+                        "groupMembers": ["editor-settings-wrapper"]
+                    }
+                ]
+            }       
+        }
+    }   
+}

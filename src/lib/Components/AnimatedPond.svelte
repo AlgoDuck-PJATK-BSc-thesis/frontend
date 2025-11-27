@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { DuckDto } from "../../routes/Shop/Dtos";
 	import { userThemePreference } from "$lib/stores/theme.svelte";
 
-  let { userDucks }: { userDucks: DuckDto[] } = $props();
+  let { userDucks }: { userDucks: {id: string}[] } = $props();
 
   interface rgba {
     r: number,
@@ -13,9 +12,9 @@
   }
 
   const shoreColor: rgba = {
-    r: 34,
-    g: 177,
-    b: 76,
+    r: 0,
+    g: 0,
+    b: 0,
     a: 255,
   }
   
@@ -32,6 +31,7 @@
 
 
   let canvas: HTMLCanvasElement | null = $state(null);
+  let workCanvas: HTMLCanvasElement | null = $state(null);
 
   let canvasComputedStyle: CSSStyleDeclaration | null = $derived.by(()=>{
     if (!canvas) return null;
@@ -39,8 +39,10 @@
   });
 
   let ctx: CanvasRenderingContext2D | null;
+  let workCtx: CanvasRenderingContext2D | null;
 
   let imageIsLoaded: boolean = $state(false);
+  let workCanvasPixelData: ImageData | null = null;
 
   const colorBatchSampleSize: number = 3;
   const colorSampleOffset: number = (colorBatchSampleSize - 1) / 2;
@@ -50,13 +52,14 @@
   const duckCanvases: Array<HTMLCanvasElement> = $state([]);
   const duckPositionalDataArr: Array<duckPositionalData> = $state([]);
 
-  const numOfRays: number = 72;
+  const numOfRays: number = 16;
   const rayAngle: number = (2 * Math.PI) / numOfRays;
   const forwardMovementBiasStrength: number = 0.1;
   const duckVel: number = 0.6;
 
   const flip: boolean = false;
 
+  const RAYCAST_INTERVAL: number = 5; 
 
   const cloudfrontDistributionDomainName: string = "d3018wbyyxg1xc.cloudfront.net";
 
@@ -67,29 +70,50 @@
   let raf: number;
 
   let pondPath: string = $derived(`/src/lib/images/ponds/${userThemePreference.theme}Pond0.png`);
+  let workPondPath: string = $derived(`/src/lib/images/ponds/work-pond.png`);
 
   $inspect(pondPath);
 
   $effect(()=>{ // gruesome
     pondPath = pondPath;
+    workPondPath = workPondPath;
     loadPond();
+    console.log("running effect");
   });
 
 
   const loadPond = () : void => {
-    if (!ctx || !canvas) return;
+    if (!ctx || !canvas || !workCtx || !workCanvas) return;
+    
     const img: HTMLImageElement = new Image();
-    img.src = pondPath;
+    const workImg: HTMLImageElement = new Image();
+    
+    let visualLoaded = false;
+    let workLoaded = false;
+
+    const containerWidth = canvas!.parentElement?.clientWidth || canvas!.clientWidth;
+    const containerHeight = canvas!.parentElement?.clientHeight || canvas!.clientHeight;
+
+    canvas!.width = containerWidth;
+    canvas!.height = containerHeight;
+    workCanvas!.width = containerWidth;
+    workCanvas!.height = containerHeight;
+
     img.onload = () => {
-      const containerWidth = canvas!.parentElement?.clientWidth || canvas!.clientWidth;
-      const containerHeight = canvas!.parentElement?.clientHeight || canvas!.clientHeight;
-
-      canvas!.width = containerWidth;
-      canvas!.height = containerHeight;
-
       ctx!.drawImage(img, 0, 0, containerWidth, containerHeight);
-      imageIsLoaded = true;
+      visualLoaded = true;
+      if (workLoaded) imageIsLoaded = true;
     };
+
+    workImg.onload = () => {
+      workCtx!.drawImage(workImg, 0, 0, containerWidth, containerHeight);
+      workCanvasPixelData = workCtx!.getImageData(0, 0, containerWidth, containerHeight);
+      workLoaded = true;
+      if (visualLoaded) imageIsLoaded = true;
+    };
+
+    img.src = pondPath;
+    workImg.src = workPondPath;
   }
 
   const loadDucks = async () : Promise<void> => {
@@ -139,16 +163,27 @@
   }
 
   const samplePixel = (col: number, row: number) : Uint8ClampedArray | null => {
-    if (!ctx || !imageIsLoaded) return null;
+    if (!workCanvasPixelData || !imageIsLoaded) return null;
 
-    if (col === 0 || row === 0 || col === canvas!.width - 1 || row === canvas!.height) return null;
-    const imageData: ImageData = ctx.getImageData(col - colorSampleOffset, row - colorSampleOffset, colorBatchSampleSize, colorBatchSampleSize);
-    return imageData.data;     
+    const roundedCol = Math.floor(col);
+    const roundedRow = Math.floor(row);
+
+    if (roundedCol <= 0 || roundedRow <= 0 || 
+        roundedCol >= workCanvas!.width - 1 || 
+        roundedRow >= workCanvas!.height - 1) return null;
+    
+    const width = workCanvas!.width;
+    const pixelIndex = (roundedRow * width + roundedCol) * 4;
+    
+    return workCanvasPixelData.data.slice(pixelIndex, pixelIndex + 4);
   }
 
 
-  const doesPixelMatchColor = (batch: Uint8ClampedArray, pixelInBatchIndex: number, color: rgba): boolean => {
-    return batch[pixelInBatchIndex] === color.r && batch[pixelInBatchIndex + 1] === color.g && batch[pixelInBatchIndex +2] === color.b && batch[pixelInBatchIndex + 3] === color.a;
+  const doesPixelMatchColor = (pixel: Uint8ClampedArray, pixelInBatchIndex: number, color: rgba): boolean => {
+    return pixel[pixelInBatchIndex] === color.r && 
+           pixel[pixelInBatchIndex + 1] === color.g && 
+           pixel[pixelInBatchIndex + 2] === color.b && 
+           pixel[pixelInBatchIndex + 3] === color.a;
   }
 
   const rayMarch = (duckCanvas: HTMLCanvasElement): Array<number> => {
@@ -173,7 +208,14 @@
         const rayY = objectCenterY + Math.sin(currentAngle) * (hypot + midLength);
 
         const isOutsideCanvas = rayX < 0 || rayY < 0 || rayX >= canvasWidth || rayY >= canvasHeight;
-        const isShoreColor = !isOutsideCanvas && doesPixelMatchColor(samplePixel(rayX, rayY)!, 4, shoreColor);
+        
+        let isShoreColor = false;
+        if (!isOutsideCanvas) {
+          const pixel = samplePixel(rayX, rayY);
+          if (pixel) {
+            isShoreColor = doesPixelMatchColor(pixel, 0, shoreColor);
+          }
+        }
 
         if (isOutsideCanvas || isShoreColor) {
           maxLength = midLength; 
@@ -272,11 +314,14 @@
   const animateDucks = (): void => {
     for (let duckIndex = 0; duckIndex < userDucks.length; ++duckIndex){
       const currDuckSameDirectionFrameCount: number = duckPositionalDataArr[duckIndex].sameDirectionFrameCount;
-      if (duckPositionalDataArr[duckIndex].frameCounter == currDuckSameDirectionFrameCount){
-        const nextSameDirectionFrameCounter = Math.floor(Math.random() * 20) + 40;
-        duckPositionalDataArr[duckIndex].sameDirectionFrameCount = nextSameDirectionFrameCounter;
-        pickNewTargetDirection(duckIndex);
-        duckPositionalDataArr[duckIndex].frameCounter = 0;
+      
+      if (duckPositionalDataArr[duckIndex].frameCounter % RAYCAST_INTERVAL === 0) {
+        if (duckPositionalDataArr[duckIndex].frameCounter >= currDuckSameDirectionFrameCount){
+          const nextSameDirectionFrameCounter = Math.floor(Math.random() * 20) + 40;
+          duckPositionalDataArr[duckIndex].sameDirectionFrameCount = nextSameDirectionFrameCounter;
+          pickNewTargetDirection(duckIndex);
+          duckPositionalDataArr[duckIndex].frameCounter = 0;
+        }
       }
       
       const duckCanvas: HTMLCanvasElement = duckCanvases[duckIndex];
@@ -286,12 +331,14 @@
       const angleStep: number = normalizeAngle(angleDiff) / currDuckSameDirectionFrameCount;
       const frameDirectionAngle: number = normalizeAngle(duckPositionalDataArr[duckIndex].dirAngle + angleStep)
 
-      if (flip) {if (duckPositionalDataArr[duckIndex].newTargetAngle > Math.PI) {        
-        duckCanvas.style.transform = "scaleX(-1)";
-      }else{
-        duckCanvas.style.transform = "scaleX(1)";
+      if (flip) {
+        if (duckPositionalDataArr[duckIndex].newTargetAngle > Math.PI) {        
+          duckCanvas.style.transform = "scaleX(-1)";
+        } else {
+          duckCanvas.style.transform = "scaleX(1)";
+        }
       }
-}
+      
       const deltaX = Math.cos(frameDirectionAngle) * duckVel;
       const deltaY = Math.sin(frameDirectionAngle) * duckVel;
 
@@ -314,6 +361,7 @@
 
   onMount(()=>{
     ctx = canvas!.getContext('2d');
+    workCtx = workCanvas!.getContext('2d');
     loadPond();
     setTimeout(loadDucks, 10);
     return () => {
@@ -325,6 +373,7 @@
 
 <main class="relative w-full h-full">
   <canvas class="absolute z-10" bind:this={canvas}></canvas>
+  <canvas class="absolute z-0 hidden" bind:this={workCanvas}></canvas>
   {#each userDucks as duck, i}
 
     <canvas class="absolute z-20 rounded-100 overflow-hidden" bind:this={duckCanvases[i]}></canvas>

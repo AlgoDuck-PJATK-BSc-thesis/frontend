@@ -1,5 +1,5 @@
 
 export interface svgArg{
-    color: string;
+    color?: string;
     class?: string
 }
