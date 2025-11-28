@@ -3,19 +3,45 @@
 	import DefaultLayout from '$lib/Components/ComponentTrees/IdeComponentTree/default-layout.json'
 	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 
-	let { components = $bindable() }: { components: Record<string, object> } = $props();
+	let { components = $bindable() }: { components: Record<string, DefaultLayoutTerminalComponentArgs> } = $props();
 	
 	let isExecutingCode: boolean = $state(false);
 	let isSettingsPanelShown = $state(false);
 
-	const executeCode = (): void => {
+	const executeCode = async (): Promise<void> => {
 		isExecutingCode = true;
+		console.log(components['code-editor']);
 	}
 
-	const submitCode = (): void => {
-		isExecutingCode = true;
+	type SubmissionResult = {
+		stdOutput: string, 
+		stdErr: string,
+		executionTime: number,
+		testResults: TestResult[]
 	}
+
+	type TestResult = {
+		testId: string, 
+		isTestPassed: boolean
+	}
+
+	const submitCode = async (): Promise<void> => {
+		isExecutingCode = true;
+		let res = await FetchFromApi<SubmissionResult>("executor/Submit", {
+			method: "POST",
+			body: JSON.stringify({
+				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).templateContents),
+				exerciseId: (components['problem-info'] as InfoPanelComponentArgs).problemId
+			})
+		});
+		(components['terminal-comp'] as TerminalComponentArgs).terminalContents = res.body.stdOutput;
+
+		isExecutingCode = false;
+	}
+	
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">

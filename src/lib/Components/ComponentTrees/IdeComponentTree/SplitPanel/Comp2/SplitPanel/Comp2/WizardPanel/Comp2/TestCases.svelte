@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
+	import type { TestCase } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
-	import type { TestCaseComponentArgs } from '$lib/types/ComponentLoadArgs';
 	import type { FileTreeRootType } from '$lib/types/FileTreeTypes';
-	import type { TestCase } from '$lib/types/Problem';
 	import TestCaseFileTreeRoot from '../../../../../../../../../../routes/(authenticated)/(user)/categories/problems/solve/IdeComponents/HelperComponents/TestCaseFileTreeRoot.svelte';
 	
 	let { options = $bindable() }: { options: TestCaseComponentArgs } = $props();

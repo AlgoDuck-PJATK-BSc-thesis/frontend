@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggle.svelte';
+	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
+	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 
 	let currentLang = '🇺🇸';
 	function toggleLang() {
@@ -65,16 +67,22 @@
 		</ul>
 	</nav>
 
-	<div class="flex items-center gap-4">
-		<div class="relative mr-18 ml-16 h-[1rem] w-[1rem] translate-y-[-3px]">
-			<ThemeToggle />
+	<div class="flex h-full flex-row justify-center gap-3 items-center">
+			<div class="w-15">
+				<ThemeToggle />
+			</div>
+			<div class="w-30 h-12">
+				<DropDownSelect options={{
+					options: SupportedLangs.map(l => {
+						return {
+							key: l,
+							value: l
+						}
+					}),
+					onSelectCallback: (selected: Lang) => {
+						userThemePreference.lang = selected
+					}
+				}}/>
+			</div>
 		</div>
-		<button
-			onclick={toggleLang}
-			class="cursor-pointer border-none bg-transparent text-2xl leading-none"
-			aria-label="Toggle Language"
-		>
-			{currentLang}
-		</button>
-	</div>
 </header>

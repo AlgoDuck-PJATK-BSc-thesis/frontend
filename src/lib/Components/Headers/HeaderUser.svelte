@@ -2,17 +2,11 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggle.svelte';
 	import coin from '$lib/images/headers/Coin.png';
+	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
+	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 
 	let coins = 5000;
 	let level = 5;
-
-	let currentLanguage = 'en';
-	let currentLang = '🇺🇸';
-
-	function toggleLang() {
-		currentLanguage = currentLanguage === 'en' ? 'pl' : 'en';
-		currentLang = currentLanguage === 'en' ? '🇺🇸' : '🇵🇱';
-	}
 
 	const logout = () => {
 		alert('Logging out...');
@@ -20,9 +14,9 @@
 	};
 </script>
 
-<div class="w-full overflow-x-auto">
+<div class="w-full sticky top-0 overflow-x-auto">
 	<header
-		class="font-body sticky top-0 z-[100] flex h-16 min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
+		class="font-body flex h-16 w-full items-center justify-between border-b-4 border-[color:var(--color-accent-1)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] text-[color:var(--color-text)] md:px-8"
 	>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
@@ -127,17 +121,23 @@
 			</ul>
 		</nav>
 
-		<div class="mr-2 gap-2">
-			<div class="relative mr-10 ml-12 h-[1rem] w-[1rem] translate-y-[-4px]">
+		<div class="flex h-full flex-row justify-center gap-3 items-center">
+			<div class="w-15">
 				<ThemeToggle />
 			</div>
-			<!-- <button
-				onclick={toggleLang}
-				class="translate-y-[-4px] cursor-pointer border-none bg-transparent text-2xl leading-none"
-				aria-label="Toggle Language"
-			>
-				{currentLang}
-			</button> -->
+			<div class="w-24 h-8">
+				<DropDownSelect options={{
+					options: SupportedLangs.map(l => {
+						return {
+							key: l,
+							value: l
+						}
+					}),
+					onSelectCallback: (selected: Lang) => {
+						userThemePreference.lang = selected
+					}
+				}}/>
+			</div>
 		</div>
 	</header>
 </div>

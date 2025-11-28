@@ -72,8 +72,6 @@
   let pondPath: string = $derived(`/src/lib/images/ponds/${userThemePreference.theme}Pond0.png`);
   let workPondPath: string = $derived(`/src/lib/images/ponds/work-pond.png`);
 
-  $inspect(pondPath);
-
   $effect(()=>{ // gruesome
     pondPath = pondPath;
     workPondPath = workPondPath;

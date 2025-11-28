@@ -13,8 +13,6 @@
 
 	let formData: SignUpDto = $state({} as SignUpDto)
 
-	$inspect(formData);
-
 	const register = async () => {
 		console.log(formData);
 		let signup: StandardResponseDto = await FetchFromApi("Auth/register", {

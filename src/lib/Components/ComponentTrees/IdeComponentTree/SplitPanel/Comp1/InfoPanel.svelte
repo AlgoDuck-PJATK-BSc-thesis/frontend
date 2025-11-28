@@ -1,21 +1,21 @@
 <script lang="ts">
 	import MarkdownRenderer from '$lib/Components/Misc/MarkdownRenderer.svelte';
-	import type { InfoPanelComponentArgs } from '$lib/types/ComponentLoadArgs';
+	import type { InfoPanelComponentArgs } from '../../component-args';
 
 	let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
 </script>
 
 <main class="w-full h-full flex flex-col justify-start bg-ide-card overflow-y-scroll overflow-x-hidden min-w-xl px-6 rounded-xl">
 	<div class="h-[10%] flex flex-col-reverse text-4xl p-5 font-bold">
-		<h2 class="select-none text-text-secondary">{options.problem.title}</h2>
+		<h2 class="select-none text-text-secondary">{options.title}</h2>
 	</div>
 	<div class="flex justify-start flex-wrap overflow-clip p-3">
-		{@render TagPill(options.problem.title)}
-		{#each options.problem.tags as tag}
-			{@render TagPill(tag)}
+		{@render TagPill(options.title)}
+		{#each options.tags as tag}
+			{@render TagPill(tag.name)}
 		{/each}
 	</div>
-	<MarkdownRenderer markdown={options.problem.description} />
+	<MarkdownRenderer markdown={options.description} />
 </main>
 
 {#snippet TagPill(tagContents: string)}

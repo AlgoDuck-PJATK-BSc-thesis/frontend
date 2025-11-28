@@ -1,17 +1,17 @@
-import type { CategoriesPageLoad } from '$lib/types/CategoriesPageLoad';
-import type { CategoryDto } from "$lib/types/CategoryDto";
+import { FetchFromApi } from '$lib/api/apiCall';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params }) : Promise<CategoriesPageLoad> => {    
-    let fetched: Array<CategoryDto> = []; 
+export const load: PageLoad = async ({ params, url, fetch }) : Promise<{categories: CategoryDto[]}> => {    
+    let resp = await FetchFromApi<CategoryDto[]>("ProblemCategories", {
+        method: "GET"
+    }, fetch);
 
-    for (let i = 0; i < 10; i++){
-        fetched.push({
-            id: `${crypto.randomUUID()}`,
-            name: "category",
-            description: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quisquam velit voluptate, aliquid cupiditate iste id recusandae. Inventore soluta, distinctio modi unde laborum aspernatur debitis, labore, dolor ut eligendi temporibus laudantium!"
-        })
+    return {
+        categories: resp.body
     };
+}
 
-    return { LoadedCategories: fetched };
+export type CategoryDto = {
+    id: string, /* TODO: I was under the impression that there was an UUID type??? */
+    categoryName: string
 }

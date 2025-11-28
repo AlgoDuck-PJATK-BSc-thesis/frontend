@@ -27,14 +27,9 @@
         }
     }
 
-    const redirectToProblem = () : void => {
-        goto(`problems/solve/?problem=${data.problem.name}&`);
-    }
-
-
 </script>
 
-<button class="w-full h-15 flex justify-start relative mb-1" onclick="{redirectToProblem}" onmouseenter="{handleMouseEnter}" onmouseleave="{handleMouseLeave}">
+<button class="w-full h-15 flex justify-start relative mb-1" onclick="{data.onclicl}" onmouseenter="{handleMouseEnter}" onmouseleave="{handleMouseLeave}">
       <div class="fixed left-[-100%] z-0 w-[300%] h-15 {isHovered? 'bg-red-950/50 shadow-[0_0_5px_5px_rgba(255,0,0,0.7)] shadow-red-950/75' : 'invisible'}"></div>
 
     <div class="h-full z-[1000] w-[20%] pl-4 flex justify-start items-center text-center text-4xl">

@@ -1,101 +1,30 @@
 <script lang="ts">
 	import { userThemePreference } from '$lib/stores/theme.svelte';
 	import { applyTheme, type ThemeName } from '$lib/Themes';
-	import { onMount } from 'svelte';
 
-	let current: ThemeName = 'dark';
-	let isAnimating = false;
-	let frame = 0;
-	let interval: number;
+	let interval: number | null;
+	const totalFrames: number = 11;
 
-	const totalFrames = 11;
+	let frame: number = $state(1);
 
-	const allFrames = Array.from(
-		{ length: totalFrames },
-		// (_, i) => `/ThemeSwitch1/yellow ver MERGED - ${i + 1}.png`
-		(_, i) => `/ThemeSwitch2/Blue ver MERGED - ${i + 1}.png`
-	);
-	const lightToDarkFrames = [...allFrames].reverse();
-	const darkToLightFrames = [...allFrames];
-
-	let frameList: string[] = darkToLightFrames;
-
-	onMount(() => {
-		if (typeof window !== 'undefined') {
-			if (!document.documentElement.getAttribute('data-theme')) {
-				document.documentElement.setAttribute('data-theme', 'dark');
-			}
-			current = document.documentElement.getAttribute('data-theme') as ThemeName;
-		}
-	});
-
-	function toggleTheme() {
-		if (isAnimating) return;
-
-		const isCurrentlyLight = current === 'light';
-
-		frameList = isCurrentlyLight ? lightToDarkFrames : darkToLightFrames;
-
-		isAnimating = true;
-		frame = 0;
-
+	const toggleTheme = (): void =>  {
+		if (interval) return;
+		
+		let toggleTo: ThemeName = userThemePreference.theme === 'light' ? 'dark' : 'light'
 		interval = setInterval(() => {
-			frame += 1;
-
-			if (frame >= totalFrames) {
-				clearInterval(interval);
-				isAnimating = false;
-				current = isCurrentlyLight ? 'dark' : 'light';
-				document.documentElement.setAttribute('data-theme', current);
-				applyTheme(current as ThemeName)
-				userThemePreference.theme = current;
+			frame = userThemePreference.theme === 'light' ? Math.max(1, frame - 1) : Math.min(frame + 1, totalFrames);
+			if (frame == 1 || frame == totalFrames){
+				clearInterval(interval!);
+				interval = null;
+				userThemePreference.theme = toggleTo;
+				applyTheme(userThemePreference.theme)
 			}
-		}, 50);
+		}, 30);
 	}
 </script>
 
-<button
-	onclick={toggleTheme}
-	aria-label="Toggle theme"
-	class="theme-toggle-button -top-[7px] cursor-pointer border-none bg-transparent"
->
-	{#if isAnimating}
-		<img class="frame-img" src={frameList[frame]} alt="theme animation" />
-	{:else}
-		<!-- <img
-			class="frame-img"
-			src={current === 'light'
-				? '/ThemeSwitch1/yellow ver MERGED - 11.png'
-				: '/ThemeSwitch1/yellow ver MERGED - 1.png'}
-			alt={current + ' theme'}
-		/> -->
-		<img
-			class="frame-img"
-			src={current === 'light'
-				? '/ThemeSwitch2/Blue ver MERGED - 11.png'
-				: '/ThemeSwitch2/Blue ver MERGED - 1.png'}
-			alt={current + ' theme'}
-		/>
-	{/if}
+<button onclick={toggleTheme} aria-label="Toggle theme" class="w-full flex items-center">
+	<img src={`/ThemeSwitch2/Blue ver MERGED - ${frame}.png`}
+		alt="{userThemePreference.theme} - theme toggle"
+	/>
 </button>
-
-<style>
-	.theme-toggle-button {
-		width: 4.5rem;
-		height: 2.5rem;
-		position: relative;
-		overflow: hidden;
-	}
-
-	.frame-img {
-		width: 4.5rem;
-		height: 2.5rem;
-		object-fit: contain;
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		max-width: none;
-		max-height: none;
-	}
-</style>

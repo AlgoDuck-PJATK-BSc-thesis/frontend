@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { TerminalComponentArgs } from "$lib/types/ComponentLoadArgs";
+	import type { TerminalComponentArgs } from "$lib/Components/ComponentTrees/IdeComponentTree/component-args";
+
 
 	let { options = $bindable() }: { options: TerminalComponentArgs } = $props();
 

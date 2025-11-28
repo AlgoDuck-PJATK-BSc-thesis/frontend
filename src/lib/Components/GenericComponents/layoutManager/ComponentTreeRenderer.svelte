@@ -16,7 +16,7 @@
     const innerComponentConfig: ComponentConfig<any> = layout.options.component;
 
     if (componentConfigurations[componentId]) {
-      Object.assign(innerComponentConfig.options, componentConfigurations[componentId]);
+      innerComponentConfig.options = componentConfigurations[componentId];
     }
 
     if (innerComponentType === 'SplitPanel') {

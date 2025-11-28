@@ -1,12 +1,10 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  
   import Island from '$lib/images/Categories/Wysepka2.png'
-	import type { CategoriesPageLoad } from '$lib/types/CategoriesPageLoad';
-  
 	import { onMount } from 'svelte';
+	import type { CategoryDto } from './proxy+page';
 
-  let { data } : { data: CategoriesPageLoad } = $props();
+  let { data } : { data: { categories: CategoryDto[] } } = $props();
 
   let scrollableFrame : HTMLElement;
   
@@ -22,8 +20,6 @@
     return getComputedStyle(main);
   });
 
-  const scrollableFrameSpaceXInPercentPerIsland: number = 30;
-  
   let categoryDivs: Array<HTMLElement> = $state([]);
   
   let lastXCoords : number;
@@ -48,7 +44,6 @@
     if (newLeft < 0 && Math.abs(newLeft) < maxLeft){
       scrollableFrame.style.left = `${newLeft}px`
     }
-
   }
   
   const animateDragged = (currentTime : number) => {
@@ -202,7 +197,7 @@
 <svelte:window on:resize={calculateIslandCoordinates} bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 
-<main bind:this={main} class="w-full h-[calc(100vh-4rem)] relative overflow-hidden">
+<main bind:this={main} class="w-full h-full relative overflow-hidden">
   <div bind:this={scrollableFrame}  role="button" tabindex="0" class="w-[300%] hover:cursor-grab active:cursor-grabbing h-full absolute z-10 bg-blue-900 bg-repeat-x bg-no-repeat-y bg-[length:auto_100%]"
     onmousedown={handleMouseDown}
     onmouseup={handleMouseUp}
@@ -210,10 +205,10 @@
 
   <!-- TODO this hypothetically presents an interesting opportunity to use tatacks infinite query. More so for presentation reasons rather than an actual practical application but still may be fun -->
     <div class="relative w-full h-full">
-      {#each data.LoadedCategories as loadedCategory, i}
+      {#each data.categories as loadedCategory, i}
         <button bind:this={categoryDivs[i]} class="w-100 h-100 absolute rounded-full flex hover:cursor-pointer z50 justify-center items-center bg-transparent select-none" 
-        onmousedown="{() => {clicked = true}}"
-        onmouseup="{() => {if (clicked) selectCategory(loadedCategory.name)}}">
+          onmousedown="{() => {clicked = true}}"
+          onmouseup="{() => {if (clicked) selectCategory(loadedCategory.categoryName)}}">
           <img class="w-full" src="{Island}" alt="category thematic island" draggable="false"/>
         </button>
       {/each}

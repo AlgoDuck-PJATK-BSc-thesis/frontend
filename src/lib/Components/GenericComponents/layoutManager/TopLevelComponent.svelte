@@ -11,12 +11,6 @@
     options?.component ? ComponentRegistry.get(registryProfileAtInitialRender)!.get(options.component.component) as Component<{ options: T }> : undefined
   );
 
-  if (options.component.compId === "root"){
-    $inspect(options)
-
-  }
-  // console.log(options.component.compId);
-
   let innerOptions: T | undefined = $derived(options?.component?.options);
 </script>
 

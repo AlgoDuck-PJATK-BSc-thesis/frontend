@@ -4,5 +4,5 @@ export interface ProblemButtonArgType{
     action: string,
     command: string,
     description: string,
-    problem: ProblemShowcase,
+    onclicl: (() => void)
 }

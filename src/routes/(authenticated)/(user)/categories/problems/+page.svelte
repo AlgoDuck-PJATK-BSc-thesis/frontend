@@ -6,11 +6,11 @@
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
   
-	import type { Category } from "$lib/types/Category";
 	import NonProblemButton from "./NonProblemButton.svelte";
 	import ProblemButton from "./ProblemButton.svelte";
+	import type { ProblemListPageLoadArg } from "./proxy+page";
 
-  let { data } : { data: Category } = $props();
+  let { data } : { data: ProblemListPageLoadArg } = $props();
 
   let currHour: number = $state(0);
   let currMinute: number = $state(0);
@@ -57,17 +57,17 @@
 
         <div class="flex flex-col justify-start py-8 overflow-scroll">
           {#each data.problems as problem}
-            {#each [...Array(15).keys()] as i}
-              <ProblemButton data={{action: problem.id.substring(0, 8), command: problem.name.replaceAll(" ", "-"), description: problem.synopsis.toUpperCase(), problem: problem}}/>         
-            {/each}
+            <ProblemButton data={{action: problem.title.replaceAll(" ", "-"), command: problem.title.replaceAll(" ", "-"), description: problem.title.replaceAll(" ", "-"), onclicl: () => {
+              goto(`problems/solve/?problem=${problem.problemId}`)
+            }}}/>         
           {/each}        
         </div>
       </div>
     </div>
     
-    <div class="w-full h-[6%] border-t-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)] shadow-white-500/50 flex justify-start items-center p-8 text-4xl">
+    <!-- <div class="w-full h-[6%] border-t-4 shadow-[0_0_5px_3px_rgba(255,255,255,0.5)] shadow-white-500/50 flex justify-start items-center p-8 text-4xl">
       {`C:\\{USER_NAME}\\${data.name}`}
-    </div>
+    </div> -->
   </div>
   <div class="w-80 h-10 absolute bottom-[1.25%] right-[20%] bg-ide-bg flex justify-center items-center text-center text-3xl">
     <span>{`beet-cat-v_0.1.271`}</span>

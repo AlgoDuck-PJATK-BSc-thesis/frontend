@@ -15,7 +15,7 @@ export const FetchFromApi = async <TResult>(
     url.search = searchParams.toString();
   }
 
-  const csrfToken = getCookie('X-CSRF-Token');
+  const csrfToken = getCookie('csrf_token');
   
   let query = await usedFetcher(url.toString(), {
     credentials: 'include',
@@ -32,7 +32,7 @@ export const FetchFromApi = async <TResult>(
     if (query.status === 401){
       if (query.headers.get("X-Token-Expired") === "true"){
         if (!replay){
-          let res = await FetchFromApi("Auth/refresh", {
+          let res = await FetchFromApi("auth/refresh", {
             method: "POST",
           }, fetcher, undefined, true);
           console.log(res);
@@ -66,5 +66,5 @@ export type QueryResult = 'Success' | 'Warning' | 'Error';
 export type StandardResponseDto<T = {}> = {
   status: QueryResult;
   message: string | null;
-  content: T;
+  body: T;
 };
