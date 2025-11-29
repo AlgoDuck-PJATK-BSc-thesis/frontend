@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { DuckDto } from '../../routes/Shop/Dtos';
+	import type { DuckDto } from '../../routes/(authenticated)/(user)/Shop/Dtos';
 	import { browser } from '$app/environment';
 
 	let { selectedDuck, mode }: { selectedDuck: DuckDto; mode: 'home' | 'solve' } = $props();
