@@ -1,6 +1,6 @@
 <script lang="ts">
 	import AnimatedPond from '$lib/Components/AnimatedPond.svelte';
-	import HelperDuck from '$lib/Components/LayoutComponents/HelperDuck.svelte';
+	import HelperDuck from '$lib/Components/HelperDuck.svelte';
 
 	let { data } = $props();
 
@@ -9,16 +9,18 @@
 	if (typeof window !== 'undefined') {
 		reduceMotion = document.documentElement.dataset.reduceMotion === 'true';
 	}
-
 </script>
 
 <svelte:head>
 	<title>Home - AlgoDuck</title>
 </svelte:head>
 
-<main class="w-full h-full flex justify-center items-center overflow-hidden">
-	<div class="w-[75%] h-[90%]">
-		<HelperDuck selectedDuck={data.ducks[Math.floor(Math.random() * data.ducks.length)]} mode="solve"/>
-		<AnimatedPond userDucks={data.ducks}/>
+<main class="flex h-full w-full items-center justify-center overflow-hidden">
+	<div class="h-[90%] w-[75%]">
+		<HelperDuck
+			selectedDuck={data.ducks[Math.floor(Math.random() * data.ducks.length)]}
+			mode="solve"
+		/>
+		<AnimatedPond userDucks={data.ducks} />
 	</div>
 </main>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import RewardModal from './RewardModal.svelte';
+	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
 
 	type Mode = 'day' | 'custom';
 	type Stage = 'menu' | 'diagram';
@@ -317,7 +318,7 @@
 		<header class="mx-auto w-full max-w-3xl text-center">
 			{#if stage === 'menu'}
 				<h1
-					class="ocr-outline ocr-title isolate mt-6 mb-8 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
+					class="ocr-outline ocr-title isolate mt-6 mb-8 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 				>
 					Study Timer
 				</h1>

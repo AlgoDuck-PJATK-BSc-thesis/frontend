@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import PixelFrameChat from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameChat.svelte';
+	import PixelFrameChat from '$lib/Components/PixelFrames/PixelFrameChat.svelte';
+	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import { highlightJava } from '../../../../../Utils/highlight';
 
@@ -143,8 +143,8 @@
 </script>
 
 <div class="relative mt-[3rem] mr-2 ml-[3rem] w-fit">
-	<PixelFrame
-		className="h-[74vh] w-[62vw] ml-1 mt-8 mr-6 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+	<PixelFrameSimple
+		className="h-[74vh] w-[62vw] ml-1 mt-1 mr-6 z-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
 		<div class="flex h-full w-full flex-col">
 			<div
@@ -209,7 +209,7 @@
 				</div>
 			</div>
 		</div>
-	</PixelFrame>
+	</PixelFrameSimple>
 </div>
 
 <style>

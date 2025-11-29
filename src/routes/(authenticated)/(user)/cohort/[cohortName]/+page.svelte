@@ -5,7 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 
@@ -164,7 +163,7 @@
 					></button>
 
 					<div class="absolute top-full right-0 z-999 mt-1 translate-x-[1.5rem]">
-						<PixelFrame
+						<PixelFrameSimple
 							className="w-48 bg-[color:var(--color-tile)] shadow-lg border-[color:var(--color-accent-2)] p-2"
 						>
 							<button
@@ -186,7 +185,7 @@
 							>
 								Leave Cohort
 							</button>
-						</PixelFrame>
+						</PixelFrameSimple>
 					</div>
 				{/if}
 			</div>
@@ -203,10 +202,10 @@
 		{/if}
 	</div>
 
-	<PixelFrame
+	<PixelFrameSimple
 		className="h-[74vh] mt-[3rem] w-[25vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
-		<div class="absolute -top-[5.3rem] left-[10%] z-10 -translate-x-1/3">
+		<div class="absolute -top-[5.6rem] left-[10%] z-10 -translate-x-10">
 			<div class="flex items-center gap-1">
 				<div class="relative ml-2 translate-y-[-12px]">
 					<div
@@ -227,7 +226,7 @@
 		</div>
 
 		<h1
-			class="ocr-outline ocr-title isolate m-4 mx-auto mt-1 mb-0 ml-3 block max-w-[20rem] overflow-x-auto p-4 text-left [font-family:var(--font-ocra)] text-5xl leading-[1.5] font-bold tracking-wide whitespace-nowrap text-[var(--color-landingpage-title)]"
+			class="ocr-outline ocr-title isolate m-4 mx-auto mt-1 mb-0 ml-3 block max-w-[20rem] overflow-x-auto p-4 text-left [font-family:var(--font-ariw9500)] text-5xl leading-[1.5] font-bold tracking-widest whitespace-nowrap text-[var(--color-landingpage-title)]"
 		>
 			Activity
 		</h1>
@@ -259,5 +258,5 @@
 				</div>
 			{/each}
 		</div>
-	</PixelFrame>
+	</PixelFrameSimple>
 </div>

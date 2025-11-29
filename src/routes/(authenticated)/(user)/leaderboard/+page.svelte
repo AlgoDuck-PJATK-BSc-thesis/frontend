@@ -1,6 +1,7 @@
 <script lang="ts">
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrame from '$lib/Components/PixelFrames/PixelFrame.svelte';
+	import PixelFrameMini from '$lib/Components/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
 
 	import gold from '$lib/images/leaderboard/Gold.png';
 	import silver from '$lib/images/leaderboard/Silver.png';
@@ -55,7 +56,7 @@
 	class="font-body flex max-h-[calc(100vh-4rem)] flex-col items-center gap-6 overflow-y-auto pt-12 pr-8 pb-0 pl-8"
 >
 	<h1
-		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
+		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 	>
 		Leaderboard
 	</h1>
@@ -100,7 +101,7 @@
 		</div>
 	</div>
 
-	<PixelFrame
+	<PixelFrameSimple
 		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
 	>
 		{#each sortedUsers as user, i}
@@ -136,7 +137,7 @@
 				</PixelFrameMini>
 			</div>
 		{/each}
-	</PixelFrame>
+	</PixelFrameSimple>
 
 	<!-- <div class="mt-4 flex items-center gap-4 text-sm text-[color:var(--color-text)]">
 		<button

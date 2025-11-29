@@ -2,45 +2,50 @@
 	import { goto } from '$app/navigation';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import landingPageBackground from '$lib/images/LandingPage/Landing_page.gif';
+	import LandingPage from '$lib/Components/LandingPage.svelte';
 
 	type SignUpDto = {
-		username: String,
-		email: String,
-		password: String
-	}
+		username: String;
+		email: String;
+		password: String;
+	};
 
-	let formData: SignUpDto = $state({} as SignUpDto)
+	let formData: SignUpDto = $state({} as SignUpDto);
 
 	const register = async () => {
 		console.log(formData);
-		let signup: StandardResponseDto = await FetchFromApi("Auth/register", {
-			method: "POST",
-			body: JSON.stringify(formData)
-		}, fetch);
-		
+		let signup: StandardResponseDto = await FetchFromApi(
+			'Auth/register',
+			{
+				method: 'POST',
+				body: JSON.stringify(formData)
+			},
+			fetch
+		);
+
 		console.log(signup);
-		if (signup.status !== 'Success'){
-			console.log('returning')
+		if (signup.status !== 'Success') {
+			console.log('returning');
 			return;
 		}
 
-		let signin = await FetchFromApi("Auth/login", {
-			method: "POST",
-			body: JSON.stringify({
-				username: formData.username,
-				password: formData.password
-			})
-		}, fetch);
+		let signin = await FetchFromApi(
+			'Auth/login',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					username: formData.username,
+					password: formData.password
+				})
+			},
+			fetch
+		);
 		console.log(signin);
 
-		if (signin.status === 'Success'){
+		if (signin.status === 'Success') {
 			goto('/home');
 		}
-	
-	}
-
+	};
 </script>
 
 <svelte:head>
@@ -48,20 +53,19 @@
 </svelte:head>
 
 <section class="mx-auto mt-16 max-w-100 text-center">
-	<img
-		src={landingPageBackground}
-		alt="landing page background"
-		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-	/>
+	<LandingPage />
+
 	<h1
-		class="ocr-outline ocr-title isolate mt-2 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
+		class="ocr-outline ocr-title isolate mt-2 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 	>
 		Sign Up
 	</h1>
 
-	<PixelFrame className="flex w-full flex-col items-center bg-black/60 px-14 pt-10 pb-14">
-		<form method="POST" class="mt-2 flex w-70 flex-col gap-2">
-			<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
+	<div
+		class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
+	>
+		<form method="POST" class="mt-0 flex w-70 flex-col gap-2">
+			<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
 				<span>Username</span>
 				<input
 					type="text"
@@ -72,7 +76,7 @@
 				/>
 			</label>
 
-			<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
+			<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
 				<span>Email</span>
 				<input
 					type="email"
@@ -83,7 +87,7 @@
 				/>
 			</label>
 
-			<label class="flex flex-col text-left text-sm text-[color:var(--color-text)]">
+			<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
 				<span>Password</span>
 				<input
 					type="password"
@@ -96,13 +100,16 @@
 		</form>
 
 		<p class="mt-6 text-center leading-snug">
-			<a href="/login" class="inline-flex hover:text-[color:var(--color-accent-2)]">
+			<a
+				href="/login"
+				class="inline-flex text-[color:var(--color-input-text)] hover:text-[color:var(--color-header-guest)]"
+			>
 				<span>Already have an account?</span>
 				<span class="ml-1 font-semibold">Log In</span>
 			</a>
 		</p>
 
-		<div class="mt-8 mb-2 flex justify-center">
+		<div class="mt-6 mb-0 flex justify-center">
 			<Button
 				size="medium"
 				label="→"
@@ -144,5 +151,5 @@
 				</a>
 			</div>
 		</div>
-	</PixelFrame>
+	</div>
 </section>

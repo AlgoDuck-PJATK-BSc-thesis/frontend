@@ -1,25 +1,26 @@
 <script lang="ts">
 	import { FetchFromApi } from '$lib/api/apiCall';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import landingPageBackground from '$lib/images/LandingPage/Landing_page.gif';
+	import LandingPage from '$lib/Components/LandingPage.svelte';
 
 	type SignInDto = {
-		username: String,
-		password: String
-	}
+		username: String;
+		password: String;
+	};
 
-	let formData: SignInDto = $state({} as SignInDto)
+	let formData: SignInDto = $state({} as SignInDto);
 
 	const login = async () => {
-		let res = await FetchFromApi("Auth/login", {
-			method: "POST",
-			body: JSON.stringify(formData)
-		}, fetch);
+		let res = await FetchFromApi(
+			'Auth/login',
+			{
+				method: 'POST',
+				body: JSON.stringify(formData)
+			},
+			fetch
+		);
 		console.log(res);
-	}
-
-
+	};
 </script>
 
 <svelte:head>
@@ -27,21 +28,20 @@
 </svelte:head>
 
 <section class="mx-auto mt-16 max-w-100 text-center">
-	<img
-		src={landingPageBackground}
-		alt="landing page background"
-		class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-	/>
+	<LandingPage />
+
 	<h1
-		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ocra)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
+		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
 	>
 		Log In
 	</h1>
 
-	<PixelFrame className="flex w-full flex-col items-center bg-black/60 px-14 pt-10 pb-14">
+	<div
+		class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
+	>
 		<form
 			method="POST"
-			class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-text)]"
+			class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-input-text)]"
 		>
 			<label class="flex flex-col">
 				<span>Username or Email</span>
@@ -67,7 +67,10 @@
 		</form>
 
 		<p class="mt-6 text-center leading-snug">
-			<a href="/signup" class="inline-flex hover:text-[color:var(--color-accent-2)]">
+			<a
+				href="/signup"
+				class="inline-flex text-[color:var(--color-input-text)] hover:text-[color:var(--color-header-guest)]"
+			>
 				<span>Don't have an account?</span>
 				<span class="ml-1 font-semibold">Sign Up</span>
 			</a>
@@ -115,5 +118,5 @@
 				</a>
 			</div>
 		</div>
-	</PixelFrame>
+	</div>
 </section>

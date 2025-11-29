@@ -1,6 +1,7 @@
 <script lang="ts">
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrame from '$lib/Components/PixelFrames/PixelFrame.svelte';
+	import PixelFrameMini from '$lib/Components/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
 
 	import gold from '$lib/images/leaderboard/Gold.png';
 	import silver from '$lib/images/leaderboard/Silver.png';
@@ -86,7 +87,7 @@
 							</div>
 						</div>
 					</div>
-					<PixelFrame
+					<PixelFrameSimple
 						className="flex h-max w-full max-w-xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
 					>
 						{#each sortedUsers as user, i}
@@ -122,7 +123,7 @@
 								</PixelFrameMini>
 							</div>
 						{/each}
-					</PixelFrame>
+					</PixelFrameSimple>
 				</div>
 			</div>
 		</div>
