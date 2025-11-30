@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ThemeToggle from '$lib/Components/ThemeToggle.svelte';
+	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import coin from '$lib/images/headers/Coin.png';
 	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
 	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
-	import PixelFrameMini from '$lib/Components/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
 
 	let coins = 1000000;
 	let level = 5;
@@ -26,7 +26,7 @@
 		</div>
 
 		<nav class="ml-6">
-			<ul class="mr-20 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
+			<ul class="mr-4 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
 				<li>
 					<a
 						href="/home"
@@ -106,12 +106,8 @@
 			</ul>
 		</nav>
 
-		<div class="flex h-full flex-row items-center justify-center gap-3">
-			<div class="mr-2 flex items-center justify-between gap-20">
-				<div class="relative h-[1rem] w-[1rem] translate-y-[-4px]">
-					<ThemeToggle />
-				</div>
-
+		<div class="flex h-full flex-row items-center justify-center gap-2">
+			<div class="mr-2 flex flex-row items-center justify-between gap-4">
 				<PixelFrameMini
 					className="bg-[color:var(--color-bg)] relative inline-flex items-center px-1 text-[1rem] tracking-widest"
 				>
@@ -120,6 +116,10 @@
 						<img src={coin} alt="coin" class="inline-block h-[1.2rem] w-[1.2rem] align-[-0.2em]" />
 					</div>
 				</PixelFrameMini>
+
+				<div class="relative w-18">
+					<ThemeToggle />
+				</div>
 			</div>
 			<div class="h-10 w-20">
 				<DropDownSelect

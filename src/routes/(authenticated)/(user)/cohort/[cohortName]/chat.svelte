@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PixelFrameChat from '$lib/Components/PixelFrames/PixelFrameChat.svelte';
-	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
+	import PixelFrameChat from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameChat.svelte';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import { highlightJava } from '../../../../../Utils/highlight';
 

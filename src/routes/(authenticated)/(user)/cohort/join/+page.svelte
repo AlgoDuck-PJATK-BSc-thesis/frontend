@@ -3,7 +3,7 @@
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 	import type { DuckDto } from '../../Shop/Dtos';
-	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 
 	let { data }: { data: { ducks: DuckDto[] } } = $props();
 

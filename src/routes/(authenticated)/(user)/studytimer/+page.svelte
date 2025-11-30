@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import RewardModal from './RewardModal.svelte';
-	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 
 	type Mode = 'day' | 'custom';
 	type Stage = 'menu' | 'diagram';

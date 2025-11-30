@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ThemeToggle from '$lib/Components/ThemeToggle.svelte';
+	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
 	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 
@@ -69,8 +69,8 @@
 		</ul>
 	</nav>
 
-	<div class="flex h-full flex-row items-center justify-center gap-8">
-		<div class="w-15 translate-y-3">
+	<div class="flex h-full flex-row items-center justify-center gap-4">
+		<div class="w-18">
 			<ThemeToggle />
 		</div>
 		<div class="h-10 w-20">

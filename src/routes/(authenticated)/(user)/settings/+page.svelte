@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import PixelFrameSimple from '$lib/Components/PixelFrames/PixelFrameSimple.svelte';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import { ui } from '$lib/stores/ui.svelte';
 
 	let username = 'OrbitOwl';
