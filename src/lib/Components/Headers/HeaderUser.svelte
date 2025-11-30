@@ -15,10 +15,9 @@
 	};
 </script>
 
-<div class="sticky top-0 w-full overflow-x-auto">
-	<header
-		class="font-body sticky top-0 z-[100] flex h-16 min-w-max items-center justify-between gap-4 border-b-4 border-[color:var(--color-bg-header-border)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-4 text-[color:var(--color-text)] md:px-8"
-	>
+<header
+	class="font-body sticky top-0 z-50 flex h-16 items-center justify-between border-b-4 border-[color:var(--color-bg-header-border)] bg-[color:var(--color-header-guest)] px-8 py-4 text-[color:var(--color-text)]"
+>
 		<div class="flex items-center gap-6 whitespace-nowrap">
 			<a href="/home" class="text-lg font-semibold text-[color:var(--color-accent-2)] no-underline">
 				AlgoDuck</a
@@ -138,4 +137,3 @@
 			</div>
 		</div>
 	</header>
-</div>

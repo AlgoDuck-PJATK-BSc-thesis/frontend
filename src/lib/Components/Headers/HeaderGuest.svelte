@@ -4,10 +4,6 @@
 	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
 	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 
-	let currentLang = '🇺🇸';
-	function toggleLang() {
-		currentLang = currentLang === '🇺🇸' ? '🇵🇱' : '🇺🇸';
-	}
 </script>
 
 <header

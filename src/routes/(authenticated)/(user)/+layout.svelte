@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { page } from '$app/state';
+	import { page } from '$app/state';
 	import HeaderUser from '$lib/Components/Headers/HeaderUser.svelte';
 
 	let { children } = $props();
@@ -7,12 +7,12 @@
 	let hideHeader = $derived(page.data.hideHeader);
 </script>
 
-{#if !hideHeader}
-    <HeaderUser />
-{/if}
-
-<div class="font-body flex min-h-screen flex-col bg-bg text-text transition-colors duration-300">
-	<main class="h-[calc(100vh-4rem)] w-full box-border">
+<main class="w-full h-full flex flex-col">
+	{#if !hideHeader}
+		<HeaderUser />
+	{/if}
+	
+	<div class="font-body flex h-full flex-col bg-bg text-text transition-colors duration-300">
 		{@render children?.()}
-	</main>
-</div>
+	</div>
+</main>

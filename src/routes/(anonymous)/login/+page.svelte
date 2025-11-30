@@ -27,7 +27,7 @@
 	<title>Log in - AlgoDuck</title>
 </svelte:head>
 
-<section class="relative h-[calc(100vh-65px)] w-full overflow-hidden">
+<section class="relative h-full w-full overflow-x-hidden">
 	<LandingPage />
 
 	<div class="relative z-20 mx-auto mt-16 max-w-100 text-center">
