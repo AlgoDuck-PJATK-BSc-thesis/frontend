@@ -1,9 +1,12 @@
 <script lang="ts">
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import HeaderGuest from '$lib/Components/Headers/HeaderGuest.svelte';
 </script>
 
-<section class="relative h-[calc(100vh-65px)] w-full overflow-hidden">
+<HeaderGuest />
+
+<section class="relative h-[calc(100vh-4rem)] w-full overflow-hidden">
 	<LandingPage />
 
 	<div class="relative z-20 flex h-full items-start">
