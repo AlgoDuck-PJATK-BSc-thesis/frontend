@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { DuckDto } from '../../../routes/(authenticated)/(user)/Shop/Dtos';
 	import { browser } from '$app/environment';
-	import type { DuckDto } from '$lib/types/DuckDto';
 
-	let { selectedDuck, mode }: { selectedDuck: {id: string}; mode: 'home' | 'solve' } = $props();
+	let { selectedDuck, mode }: { selectedDuck: DuckDto; mode: 'home' | 'solve' } = $props();
 
 	const problemCategories = [
 		'array',

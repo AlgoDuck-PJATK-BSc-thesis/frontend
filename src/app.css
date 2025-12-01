@@ -82,6 +82,7 @@
 	}
 
 	.ocr-subtitle {
+		--stroke: 4px;
 		--stroke-color: rgba(0, 0, 0, 0.8);
 		color: var(--color-landingpage-description);
 	}
@@ -194,4 +195,12 @@ html {
 
 [data-reduce-motion='true'] {
 	scroll-behavior: auto !important;
+}
+
+[data-contrast='1'] .landing-bg,
+[data-contrast='2'] .landing-bg {
+	display: none !important;
+}
+:root {
+	--color-primary-soft: color-mix(in srgb, var(--color-primary) 85%, white 15%);
 }

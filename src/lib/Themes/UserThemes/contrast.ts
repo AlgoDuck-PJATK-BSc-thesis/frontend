@@ -5,13 +5,15 @@ export const contrast = {
 
 		'--color-bg': '#000000',
 		'--color-bg-2': '#000000',
-		'--color-text': '#f2b500',
-		'--color-primary': '#f2b500',
 
 		'--color-landingpage-title': '#f2b500',
-		'--color-landingpage-description': '#f2b500',
+		'--color-landingpage-subtitle': '#f2b500',
 
 		'--color-tile': '#000000',
+		'--color-text': '#f2b500',
+		'--color-text-reversed': '#000000',
+		'--color-primary': '#f2b500',
+
 		'--color-accent-1': '#f2b500',
 		'--color-accent-2': '#f2b500',
 		'--color-accent-3': '#000000',
@@ -23,7 +25,15 @@ export const contrast = {
 		'--color-chat-left': '#000000',
 		'--color-chat-right': '#000000',
 		'--color-chat-border-left': '#f2b500',
-		'--color-chat-border-right': '#f2b500'
+		'--color-chat-border-right': '#f2b500',
+
+		'--color-input-signature': '#f2b500',
+		'--color-input-text': '#f2b500',
+		'--color-text-box': '#f2b500',
+
+		'--color-header-guest': '#000000',
+		'--color-header-user': '#000000',
+		'--color-logo-header': '#f2b500'
 	},
 	'2': {
 		'--color-bg-a11y': '#f2b500',
@@ -34,8 +44,8 @@ export const contrast = {
 		'--color-text': '#000000',
 		'--color-primary': '#000000',
 
-		'--color-landingpage-title': '#f2b500',
-		'--color-landingpage-description': '#f2b500',
+		'--color-landingpage-title': '#000000',
+		'--color-landingpage-subtitle': '#000000',
 
 		'--color-tile': '#f2b500',
 		'--color-accent-1': '#000000',
@@ -49,7 +59,15 @@ export const contrast = {
 		'--color-chat-left': '#f2b500',
 		'--color-chat-right': '#f2b500',
 		'--color-chat-border-left': '#000000',
-		'--color-chat-border-right': '#000000'
+		'--color-chat-border-right': '#000000',
+
+		'--color-input-signature': '#000000',
+		'--color-input-text': '#000000',
+		'--color-text-box': '#000000',
+
+		'--color-header-guest': '#f2b500',
+		'--color-header-user': '#f2b500',
+		'--color-logo-header': '#000000'
 	}
 } as const;
 

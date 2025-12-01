@@ -17,13 +17,11 @@
 <ThemeInitializer />
 <RegistryInitializer />
 
-<div
-	class="w-screen h-screen"
->
+<div class="h-screen w-screen">
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
 
-	<main class="w-full h-full">
+	<main class="h-full w-full">
 		{@render children?.()}
 	</main>
 </div>

@@ -5,7 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
-	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 
@@ -125,16 +124,16 @@
 	class="fixed top-[5rem] left-[24rem] z-[9] w-[calc(42vw)] overflow-y-hidden whitespace-nowrap select-none"
 ></div>
 
-<div class="-mt-[9px] flex w-[18rem] pr-100 pl-20">
+<div class="-mt-[1px] flex w-[18rem] pr-100 pl-20">
 	<PixelFrameSimple
-		className="flex-1 px-6 py-2 flex items-center justify-start bg-[linear-gradient(to_bottom,var(--color-tile),var(--color-accent-3))]"
+		className="text-[color:var(--color-landingpage-subtitle)] flex-1 px-6 py-1 z-60 flex items-center justify-start bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
 		<nav class="mt-2 flex gap-6 text-lg font-semibold">
 			<button
 				onclick={() => setView('chat')}
 				class={view === 'chat'
 					? 'text-[color:var(--color-primary)]'
-					: 'text-[color:var(--color-text)]'}
+					: 'text-[color:var(--color-landingpage-subtitle)]'}
 			>
 				Chat
 			</button>
@@ -142,13 +141,13 @@
 				onclick={() => setView('leaderboard')}
 				class={view === 'leaderboard'
 					? 'text-[color:var(--color-primary)]'
-					: 'text-[color:var(--color-text)]'}
+					: 'text-[color:var(--color-landingpage-subtitle)]'}
 			>
 				Leaderboard
 			</button>
 			<div class="relative">
 				<button
-					class="scale-y-[-1] rounded py-1 text-xl font-bold transition hover:bg-[color:var(--color-accent-1)]"
+					class="scale-y-[-1] rounded py-1 text-xl font-bold transition hover:bg-[color:var(--color-accent-3)]"
 					onclick={toggleOptions}
 					aria-label="Cohort options"
 				>
@@ -163,9 +162,9 @@
 						onclick={toggleOptions}
 					></button>
 
-					<div class="absolute top-full right-0 z-999 mt-1 translate-x-[1.5rem]">
-						<PixelFrame
-							className="w-48 bg-[color:var(--color-tile)] shadow-lg border-[color:var(--color-accent-2)] p-2"
+					<div class="absolute top-full right-0 z-999 mt-0 translate-x-[1.5rem]">
+						<PixelFrameSimple
+							className="w-48 bg-[color:var(--color-accent-3)] shadow-lg border-[color:var(--color-accent-4)] p-2"
 						>
 							<button
 								onclick={copyInviteLink}
@@ -186,7 +185,7 @@
 							>
 								Leave Cohort
 							</button>
-						</PixelFrame>
+						</PixelFrameSimple>
 					</div>
 				{/if}
 			</div>
@@ -203,10 +202,10 @@
 		{/if}
 	</div>
 
-	<PixelFrame
+	<PixelFrameSimple
 		className="h-[74vh] mt-[3rem] w-[25vw] flex flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 	>
-		<div class="absolute -top-[5.3rem] left-[10%] z-10 -translate-x-1/3">
+		<div class="absolute -top-[5.6rem] left-[10%] z-10 -translate-x-10">
 			<div class="flex items-center gap-1">
 				<div class="relative ml-2 translate-y-[-12px]">
 					<div
@@ -227,37 +226,35 @@
 		</div>
 
 		<h1
-			class="ocr-outline ocr-title isolate m-4 mx-auto mt-1 mb-0 ml-3 block max-w-[20rem] overflow-x-auto p-4 text-left [font-family:var(--font-ocra)] text-5xl leading-[1.5] font-bold tracking-wide whitespace-nowrap text-[var(--color-landingpage-title)]"
+			class="ocr-outline ocr-title isolate m-4 mx-auto mt-1 mb-0 ml-3 block max-w-[20rem] overflow-x-auto p-4 text-left [font-family:var(--font-ariw9500)] text-4xl leading-[1.5] font-bold tracking-widest whitespace-nowrap text-[var(--color-landingpage-title)]"
 		>
 			Activity
 		</h1>
 
-		<div class="mt-2 ml-[1rem] h-[58vh] w-full flex-1 overflow-auto px-5">
+		<div class="mt-2 ml-[1rem] h-[58vh] w-full flex-1 overflow-auto px-4">
 			{#each sortedUsers as user}
 				<div class="mb-4 flex w-[90%] items-center gap-3">
 					<div class="relative h-12 w-12 shrink-0">
 						<div
-							class="h-full w-full overflow-hidden rounded-full border-2 border-white bg-[color:var(--color-primary)] shadow"
+							class="h-full w-full overflow-hidden rounded-full border-3 border-white bg-[color:var(--color-primary)] shadow"
 						>
 							<CloudfrontImage
 								path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`}
-								cls="h-full w-full -translate-x-[-15%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+								cls="h-full w-full -translate-x-[-15%] -translate-y-[-5%] scale-[1.5] object-cover object-[left_top]"
 							/>
 						</div>
 						<span
-							class={`absolute right-0 bottom-0 h-4 w-4 rounded-full border-[3px] border-[color:var(--color-bg)] ${
+							class={`absolute right-0 bottom-0 h-4 w-4 rounded-full border-[2px] border-[color:var(--color-white)] ${
 								user.isOnline ? 'bg-green-400' : 'bg-gray-500'
 							}`}
 						></span>
 					</div>
 
-					<PixelFrameSimple
-						className="flex-1 rounded-2xl bg-[color:var(--color-bg)] px-4 py-3 text-sm text-[color:var(--color-text)]"
-					>
+					<PixelFrameSimple className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm text-black">
 						<span class="font-semibold">{user.name}</span>
 					</PixelFrameSimple>
 				</div>
 			{/each}
 		</div>
-	</PixelFrame>
+	</PixelFrameSimple>
 </div>
