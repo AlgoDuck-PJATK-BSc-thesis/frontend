@@ -1,7 +1,7 @@
 <script lang="ts">
-	import CalendarPicker from './CalendarPicker.svelte';
-	import TimePicker from './TimePicker.svelte';
-	import DurationPicker from './DurationPicker.svelte';
+	import CalendarPicker from '../../../../../lib/Components/Pickers/CalendarPicker.svelte';
+	import TimePicker from '../../../../../lib/Components/Pickers/TimePicker.svelte';
+	import DurationPicker from '../../../../../lib/Components/Pickers/DurationPicker.svelte';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import type { EntryType } from '$lib/types/StudyTimerTypes';
@@ -52,11 +52,13 @@
 <PixelFrameSimple
 	className="relative w-full bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-8"
 >
-	<div class="flex items-center gap-3">
+	<div class="flex items-center gap-3 text-[color:var(--color-landingpage-subtitle)]">
 		<h2 class="text-2xl font-bold">Set a timer</h2>
 	</div>
 
-	<div class="mt-4 mb-2 inline-flex overflow-hidden rounded-xl ring-1 ring-[var(--border-15)]">
+	<div
+		class="mt-4 mb-2 inline-flex overflow-hidden rounded-xl text-[color:var(--color-landingpage-subtitle)] ring-1 ring-[var(--border-15)]"
+	>
 		<button
 			type="button"
 			class={`px-3 py-1.5 text-xs transition md:text-sm ${
@@ -104,7 +106,9 @@
 			/>
 		</div>
 
-		<div class="mt-3 flex items-center justify-between gap-4">
+		<div
+			class="mt-3 flex items-center justify-between gap-4 text-[color:var(--color-landingpage-subtitle)]"
+		>
 			<div class="text-sm opacity-80">
 				{#if pickedDate}
 					{#if combinedDeadline}
@@ -157,7 +161,7 @@
 	</div>
 
 	<div class="mt-3 grid gap-3" hidden={entryType !== 'day'}>
-		<p class="mt-2 text-sm opacity-80">
+		<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-80">
 			Track how much of the current day is left. The timer will count down until midnight.
 		</p>
 		<div class="mt-2 inline-flex w-fit">

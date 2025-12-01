@@ -109,9 +109,11 @@
 					id="language"
 					className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-text)]">Display Language</h2>
+					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
+						Display Language
+					</h2>
 
-					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-text)]">
+					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
@@ -146,9 +148,11 @@
 					id="language"
 					class="mx-auto flex w-full max-w-md flex-col gap-4 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-text)]">Display Language</h2>
+					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
+						Display Language
+					</h2>
 
-					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-text)]">
+					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
@@ -180,16 +184,16 @@
 				</div>
 			{/if}
 
-			{#if ui.mode === 'retro'}
+			<!-- {#if ui.mode === 'retro'}
 				<PixelFrameSimple
 					id="ui-style"
 					className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						User Interface Style
 					</h2>
 
-					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-text)]">
+					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
@@ -224,11 +228,11 @@
 					id="ui-style"
 					class="mx-auto flex w-full max-w-md flex-col gap-4 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-4 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						User Interface Style
 					</h2>
 
-					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-text)]">
+					<div class="mb-2 flex gap-4 text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<label class="flex cursor-pointer items-center gap-2">
 							<input
 								type="radio"
@@ -258,18 +262,18 @@
 						</label>
 					</div>
 				</div>
-			{/if}
+			{/if} -->
 
 			{#if ui.mode === 'retro'}
 				<PixelFrameSimple
 					id="profile"
 					className="flex flex-col gap-5 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Profile Information
 					</h2>
 
-					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3">Username:</span>
 						<input
 							bind:value={username}
@@ -278,7 +282,7 @@
 						/>
 					</label>
 
-					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3">E-mail:</span>
 						<input
 							bind:value={email}
@@ -292,11 +296,11 @@
 					id="profile"
 					class="mx-auto flex w-full max-w-md flex-col gap-5 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Profile Information
 					</h2>
 
-					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3">Username:</span>
 						<input
 							bind:value={username}
@@ -305,7 +309,7 @@
 						/>
 					</label>
 
-					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="mb-3 flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3">E-mail:</span>
 						<input
 							bind:value={email}
@@ -321,9 +325,11 @@
 					id="password"
 					className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="text-normal mb-3 text-lg text-[color:var(--color-text)]">Password Settings</h2>
+					<h2 class="text-normal mb-3 text-lg text-[color:var(--color-landingpage-subtitle)]">
+						Password Settings
+					</h2>
 
-					<label class="flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3"> Current password: </span>
 						<input
 							type="password"
@@ -332,7 +338,7 @@
 							class="font-body mb-3 w-full max-w-sm border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
 						/>
 					</label>
-					<label class="flex flex-col text-xs text-[color:var(--color-text)]">
+					<label class="flex flex-col text-xs text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3"> New password: </span>
 						<input
 							type="password"
@@ -347,9 +353,11 @@
 					id="password"
 					class="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="text-normal mb-3 text-lg text-[color:var(--color-text)]">Password Settings</h2>
+					<h2 class="text-normal mb-3 text-lg text-[color:var(--color-landingpage-subtitle)]">
+						Password Settings
+					</h2>
 
-					<label class="flex flex-col text-sm text-[color:var(--color-text)]">
+					<label class="flex flex-col text-sm text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3"> Current password: </span>
 						<input
 							type="password"
@@ -358,7 +366,7 @@
 							class="font-body mb-3 w-full max-w-sm border-2 border-[color:var(--color-accent-1)] bg-white p-[0.3rem] text-xs text-black"
 						/>
 					</label>
-					<label class="flex flex-col text-xs text-[color:var(--color-text)]">
+					<label class="flex flex-col text-xs text-[color:var(--color-landingpage-subtitle)]">
 						<span class="mb-3"> New password: </span>
 						<input
 							type="password"
@@ -375,11 +383,11 @@
 					id="2fa"
 					className="flex flex-col gap-4 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Two-Factor Authentication
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Enable 2FA: </span>
 						<input
@@ -389,7 +397,7 @@
 							style:background-color={twoFactor ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{twoFactor ? 'Enabled' : 'Disabled'}
 					</p>
 				</PixelFrameSimple>
@@ -398,11 +406,11 @@
 					id="2fa"
 					class="mx-auto flex w-full max-w-md flex-col gap-4 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-3 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Two-Factor Authentication
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Enable 2FA: </span>
 						<input
@@ -412,7 +420,7 @@
 							style:background-color={twoFactor ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{twoFactor ? 'Enabled' : 'Disabled'}
 					</p>
 				</div>
@@ -423,11 +431,11 @@
 					id="email"
 					className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Email Notifications
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Receive updates: </span>
 						<input
@@ -437,7 +445,7 @@
 							style:background-color={emailNotifs ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{emailNotifs ? 'On' : 'Off'}
 					</p>
 				</PixelFrameSimple>
@@ -446,11 +454,11 @@
 					id="email"
 					class="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Email Notifications
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Receive updates: </span>
 						<input
@@ -460,7 +468,7 @@
 							style:background-color={emailNotifs ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{emailNotifs ? 'On' : 'Off'}
 					</p>
 				</div>
@@ -471,11 +479,11 @@
 					id="push"
 					className="flex flex-col gap-6 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-6 w-full max-w-md mx-auto"
 				>
-					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Push Notifications
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Enable push: </span>
 						<input
@@ -485,7 +493,7 @@
 							style:background-color={pushNotifs ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{pushNotifs ? 'On' : 'Off'}
 					</p>
 				</PixelFrameSimple>
@@ -494,11 +502,11 @@
 					id="push"
 					class="mx-auto flex w-full max-w-md flex-col gap-6 rounded-3xl border border-white/10 bg-[color:var(--color-bg)] p-6 text-[color:var(--color-input-text)] shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-3xl"
 				>
-					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-text)]">
+					<h2 class="mb-1 text-lg font-normal text-[color:var(--color-landingpage-subtitle)]">
 						Push Notifications
 					</h2>
 					<div
-						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-text)]"
+						class="mb-3 flex flex-row items-center justify-between text-sm text-[color:var(--color-landingpage-subtitle)]"
 					>
 						<span> Enable push: </span>
 						<input
@@ -508,7 +516,7 @@
 							style:background-color={pushNotifs ? 'var(--color-primary)' : 'white'}
 						/>
 					</div>
-					<p class="-mt-2 text-xs text-[color:var(--color-text)]">
+					<p class="-mt-2 text-xs text-[color:var(--color-landingpage-subtitle)]">
 						{pushNotifs ? 'On' : 'Off'}
 					</p>
 				</div>
@@ -516,27 +524,27 @@
 		</div>
 
 		{#if ui.mode === 'retro'}
-			<div id="logout" class="mt-4 flex w-full items-center justify-center gap-10">
+			<div id="logout" class="mt-4 flex w-full items-center justify-center gap-20">
 				<Button
-					size="big"
+					size="medium"
 					label="Log Out"
 					labelFontFamily="var(--font-ariw9500)"
 					labelColor="rgba(0,0,0,0.7)"
 					labelFontSize="1.2rem"
 					labelFontWeight="normal"
-					labelTracking="extra"
+					labelTracking="normal"
 					labelClass=""
 					onclick={logout}
 				/>
 
 				<Button
-					size="big"
+					size="medium"
 					label="Save All"
 					labelFontFamily="var(--font-ariw9500)"
 					labelColor="rgba(0,0,0,0.7)"
 					labelFontSize="1.2rem"
 					labelFontWeight="normal"
-					labelTracking="extra"
+					labelTracking="normal"
 					labelClass=""
 					onclick={saveAll}
 				/>
@@ -561,7 +569,7 @@
 					type="button"
 					onclick={saveAll}
 					class="relative rounded-2xl bg-[color:var(--color-primary)] px-8 py-3 text-base
-					font-semibold tracking-wide
+					font-semibold tracking-normal
 					text-[color:var(--color-bg)]
 					shadow-[0_18px_90px_rgba(0,0,0,0.10)]
 					transition

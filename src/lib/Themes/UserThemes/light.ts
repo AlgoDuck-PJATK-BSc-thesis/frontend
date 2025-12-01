@@ -2,7 +2,7 @@ export const light = {
 	'--color-bg-a11y': '#ffffff',
 	'--color-text-a11y': '#000000',
 
-	'--color-bg': '#e3f7ff',
+	'--color-bg': '#409fffc5',
 	'--color-bg-2': '#fef8ff',
 
 	'--color-landingpage-title': '#fcd13f',
@@ -10,12 +10,12 @@ export const light = {
 
 	'--color-tile': '#99e0ff',
 	'--color-text': '#1b131d',
+	'--color-text-reversed': '#f5f5f5',
 	'--color-primary': '#fd9fff',
 
-	'--color-accent-1': '#77c5e6',
-	'--color-accent-2': '#386682c5',
-	'--color-accent-3': '#c4e9f8',
-	'--color-accent-4': '#97deff',
+	'--color-accent-1': '#2359be',
+	'--color-accent-3': '#4866f4',
+	'--color-accent-4': '#344aa3',
 
 	'--color-text-button': 'rgba(255, 255, 255, 0.9)',
 	'--color-grass-green': '#1aa67e',
@@ -38,6 +38,6 @@ export const light = {
 	'--color-text-box': '#18252fc5',
 
 	'--color-header-guest': '#2174c5',
-	'--color-header-user': '#ffffffc5',
+	'--color-header-user': '#206dd8c5',
 	'--color-logo-header': '#7fd2ffc5'
 };

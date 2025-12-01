@@ -11,7 +11,7 @@
 	}
 </script>
 
-<div class="mt-3 grid gap-3">
+<div class="mt-3 grid gap-3 text-[color:var(--color-landingpage-subtitle)]">
 	<label for="durationInput" class="text-xs opacity-80 md:text-sm"> Duration in minutes: </label>
 	<div class="flex items-center gap-2">
 		<input

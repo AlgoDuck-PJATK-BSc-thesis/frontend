@@ -11,6 +11,7 @@ export const contrast = {
 
 		'--color-tile': '#000000',
 		'--color-text': '#f2b500',
+		'--color-text-reversed': '#000000',
 		'--color-primary': '#f2b500',
 
 		'--color-accent-1': '#f2b500',

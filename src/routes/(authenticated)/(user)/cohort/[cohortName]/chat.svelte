@@ -155,7 +155,7 @@
 					<div
 						class={`flex w-full flex-col gap-2 ${user === 'you' ? 'items-end' : 'items-start'} ${i > 0 ? 'mt-[1rem]' : ''}`}
 					>
-						<span class="text-xs text-[color:var(--color-text)]">{user}</span>
+						<span class="text-xs text-[color:var(--color-landingpage-subtitle)]">{user}</span>
 						{#each texts as text}
 							<PixelFrameChat
 								className={`px-5 py-3 text-sm max-w-[70%] break-words

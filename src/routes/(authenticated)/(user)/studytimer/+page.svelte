@@ -2,8 +2,8 @@
 	import { onMount, onDestroy } from 'svelte';
 	import RewardModal from './RewardModal.svelte';
 	import DonutDiagram from './DonutDiagram.svelte';
-	import SetTimerCard from './SetTimerCard.svelte';
-	import SetReminderCard from './SetReminderCard.svelte';
+	import SetTimerCard from './menu/SetTimer.svelte';
+	import SetReminderCard from './menu/SetReminder.svelte';
 	import type { EntryType, WeeklyReminderConfig } from '$lib/types/StudyTimerTypes';
 
 	type Mode = 'day' | 'custom';

@@ -56,7 +56,9 @@
 	}
 </script>
 
-<div class="rounded-xl border border-[var(--border-10)] p-3">
+<div
+	class="rounded-xl border border-[var(--border-10)] p-3 text-[color:var(--color-landingpage-subtitle)]"
+>
 	<div class="mb-2 flex items-center justify-between">
 		<button
 			type="button"

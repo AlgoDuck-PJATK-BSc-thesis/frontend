@@ -65,36 +65,36 @@
 		<div class="mt-8 flex items-end justify-center gap-8">
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-text-reversed)]"
 				>
 					2
 				</div>
 				<img src={trophy} alt="Silver Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-bold text-[color:var(--color-landingpage-subtitle)]">
 					{topUsers[1].name}
 				</div>
 			</div>
 
 			<div class="relative flex -translate-y-2 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-text-reversed)]"
 				>
 					1
 				</div>
 				<img src={trophy} alt="Gold Trophy" class="mb-2 h-24 w-24" />
-				<div class="text-xl font-bold text-[color:var(--color-accent-2)]">
+				<div class="text-xl font-bold text-[color:var(--color-landingpage-subtitle)]">
 					{topUsers[0].name}
 				</div>
 			</div>
 
 			<div class="relative flex translate-y-4 flex-col items-center">
 				<div
-					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-bg)]"
+					class="absolute -top-6 rounded-full bg-[color:var(--color-text)] px-2 py-0.5 text-xs font-bold text-[color:var(--color-text-reversed)]"
 				>
 					3
 				</div>
 				<img src={trophy} alt="Bronze Trophy" class="mb-2 h-20 w-20" />
-				<div class=" text-lg font-bold text-[color:var(--color-accent-2)]">
+				<div class=" text-lg font-bold text-[color:var(--color-landingpage-subtitle)]">
 					{topUsers[2].name}
 				</div>
 			</div>
@@ -102,7 +102,7 @@
 	</div>
 
 	<PixelFrameSimple
-		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-text)]"
+		className="mb-10 flex h-max w-full max-w-2xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-2 pb-6 text-[color:var(--color-landingpage-subtitle)]"
 	>
 		{#each sortedUsers as user, i}
 			<div
@@ -130,7 +130,7 @@
 				</div>
 
 				<PixelFrameMini
-					className="flex items-center gap-1 bg-[color:var(--color-bg)] px-3 py-0.5 text-[0.9rem] text-[color:var(--color-text)]"
+					className="flex items-center gap-1 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
 				>
 					<span>{user.points}</span>
 					<span>⭐</span>

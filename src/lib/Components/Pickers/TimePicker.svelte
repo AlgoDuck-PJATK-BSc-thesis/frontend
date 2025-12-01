@@ -42,7 +42,7 @@
 	});
 </script>
 
-<div class="mt-3 grid gap-3">
+<div class="mt-3 grid gap-3 text-[color:var(--color-landingpage-subtitle)]">
 	<div class="flex gap-4">
 		<div class="flex-1">
 			<div class="mb-1 text-xs opacity-80">Hour</div>

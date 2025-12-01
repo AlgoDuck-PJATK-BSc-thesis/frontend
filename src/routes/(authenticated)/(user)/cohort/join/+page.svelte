@@ -37,7 +37,7 @@
 		Join a Cohort
 	</h1>
 	<PixelFrameSimple
-		className="relative bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] z-10 mb-8 w-full rounded-3xl border border-white/10 p-10 py-12 text-left text-[var(--color-input-text)] backdrop-blur-3xl"
+		className="relative bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] z-10 mb-8 w-full rounded-3xl border-xl border-white/10 p-10 py-12 text-left text-[var(--color-input-text)] backdrop-blur-3xl"
 	>
 		<div class="absolute -top-[9.3rem] left-35 z-10 -translate-x-1/2">
 			<div class="-gap-3 flex items-center">
@@ -74,7 +74,7 @@
 			</div>
 		</div>
 
-		<h5 class="mt-2 mb-8 text-base text-[color:var(--color-text)]">
+		<h5 class="mt-2 mb-8 text-base text-[color:var(--color-landingpage-subtitle)]">
 			You can either create your own or ask a friend for an invite link
 		</h5>
 

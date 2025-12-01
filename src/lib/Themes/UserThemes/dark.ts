@@ -2,14 +2,15 @@ export const dark = {
 	'--color-bg-a11y': '#000000',
 	'--color-text-a11y': '#ffffff',
 
-	'--color-bg': '#192850',
-	'--color-bg-2': '#083640',
+	'--color-bg': '#1e2450',
+	'--color-bg-2': '#312d40',
 
 	'--color-landingpage-title': '#f0cb42',
 	'--color-landingpage-subtitle': '#ffffff',
 
 	'--color-tile': '#124575',
 	'--color-text': '#f5f5f5',
+	'--color-text-reversed': '#1b131d',
 	'--color-primary': '#1cd6ff',
 
 	'--color-accent-1': '#3781b3',
@@ -38,6 +39,6 @@ export const dark = {
 	'--color-text-box': '#18252fc5',
 
 	'--color-header-guest': '#203085',
-	'--color-header-user': '#ffffffc5',
+	'--color-header-user': '#203085',
 	'--color-logo-header': '#7fd2ffc5'
 };

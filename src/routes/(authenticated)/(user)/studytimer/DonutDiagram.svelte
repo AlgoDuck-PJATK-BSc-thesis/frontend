@@ -26,35 +26,34 @@
 
 	<div
 		class="absolute inset-0 rounded-full"
-		style="background:conic-gradient(var(--accent) calc({fractionRemaining} * 1turn), var(--track) 0);"
+		style="
+			background:conic-gradient(var(--accent) calc({fractionRemaining} * 1turn), var(--track) 0);
+			mask:radial-gradient(farthest-side, transparent 0 calc(100% - 10%), #000 calc(100% - 10%) 100%);
+			-webkit-mask:radial-gradient(farthest-side, transparent 0 calc(100% - 80%), #000 calc(100% - 10%) 100%);
+		"
 	></div>
 
-	<div
-		class="absolute rounded-full"
-		style="inset:12%; background:var(--color-bg); box-shadow: inset 0 0 0 1px hsl(0 0% 100% / .02), 0 0 40px 0 hsl(0 80% 50% / .06);"
-	></div>
+	<div class="absolute rounded-full" style="inset:12%; background:var(--color-bg);"></div>
 
 	<div class="relative z-[1] grid gap-1 text-center">
 		<div
-			class="text-6xl leading-none font-semibold tracking-wide"
-			style="font-size:clamp(5rem,3rem+8vw,12rem);
-				color:color-mix(in srgb, var(--color-text) 80%, transparent);
-				text-shadow:0 0 28px color-mix(in srgb, var(--color-primary) 15%, transparent);
-				line-height:0.95;"
+			class="text-6xl leading-none font-semibold tracking-wide text-[color:var(--color-landingpage-subtitle)]"
+			style="font-size:clamp(5rem,3rem+8vw,12rem); text-shadow:0 0 28px color-mix(in srgb, var(--color-primary) 15%, transparent); line-height:0.95;"
 		>
 			{(fractionRemaining * 100).toFixed(1)}%
 		</div>
 
-		<div class="opacity-90" style="font-size:clamp(1rem,1rem+1vw,1.8rem); color:var(--color-text);">
+		<div
+			class="opacity-90"
+			style="font-size:clamp(1rem,1rem+1vw,1.8rem); color:var(--color-landingpage-subtitle);"
+		>
 			Remaining • {hh}:{mm}:{ss}
 		</div>
 
-		<div class="mt-5 flex gap-3">
+		<div class="mt-5 flex justify-center gap-3 text-[color:var(--color-landingpage-subtitle)]">
 			<button
 				type="button"
-				class="rounded-xl px-4 py-2 text-sm ring-1 ring-[var(--border-15)] transition hover:bg-[color:var(--color-primary)]/15
-					hover:ring-[color:var(--color-primary)] focus-visible:ring-2
-					focus-visible:ring-[color:var(--color-primary)] focus-visible:outline-none active:scale-[0.98]"
+				class="rounded-xl px-4 py-2 text-sm ring-1 ring-[var(--border-15)] transition hover:bg-[color:var(--color-primary)]/15 hover:ring-[color:var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none active:scale-[0.98]"
 				onclick={onConfirmEnd}
 			>
 				End and return to menu
@@ -63,9 +62,7 @@
 			{#if mode === 'custom' && entryType === 'duration' && onRestart}
 				<button
 					type="button"
-					class="rounded-xl px-4 py-2 text-sm ring-1 ring-[var(--border-15)] transition hover:bg-[color:var(--color-primary)]/15
-						hover:ring-[color:var(--color-primary)] focus-visible:ring-2
-						focus-visible:ring-[color:var(--color-primary)] focus-visible:outline-none active:scale-[0.98]"
+					class="rounded-xl px-4 py-2 text-sm ring-1 ring-[var(--border-15)] transition hover:bg-[color:var(--color-primary)]/15 hover:ring-[color:var(--color-primary)] focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:outline-none active:scale-[0.98]"
 					onclick={onRestart}
 				>
 					Restart
