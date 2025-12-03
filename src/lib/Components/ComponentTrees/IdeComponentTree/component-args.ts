@@ -22,5 +22,6 @@ export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentA
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs{
-  testCases: TestCase[]
+  testCases: TestCase[],
+  InsertTestCase: (testCaseId: string) => Promise<void>
 }

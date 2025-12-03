@@ -4,16 +4,16 @@
 	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
-	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
+	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 
 	let { components = $bindable() }: { components: Record<string, DefaultLayoutTerminalComponentArgs> } = $props();
 	
-	let isExecutingCode: boolean = $state(false);
 	let isSettingsPanelShown = $state(false);
 
-	const executeCode = async (): Promise<void> => {
-		isExecutingCode = true;
+	const executeCode = async (runner: boolean): Promise<void> => {
+		runner = true;
 		console.log(components['code-editor']);
+		runner = false;
 	}
 
 	type SubmissionResult = {
@@ -28,8 +28,8 @@
 		isTestPassed: boolean
 	}
 
-	const submitCode = async (): Promise<void> => {
-		isExecutingCode = true;
+	const submitCode = async (runner: boolean): Promise<void> => {
+		runner = true;
 		let res = await FetchFromApi<SubmissionResult>("executor/Submit", {
 			method: "POST",
 			body: JSON.stringify({
@@ -38,8 +38,13 @@
 			})
 		});
 		(components['terminal-comp'] as TerminalComponentArgs).terminalContents = res.body.stdOutput;
-
-		isExecutingCode = false;
+		(components['test-cases-comp'] as TestCaseComponentArgs).testCases = (components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => {
+			return {
+				isPassed: res.body.testResults.find(ti => ti.testId == t.testCaseId)?.isTestPassed,
+				...t
+			}
+		})
+		runner = false;
 	}
 	
 </script>
@@ -53,7 +58,6 @@
 		<TopPanel
 			executeCallback={executeCode}
 			submitCallback={submitCode}
-			isExecuting={isExecutingCode}
 			bind:isSettingsPanelShown
 		/>
 	</div>

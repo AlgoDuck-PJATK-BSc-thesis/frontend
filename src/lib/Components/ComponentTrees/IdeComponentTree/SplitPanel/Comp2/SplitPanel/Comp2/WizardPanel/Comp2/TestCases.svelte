@@ -7,12 +7,13 @@
 	
 	let { options = $bindable() }: { options: TestCaseComponentArgs } = $props();
 
-
 	let publicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => tc.isPublic));
 	let nonPublicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => !tc.isPublic));
 
+	$inspect(options);
+
 	// svelte-ignore state_referenced_locally
-	let previewedTestCase: TestCase = $state(publicTestCases[0] );
+	let previewedTestCase: TestCase = $state(publicTestCases[0]);
 
 	let root: FileTreeRootType = $derived.by(() => {
 		return {
@@ -87,9 +88,7 @@
 						<span class="flex justify-center items-center"
 							>Passed: {previewedTestCase!.isPassed ? previewedTestCase!.isPassed : 'N/A'}</span
 						>
-						<button
-							class="hover:cursor-pointer h-[90%] px-2 rounded-md border-2 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
-						>
+						<button onclick={()=>{options.InsertTestCase(previewedTestCase.testCaseId)}} class="hover:cursor-pointer h-[90%] px-2 rounded-md border-2 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]">
 							<span class="flex justify-center items-center">Insert test case</span>
 						</button>
 					</div>

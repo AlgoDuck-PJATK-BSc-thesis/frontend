@@ -3,6 +3,8 @@
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
 
 	let { options = $bindable() }: { options: CodeEditorComponentArgs } = $props();
+
+	$inspect(`from editro : ${options.templateContents}`);
 </script>
 
 <main class="w-full h-full">

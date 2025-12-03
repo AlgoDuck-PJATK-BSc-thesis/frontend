@@ -5,6 +5,7 @@
  
   let { options = $bindable() }: { options: { component: ComponentConfig<T> } } = $props();
   
+
   const registryProfileAtInitialRender: string = $state.snapshot(activeProfile.profile);
 
   const Inner: Component<{ options: T }> | undefined = $derived(
@@ -12,6 +13,7 @@
   );
 
   let innerOptions: T | undefined = $derived(options?.component?.options);
+  
 </script>
 
 {#if options?.component && Inner && innerOptions}

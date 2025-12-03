@@ -16,27 +16,23 @@
 	let {
 		executeCallback,
 		submitCallback,
-		isExecuting,
 		isSettingsPanelShown = $bindable()
 	}: {
-		executeCallback: (event: MouseEvent) => void;
-		submitCallback: (event: MouseEvent) => void;
-		isExecuting: boolean;
+		executeCallback: (runner: boolean) => void;
+		submitCallback: (runner: boolean) => void;
 		isSettingsPanelShown: boolean;
 	} = $props();
 
-	const execute = (event: MouseEvent): void => {
-		isExecutin = true;
+	const execute = (runner: boolean): void => {
 		submitButton.style.width = '0';
 		executeButton.style.width = '100%';
-		executeCallback(event);
+		executeCallback(runner);
 	};
 
-	const submit = (event: MouseEvent): void => {
-		isSubmitting = true;
+	const submit = (runner: boolean): void => {
 		executeButton.style.width = '0';
 		submitButton.style.width = '100%';
-		submitCallback(event);
+		submitCallback(runner);
 	};
 
 	const toggleSettingsPanel = (): void => {
@@ -59,7 +55,7 @@
 				? 'border-0'
 				: 'border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}
 			{isExecutin ? 'rounded-md' : 'rounded-l-md'}"
-			onclick={execute}
+			onclick={() => {execute(isExecutin)}}
 			aria-label="run-code"
 		>
 			{#if isExecutin}
@@ -78,7 +74,7 @@
 				: 'border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}
 			{isSubmitting ? 'rounded-md' : 'rounded-r-md'} 
 			items-center text-center ml-[1px]"
-			onclick={submit}
+			onclick={()=>{submit(isSubmitting)}}
 		>
 			{#if isSubmitting}
 				{@render LebeledRunner('Submitting')}

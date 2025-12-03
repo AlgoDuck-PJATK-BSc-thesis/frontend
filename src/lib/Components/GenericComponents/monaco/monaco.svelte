@@ -3,10 +3,10 @@
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { userEditorPreferences } from '$lib/stores/theme.svelte';
+	import type { ThemeName } from '$lib/Themes';
 	
 	let {
 		editorContents = $bindable(),
-		fontSize,
 		readOnly
 	}: { editorContents: string; fontSize?: number; readOnly?: boolean;} = $props();
 
@@ -42,16 +42,28 @@
 	});
 
 	$effect(() => {
-		console.log('theme:', userEditorPreferences.theme, 'fontSize:', userEditorPreferences.fontSize);
+		const theme: ThemeName = userEditorPreferences.theme as ThemeName;
+		const fontSize: number = userEditorPreferences.fontSize;
 
 		if (editor && monaco) {
-			monaco.editor.setTheme(userEditorPreferences.theme);
+			monaco.editor.setTheme(theme);
 
 			editor.updateOptions({
-				fontSize: userEditorPreferences.fontSize
+				fontSize: fontSize
 			});
 		}
 	});
+
+	// $effect(() => {
+	// 	const content: string = editorContents;
+	// 	if (editor && monaco) {
+	// 		const position = editor.getPosition();
+	// 		editor.setValue(content);
+	// 		if (position) {
+	// 			editor.setPosition(position);
+	// 		}
+	// 	}
+	// });
 
 	onDestroy(() => {
 		if (browser && monaco && editor) {
