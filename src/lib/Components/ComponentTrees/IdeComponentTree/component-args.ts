@@ -19,6 +19,7 @@ export interface TerminalComponentArgs extends DefaultLayoutTerminalComponentArg
 
 export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentArgs{
   templateContents: string,
+  problemId: string
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs{

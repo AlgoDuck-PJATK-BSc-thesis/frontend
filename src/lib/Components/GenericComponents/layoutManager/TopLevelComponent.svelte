@@ -5,15 +5,11 @@
  
   let { options = $bindable() }: { options: { component: ComponentConfig<T> } } = $props();
   
-
-  const registryProfileAtInitialRender: string = $state.snapshot(activeProfile.profile);
-
   const Inner: Component<{ options: T }> | undefined = $derived(
-    options?.component ? ComponentRegistry.get(registryProfileAtInitialRender)!.get(options.component.component) as Component<{ options: T }> : undefined
+    options?.component ? ComponentRegistry.get(activeProfile.profile)!.get(options.component.component) as Component<{ options: T }> : undefined
   );
 
-  let innerOptions: T | undefined = $derived(options?.component?.options);
-  
+  let innerOptions: T | undefined = $derived(options?.component?.options);  
 </script>
 
 {#if options?.component && Inner && innerOptions}

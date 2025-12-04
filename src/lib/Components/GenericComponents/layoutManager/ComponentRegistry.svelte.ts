@@ -22,28 +22,46 @@ export const ComponentRegistry: Map<string, Map<string, Component<any>>> = new M
 
 export const InitializeRegistryDefault = (): void => {
 
-    const newMap: Map<string, Component<any>> = new Map<string, Component<any>>(StaticBaselineComponents);
-    newMap.set('Terminal', Terminal);
-    newMap.set("TerminalIconSvg", TerminalIconSvg);
+    const defaultMap: Map<string, Component<any>> = new Map<string, Component<any>>(StaticBaselineComponents);
+    defaultMap.set('Terminal', Terminal);
+    defaultMap.set("TerminalIconSvg", TerminalIconSvg);
     
-    newMap.set('TestCases', TestCases);
-    newMap.set('TestCasesIconSvg', TestCasesIconSvg);
+    defaultMap.set('TestCases', TestCases);
+    defaultMap.set('TestCasesIconSvg', TestCasesIconSvg);
     
-    newMap.set('InfoPanel', InfoPanel);
-    newMap.set('InfoPanelIconSvg', InfoPanelIconSvg);
+    defaultMap.set('InfoPanel', InfoPanel);
+    defaultMap.set('InfoPanelIconSvg', InfoPanelIconSvg);
     
-    newMap.set('Editor', CodeEditor);
-    newMap.set('EditorIconSvg', CodeEditorIconSvg);
+    defaultMap.set('Editor', CodeEditor);
+    defaultMap.set('EditorIconSvg', CodeEditorIconSvg);
     
-    newMap.set('SolutionAreaControlPanel', SolutionAreaControlPanel)
-    
-    newMap.set('EditorSettings', EditorSettings);
-    newMap.set('SettingsControlPanel', SettingsControlPanel)
+    defaultMap.set('EditorSettings', EditorSettings);
+    defaultMap.set('SettingsControlPanel', SettingsControlPanel)
 
+    defaultMap.set('SolutionAreaControlPanel', SolutionAreaControlPanel)
+
+    ComponentRegistry.set('default', defaultMap);
 
     
+    const loading: Map<string, Component<any>> = new Map<string, Component<any>>(StaticBaselineComponents);
+    loading.set('Terminal', TerminalPlaceHolder);
+    loading.set("TerminalIconSvg", TerminalIconSvg);
+    
+    loading.set('TestCases', TestCasesPlaceholder);
+    loading.set('TestCasesIconSvg', TestCasesIconSvg);
+    
+    loading.set('InfoPanel', InfoPanelPlaceholder);
+    loading.set('InfoPanelIconSvg', InfoPanelIconSvg);
+    
+    loading.set('Editor', CodeEditorPlaceholder);
+    loading.set('EditorIconSvg', CodeEditorIconSvg);
+    
+    loading.set('EditorSettings', EditorSettings);
+    loading.set('SettingsControlPanel', SettingsControlPanel)
 
-    ComponentRegistry.set('default', newMap);
+    loading.set('SolutionAreaControlPanel', SolutionAreaControlPanel)
+
+    ComponentRegistry.set('placeholder', loading);
 }
 
 export const InitializeRegistryPlaceholder = (): void => {

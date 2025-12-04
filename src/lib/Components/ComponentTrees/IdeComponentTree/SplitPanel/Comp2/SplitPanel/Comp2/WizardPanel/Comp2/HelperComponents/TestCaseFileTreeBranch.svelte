@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Chevron from '$lib/svg/chevron.svelte';
+	import FolderClosedIconSvg from '$lib/svg/EditorComponentIcons/FolderClosedIconSvg.svelte';
+	import FolderOpenIconSvg from '$lib/svg/EditorComponentIcons/FolderOpenIconSvg.svelte';
 	import type { FileTreeBranchType } from '$lib/types/FileTreeTypes';
 	import TestCaseFileTreeBranch from './TestCaseFileTreeBranch.svelte'; // lovely recursive import. Hope it does not break
 	import TestCaseFileTreeLeaf from './TestCaseFileTreeLeaf.svelte';
@@ -16,7 +18,7 @@
 <button
 	onclick={toggleContentContainer}
 	style={`padding-left: ${16 + 8 * branch.depth}px;`}
-	class="m-1 text-text-secondary overflow-hidden w-full h-8 flex justify-start items-center text-center px-4 rounded-sm hover:cursor-pointer active:bg-ide-card active:border-ide-accent active:shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
+	class="m-1 text-text-secondary overflow-hidden w-full gap-3 h-8 flex justify-start items-center text-center px-4 rounded-sm hover:cursor-pointer active:bg-ide-card active:border-ide-accent active:shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
 >
 	{#if branch.branchingBranches || branch.leaves}
 		<div
@@ -26,6 +28,11 @@
 		>
 			<Chevron args={{ color: '#FF13F0' }} />
 		</div>
+		{#if isContentContainerShown}
+			<FolderOpenIconSvg options={{ class: "h-[70%] aspect-square stroke-ide-text-primary" }}/>
+		{:else}
+			<FolderClosedIconSvg options={{ class: "h-[70%] aspect-square stroke-ide-text-primary" }}/>
+		{/if}
 	{/if}
 	<span class="px-2 flex justify-center items-center overflow-hidden">{branch.label}</span>
 </button>

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { marked } from 'marked';
-	let { markdown }: { markdown: string } = $props();
-	let htmlContent = $derived(marked.parse(markdown));
+	let { options }: { options: { markdown: string, class?: string }} = $props();
+	let htmlContent = $derived(marked.parse(options.markdown));
 </script>
 
-<div class="prose prose-invert max-w-none">
+<div class="{options.class}">
 	{@html htmlContent}
 </div>

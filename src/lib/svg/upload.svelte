@@ -1,27 +1,9 @@
 <script lang="ts">
 	import type { svgArg } from "$lib/types/SvgIcon";
 
-
-
-	let { args }: { args: svgArg } = $props();
+	let { options }: { options: svgArg } = $props();
 </script>
 
-<svg class="h-[70%] aspect-square mr-[5%]" viewBox="0 0 32 32">
-	<line class="st0" x1="16" y1="20" x2="16" y2="4" style="stroke: {args.color};" />
-	<polyline class="st0" points="12,8 16,4 20,8 " style="stroke: {args.color};" />
-	<polyline
-		class="st0"
-		points="9,13 3,16.5 3,21.5 16,29 29,21.5 29,16.5 23,13 "
-		style="stroke: {args.color};"
-	/>
+<svg class="{options.class}"viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.9999 13V21M11.9999 13L7.99985 17M11.9999 13L15.9999 17M3.99985 14.899C3.25689 14.1399 2.69642 13.2217 2.36089 12.2139C2.02535 11.2062 1.92356 10.1352 2.06321 9.0823C2.20287 8.02935 2.58031 7.022 3.16695 6.13653C3.75358 5.25107 4.53403 4.51071 5.44918 3.97155C6.36433 3.43238 7.39018 3.10855 8.44902 3.02458C9.50786 2.9406 10.5719 3.09868 11.5606 3.48686C12.5493 3.87503 13.4367 4.48311 14.1556 5.26503C14.8745 6.04696 15.406 6.98223 15.7099 8H17.4999C18.4654 7.99989 19.4053 8.31032 20.1808 8.88544C20.9564 9.46056 21.5264 10.2699 21.8066 11.1938C22.0869 12.1177 22.0625 13.1073 21.7372 14.0164C21.4118 14.9254 20.8027 15.7057 19.9999 16.242" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
-
-<style type="text/css">
-	.st0 {
-		fill: none;
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-miterlimit: 10;
-	}
-</style>

@@ -9,11 +9,10 @@
     {#each options.labels.filter(l => l.icon?.component !== undefined) as label}
         {@const Comp = ComponentRegistry.get(activeProfile.profile)!.get(label.icon?.component!)}
         <button 
-        class="w-[80%] bg-blue-500 aspect-square rounded-md p-[5%]
-        {options.selectedElemId === label.labelFor ? "stroke-ide-text-secondary bg-blue-500" : "stroke-ide-text-primary bg-ide-bg hover:bg-ide-text-primary/10"}" 
+        class="w-[70%] aspect-square rounded-md p-[5%]
+        {options.selectedElemId === label.labelFor ? "stroke-ide-text-secondary border-2 bg-ide-accent/10 border-ide-accent" : "stroke-ide-text-primary bg-ide-bg hover:bg-ide-text-primary/10"}" 
         onclick="{()=>{options.selectedElemId = label.labelFor}}">
             <Comp options={{class: "w-full h-full"}}/>
         </button>
     {/each}
-
 </main>

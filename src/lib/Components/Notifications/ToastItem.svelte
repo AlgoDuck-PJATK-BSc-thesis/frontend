@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import type { Toast } from './ToastStore.svelte';
-    import successIconSvg from '$lib/svg/Toast/successIconSvg.svelte';
-	import warningIconSvg from '$lib/svg/Toast/warningIconSvg.svelte';
-	import errorIconSvg from '$lib/svg/Toast/errorIconSvg.svelte';
-	import type { ComponentConfigStatic } from '../GenericComponents/scrollableComponent/ScrollableComponentArgs';
-	import type { svgArg } from '$lib/types/ui/GenericArgs/SvgArg';
-	import SuccessIconSvg from '$lib/svg/Toast/successIconSvg.svelte';
-	import ErrorIconSvg from '$lib/svg/Toast/errorIconSvg.svelte';
-	import WarningIconSvg from '$lib/svg/Toast/warningIconSvg.svelte';
 	import type { Component } from 'svelte';
+	import type { svgArg } from '$lib/types/SvgIcon';
+	import SuccessIconSvg from '$lib/svg/Toast/SuccessIconSvg.svelte';
+	import ErrorIconSvg from '$lib/svg/Toast/ErrorIconSvg.svelte';
+	import WarningIconSvg from '$lib/svg/Toast/WarningIconSvg.svelte';
 
 	
-	
+	interface ComponentConfigStatic<TData extends Record<string, any>> {
+    	component: Component<{ options: TData, errors?: Record<string, any>, rootElement?: HTMLElement}>
+    	options: TData
+    	rootElement?: HTMLElement
+	}
+
 	let { 
 		toast, 
 		onRemove 

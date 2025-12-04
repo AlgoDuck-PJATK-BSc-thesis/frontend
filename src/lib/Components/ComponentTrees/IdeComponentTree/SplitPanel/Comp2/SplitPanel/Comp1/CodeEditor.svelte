@@ -1,12 +1,40 @@
 <script lang="ts">
+	import { FetchFromApi } from '$lib/api/apiCall';
 	import type { CodeEditorComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
 
 	let { options = $bindable() }: { options: CodeEditorComponentArgs } = $props();
 
-	$inspect(`from editro : ${options.templateContents}`);
+	type SaveState = "saving" | "saved" | "unsaved";
+
+	let savingState: SaveState = $state("saved");
+
+	let lastTimeout: number | undefined;
+	const autoSaveStallTimeMillis: number = 1000;
+
+	$effect(() => {
+		const templateContents: string = options.templateContents;
+		savingState = "unsaved";
+		if (lastTimeout){
+			clearTimeout(lastTimeout);
+		}
+		lastTimeout = setTimeout(async () => {
+			savingState = "saving";
+			const res = await FetchFromApi("AutoSave", {
+				method: 'POST',
+				body: JSON.stringify({
+					problemId: options.problemId,
+					userCodeB64: btoa(templateContents)
+				})
+			});
+			if (res.status === "Success"){
+				savingState = "saved";
+			}
+		}, autoSaveStallTimeMillis);
+	})
 </script>
 
-<main class="w-full h-full">
+<main class="w-full h-full relative">
 	<Monaco bind:editorContents={options.templateContents} />
+	<span class="absolute z-50 bottom-[1%] left-[1%] text-ide-text-secondary backdrop-blur-xs">{savingState}</span>
 </main>

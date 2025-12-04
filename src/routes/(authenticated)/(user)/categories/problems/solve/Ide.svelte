@@ -3,11 +3,15 @@
 	import DefaultLayout from '$lib/Components/ComponentTrees/IdeComponentTree/default-layout.json'
 	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
-	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
+	import { FetchFromApi } from '$lib/api/apiCall';
+  
+	let { 
+		components = $bindable(),
+	}: { 
+		components: Record<string, DefaultLayoutTerminalComponentArgs>,
+	} = $props();
 
-	let { components = $bindable() }: { components: Record<string, DefaultLayoutTerminalComponentArgs> } = $props();
-	
 	let isSettingsPanelShown = $state(false);
 
 	const executeCode = async (runner: boolean): Promise<void> => {
@@ -53,16 +57,17 @@
 	{#if isSettingsPanelShown}
 		<SettingsPanel bind:isSettingsPanelShown />
 	{/if}
-
 	<div class="w-full h-[5%]">
 		<TopPanel
-			executeCallback={executeCode}
-			submitCallback={submitCode}
-			bind:isSettingsPanelShown
+		executeCallback={executeCode}
+		submitCallback={submitCode}
+		bind:isSettingsPanelShown
 		/>
 	</div>
-
 	<div class="w-full h-[95%] flex p-[0.5%]">
-		<ComponentTreeRenderer componentTree={DefaultLayout} bind:componentOpts={components}/>
+		<ComponentTreeRenderer 
+		componentTree={DefaultLayout} 
+		bind:componentOpts={components}
+		/>
 	</div>
 </main>

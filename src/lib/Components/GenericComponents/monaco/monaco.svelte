@@ -36,7 +36,7 @@
 		});
 
 		editor.onDidChangeModelContent(() => {
-      editorContents = editor.getValue();
+      	editorContents = editor.getValue();
     });
 		
 	});
