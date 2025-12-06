@@ -5,8 +5,6 @@ export function useInvalidation(
   onInvalidate: () => Promise<void> | void
 ) {
   $effect(() => {
-    console.log("running effect");
-    console.log(options.isValid);
     if (options.isValid === false) {
       onInvalidate();
       untrack(() => {

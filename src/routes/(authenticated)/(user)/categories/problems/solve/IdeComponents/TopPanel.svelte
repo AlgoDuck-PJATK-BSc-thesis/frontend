@@ -6,9 +6,13 @@
     import Runner from '$lib/svg/runner.svelte';
     import Upload from '$lib/svg/upload.svelte';
     import LayoutIconSvg from '$lib/svg/LayoutIconSvg.svelte';
+	import { fly } from 'svelte/transition';
+	import LayoutSelector from './LayoutSelector.svelte';
 
     let isExecuting: boolean = $state(false);
     let isSubmitting: boolean = $state(false);
+
+    let isLayoutSelectionVisible: boolean = $state(false);
 
     let {
         executeCallback,
@@ -80,8 +84,15 @@
     </div>
 
     <div class="w-[25%] h-full flex justify-end items-center px-5 gap-7">
-        <div class="grow h-full flex flex-row items-center justify-end gap-2">
+        <div class="grow h-full flex flex-row items-center justify-end gap-2 relative">
+            {#if isLayoutSelectionVisible}
+                <div transition:fly={{y: -30, duration: 200}} class="absolute w-75 h-75 z-100 top-full">
+                    <LayoutSelector/>
+                </div>
+            {/if}
+        
             <button
+                onclick={()=>{isLayoutSelectionVisible = !isLayoutSelectionVisible}}
                 class="h-[55%] aspect-square hover:cursor-pointer flex items-center justify-center transition-transform duration-100 ease-out"
             >
                 <LayoutIconSvg options={{ class: 'stroke-ide-text-primary stroke-[1.5]' }} />

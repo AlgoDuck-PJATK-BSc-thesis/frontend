@@ -1,12 +1,12 @@
-<script lang="ts" generics="T1 extends ComponentConfig<LayoutManagerComponentArgs>, T2 extends ComponentConfig<LayoutManagerComponentArgs>">
+<script lang="ts" generics="T1 extends MyTopLevelComponentArg<LayoutManagerComponentArgs>, T2 extends MyTopLevelComponentArg<LayoutManagerComponentArgs>">
 	import { onMount, type Component } from 'svelte';
-  	import type { ComponentConfig, LayoutManagerComponentArgs, ResizeableComponentArg } from './ResizableComponentArg';
+  	import type { ComponentConfig, LayoutManagerComponentArgs, MyTopLevelComponentArg, ResizeableComponentArg } from './ResizableComponentArg';
   	import { activeProfile, ComponentRegistry } from './ComponentRegistry.svelte';
   
  	let { options = $bindable() }: { options: ResizeableComponentArg<T1, T2> } = $props();
   
-	const comp1ClampValue: number = options.comp1.meta?.clampVal === undefined ? 0 : options.comp1.meta?.clampVal;
-	const comp2ClampValue: number = options.comp2.meta?.clampVal === undefined ? 0 : options.comp2.meta?.clampVal;
+	const comp1ClampValue: number = options.comp1.options.component.meta?.clampVal === undefined ? 0 : options.comp1.options.component.meta?.clampVal;
+	const comp2ClampValue: number = options.comp2.options.component.meta?.clampVal === undefined ? 0 : options.comp2.options.component.meta?.clampVal;
 
   let initialComp2Proportions: number = $derived(options ? 1 - options.initialComp1Proportions : 0.5);
   let mainContainer: HTMLDivElement | undefined = $state();
@@ -33,8 +33,8 @@
   );
 
     
-  const comp1ClampConfig: ComponentConfig<T1> | undefined = $derived(options.comp1.meta?.clamp);
-  const comp2ClampConfig: ComponentConfig<T2> | undefined = $derived(options.comp2.meta?.clamp);
+  const comp1ClampConfig: ComponentConfig<T1> | undefined = $derived(options.comp1.options.component.meta?.clamp);
+  const comp2ClampConfig: ComponentConfig<T2> | undefined = $derived(options.comp2.options.component.meta?.clamp);
   
   let comp1ClampOptions: T1 | undefined = $derived(comp1ClampConfig?.options);
   let comp2ClampOptions: T2 | undefined = $derived(comp2ClampConfig?.options);

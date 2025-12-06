@@ -1,3 +1,7 @@
+import EditorBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/EditorBuilder.svelte";
+import InfoPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/InfoPanelBuilder.svelte";
+import TerminalBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/TerminalBuilder.svelte";
+import TestCasesBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/TestCasesBuilder.svelte";
 import InfoPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp1/InfoPanel.svelte";
 import InfoPanelIconSvg from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp1/InfoPanelIconSvg.svelte";
 import InfoPanelPlaceholder from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp1/InfoPanelPlaceholder.svelte";
@@ -11,6 +15,7 @@ import TestCases from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPane
 import TestCasesIconSvg from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp2/TestCasesIconSvg.svelte";
 import TestCasesPlaceholder from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp2/TestCasesPlaceholder.svelte";
 import SolutionAreaControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaControlPanel.svelte";
+import SolutionAreaHorizontalControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaHorizontalControlPanel.svelte";
 import EditorSettings from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/Comp1/EditorSettings.svelte";
 import SettingsControlPanel from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/SettingsControlPanel.svelte";
 import type { Component } from "svelte";
@@ -39,6 +44,7 @@ export const InitializeRegistryDefault = (): void => {
     defaultMap.set('SettingsControlPanel', SettingsControlPanel)
 
     defaultMap.set('SolutionAreaControlPanel', SolutionAreaControlPanel)
+    defaultMap.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanel)
 
     ComponentRegistry.set('default', defaultMap);
 
@@ -52,16 +58,43 @@ export const InitializeRegistryDefault = (): void => {
     
     loading.set('InfoPanel', InfoPanelPlaceholder);
     loading.set('InfoPanelIconSvg', InfoPanelIconSvg);
-    
+
     loading.set('Editor', CodeEditorPlaceholder);
     loading.set('EditorIconSvg', CodeEditorIconSvg);
     
     loading.set('EditorSettings', EditorSettings);
     loading.set('SettingsControlPanel', SettingsControlPanel)
-
-    loading.set('SolutionAreaControlPanel', SolutionAreaControlPanel)
+    
+    loading.set('SolutionAreaControlPanel', SolutionAreaControlPanel);
+    loading.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanel);
 
     ComponentRegistry.set('placeholder', loading);
+
+        
+    const builder: Map<string, Component<any>> = new Map<string, Component<any>>(StaticBaselineComponents);
+    builder.set('Terminal', TerminalBuilder);
+    builder.set("TerminalIconSvg", TerminalIconSvg);
+    
+    builder.set('TestCases', TestCasesBuilder);
+    builder.set('TestCasesIconSvg', TestCasesIconSvg);
+    
+    builder.set('InfoPanel', InfoPanelBuilder);
+    builder.set('InfoPanelIconSvg', InfoPanelIconSvg);
+    
+    builder.set('Editor', EditorBuilder);
+    builder.set('EditorIconSvg', CodeEditorIconSvg);
+
+    builder.set("PlaceholderPanelIconSvg", CodeEditorIconSvg);
+    
+    builder.set('SolutionAreaControlPanel', SolutionAreaControlPanel);
+    builder.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanel);
+
+    builder.set('EditorIconSvg', CodeEditorIconSvg);
+    builder.set('InfoPanelIconSvg', InfoPanelIconSvg);
+    builder.set('TestCasesIconSvg', TestCasesIconSvg);
+    builder.set("TerminalIconSvg", TerminalIconSvg);
+
+    ComponentRegistry.set('builder', builder);
 }
 
 export const InitializeRegistryPlaceholder = (): void => {

@@ -38,10 +38,10 @@ export interface LayoutManagerComponentArgs{
   }
 
 export interface WizardComponentArg{
-    components: ComponentConfig<any>[],
-    componentsContainer: HTMLDivElement | undefined,
+    components: ComponentConfig<MyTopLevelComponentArg<any>>[],
+    componentsContainer?: HTMLDivElement,
     side: tabSide,
-    control: ComponentConfig<any>,
+    control: ComponentConfig<ControlPanelArgs>,
     groups?: GroupData[],
 
 }
@@ -58,7 +58,8 @@ export interface MyTopLevelComponentArg<T>{
 
 export interface ControlPanelArgs{
     labels: Label[],
-    selectedElemId: string,
+    selectedElemId?: string,
+    onSelect?: (selected: string) => void
     side: number,
     groups?: GroupData[],
 }

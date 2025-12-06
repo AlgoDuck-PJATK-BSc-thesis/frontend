@@ -1,128 +1,128 @@
 {
-    "compId": "root-wrapper",
-    "component": "TopLevelComponent",
-    "options": {
-        "component": {
-            "compId": "root",
-            "component": "SplitPanel",
-            "options": {
+  "compId": "root-wrapper",
+  "component": "TopLevelComponent",
+  "options": {
+    "component": {
+      "compId": "root",
+      "component": "SplitPanel",
+      "options": {
+        "axis": 0,
+        "initialComp1Proportions": 0.25,
+        "comp1": {
+          "compId": "problem-info-wrapper",
+          "component": "TopLevelComponent",
+          "options": {
+            "component": {
+              "compId": "problem-info",
+              "component": "InfoPanel",
+              "options": {},
+          "meta": {
+            "clampVal": 0.025,
+            "clamp": {
+              "component": "ProblemInfoClamp",
+              "options": {}
+            }
+          }
+            }
+          }
+        },
+        "comp2": {
+          "compId": "right-side-split-wrapper",
+          "component": "TopLevelComponent",
+          "options": {
+            "component": {
+              "compId": "right-side-split",
+              "component": "SplitPanel",
+              "options": {
+                "meta": {
+            "clampVal": 0.025,
+            "clamp": {
+              "component": "RightSideClamp",
+              "options": {}
+            }
+          },
                 "axis": 0,
-                "initialComp1Proportions": 0.25,
+                "initialComp1Proportions": 0.5,
                 "comp1": {
-                    "compId": "problem-info-wrapper",
-                    "component": "TopLevelComponent",
-                    "options": {
-                        "component": {
-                            "compId": "problem-info",
-                            "component": "InfoPanel",
-                            "options": {}
-                        }
-                    },
-                    "meta": {
-                        "clampVal": 0.025,
-                        "clamp": {
-                            "component": "ProblemInfoClamp",
-                            "options": {}
-                        }
+                  "compId": "editor-terminal-split-wrapper",
+                  "component": "TopLevelComponent",
+                  "options": {
+                    "component": {
+                        "meta": {
+                    "clampVal": 0.025,
+                    "clamp": {
+                      "component": "EditorTerminalClamp",
+                      "options": {}
                     }
+                  },
+                      "compId": "editor-terminal-split",
+                      "component": "SplitPanel",
+                      "options": {
+                        "axis": 1,
+                        "initialComp1Proportions": 0.6,
+                        "comp1": {
+                          "compId": "code-editor-wrapper",
+                          "component": "TopLevelComponent",
+                          "options": {
+                            "component": {
+                              "compId": "code-editor",
+                              "component": "Editor",
+                              "options": {},
+                          "meta": {
+                            "clampVal": 0.025,
+                            "clamp": {
+                              "component": "EditorClamp",
+                              "options": {}
+                            }
+                          }
+                            }
+                          }
+                        },
+                        "comp2": {
+                          "compId": "test-cases-comp-wrapper",
+                          "component": "TopLevelComponent",
+                          "options": {
+                            "component": {
+                              "compId": "test-cases-comp",
+                              "component": "TestCases",
+                              "options": {},
+                          "meta": {
+                            "clampVal": 0.025,
+                            "clamp": {
+                              "component": "TestCasesClamp",
+                              "options": {}
+                            }
+                          }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 },
                 "comp2": {
-                    "compId": "right-side-split-wrapper",
-                    "component": "TopLevelComponent",
-                    "options": {
-                        "component": {
-                            "compId": "right-side-split",
-                            "component": "SplitPanel",
-                            "options": {
-                                "axis": 0,
-                                "initialComp1Proportions": 0.5,
-                                "comp1": {
-                                    "compId": "editor-terminal-split-wrapper",
-                                    "component": "TopLevelComponent",
-                                    "options": {
-                                        "component": {
-                                            "compId": "editor-terminal-split",
-                                            "component": "SplitPanel",
-                                            "options": {
-                                                "axis": 1,
-                                                "initialComp1Proportions": 0.6,
-                                                "comp1": {
-                                                    "compId": "code-editor-wrapper",
-                                                    "component": "TopLevelComponent",
-                                                    "options": {
-                                                        "component": {
-                                                            "compId": "code-editor",
-                                                            "component": "Editor",
-                                                            "options": {}
-                                                        }
-                                                    },
-                                                    "meta": {
-                                                        "clampVal": 0.025,
-                                                        "clamp": {
-                                                            "component": "EditorClamp",
-                                                            "options": {}
-                                                        }
-                                                    }
-                                                },
-                                                "comp2": {
-                                                    "compId": "terminal-comp-wrapper",
-                                                    "component": "TopLevelComponent",
-                                                    "options": {
-                                                        "component": {
-                                                            "compId": "terminal-comp",
-                                                            "component": "Terminal",
-                                                            "options": {}
-                                                        }
-                                                    },
-                                                    "meta": {
-                                                        "clampVal": 0.025,
-                                                        "clamp": {
-                                                            "component": "TerminalClamp",
-                                                            "options": {}
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "meta": {
-                                        "clampVal": 0.025,
-                                        "clamp": {
-                                            "component": "EditorTerminalClamp",
-                                            "options": {}
-                                        }
-                                    }
-                                },
-                                "comp2": {
-                                    "compId": "test-cases-comp-wrapper",
-                                    "component": "TopLevelComponent",
-                                    "options": {
-                                        "component": {
-                                            "compId": "test-cases-comp",
-                                            "component": "TestCases",
-                                            "options": {}
-                                        }
-                                    },
-                                    "meta": {
-                                        "clampVal": 0.025,
-                                        "clamp": {
-                                            "component": "TestCasesClamp",
-                                            "options": {}
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "meta": {
-                        "clampVal": 0.025,
-                        "clamp": {
-                            "component": "RightSideClamp",
-                            "options": {}
-                        }
+                  "compId": "terminal-comp-wrapper",
+                  "component": "TopLevelComponent",
+                  "options": {
+                    "component": {
+                        "meta": {
+                    "clampVal": 0.025,
+                    "clamp": {
+                      "component": "TerminalClamp",
+                      "options": {}
                     }
+                  },
+                      "compId": "terminal-comp",
+                      "component": "Terminal",
+                      "options": {}
+                    }
+                  }
                 }
+              }
             }
+          }
         }
+      }
     }
+  }
 }

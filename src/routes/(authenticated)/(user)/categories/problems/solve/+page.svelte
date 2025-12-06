@@ -6,6 +6,7 @@
 	import Ide from './Ide.svelte';
 	import { onMount } from 'svelte';
 
+	
 	let { data }: { data: { hideHeader:boolean, problemLoadResponse: Promise<StandardResponseDto<ProblemDetailsDto>> } } = $props();
 	
 	let config = $state<Record<string, DefaultLayoutTerminalComponentArgs>>({});
@@ -28,9 +29,9 @@
 			InsertTestCase: insertTestCase
 			} as TestCaseComponentArgs,
 		};
-		setTimeout(() => {
-			activeProfile.profile = "default";
-		});
+		activeProfile.profile = "default";
+		// setTimeout(() => { // Needed for dom reload ig
+		// });
 	});
 
 
@@ -46,6 +47,7 @@
     });
     (config['code-editor'] as CodeEditorComponentArgs).templateContents = atob(res?.body?.modifiedCodeB64 ?? "")
   } 
+
 </script>
 
 <main class="w-full h-[100vh] bg-ide-bg">

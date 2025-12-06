@@ -9,10 +9,12 @@
 
 	let savingState: SaveState = $state("saved");
 
-	let lastTimeout: number | undefined;
+	let lastTimeout: NodeJS.Timeout | undefined;
 	const autoSaveStallTimeMillis: number = 1000;
 
+	// TODO: make this more selective to not spam server
 	$effect(() => {
+		if (!options || !options?.problemId || !options?.templateContents) return;
 		const templateContents: string = options.templateContents;
 		savingState = "unsaved";
 		if (lastTimeout){

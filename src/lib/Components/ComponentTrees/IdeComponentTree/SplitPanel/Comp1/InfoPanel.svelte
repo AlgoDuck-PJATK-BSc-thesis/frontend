@@ -2,7 +2,7 @@
     import MarkdownRenderer from '$lib/Components/Misc/MarkdownRenderer.svelte';
     import type { InfoPanelComponentArgs } from '../../component-args';
     let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
-	$inspect(options);
+	// $inspect(options);
 </script>
 
 <main class="w-full h-full flex flex-col bg-ide-card overflow-y-auto overflow-x-hidden min-w-xl rounded-xl">
@@ -20,7 +20,9 @@
     </div>
     
     <div class="px-8 py-6 flex-1">
-        <MarkdownRenderer options={{ markdown: options.description, class: "prose prose-invert max-w-none text-ide-text-secondary"}} />
+        {#if options.description}
+            <MarkdownRenderer options={{ markdown: options.description, class: "prose prose-invert max-w-none text-ide-text-secondary"}} />
+        {/if}
     </div>
 </main>
 

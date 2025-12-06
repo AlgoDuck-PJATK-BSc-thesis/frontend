@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Component } from "svelte";
+  import { untrack, type Component } from "svelte";
   import type { ComponentConfig } from "./ResizableComponentArg";
   import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
 
@@ -19,7 +19,7 @@
     const innerComponentType: string = layout.options.component.component;
     const componentId: string = layout.options.component.compId;
     const innerComponentConfig: ComponentConfig<any> = layout.options.component;
-    
+
     if (componentConfigurations[componentId]) {
       innerComponentConfig.options = componentConfigurations[componentId];
     }
@@ -28,16 +28,15 @@
       innerComponentConfig.options.comp1 = hydrateLayout(innerComponentConfig.options.comp1, componentConfigurations);
       innerComponentConfig.options.comp2 = hydrateLayout(innerComponentConfig.options.comp2, componentConfigurations);
     } else if (innerComponentType === 'WizardPanel') {
-      innerComponentConfig.options.components = innerComponentConfig.options.components.map((c: any) =>
+      innerComponentConfig.options.components.forEach((c: any) => {
         hydrateLayout(c, componentConfigurations)
-      );
+      })
     }
     
     return layout; 
   };
 
   let hydratedLayout: ComponentConfig<any> | undefined = $state();
-  
   $effect(() => {
     hydratedLayout = hydrateLayout(componentTree, componentOpts);
   });
