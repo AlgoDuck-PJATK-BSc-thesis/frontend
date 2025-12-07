@@ -4,6 +4,7 @@
 	import { activeProfile, ComponentRegistry } from "$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte";
 	import type { ComponentConfig, ControlPanelArgs, MyTopLevelComponentArg, ResizeAxis, tabSide, WizardComponentArg } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
 	import ComponentTreeRenderer from "$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte";
+	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 
 	type Coords = { x: number; y: number };
 
@@ -328,23 +329,93 @@
 		displayArgs: object;
 	}
 
+	let isLayoutHarmonicaExpanded: boolean = $state(true);
+	let isTerminalHarmonicaExpanded: boolean = $state(true);
+	$inspect(isLayoutHarmonicaExpanded);
 </script>
 
-<main
-	class="w-full h-full flex bg-ide-dcard flex-col justify-start items-center overflow-x-hidden overflow-y-scroll"
->
-	<div class="w-full h-[80%] flex flex-col justify-start items-center px-6 py-3 flex-shrink-0">
-		<div class="w-full h-[8%]">
-			<span class="w-full h-full flex justify-center items-center text-2xl text-ide-text-primary"> 
-				Layout Builder Preview
-			</span>
+<main class="w-full h-full flex bg-ide-dcard flex-row justify-center items-center">
+	<div class="w-50 h-full bg-red-500 flex flex-col">
+		<span class="font-mono text-lg px-5 py-3">Components</span>
+		<div class="w-full h-full bg-blue-500 flex flex-col">
+
+			<div class="w-full flex flex-col justify-start">
+				<button onclick={() => {isLayoutHarmonicaExpanded = !isLayoutHarmonicaExpanded}} class="w-full h-16 flex flex-row justify-between items-center p-1">
+					<span class="px-3 py-2">Layout components</span>
+					<div class="h-3 w-3 transition-all duration-75 ease-out {isLayoutHarmonicaExpanded ? "rotate-90" : ""}">
+						<ChevronIconSvg options={{ class: "h-full w-full stroke-ide-text-primary" }}/>
+					</div>
+				</button>
+				<div class="w-full {isLayoutHarmonicaExpanded ? "": "h-0"} bg-amber-400 overflow-y-hidden">
+					{@render ComponentList([
+						{
+							attachable: (node) => {
+								node.onmousedown = () => {
+									handleMouseDown(node, {
+										compId: generateId('wizard-panel'),
+										component: 'WizardPanel',
+										options: {}
+									});
+								};
+								node.onmouseup = () =>
+									handleMouseOutLayoutComp(() => (wizardPipPosition = (wizardPipPosition + 1) % 4));
+							},
+							display: WizardContents,
+							displayArgs: {}
+						},
+						{
+							attachable: (node) => {
+								node.onmousedown = () => handleMouseDown(node, {
+										compId: generateId('split-panel'),
+										component: 'SplitPanel',
+										options: {}
+									});
+								node.onmouseup = () =>
+									handleMouseOutLayoutComp(() => (isResizablePipRotated = !isResizablePipRotated));
+							},
+							display: SplitPaneContents,
+							displayArgs: {}
+						}
+					])}
+				</div>
+			</div>
+
+			<div class="w-full flex flex-col justify-start">
+				<button onclick={() => {isTerminalHarmonicaExpanded = !isTerminalHarmonicaExpanded}} class="w-full h-16 flex flex-row justify-between items-center p-1">
+					<span class="px-3 py-2">Content components</span>
+					<div class="h-3 w-3 transition-all duration-75 ease-out {isTerminalHarmonicaExpanded ? "rotate-90" : ""}">
+						<ChevronIconSvg options={{ class: "h-full w-full stroke-ide-text-primary" }}/>
+					</div>
+				</button>
+				<div class="w-full {isTerminalHarmonicaExpanded ? "grow": "h-0"} bg-amber-400 overflow-y-hidden">
+					{@render ComponentList(
+						registeredComponents.map<ComponentPipConfig>((comp) => {
+							return {
+								attachable: (node) => {
+									node.onmousedown = () => {
+										handleMouseDown(node, comp);
+									};
+								},
+								display: TerminalContents,
+								displayArgs: { componentType: comp.component ?? "name undefined" }
+							};
+						})
+					)}
+				</div>
+			</div>
+			
 		</div>
-		<div class="w-full h-[92%] rounded-xl overflow-hidden border-2 border-ide-accent/20">
+	</div>	
+	<div class="grow h-full  flex flex-col justify-start items-center px-6 py-3 flex-shrink-0">
+		<span class="w-full flex justify-center items-center text-2xl text-ide-text-primary"> 
+			Layout Builder Preview
+		</span>
+		<div class="w-full grow rounded-xl overflow-hidden border-2 border-ide-accent/20">
 			<ComponentTreeRenderer {componentTree} bind:componentOpts />
 		</div>
 	</div>
 
-	<div class="w-full h-[40%] flex flex-col flex-shrink-0">
+	<!-- <div class="w-full h-[40%] flex flex-col flex-shrink-0">
 		<div class="w-full h-[50%] flex flex-col justify-start">
 			{@render ComponentList('Layout Components', [
 				{
@@ -403,55 +474,57 @@
 				Save Layout
 			</button>
 		</div>
-	</div>
+	</div> -->
 </main>
 
-{#snippet ComponentList(label: string, displayablePips: ComponentPipConfig[])}
-	<div class="w-full h-full flex flex-col justify-start">
-		<div class="w-full h-[25%] items-center bg-ide-card flex justify-start border-b border-ide-accent/10">
-			<span class="flex justify-start items-center text-lg font-medium text-ide-text-primary px-10">{label}</span>
-		</div>
-		<div class="w-full h-[75%] flex justify-start px-10 py-2 gap-5 bg-ide-dcard overflow-x-auto">
-			{#each displayablePips as pip}
-				{@render draggablePip(pip.attachable, pip.display, pip.displayArgs)}
-			{/each}
-		</div>
+{#snippet ComponentList(displayablePips: ComponentPipConfig[])}
+	<div class="w-full flex flex-col items-center justify-start bg-ide-dcard">
+		{#each displayablePips as pip}
+			{@render draggablePip(pip.attachable, pip.display, pip.displayArgs)}
+		{/each}
 	</div>
 {/snippet}
 
 
 {#snippet TerminalContents(args: { componentType: string })}
   {@const Icon = ComponentRegistry.get(activeProfile.profile)?.get(`${args.componentType}IconSvg`) as Component<{ options: svgArg }>}
-	<div
-		class="w-full bg-[#434343] h-full rounded-lg overflow-hidden flex flex-col justify-center items-center"
-	>
-    <Icon options={{class: "w-24 h-24 stroke-white"}}/>
-    <span class="w-full flex justify-center items-center text-lg">{args.componentType}</span>
+  	<div class="w-full h-full flex flex-col justify-start items-center">
+		<div class="w-full bg-ide-dcard h-full rounded-lg overflow-hidden flex flex-col justify-center items-center">
+			<Icon options={{class: "w-6 h-6 stroke-ide-text-secondary"}}/>
+		</div>
+		<span class="font-mono text-xs">{args.componentType}</span>
 	</div>
 {/snippet}
 
 
 {#snippet WizardContents()}
-	<div
-		class="w-full h-full bg-[#434343] rounded-lg flex {wizardPipPosition === 0
-			? 'flex-col justify-start'
-			: ''} {wizardPipPosition === 1 ? 'flex-row justify-end' : ''} {wizardPipPosition === 2
-			? 'flex-col-reverse justify-start'
-			: ''} {wizardPipPosition === 3 ? 'flex-row justify-start' : ''} items-center p-2"
-	>
-		<div class="w-3 h-3 bg-ide-accent rounded-sm"></div>
+	<div class="w-full h-full flex flex-col justify-start items-center">
+		<div
+			class="w-full h-full bg-ide-dcard rounded-lg flex {wizardPipPosition === 0
+				? 'flex-col justify-start'
+				: ''} {wizardPipPosition === 1 ? 'flex-row justify-end' : ''} {wizardPipPosition === 2
+				? 'flex-col-reverse justify-start'
+				: ''} {wizardPipPosition === 3 ? 'flex-row justify-start' : ''} items-center p-2">
+			<div class="w-3 h-3 bg-ide-accent rounded-sm"></div>
+		</div>
+		<span class="font-mono text-xs">Wizard</span>
 	</div>
 {/snippet}
 
 {#snippet SplitPaneContents()}
-	<div
-		class="w-full h-full bg-transparent flex gap-1 transition-transform duration-200 ease-out p-1 {isResizablePipRotated
-			? 'rotate-90'
-			: ''}"
-	>
-		<div class="flex-1 h-full bg-[#434343] rounded-md border border-ide-accent/40"></div>
-		<div class="flex-1 h-full bg-[#434343] rounded-md border border-ide-accent/40"></div>
+	<div class="w-full h-full flex flex-col justify-start items-center">
+		<div
+			class="w-full h-full bg-transparent flex gap-1 transition-transform duration-200 ease-out p-1 {isResizablePipRotated
+				? 'rotate-90'
+				: ''}"
+		>
+			<div class="flex-1 h-full bg-ide-dcard rounded-md border border-ide-accent/40"></div>
+			<div class="flex-1 h-full bg-ide-dcard rounded-md border border-ide-accent/40"></div>
+		</div>
+		<span class="font-mono text-xs">Split</span>
+
 	</div>
+
 {/snippet}
 
 {#snippet draggablePip(attachable: (elem: HTMLButtonElement) => void, display: Snippet<[any]>, displayArgs: object)}

@@ -1,37 +1,79 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { PageData } from './$types';
-	import type { DuckDto, DuckShopPage } from './Dtos';
-	import { simulateFetchAsync } from './loadDucks';
+	import type { Duck, DuckShopPage, PageData } from './Dtos';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
+	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 
-  let { data } : {data: PageData} = $props();
+  let { data } : { data: StandardResponseDto<PageData<Duck>> } = $props();
+  
+  let currentPage: number = $state(data.body.currPage);
+  let pageSize: number = $state(data.body.pageSize);
+  
+  const queryClient = useQueryClient();
 
-  let selectedDuckImage: HTMLElement;
+  let query = $derived(createQuery({
+    queryKey: ['ducks', currentPage, pageSize],
+    queryFn: async () => {
+      return await FetchFromApi<PageData<Duck>>("Item", {
+        method: "GET"
+      }, fetch, new URLSearchParams({ currentPage: currentPage.toString(), pageSize: pageSize.toString()}))
+    },
+    initialData: data,
+  }));
 
-  let duckShopPage: DuckShopPage = $state(data as DuckShopPage);
+  $inspect($query.data.body.items);
+
+  let duckShopPage: DuckShopPage = $derived({
+      hasPrev: currentPage > 1,
+      hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
+      totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
+      ducksPaged: $query.data.body.items
+  } as DuckShopPage);
+
+  // Prefetch adjacent pages
+  $effect(() => {
+    if (duckShopPage.hasNext) {
+      queryClient.prefetchQuery({
+        queryKey: ['ducks', currentPage + 1, pageSize],
+        queryFn: async () => {
+          return await FetchFromApi<PageData<Duck>>("Item", {
+            method: "GET"
+          }, fetch, new URLSearchParams({ currentPage: (currentPage + 1).toString(), pageSize: pageSize.toString()}))
+        }
+      });
+    }
+    
+    if (duckShopPage.hasPrev) {
+      queryClient.prefetchQuery({
+        queryKey: ['ducks', currentPage - 1, pageSize],
+        queryFn: async () => {
+          return await FetchFromApi<PageData<Duck>>("Item", {
+            method: "GET"
+          }, fetch, new URLSearchParams({ currentPage: (currentPage - 1).toString(), pageSize: pageSize.toString()}))
+        }
+      });
+    }
+  });
+
   let duckNextPage: DuckShopPage | null = $state(null);
   
-  let currDucks: Array<DuckDto> = $derived(duckShopPage.ducksPaged);
-  let nextDucks: Array<DuckDto> | null = $derived.by(()=>{
+  let currDucks: Array<Duck> = $derived(duckShopPage.ducksPaged);
+  let nextDucks: Array<Duck> | null = $derived.by(()=>{
     return duckNextPage ? duckNextPage.ducksPaged : null;
   });
   
-  let currentPreviewedDuck: DuckDto | undefined = $derived(currDucks.at(0))
+  let currentPreviewedDuck: Duck | undefined = $derived(currDucks.at(0))
 
   let isAnimating: boolean = $state(false);
   let rowType: 'flex-col' | 'flex-col-reverse' = $state("flex-col");
-  let currentPage = $state(0);
 
   let shift: number = $derived.by(()=>{
     return rowType === "flex-col" ? -100 : 100;
   });
 
-  const divs: Array<HTMLElement> = [];
+  const pageContainers: Array<HTMLElement> = [];
     
   const hoverAnimationTime: number = 3000;
-  let raf: number | null;
-  let animationStartTime: number | null = null;
   const driftAmount = 15;
 
   const waitForTransition = (element: HTMLElement): Promise<void> => {
@@ -50,7 +92,12 @@
     if (!duckShopPage.hasNext || isAnimating) return;
     
     currentPage++;
-    duckNextPage = simulateFetchAsync(currentPage);
+    duckNextPage = {
+        hasPrev: currentPage > 1,
+        hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
+        totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
+        ducksPaged: $query.data.body.items
+    } as DuckShopPage;
     
     await scrollPage();
   };
@@ -59,7 +106,12 @@
     if (!duckShopPage.hasPrev || isAnimating) return;
     
     currentPage--;
-    duckNextPage = simulateFetchAsync(currentPage);
+    duckNextPage = {
+        hasPrev: currentPage > 1,
+        hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
+        totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
+        ducksPaged: $query.data.body.items
+    } as DuckShopPage;
     rowType = "flex-col-reverse";
     
     await scrollPage();
@@ -72,10 +124,10 @@
     
     const runningTransitions: Promise<void>[] = [];
     
-    divs.forEach(div => {
-      if (div) {
-        div.style.transform = `translateY(${shift}%)`;
-        runningTransitions.push(waitForTransition(div));
+    pageContainers.forEach(container => {
+      if (container) {
+        container.style.transform = `translateY(${shift}%)`;
+        runningTransitions.push(waitForTransition(container));
       }
     });
     
@@ -83,106 +135,86 @@
     
     duckShopPage = duckNextPage!;
     
-    divs.forEach(div => {
-      if (div) {
-        div.style.transition = 'none';
-        div.style.transform = 'translateY(0)';
+    pageContainers.forEach(container => {
+      if (container) {
+        container.style.transition = 'none';
+        container.style.transform = 'translateY(0)';
       }
     });
         
     await new Promise(resolve => setTimeout(resolve, 20));
     
-    divs.forEach(div => {
-      if (div) {
-        div.style.transition = '';
+    pageContainers.forEach(container => {
+      if (container) {
+        container.style.transition = '';
       }
     });
     
     duckNextPage = null;
-    divs.length = 1; 
+    pageContainers.length = 0; 
     isAnimating = false;
     
     rowType = "flex-col";
   }
-
-  const animateDuckHover = (currentTime: number) : void => {
-    if (!animationStartTime) {
-      animationStartTime = currentTime;
-    }
-    
-    const elapsed = currentTime - animationStartTime;
-    const progress = (elapsed % hoverAnimationTime) / hoverAnimationTime;
-    
-    selectedDuckImage.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
-    
-    raf = requestAnimationFrame(animateDuckHover);
-  }
-
-  onMount(()=>{
-    raf = requestAnimationFrame(animateDuckHover);
-    
-    return () => {
-      if (raf) {
-        cancelAnimationFrame(raf);
-      }
-    };
-  });
-
 </script>
 
-<main class="w-full h-[90vh] flex justify-start">
-  <div class="relative left-0 w-[75%] h-full bg-green-500">
-
-
-    <div class="absolute w-[25%] h-[8%] bg-amber-50 left-[3%] top-0 flex justify-center">
-      <button class="w-[50%] h-full border-4 border-t-0 border-r-2 border-black"> huh</button>
-      <button class="w-[50%] h-full border-4 border-t-0 border-l-2 border-black"> huh</button>
-    </div>
-
-    <div class="absolute w-[90%] h-[60%] top-[9%] left-[5%] flex {rowType} justify-start overflow-hidden">
-
-      {@render ShopPage("bg-blue-500", currDucks)}
-      {#if nextDucks}      
-        {@render ShopPage("bg-blue-500", nextDucks)}
+<main class="w-full h-full relative">
+  <div class="fixed w-10 h-20 left-5 top-5 flex flex-col z-999">             
+    <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasPrev} onclick="{getPrevPage}">↑</button>
+    <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasNext} onclick="{getNextPage}">↓</button>
+  </div>
+  <img class="absolute inset-0 pointer-events-none select-none top-0 w-full h-full object-cover" src="/shop/store-bg.gif" alt="shop background gif">
+  <img class="absolute inset-0 pointer-events-none select-none top-0 w-full h-full z-500 object-cover" src="/shop/shopkeep.gif" alt="shopkeep">
+    <div class="w-full h-full flex flex-row absolute top-0 z-150">
+      <div class="w-3/4 h-full relative">
+        <div class="absolute right-[1%] top-[4%] w-[91%] h-[65%]">
+          <div class="w-full h-full relative overflow-hidden">
+            <div class="w-full h-full flex {rowType} justify-start">
+              {@render ShopPage(currDucks)}
+              {#if nextDucks}      
+                {@render ShopPage(nextDucks)}
+              {/if}
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="w-1/4 h-full relative flex flex-col items-center">
+      {#if currentPreviewedDuck}
+        <div class="w-[50%] aspect-square absolute top-[40%]" {@attach node => {
+          let localAnimationStartTime: number | undefined;
+          let localRaf: number;
+          const animateDuckHover = (currentTime: number) => {
+            if (!localAnimationStartTime) {
+              localAnimationStartTime = currentTime;
+            }
+            const elapsed = currentTime - localAnimationStartTime;
+            const progress = (elapsed % hoverAnimationTime) / hoverAnimationTime;
+            node.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
+            localRaf = requestAnimationFrame(animateDuckHover);
+          };
+          localRaf = requestAnimationFrame(animateDuckHover);
+          return () => {
+            if (localRaf) {
+              cancelAnimationFrame(localRaf);
+            }
+          }
+          }}>
+          <CloudfrontImage path={`Ducks/Outfits/duck-${currentPreviewedDuck.itemId}.png`} cls={""}/>
+        </div>
       {/if}
-      
-    </div> 
-    
-    <div class="absolute w-[65%] h-[35%] bg-amber-50 bottom-0 left-[3%]"></div>
-  </div>
-
-  <div class="relative right-0 w-[25%] px-3 h-full bg-red-500 flex flex-col-reverse">
-    <div class="absolute top-0 w-[75%] h-[24%] bg-red-400">
-
-    </div>
-    <div class="bg-blue-950 h-[75%] flex flex-col justify-centstart items-center">
-      <div bind:this={selectedDuckImage} class="w-full aspect-square m-[5%]">
-        <CloudfrontImage path={`Ducks/Outfits/duck-${currentPreviewedDuck!.id}.png`} cls="w-full aspect-square" alt="{currentPreviewedDuck!.id}"/>
-      </div>
-      <div class="w-full h-[10%] bg-red-500"></div>
-      <div class="w-full h-[10%] bg-transparent flex justify-center items-center text-center">
-        <button class="bg-blue-500 w-[60%] h-[98%]" onclick="{()=>{window.alert("purchased")}}">
-          buy
-        </button>
-      </div>
     </div>
   </div>
-
-
 </main>
 
-
-
-{#snippet ShopPage(color: string, ducksToBeRendered: Array<DuckDto>)}
-  <div bind:this={divs[divs.length]} class="bg-amber-50 w-full h-full min-h-full relative grid grid-cols-4 grid-rows-3 gap-x-5 gap-y-3 p-3 transition-transform duration-1000 ease-out">
-    <div class="absolute w-10 h-20 left-5 top-5 flex-col">
-      <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasPrev} onclick="{getPrevPage}">t</button>
-      <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasNext} onclick="{getNextPage}">b</button>
+{#snippet ShopPage(ducksToBeRendered: Array<Duck>)}
+  <div bind:this={pageContainers[pageContainers.length]} class="w-full h-full relative flex-shrink-0 transition-transform duration-1000 ease-out">
+    <img src="/shop/edited-photo.png" class="w-full h-full pointer-events-none select-none absolute inset-0" alt=""/>
+    <div class="w-full h-full grid grid-cols-4 gap-x-[1.5%] gap-y-[4%] py-[2%] px-[1.5%] grid-rows-3 relative">
+      {#each ducksToBeRendered as duck, i}
+        <button class="w-full h-full flex justify-center items-center hover:cursor-pointer" onclick="{()=>{currentPreviewedDuck=duck}}">
+          <CloudfrontImage path={`Ducks/Outfits/duck-${duck.itemId}.png`} cls="h-full aspect-square" alt={duck.itemId}/>
+        </button>
+      {/each}
     </div>
-    {#each ducksToBeRendered as duck, i}
-      <button class="w-full h-full flex justify-center items-center hover:cursor-pointer {color}" onclick="{()=>{currentPreviewedDuck=duck}}">
-        <CloudfrontImage path={`Ducks/Outfits/duck-${duck.id}.png`} cls="h-full aspect-square" alt={duck.id}/>
-      </button>
-    {/each}
   </div>
 {/snippet}

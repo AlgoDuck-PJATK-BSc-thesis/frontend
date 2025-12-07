@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack, type Component } from "svelte";
-  import type { ComponentConfig } from "./ResizableComponentArg";
+  import type { ComponentConfig, ControlPanelArgsBuild, MyTopLevelComponentArg, WizardComponentArg } from "./ResizableComponentArg";
   import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
 
   let { 
@@ -31,6 +31,19 @@
       innerComponentConfig.options.components.forEach((c: any) => {
         hydrateLayout(c, componentConfigurations)
       })
+      
+      innerComponentConfig.options.control.options.removeComp = (selected: string) => {
+        (innerComponentConfig.options as WizardComponentArg).components = (innerComponentConfig.options as WizardComponentArg).components.filter((c: ComponentConfig<MyTopLevelComponentArg<any>>) => c.options.component.compId !== selected);
+      };
+      
+      innerComponentConfig.options.control.options.swapCompenets = (comp1Index: number, comp2Index: number ) => {
+        let tmp: ComponentConfig<MyTopLevelComponentArg<any>> | undefined = (innerComponentConfig.options as WizardComponentArg).components.at(comp1Index);
+        if (!tmp) return;
+        innerComponentConfig.options.components[comp1Index] = innerComponentConfig.options.components[comp2Index];
+        innerComponentConfig.options.components[comp2Index] = tmp
+
+      };
+      
     }
     
     return layout; 

@@ -30,8 +30,6 @@
 			} as TestCaseComponentArgs,
 		};
 		activeProfile.profile = "default";
-		// setTimeout(() => { // Needed for dom reload ig
-		// });
 	});
 
 

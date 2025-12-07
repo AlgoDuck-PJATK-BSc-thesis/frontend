@@ -4,7 +4,7 @@ export type ResizeAxis = 0 | 1;
 
 export type tabSide = 0 | 1 | 2 | 3;
 
-export interface ComponentConfig<P> {
+export interface ComponentConfig<P extends {}> {
     compId: string,
     component: string;
     options: P;
@@ -12,7 +12,7 @@ export interface ComponentConfig<P> {
     meta?: Meta,
 }
 
-export interface ResizeableComponentArg<T1, T2>{
+export interface ResizeableComponentArg<T1 extends {}, T2 extends {}>{
     axis: ResizeAxis; 
     comp1: ComponentConfig<T1>;
     comp2: ComponentConfig<T2>;
@@ -52,7 +52,7 @@ export interface GroupData{
     groupMembers: string[]
 }
 
-export interface MyTopLevelComponentArg<T>{
+export interface MyTopLevelComponentArg<T extends {}>{
     component: ComponentConfig<T>
 }
 
@@ -62,4 +62,9 @@ export interface ControlPanelArgs{
     onSelect?: (selected: string) => void
     side: number,
     groups?: GroupData[],
+}
+
+export interface ControlPanelArgsBuild extends ControlPanelArgs{
+    removeComp: (compId: string) => void
+    swapCompenets: (comp1Index: number, comp2Index: number ) => void
 }

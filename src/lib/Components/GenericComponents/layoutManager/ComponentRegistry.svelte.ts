@@ -1,5 +1,7 @@
 import EditorBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/EditorBuilder.svelte";
 import InfoPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/InfoPanelBuilder.svelte";
+import SolutionAreaControlPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/SolutionAreaControlPanelBuilder.svelte";
+import SolutionAreaHorizontalControlPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/SolutionAreaHorizontalControlPanelBuilder.svelte";
 import TerminalBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/TerminalBuilder.svelte";
 import TestCasesBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/TestCasesBuilder.svelte";
 import InfoPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp1/InfoPanel.svelte";
@@ -18,6 +20,7 @@ import SolutionAreaControlPanel from "$lib/Components/ComponentTrees/IdeComponen
 import SolutionAreaHorizontalControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaHorizontalControlPanel.svelte";
 import EditorSettings from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/Comp1/EditorSettings.svelte";
 import SettingsControlPanel from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/SettingsControlPanel.svelte";
+
 import type { Component } from "svelte";
 
 export const activeProfile: { profile: string } = $state({ profile: 'default' });
@@ -86,8 +89,8 @@ export const InitializeRegistryDefault = (): void => {
 
     builder.set("PlaceholderPanelIconSvg", CodeEditorIconSvg);
     
-    builder.set('SolutionAreaControlPanel', SolutionAreaControlPanel);
-    builder.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanel);
+    builder.set('SolutionAreaControlPanel', SolutionAreaControlPanelBuilder);
+    builder.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanelBuilder);
 
     builder.set('EditorIconSvg', CodeEditorIconSvg);
     builder.set('InfoPanelIconSvg', InfoPanelIconSvg);
