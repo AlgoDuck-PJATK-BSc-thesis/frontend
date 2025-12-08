@@ -33,7 +33,12 @@
 		"vite-plugin-devtools-json": "^0.2.0"
 	},
 	"dependencies": {
+		"@microsoft/signalr": "^10.0.0",
 		"@tanstack/svelte-query": "^5.83.0",
+		"@tiptap/core": "^3.13.0",
+		"@tiptap/extension-bubble-menu": "^3.13.0",
+		"@tiptap/pm": "^3.13.0",
+		"@tiptap/starter-kit": "^3.13.0",
 		"highlight.js": "^11.11.1",
 		"marked": "^16.3.0",
 		"monaco-editor": "^0.52.2",

@@ -16,6 +16,9 @@ import TerminalPlaceHolder from "$lib/Components/ComponentTrees/IdeComponentTree
 import TestCases from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp2/TestCases.svelte";
 import TestCasesIconSvg from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp2/TestCasesIconSvg.svelte";
 import TestCasesPlaceholder from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp2/TestCasesPlaceholder.svelte";
+import AssistantIconSvg from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/AssistantIconSvg.svelte";
+import AssistantWizardControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/AssistantWizardControlPanel.svelte";
+import ChatWindow from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/ChatWindow.svelte";
 import SolutionAreaControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaControlPanel.svelte";
 import SolutionAreaHorizontalControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaHorizontalControlPanel.svelte";
 import EditorSettings from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/Comp1/EditorSettings.svelte";
@@ -39,6 +42,11 @@ export const InitializeRegistryDefault = (): void => {
     
     defaultMap.set('InfoPanel', InfoPanel);
     defaultMap.set('InfoPanelIconSvg', InfoPanelIconSvg);
+
+    
+    defaultMap.set('ChatWindow', ChatWindow);
+    defaultMap.set('AssistantWizardControlPanel', AssistantWizardControlPanel);
+    defaultMap.set('AssistantIconSvg', AssistantIconSvg);
     
     defaultMap.set('Editor', CodeEditor);
     defaultMap.set('EditorIconSvg', CodeEditorIconSvg);
@@ -67,6 +75,9 @@ export const InitializeRegistryDefault = (): void => {
     
     loading.set('EditorSettings', EditorSettings);
     loading.set('SettingsControlPanel', SettingsControlPanel)
+
+    loading.set('AssistantIconSvg', AssistantIconSvg);
+
     
     loading.set('SolutionAreaControlPanel', SolutionAreaControlPanel);
     loading.set('SolutionAreaControlPanelHorizontal', SolutionAreaHorizontalControlPanel);

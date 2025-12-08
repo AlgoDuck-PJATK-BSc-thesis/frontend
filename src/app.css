@@ -56,6 +56,13 @@
 	font-style: normal;
 }
 
+:global(.ProseMirror) {
+  padding: 1rem;
+  min-height: 200px;
+  outline: none;
+}
+
+
 :root {
 	--font-pressstart2p: 'Press Start 2P', normal;
 	--font-blockblueprint: 'Block Blueprint', sans-serif;

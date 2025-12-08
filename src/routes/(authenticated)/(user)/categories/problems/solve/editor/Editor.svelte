@@ -331,7 +331,7 @@
 
 	let isLayoutHarmonicaExpanded: boolean = $state(true);
 	let isTerminalHarmonicaExpanded: boolean = $state(true);
-	$inspect(isLayoutHarmonicaExpanded);
+	// $inspect(isLayoutHarmonicaExpanded);
 </script>
 
 <main class="w-full h-full flex bg-ide-dcard flex-row justify-center items-center">

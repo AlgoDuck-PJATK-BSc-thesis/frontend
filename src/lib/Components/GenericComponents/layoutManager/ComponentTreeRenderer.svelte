@@ -2,6 +2,7 @@
   import { untrack, type Component } from "svelte";
   import type { ComponentConfig, ControlPanelArgsBuild, MyTopLevelComponentArg, WizardComponentArg } from "./ResizableComponentArg";
   import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
+	import { kbd } from "motion/react-client";
 
   let { 
     componentTree, 
@@ -21,7 +22,9 @@
     const innerComponentConfig: ComponentConfig<any> = layout.options.component;
 
     if (componentConfigurations[componentId]) {
-      innerComponentConfig.options = componentConfigurations[componentId];
+      Object.entries(componentConfigurations[componentId]).forEach(([k, v]) => {
+        innerComponentConfig.options[k] = v;
+      })
     }
     
     if (innerComponentType === 'SplitPanel') {

@@ -19,14 +19,6 @@ export interface RarityDto {
 }
 
 
-export interface PageData<T>
-{
-    currPage: number,
-    pageSize: number,
-    totalItems: number,
-    items: T[]
-}
-
 export interface DuckShopPage{
     ducksPaged: Array<Duck>,
     hasNext: boolean,

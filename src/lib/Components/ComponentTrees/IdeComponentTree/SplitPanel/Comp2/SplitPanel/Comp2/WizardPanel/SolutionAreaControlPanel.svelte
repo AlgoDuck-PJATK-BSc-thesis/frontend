@@ -4,8 +4,6 @@
 
     let { options = $bindable() }: {options: ControlPanelArgs} = $props();
 
-
-    // $inspect(options);
     const handleSelect = (seleceted: string) => {
         if (options.onSelect){
             options.onSelect(seleceted);

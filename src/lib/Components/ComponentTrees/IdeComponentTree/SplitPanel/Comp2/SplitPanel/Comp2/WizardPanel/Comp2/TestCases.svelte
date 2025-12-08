@@ -14,7 +14,8 @@
 	let publicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => tc.isPublic));
 	let nonPublicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => !tc.isPublic));
 
-	let previewedTestCase: TestCase = $state(publicTestCases[0]);
+	// svelte-ignore state_referenced_locally
+		let previewedTestCase: TestCase = $state(publicTestCases[0]);
 
 	let root: FileTreeRootType = $derived.by(() => {
 		return {

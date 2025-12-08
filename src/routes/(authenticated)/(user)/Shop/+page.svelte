@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { Duck, DuckShopPage, PageData } from './Dtos';
+	import type { Duck, DuckShopPage } from './Dtos';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 
-  let { data } : { data: StandardResponseDto<PageData<Duck>> } = $props();
+  let { data } : { data: StandardResponseDto<CustomPageData<Duck>> } = $props();
   
   let currentPage: number = $state(data.body.currPage);
   let pageSize: number = $state(data.body.pageSize);
@@ -14,14 +15,14 @@
   let query = $derived(createQuery({
     queryKey: ['ducks', currentPage, pageSize],
     queryFn: async () => {
-      return await FetchFromApi<PageData<Duck>>("Item", {
+      return await FetchFromApi<CustomPageData<Duck>>("Item", {
         method: "GET"
       }, fetch, new URLSearchParams({ currentPage: currentPage.toString(), pageSize: pageSize.toString()}))
     },
     initialData: data,
   }));
 
-  $inspect($query.data.body.items);
+  // $inspect($query.data.body.items);
 
   let duckShopPage: DuckShopPage = $derived({
       hasPrev: currentPage > 1,
@@ -30,13 +31,12 @@
       ducksPaged: $query.data.body.items
   } as DuckShopPage);
 
-  // Prefetch adjacent pages
   $effect(() => {
     if (duckShopPage.hasNext) {
       queryClient.prefetchQuery({
         queryKey: ['ducks', currentPage + 1, pageSize],
         queryFn: async () => {
-          return await FetchFromApi<PageData<Duck>>("Item", {
+          return await FetchFromApi<CustomPageData<Duck>>("Item", {
             method: "GET"
           }, fetch, new URLSearchParams({ currentPage: (currentPage + 1).toString(), pageSize: pageSize.toString()}))
         }
@@ -47,7 +47,7 @@
       queryClient.prefetchQuery({
         queryKey: ['ducks', currentPage - 1, pageSize],
         queryFn: async () => {
-          return await FetchFromApi<PageData<Duck>>("Item", {
+          return await FetchFromApi<CustomPageData<Duck>>("Item", {
             method: "GET"
           }, fetch, new URLSearchParams({ currentPage: (currentPage - 1).toString(), pageSize: pageSize.toString()}))
         }
