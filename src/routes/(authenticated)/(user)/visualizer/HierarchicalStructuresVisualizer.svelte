@@ -36,8 +36,11 @@
 	};
 	let bstInput = '';
 
-	let heap: number[] = [10, 20, 15, 30, 40, 50, 100];
-	let heapInput = '';
+	let minHeap: number[] = [10, 20, 15, 30, 40, 50, 100];
+	let minHeapInput = '';
+
+	let maxHeap: number[] = [100, 70, 90, 40, 30, 60, 80];
+	let maxHeapInput = '';
 
 	const graph = {
 		A: ['B', 'D'],
@@ -58,8 +61,11 @@
 	let bstNodes: PositionedNode[] = [];
 	let bstEdges: Edge[] = [];
 
-	let heapNodes: PositionedNode[] = [];
-	let heapEdges: Edge[] = [];
+	let minHeapNodes: PositionedNode[] = [];
+	let minHeapEdges: Edge[] = [];
+
+	let maxHeapNodes: PositionedNode[] = [];
+	let maxHeapEdges: Edge[] = [];
 
 	function resetBst() {
 		bstTree = {
@@ -120,16 +126,16 @@
 		}
 	}
 
-	function layoutHeap(currentHeap: number[]) {
-		heapNodes = [];
-		heapEdges = [];
-		for (let i = 0; i < currentHeap.length; i++) {
+	function computeHeapLayout(values: number[]): { nodes: PositionedNode[]; edges: Edge[] } {
+		const nodes: PositionedNode[] = [];
+		const edges: Edge[] = [];
+		for (let i = 0; i < values.length; i++) {
 			const level = Math.floor(Math.log2(i + 1));
 			const posInLevel = i - (Math.pow(2, level) - 1);
 			const totalInLevel = Math.pow(2, level);
 			const spacing = 600 / (totalInLevel + 1);
 			const x = 100 + spacing * (posInLevel + 1);
-			const y = 50 + level * 70;
+			const y = 60 + level * 80;
 			if (i > 0) {
 				const parentIdx = Math.floor((i - 1) / 2);
 				const parentLevel = Math.floor(Math.log2(parentIdx + 1));
@@ -137,17 +143,124 @@
 				const parentTotalInLevel = Math.pow(2, parentLevel);
 				const parentSpacing = 600 / (parentTotalInLevel + 1);
 				const parentX = 100 + parentSpacing * (parentPosInLevel + 1);
-				const parentY = 50 + parentLevel * 70;
-				heapEdges.push({
+				const parentY = 60 + parentLevel * 80;
+				edges.push({
 					fromX: parentX,
-					fromY: parentY + 20,
+					fromY: parentY + 26,
 					toX: x,
-					toY: y - 20
+					toY: y - 26
 				});
 			}
-			const key = `${i}-${x}-${y}-${currentHeap[i]}`;
-			heapNodes.push({ x, y, value: currentHeap[i], key });
+			const key = `${i}-${x}-${y}-${values[i]}`;
+			nodes.push({ x, y, value: values[i], key });
 		}
+		return { nodes, edges };
+	}
+
+	function insertIntoMinHeap(value: number) {
+		const heap = [...minHeap];
+		heap.push(value);
+		let index = heap.length - 1;
+		while (index > 0) {
+			const parent = Math.floor((index - 1) / 2);
+			if (heap[index] < heap[parent]) {
+				const temp = heap[index];
+				heap[index] = heap[parent];
+				heap[parent] = temp;
+				index = parent;
+			} else {
+				break;
+			}
+		}
+		minHeap = heap;
+	}
+
+	function extractFromMinHeap() {
+		if (minHeap.length === 0) {
+			return;
+		}
+		if (minHeap.length === 1) {
+			minHeap = [];
+			return;
+		}
+		const heap = [...minHeap];
+		heap[0] = heap[heap.length - 1];
+		heap.pop();
+		let index = 0;
+		const length = heap.length;
+		while (true) {
+			const left = 2 * index + 1;
+			const right = 2 * index + 2;
+			let smallest = index;
+			if (left < length && heap[left] < heap[smallest]) {
+				smallest = left;
+			}
+			if (right < length && heap[right] < heap[smallest]) {
+				smallest = right;
+			}
+			if (smallest !== index) {
+				const temp = heap[index];
+				heap[index] = heap[smallest];
+				heap[smallest] = temp;
+				index = smallest;
+			} else {
+				break;
+			}
+		}
+		minHeap = heap;
+	}
+
+	function insertIntoMaxHeap(value: number) {
+		const heap = [...maxHeap];
+		heap.push(value);
+		let index = heap.length - 1;
+		while (index > 0) {
+			const parent = Math.floor((index - 1) / 2);
+			if (heap[index] > heap[parent]) {
+				const temp = heap[index];
+				heap[index] = heap[parent];
+				heap[parent] = temp;
+				index = parent;
+			} else {
+				break;
+			}
+		}
+		maxHeap = heap;
+	}
+
+	function extractFromMaxHeap() {
+		if (maxHeap.length === 0) {
+			return;
+		}
+		if (maxHeap.length === 1) {
+			maxHeap = [];
+			return;
+		}
+		const heap = [...maxHeap];
+		heap[0] = heap[heap.length - 1];
+		heap.pop();
+		let index = 0;
+		const length = heap.length;
+		while (true) {
+			const left = 2 * index + 1;
+			const right = 2 * index + 2;
+			let largest = index;
+			if (left < length && heap[left] > heap[largest]) {
+				largest = left;
+			}
+			if (right < length && heap[right] > heap[largest]) {
+				largest = right;
+			}
+			if (largest !== index) {
+				const temp = heap[index];
+				heap[index] = heap[largest];
+				heap[largest] = temp;
+				index = largest;
+			} else {
+				break;
+			}
+		}
+		maxHeap = heap;
 	}
 
 	$: {
@@ -156,467 +269,567 @@
 		layoutBst(bstTree, 450, 50, 0, 260);
 	}
 
-	$: layoutHeap(heap);
+	$: ({ nodes: minHeapNodes, edges: minHeapEdges } = computeHeapLayout(minHeap));
+	$: ({ nodes: maxHeapNodes, edges: maxHeapEdges } = computeHeapLayout(maxHeap));
 
 	const bstJava = `class TreeNode {
-        int data;
-        TreeNode left, right;
-        
-        public TreeNode(int data) {
-                this.data = data;
-                this.left = null;
-                this.right = null;
-            }
-        }
+    int data;
+    TreeNode left, right;
 
-        public class BinarySearchTree {
-            private TreeNode root;
-            
-            public BinarySearchTree() {
-                this.root = null;
-            }
-            
-            public void insert(int data) {
-                root = insertRec(root, data);
-            }
-            
-            private TreeNode insertRec(TreeNode root, int data) {
-                if (root == null) {
-                    root = new TreeNode(data);
-                    return root;
-                }
-                
-                if (data < root.data) {
-                    root.left = insertRec(root.left, data);
-                } else if (data > root.data) {
-                    root.right = insertRec(root.right, data);
-                }
-                
-                return root;
-            }
-            
-            public boolean search(int data) {
-                return searchRec(root, data);
-            }
-            
-            private boolean searchRec(TreeNode root, int data) {
-                if (root == null) return false;
-                if (root.data == data) return true;
-                
-                if (data < root.data) {
-                    return searchRec(root.left, data);
-                }
-                return searchRec(root.right, data);
-            }
-            
-            public void inorder() {
-                inorderRec(root);
-            }
-            
-            private void inorderRec(TreeNode root) {
-                if (root != null) {
-                    inorderRec(root.left);
-                    System.out.print(root.data + " ");
-                    inorderRec(root.right);
-                }
-            }
-            
-            public void delete(int data) {
-                root = deleteRec(root, data);
-            }
-            
-            private TreeNode deleteRec(TreeNode root, int data) {
-                if (root == null) return root;
-                
-                if (data < root.data) {
-                    root.left = deleteRec(root.left, data);
-                } else if (data > root.data) {
-                    root.right = deleteRec(root.right, data);
-                } else {
-                    if (root.left == null) return root.right;
-                    if (root.right == null) return root.left;
-                    
-                    root.data = minValue(root.right);
-                    root.right = deleteRec(root.right, root.data);
-                }
-                return root;
-            }
-            
-            private int minValue(TreeNode root) {
-                int min = root.data;
-                while (root.left != null) {
-                    min = root.left.data;
-                    root = root.left;
-                }
-                return min;
-            }
-        }`;
+    public TreeNode(int data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+}
 
-	const heapJava = `public class MinHeap {
-        private int[] heap;
-        private int size;
-        private int capacity;
-        
-        public MinHeap(int capacity) {
-            this.capacity = capacity;
-            this.size = 0;
-            this.heap = new int[capacity];
-        }
-        
-        private int parent(int i) { return (i - 1) / 2; }
-        private int leftChild(int i) { return 2 * i + 1; }
-        private int rightChild(int i) { return 2 * i + 2; }
-        
-        private void swap(int i, int j) {
-            int temp = heap[i];
-            heap[i] = heap[j];
-            heap[j] = temp;
-        }
-        
-        public void insert(int value) {
-            if (size == capacity) {
-                throw new RuntimeException("Heap is full");
-            }
-            
-            heap[size] = value;
-            int current = size;
-            size++;
-            
-            while (current != 0 && heap[current] < heap[parent(current)]) {
-                swap(current, parent(current));
-                current = parent(current);
-            }
-        }
-        
-        public int extractMin() {
-            if (size <= 0) {
-                throw new RuntimeException("Heap is empty");
-            }
-            if (size == 1) {
-                size--;
-                return heap[0];
-            }
-            
-            int root = heap[0];
-            heap[0] = heap[size - 1];
-            size--;
-            heapify(0);
-            
+public class BinarySearchTree {
+    private TreeNode root;
+
+    public BinarySearchTree() {
+        this.root = null;
+    }
+
+    public void insert(int data) {
+        root = insertRec(root, data);
+    }
+
+    private TreeNode insertRec(TreeNode root, int data) {
+        if (root == null) {
+            root = new TreeNode(data);
             return root;
         }
-        
-        private void heapify(int i) {
-            int left = leftChild(i);
-            int right = rightChild(i);
-            int smallest = i;
-            
-            if (left < size && heap[left] < heap[smallest]) {
-                smallest = left;
-            }
-            if (right < size && heap[right] < heap[smallest]) {
-                smallest = right;
-            }
-            
-            if (smallest != i) {
-                swap(i, smallest);
-                heapify(smallest);
-            }
+
+        if (data < root.data) {
+            root.left = insertRec(root.left, data);
+        } else if (data > root.data) {
+            root.right = insertRec(root.right, data);
         }
-        
-        public int peek() {
-            if (size <= 0) {
-                throw new RuntimeException("Heap is empty");
-            }
+
+        return root;
+    }
+
+    public boolean search(int data) {
+        return searchRec(root, data);
+    }
+
+    private boolean searchRec(TreeNode root, int data) {
+        if (root == null) return false;
+        if (root.data == data) return true;
+
+        if (data < root.data) {
+            return searchRec(root.left, data);
+        }
+        return searchRec(root.right, data);
+    }
+
+    public void inorder() {
+        inorderRec(root);
+    }
+
+    private void inorderRec(TreeNode root) {
+        if (root != null) {
+            inorderRec(root.left);
+            System.out.print(root.data + " ");
+            inorderRec(root.right);
+        }
+    }
+
+    public void delete(int data) {
+        root = deleteRec(root, data);
+    }
+
+    private TreeNode deleteRec(TreeNode root, int data) {
+        if (root == null) return root;
+
+        if (data < root.data) {
+            root.left = deleteRec(root.left, data);
+        } else if (data > root.data) {
+            root.right = deleteRec(root.right, data);
+        } else {
+            if (root.left == null) return root.right;
+            if (root.right == null) return root.left;
+
+            root.data = minValue(root.right);
+            root.right = deleteRec(root.right, root.data);
+        }
+        return root;
+    }
+
+    private int minValue(TreeNode root) {
+        int min = root.data;
+        while (root.left != null) {
+            min = root.left.data;
+            root = root.left;
+        }
+        return min;
+    }
+}`;
+
+	const heapJava = `public class MinHeap {
+    private int[] heap;
+    private int size;
+    private int capacity;
+
+    public MinHeap(int capacity) {
+        this.capacity = capacity;
+        this.size = 0;
+        this.heap = new int[capacity];
+    }
+
+    private int parent(int i) { return (i - 1) / 2; }
+    private int leftChild(int i) { return 2 * i + 1; }
+    private int rightChild(int i) { return 2 * i + 2; }
+
+    private void swap(int i, int j) {
+        int temp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = temp;
+    }
+
+    public void insert(int value) {
+        if (size == capacity) {
+            throw new RuntimeException("Heap is full");
+        }
+
+        heap[size] = value;
+        int current = size;
+        size++;
+
+        while (current != 0 && heap[current] < heap[parent(current)]) {
+            swap(current, parent(current));
+            current = parent(current);
+        }
+    }
+
+    public int extractMin() {
+        if (size <= 0) {
+            throw new RuntimeException("Heap is empty");
+        }
+        if (size == 1) {
+            size--;
             return heap[0];
         }
-        
-        public int size() {
-            return size;
+
+        int root = heap[0];
+        heap[0] = heap[size - 1];
+        size--;
+        heapify(0);
+
+        return root;
+    }
+
+    private void heapify(int i) {
+        int left = leftChild(i);
+        int right = rightChild(i);
+        int smallest = i;
+
+        if (left < size && heap[left] < heap[smallest]) {
+            smallest = left;
         }
-        
-        public boolean isEmpty() {
-            return size == 0;
+        if (right < size && heap[right] < heap[smallest]) {
+            smallest = right;
         }
-    }`;
+
+        if (smallest != i) {
+            swap(i, smallest);
+            heapify(smallest);
+        }
+    }
+
+    public int peek() {
+        if (size <= 0) {
+            throw new RuntimeException("Heap is empty");
+        }
+        return heap[0];
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+}`;
+
+	const maxHeapJava = `public class MaxHeap {
+    private int[] heap;
+    private int size;
+    private int capacity;
+
+    public MaxHeap(int capacity) {
+        this.capacity = capacity;
+        this.size = 0;
+        this.heap = new int[capacity];
+    }
+
+    private int parent(int i) { return (i - 1) / 2; }
+    private int leftChild(int i) { return 2 * i + 1; }
+    private int rightChild(int i) { return 2 * i + 2; }
+
+    private void swap(int i, int j) {
+        int temp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = temp;
+    }
+
+    public void insert(int value) {
+        if (size == capacity) {
+            throw new RuntimeException("Heap is full");
+        }
+
+        heap[size] = value;
+        int current = size;
+        size++;
+
+        while (current != 0 && heap[current] > heap[parent(current)]) {
+            swap(current, parent(current));
+            current = parent(current);
+        }
+    }
+
+    public int extractMax() {
+        if (size <= 0) {
+            throw new RuntimeException("Heap is empty");
+        }
+        if (size == 1) {
+            size--;
+            return heap[0];
+        }
+
+        int root = heap[0];
+        heap[0] = heap[size - 1];
+        size--;
+        heapify(0);
+
+        return root;
+    }
+
+    private void heapify(int i) {
+        int left = leftChild(i);
+        int right = rightChild(i);
+        int largest = i;
+
+        if (left < size && heap[left] > heap[largest]) {
+            largest = left;
+        }
+        if (right < size && heap[right] > heap[largest]) {
+            largest = right;
+        }
+
+        if (largest != i) {
+            swap(i, largest);
+            heapify(largest);
+        }
+    }
+
+    public int peek() {
+        if (size <= 0) {
+            throw new RuntimeException("Heap is empty");
+        }
+        return heap[0];
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+}`;
 
 	const graphJava = `import java.util.*;
 
-        public class Graph {
-            private Map<Integer, List<Integer>> adjList;
-            
-            public Graph() {
-                adjList = new HashMap<>();
-            }
-            
-            public void addVertex(int vertex) {
-                adjList.putIfAbsent(vertex, new ArrayList<>());
-            }
-            
-            public void addEdge(int v1, int v2) {
-                adjList.putIfAbsent(v1, new ArrayList<>());
-                adjList.putIfAbsent(v2, new ArrayList<>());
-                adjList.get(v1).add(v2);
-                adjList.get(v2).add(v1);
-            }
-            
-            public void removeEdge(int v1, int v2) {
-                List<Integer> v1Neighbors = adjList.get(v1);
-                List<Integer> v2Neighbors = adjList.get(v2);
-                if (v1Neighbors != null) v1Neighbors.remove(Integer.valueOf(v2));
-                if (v2Neighbors != null) v2Neighbors.remove(Integer.valueOf(v1));
-            }
-            
-            public void removeVertex(int vertex) {
-                List<Integer> neighbors = adjList.get(vertex);
-                if (neighbors != null) {
-                    for (int neighbor : neighbors) {
-                        adjList.get(neighbor).remove(Integer.valueOf(vertex));
-                    }
-                }
-                adjList.remove(vertex);
-            }
-            
-            public void bfs(int start) {
-                Set<Integer> visited = new HashSet<>();
-                Queue<Integer> queue = new LinkedList<>();
-                
-                visited.add(start);
-                queue.offer(start);
-                
-                while (!queue.isEmpty()) {
-                    int vertex = queue.poll();
-                    System.out.print(vertex + " ");
-                    
-                    for (int neighbor : adjList.get(vertex)) {
-                        if (!visited.contains(neighbor)) {
-                            visited.add(neighbor);
-                            queue.offer(neighbor);
-                        }
-                    }
+public class Graph {
+    private Map<Integer, List<Integer>> adjList;
+
+    public Graph() {
+        adjList = new HashMap<>();
+    }
+
+    public void addVertex(int vertex) {
+        adjList.putIfAbsent(vertex, new ArrayList<>());
+    }
+
+    public void addEdge(int v1, int v2) {
+        adjList.putIfAbsent(v1, new ArrayList<>());
+        adjList.putIfAbsent(v2, new ArrayList<>());
+        adjList.get(v1).add(v2);
+        adjList.get(v2).add(v1);
+    }
+
+    public void removeEdge(int v1, int v2) {
+        List<Integer> v1Neighbors = adjList.get(v1);
+        List<Integer> v2Neighbors = adjList.get(v2);
+        if (v1Neighbors != null) v1Neighbors.remove(Integer.valueOf(v2));
+        if (v2Neighbors != null) v2Neighbors.remove(Integer.valueOf(v1));
+    }
+
+    public void removeVertex(int vertex) {
+        List<Integer> neighbors = adjList.get(vertex);
+        if (neighbors != null) {
+            for (int neighbor : neighbors) {
+                List<Integer> list = adjList.get(neighbor);
+                if (list != null) {
+                    list.remove(Integer.valueOf(vertex));
                 }
             }
-            
-            public void dfs(int start) {
-                Set<Integer> visited = new HashSet<>();
-                dfsHelper(start, visited);
-            }
-            
-            private void dfsHelper(int vertex, Set<Integer> visited) {
-                visited.add(vertex);
-                System.out.print(vertex + " ");
-                
-                for (int neighbor : adjList.get(vertex)) {
-                    if (!visited.contains(neighbor)) {
-                        dfsHelper(neighbor, visited);
-                    }
+        }
+        adjList.remove(vertex);
+    }
+
+    public void bfs(int start) {
+        if (!adjList.containsKey(start)) {
+            return;
+        }
+        Set<Integer> visited = new HashSet<>();
+        Queue<Integer> queue = new LinkedList<>();
+
+        visited.add(start);
+        queue.offer(start);
+
+        while (!queue.isEmpty()) {
+            int vertex = queue.poll();
+            System.out.print(vertex + " ");
+
+            for (int neighbor : adjList.getOrDefault(vertex, Collections.emptyList())) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    queue.offer(neighbor);
                 }
             }
-            
-            public boolean hasPath(int v1, int v2) {
-                Set<Integer> visited = new HashSet<>();
-                return hasPathHelper(v1, v2, visited);
+        }
+    }
+
+    public void dfs(int start) {
+        if (!adjList.containsKey(start)) {
+            return;
+        }
+        Set<Integer> visited = new HashSet<>();
+        dfsHelper(start, visited);
+    }
+
+    private void dfsHelper(int vertex, Set<Integer> visited) {
+        visited.add(vertex);
+        System.out.print(vertex + " ");
+
+        for (int neighbor : adjList.getOrDefault(vertex, Collections.emptyList())) {
+            if (!visited.contains(neighbor)) {
+                dfsHelper(neighbor, visited);
             }
-            
-            private boolean hasPathHelper(int current, int target, Set<Integer> visited) {
-                if (current == target) return true;
-                visited.add(current);
-                
-                for (int neighbor : adjList.get(current)) {
-                    if (!visited.contains(neighbor)) {
-                        if (hasPathHelper(neighbor, target, visited)) {
-                            return true;
-                        }
-                    }
+        }
+    }
+
+    public boolean hasPath(int v1, int v2) {
+        if (!adjList.containsKey(v1) || !adjList.containsKey(v2)) {
+            return false;
+        }
+        Set<Integer> visited = new HashSet<>();
+        return hasPathHelper(v1, v2, visited);
+    }
+
+    private boolean hasPathHelper(int current, int target, Set<Integer> visited) {
+        if (current == target) return true;
+        visited.add(current);
+
+        for (int neighbor : adjList.getOrDefault(current, Collections.emptyList())) {
+            if (!visited.contains(neighbor)) {
+                if (hasPathHelper(neighbor, target, visited)) {
+                    return true;
                 }
-                return false;
             }
-        }`;
+        }
+        return false;
+    }
+}`;
 
 	const trieJava = `import java.util.*;
 
-        class TrieNode {
-            Map<Character, TrieNode> children;
-            boolean isEndOfWord;
-            
-            public TrieNode() {
-                children = new HashMap<>();
-                isEndOfWord = false;
+class TrieNode {
+    Map<Character, TrieNode> children;
+    boolean isEndOfWord;
+
+    public TrieNode() {
+        children = new HashMap<>();
+        isEndOfWord = false;
+    }
+}
+
+public class Trie {
+    private TrieNode root;
+
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public void insert(String word) {
+        TrieNode current = root;
+
+        for (char ch : word.toCharArray()) {
+            current.children.putIfAbsent(ch, new TrieNode());
+            current = current.children.get(ch);
+        }
+
+        current.isEndOfWord = true;
+    }
+
+    public boolean search(String word) {
+        TrieNode current = root;
+
+        for (char ch : word.toCharArray()) {
+            current = current.children.get(ch);
+            if (current == null) {
+                return false;
             }
         }
 
-        public class Trie {
-            private TrieNode root;
-            
-            public Trie() {
-                root = new TrieNode();
-            }
-            
-            public void insert(String word) {
-                TrieNode current = root;
-                
-                for (char ch : word.toCharArray()) {
-                    current.children.putIfAbsent(ch, new TrieNode());
-                    current = current.children.get(ch);
-                }
-                
-                current.isEndOfWord = true;
-            }
-            
-            public boolean search(String word) {
-                TrieNode current = root;
-                
-                for (char ch : word.toCharArray()) {
-                    current = current.children.get(ch);
-                    if (current == null) {
-                        return false;
-                    }
-                }
-                
-                return current.isEndOfWord;
-            }
-            
-            public boolean startsWith(String prefix) {
-                TrieNode current = root;
-                
-                for (char ch : prefix.toCharArray()) {
-                    current = current.children.get(ch);
-                    if (current == null) {
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
-            
-            public void delete(String word) {
-                deleteHelper(root, word, 0);
-            }
-            
-            private boolean deleteHelper(TrieNode current, String word, int index) {
-                if (index == word.length()) {
-                    if (!current.isEndOfWord) {
-                        return false;
-                    }
-                    current.isEndOfWord = false;
-                    return current.children.isEmpty();
-                }
-                
-                char ch = word.charAt(index);
-                TrieNode node = current.children.get(ch);
-                if (node == null) {
-                    return false;
-                }
-                
-                boolean shouldDeleteCurrentNode = deleteHelper(node, word, index + 1);
-                
-                if (shouldDeleteCurrentNode) {
-                    current.children.remove(ch);
-                    return current.children.isEmpty() && !current.isEndOfWord;
-                }
-                
+        return current.isEndOfWord;
+    }
+
+    public boolean startsWith(String prefix) {
+        TrieNode current = root;
+
+        for (char ch : prefix.toCharArray()) {
+            current = current.children.get(ch);
+            if (current == null) {
                 return false;
             }
-            
-            public List<String> autocomplete(String prefix) {
-                List<String> results = new ArrayList<>();
-                TrieNode current = root;
-                
-                for (char ch : prefix.toCharArray()) {
-                    current = current.children.get(ch);
-                    if (current == null) {
-                        return results;
-                    }
-                }
-                
-                findAllWords(current, prefix, results);
+        }
+
+        return true;
+    }
+
+    public void delete(String word) {
+        deleteHelper(root, word, 0);
+    }
+
+    private boolean deleteHelper(TrieNode current, String word, int index) {
+        if (index == word.length()) {
+            if (!current.isEndOfWord) {
+                return false;
+            }
+            current.isEndOfWord = false;
+            return current.children.isEmpty();
+        }
+
+        char ch = word.charAt(index);
+        TrieNode node = current.children.get(ch);
+        if (node == null) {
+            return false;
+        }
+
+        boolean shouldDeleteCurrentNode = deleteHelper(node, word, index + 1);
+
+        if (shouldDeleteCurrentNode) {
+            current.children.remove(ch);
+            return current.children.isEmpty() && !current.isEndOfWord;
+        }
+
+        return false;
+    }
+
+    public List<String> autocomplete(String prefix) {
+        List<String> results = new ArrayList<>();
+        TrieNode current = root;
+
+        for (char ch : prefix.toCharArray()) {
+            current = current.children.get(ch);
+            if (current == null) {
                 return results;
             }
-            
-            private void findAllWords(TrieNode node, String prefix, List<String> results) {
-                if (node.isEndOfWord) {
-                    results.add(prefix);
-                }
-                
-                for (Map.Entry<Character, TrieNode> entry : node.children.entrySet()) {
-                    findAllWords(entry.getValue(), prefix + entry.getKey(), results);
-                }
-            }
-        }`;
+        }
+
+        findAllWords(current, prefix, results);
+        return results;
+    }
+
+    private void findAllWords(TrieNode node, String prefix, List<String> results) {
+        if (node.isEndOfWord) {
+            results.add(prefix);
+        }
+
+        for (Map.Entry<Character, TrieNode> entry : node.children.entrySet()) {
+            findAllWords(entry.getValue(), prefix + entry.getKey(), results);
+        }
+    }
+}`;
 
 	const hashTableJava = `import java.util.*;
 
-        public class HashTable {
-            private static final int SIZE = 10;
-            private LinkedList<Entry>[] table;
-            
-            static class Entry {
-                String key;
-                int value;
-                
-                public Entry(String key, int value) {
-                    this.key = key;
-                    this.value = value;
-                }
+public class HashTable {
+    private static final int SIZE = 10;
+    private LinkedList<Entry>[] table;
+
+    static class Entry {
+        String key;
+        int value;
+
+        public Entry(String key, int value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public HashTable() {
+        table = new LinkedList[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            table[i] = new LinkedList<>();
+        }
+    }
+
+    private int hash(String key) {
+        return Math.abs(key.hashCode() % SIZE);
+    }
+
+    public void put(String key, int value) {
+        int index = hash(key);
+        LinkedList<Entry> bucket = table[index];
+
+        for (Entry entry : bucket) {
+            if (entry.key.equals(key)) {
+                entry.value = value;
+                return;
             }
-            
-            @SuppressWarnings("unchecked")
-            public HashTable() {
-                table = new LinkedList[SIZE];
-                for (int i = 0; i < SIZE; i++) {
-                    table[i] = new LinkedList<>();
-                }
+        }
+
+        bucket.add(new Entry(key, value));
+    }
+
+    public Integer get(String key) {
+        int index = hash(key);
+        LinkedList<Entry> bucket = table[index];
+
+        for (Entry entry : bucket) {
+            if (entry.key.equals(key)) {
+                return entry.value;
             }
-            
-            private int hash(String key) {
-                return Math.abs(key.hashCode() % SIZE);
-            }
-            
-            public void put(String key, int value) {
-                int index = hash(key);
-                LinkedList<Entry> bucket = table[index];
-                
-                for (Entry entry : bucket) {
-                    if (entry.key.equals(key)) {
-                        entry.value = value;
-                        return;
-                    }
-                }
-                
-                bucket.add(new Entry(key, value));
-            }
-            
-            public Integer get(String key) {
-                int index = hash(key);
-                LinkedList<Entry> bucket = table[index];
-                
-                for (Entry entry : bucket) {
-                    if (entry.key.equals(key)) {
-                        return entry.value;
-                    }
-                }
-                
-                return null;
-            }
-            
-            public void remove(String key) {
-                int index = hash(key);
-                LinkedList<Entry> bucket = table[index];
-                
-                bucket.removeIf(entry -> entry.key.equals(key));
-            }
-            
-            public boolean containsKey(String key) {
-                return get(key) != null;
-            }
-            
-            public int size() {
-                int count = 0;
-                for (LinkedList<Entry> bucket : table) {
-                    count += bucket.size();
-                }
-                return count;
-            }
-        }`;
+        }
+
+        return null;
+    }
+
+    public void remove(String key) {
+        int index = hash(key);
+        LinkedList<Entry> bucket = table[index];
+
+        bucket.removeIf(entry -> entry.key.equals(key));
+    }
+
+    public boolean containsKey(String key) {
+        return get(key) != null;
+    }
+
+    public int size() {
+        int count = 0;
+        for (LinkedList<Entry> bucket : table) {
+            count += bucket.size();
+        }
+        return count;
+    }
+}`;
 </script>
 
 <section class="space-y-10">
@@ -740,7 +953,7 @@
 			</div>
 			<div>
 				<h3 class="text-xl font-bold text-white md:text-2xl">Min Heap</h3>
-				<p class="text-sm text-slate-200">Array-based heap with tree visualization.</p>
+				<p class="text-sm text-slate-200">Array-based min heap with tree visualization.</p>
 			</div>
 		</div>
 
@@ -756,7 +969,7 @@
 						<stop offset="100%" stop-color="#f59e0b" />
 					</linearGradient>
 				</defs>
-				{#each heapEdges as edge}
+				{#each minHeapEdges as edge}
 					<line
 						x1={edge.fromX}
 						y1={edge.fromY}
@@ -766,7 +979,7 @@
 						stroke-width="2"
 					/>
 				{/each}
-				{#each heapNodes as node}
+				{#each minHeapNodes as node}
 					<g>
 						<circle
 							cx={node.x}
@@ -791,24 +1004,23 @@
 			</svg>
 			<div class="mt-6 text-center">
 				<div class="mb-4 text-sm text-orange-300">
-					Array representation: [{heap.join(', ')}]
+					Array representation: [{minHeap.join(', ')}]
 				</div>
 				<div class="flex flex-wrap justify-center gap-3">
 					<input
 						type="number"
-						bind:value={heapInput}
+						bind:value={minHeapInput}
 						placeholder="Value"
 						class="w-32 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white"
 					/>
 					<button
 						onclick={() => {
-							if (heapInput) {
-								const value = parseInt(heapInput, 10);
+							if (minHeapInput) {
+								const value = parseInt(minHeapInput, 10);
 								if (!Number.isNaN(value)) {
-									const newHeap = [...heap, value].sort((a, b) => a - b);
-									heap = newHeap;
+									insertIntoMinHeap(value);
 								}
-								heapInput = '';
+								minHeapInput = '';
 							}
 						}}
 						class="rounded-lg bg-orange-600 px-6 py-2 font-semibold text-white hover:bg-orange-700"
@@ -817,9 +1029,7 @@
 					</button>
 					<button
 						onclick={() => {
-							if (heap.length > 0) {
-								heap = heap.slice(1);
-							}
+							extractFromMinHeap();
 						}}
 						class="rounded-lg bg-red-600 px-6 py-2 font-semibold text-white hover:bg-red-700"
 					>
@@ -827,8 +1037,8 @@
 					</button>
 					<button
 						onclick={() => {
-							heap = [10, 20, 15, 30, 40, 50, 100];
-							heapInput = '';
+							minHeap = [10, 20, 15, 30, 40, 50, 100];
+							minHeapInput = '';
 						}}
 						class="rounded-lg bg-gray-600 px-6 py-2 font-semibold text-white hover:bg-gray-700"
 					>
@@ -839,9 +1049,126 @@
 		</div>
 
 		<div id="heap-java" class="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
-			<h4 class="mb-6 text-lg font-semibold text-white">Java Implementation</h4>
+			<h4 class="mb-6 text-lg font-semibold text-white">Java Implementation (Min Heap)</h4>
 			<pre class="overflow-x-auto text-xs text-gray-300 md:text-sm">
         <code>{heapJava}</code>
+      </pre>
+		</div>
+	</div>
+
+	<div
+		id="max-heap"
+		class="space-y-6 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-lg md:p-8"
+	>
+		<div class="flex items-center gap-3">
+			<div
+				class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500 font-semibold text-white"
+			>
+				3
+			</div>
+			<div>
+				<h3 class="text-xl font-bold text-white md:text-2xl">Max Heap</h3>
+				<p class="text-sm text-slate-200">
+					Array-based max heap using the same tree layout, colored like the stack.
+				</p>
+			</div>
+		</div>
+
+		<div class="overflow-x-auto rounded-xl bg-slate-800/50 p-6">
+			<svg
+				viewBox="0 0 900 600"
+				class="mx-auto h-[28rem] w-full min-w-[52rem]"
+				preserveAspectRatio="xMidYMin meet"
+			>
+				<defs>
+					<linearGradient id="maxHeapGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+						<stop offset="0%" stop-color="#38bdf8" />
+						<stop offset="100%" stop-color="#0ea5e9" />
+					</linearGradient>
+				</defs>
+				{#each maxHeapEdges as edge}
+					<line
+						x1={edge.fromX}
+						y1={edge.fromY}
+						x2={edge.toX}
+						y2={edge.toY}
+						stroke="#38bdf8"
+						stroke-width="2"
+					/>
+				{/each}
+				{#each maxHeapNodes as node}
+					<g>
+						<circle
+							cx={node.x}
+							cy={node.y}
+							r="24"
+							fill="url(#maxHeapGradient)"
+							stroke="#38bdf8"
+							stroke-width="2"
+						/>
+						<text
+							x={node.x}
+							y={node.y + 6}
+							text-anchor="middle"
+							fill="white"
+							font-size="16"
+							font-weight="bold"
+						>
+							{node.value}
+						</text>
+					</g>
+				{/each}
+			</svg>
+			<div class="mt-6 text-center">
+				<div class="mb-4 text-sm text-sky-300">
+					Array representation: [{maxHeap.join(', ')}]
+				</div>
+				<div class="flex flex-wrap justify-center gap-3">
+					<input
+						type="number"
+						bind:value={maxHeapInput}
+						placeholder="Value"
+						class="w-32 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-white"
+					/>
+					<button
+						onclick={() => {
+							if (maxHeapInput) {
+								const value = parseInt(maxHeapInput, 10);
+								if (!Number.isNaN(value)) {
+									insertIntoMaxHeap(value);
+								}
+								maxHeapInput = '';
+							}
+						}}
+						class="rounded-lg bg-sky-600 px-6 py-2 font-semibold text-white hover:bg-sky-700"
+					>
+						Insert
+					</button>
+					<button
+						onclick={() => {
+							extractFromMaxHeap();
+						}}
+						class="rounded-lg bg-red-600 px-6 py-2 font-semibold text-white hover:bg-red-700"
+					>
+						Extract Max
+					</button>
+					<button
+						onclick={() => {
+							maxHeap = [100, 70, 90, 40, 30, 60, 80];
+							maxHeapInput = '';
+						}}
+						class="rounded-lg bg-gray-600 px-6 py-2 font-semibold text-white hover:bg-gray-700"
+					>
+						Reset
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="max-heap-java" class="rounded-xl border border-slate-700 bg-slate-900/60 p-6">
+			<h4 class="mb-6 text-lg font-semibold text-white">Java Implementation (Max Heap)</h4>
+			<pre class="overflow-x-auto text-xs text-gray-300 md:text-sm">
+        <code>{maxHeapJava}</code>
       </pre>
 		</div>
 	</div>
@@ -854,7 +1181,7 @@
 			<div
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500 font-semibold text-white"
 			>
-				3
+				4
 			</div>
 			<div>
 				<h3 class="text-xl font-bold text-white md:text-2xl">Graph (Undirected)</h3>
@@ -1016,7 +1343,7 @@
 			<div
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-500 font-semibold text-white"
 			>
-				4
+				5
 			</div>
 			<div>
 				<h3 class="text-xl font-bold text-white md:text-2xl">Trie (Prefix Tree)</h3>
@@ -1089,7 +1416,7 @@
 			<div
 				class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 font-semibold text-white"
 			>
-				5
+				6
 			</div>
 			<div>
 				<h3 class="text-xl font-bold text-white md:text-2xl">Hash Table</h3>
