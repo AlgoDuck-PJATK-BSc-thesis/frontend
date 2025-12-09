@@ -74,6 +74,15 @@
 			</li>
 			<li>
 				<a
+					href="/visualizer"
+					aria-current={page.url.pathname === '/visualizer' ? 'page' : undefined}
+					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Visualizer
+				</a>
+			</li>
+			<li>
+				<a
 					href="/studytimer"
 					aria-current={page.url.pathname === '/studytimer' ? 'page' : undefined}
 					class="tracking-tight text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
