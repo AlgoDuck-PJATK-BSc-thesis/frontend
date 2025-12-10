@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
-	import type { AssistantComponentArgs, AssistantConversationMessage, ChatWindowComponentArgs, CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
+	import type { AssistantConversationMessage, ChatWindowComponentArgs, CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import type { ProblemDetailsDto } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
+	import ChatWindow from '$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/ChatWindow.svelte';
 	import { activeProfile } from '$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte';
-	import type { ComponentConfig, MyTopLevelComponentArg, WizardComponentArg } from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
-	import type { AssistantQuery, AssistantResponse } from '$lib/types/domain/modules/problem/assistant';
+	import type { AssistantWizardControlPanelArgs, ComponentConfig, Label, Meta, MyTopLevelComponentArg, WizardComponentArg } from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
+	import WizardComponent from '$lib/Components/GenericComponents/layoutManager/WizardComponent.svelte';
+	import type { ChatList } from '$lib/types/domain/modules/problem/assistant';
 	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
+	import type { SolvePageLoadArgs } from '$lib/types/ui/modules/problem/solvePageLoadArgs';
 	import Ide from './Ide.svelte';
 	import { onMount } from 'svelte';
 
 	
-	let { data }: { data: { hideHeader:boolean, problemLoadResponse: Promise<StandardResponseDto<ProblemDetailsDto>> } } = $props();
+	let { data = $bindable() }: { data: SolvePageLoadArgs } = $props();
 	
 	let config = $state<Record<string, DefaultLayoutTerminalComponentArgs>>({});
 
@@ -19,10 +22,13 @@
 	}
 
 	let loadedData: StandardResponseDto<ProblemDetailsDto> = $state({} as StandardResponseDto<ProblemDetailsDto>)
+	let loadedChatData: StandardResponseDto<ChatList> = $state({} as StandardResponseDto<ChatList>)
 
+		
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
 		loadedData = await data.problemLoadResponse;
+		loadedChatData = await data.chatList;
 		config = {
 			'code-editor': { templateContents: loadedData.body.templateContents } as CodeEditorComponentArgs,
 			'terminal-comp':  { terminalContents: '' } as TerminalComponentArgs,
@@ -32,58 +38,47 @@
 				InsertTestCase: insertTestCase
 			} as TestCaseComponentArgs,
 			'assistant-wizard': {
-				components: [{
-					compId: "new-chat-comp-wrapper",
-					component: "TopLevelComponent",
-					options: {
-						component: {
-							compId: "new-chat-comp",
-							component: "ChatWindow",
-							options: {},
-							meta: {
-								label: {
-									commonName: "New Chat",
-									labelFor: "new-chat-comp"
-								}
-							}
-						}
-					}
-				},
-			{
-					compId: "new-chat-1-comp-wrapper",
-					component: "TopLevelComponent",
-					options: {
-						component: {
-							compId: "new-chat-1-comp",
-							component: "ChatWindow",
-							options: {},
-							meta: {
-								label: {
-									commonName: "New Chat 1",
-									labelFor: "new-chat-1-comp"
-								}
-							}
-						}
-					}
-				}] as ComponentConfig<MyTopLevelComponentArg<{ pages: CustomPageData<AssistantConversationMessage>[] }>>[]
-			} as Partial<WizardComponentArg>,
-			'new-chat-comp': {
-    			pages: [],
-				chatName: "chat-0",
-				getFullAssistanceData: (chatname: string, query: string) => {
+				components: loadedChatData.body.chats.map(c => {
 					return {
-						exerciseId: (config['problem-info'] as InfoPanelComponentArgs).problemId,
-						codeB64: btoa((config['code-editor'] as CodeEditorComponentArgs).templateContents),
-						query: query,
-						chatName: chatname
-					} as AssistantQuery
-				}
-			} as ChatWindowComponentArgs
-		};
+						compId: `${c.chatName}-comp-wrapper`,
+						component: "TopLevelComponent",
+						options: {
+							component: {
+								compId: `${c.chatName}-comp`,
+								component: "ChatWindow",
+								options: {},
+								meta: {
+									label: {
+										commonName: c.chatName,
+										labelFor: `${c.chatName}-comp`
+									}
+								}
+							}
+						}
+					} as ComponentConfig<MyTopLevelComponentArg<ChatWindowComponentArgs>>
+				})
+			} as Partial<WizardComponentArg>
+		}
 		activeProfile.profile = "default";
 	});
+	
+	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
+		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
+			(target as ChatWindowComponentArgs).problemId = (config['problem-info'] as InfoPanelComponentArgs).problemId;
+			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs).templateContents;
+		},
+		"AssistantWizardControlPanel" : ( target: DefaultLayoutTerminalComponentArgs ) => {
+			(target as AssistantWizardControlPanelArgs).addInsertedComponentToRoot = (compId: string) => {
+				if (config[compId] === undefined){
+					config[compId] = {}
+					return true;
+				}
+				return true;
+			}
+		}
+	});
 
-
+	// $inspect(config);
 
   const insertTestCase = async (testCaseId: string) => {
     let res = await FetchFromApi<testCaseInsertResp>("TestCaseInsert", {
@@ -100,5 +95,5 @@
 </script>
 
 <main class="w-full h-[100vh] bg-ide-bg">
-	<Ide bind:components={config} />
+	<Ide {contextInjectors} bind:components={config} />
 </main>

@@ -5,15 +5,15 @@
     let { options = $bindable() }: {options: ControlPanelArgs} = $props();
 
     const handleSelect = (seleceted: string) => {
-        if (options.onSelect){
-            options.onSelect(seleceted);
+        if (options.controlCallbacks?.select){
+            options.controlCallbacks?.select(seleceted);
         }else{
             options.selectedElemId = seleceted;
         }
     }
 </script>
 
-<main class="w-12 h-full bg-ide-bg flex flex-col justify-start items-center gap-3">
+<main class="w-12 shrink-0 h-full bg-ide-bg flex flex-col justify-start items-center gap-3">
     {#each options.labels.filter(l => l.icon?.component !== undefined) as label}
         {@const Comp = ComponentRegistry.get(activeProfile.profile)!.get(label.icon?.component!)}
         <button 
