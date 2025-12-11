@@ -22,7 +22,6 @@
     initialData: data,
   }));
 
-  // $inspect($query.data.body.items);
 
   let duckShopPage: DuckShopPage = $derived({
       hasPrev: currentPage > 1,

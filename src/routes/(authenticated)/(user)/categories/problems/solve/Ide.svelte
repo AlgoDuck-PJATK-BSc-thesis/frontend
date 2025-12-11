@@ -57,7 +57,7 @@
 		let res = await FetchFromApi<{ jobId: string }>("executor/Submit", {
 			method: "POST",
 			body: JSON.stringify({
-				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).templateContents),
+				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).userCode),
 				problemId: (components['problem-info'] as InfoPanelComponentArgs).problemId
 			})
 		});

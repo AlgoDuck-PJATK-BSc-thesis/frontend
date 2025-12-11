@@ -8,41 +8,66 @@
 	import { onDestroy } from "svelte";
 	import SendMessageIconSvg from "$lib/svg/SendMessageIconSvg.svelte";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
-	import type { AssistantQuery, ChatMessage } from "$lib/types/domain/modules/problem/assistant";
+	import type { AssistantQuery, ChatMessage, MessageFragment } from "$lib/types/domain/modules/problem/assistant";
+    import hljs from 'highlight.js/lib/core';
+    import java from 'highlight.js/lib/languages/java';
+
+    import 'highlight.js/styles/dark.css';
+	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
+	import { createInfiniteQuery } from "@tanstack/svelte-query";
+	import CloudfrontImage from "$lib/Components/Misc/CloudfrontImage.svelte";
+	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
+
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
+    
+    hljs.registerLanguage('java', java);
 
     let connected: boolean = $state(false);
+    let isSending: boolean = $state(false);
 
     let query: string = $state("");
-    type Type = "code" | "text" | "name";
+    type FragmentType = "Code" | "Text" | "Name";
 
     type StreamingCompletionPart = {
-        type: Type
+        type: FragmentType
         message: string
     }
+    
+    const infiniteQuery = createInfiniteQuery({
+        queryKey: [ options?.chatName ?? "New Chat" ],
+        initialPageParam: 1,
+        queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
+            const existingPage: CustomPageData<ChatMessage> | undefined = options.pages.find(p => p.currPage === pageParam);
+            if (existingPage) {
+                return { body: existingPage } as StandardResponseDto<CustomPageData<ChatMessage>>;
+            }
 
-    let response: string | undefined = $state();
+            let data: StandardResponseDto<CustomPageData<ChatMessage>> = await FetchFromApi<CustomPageData<ChatMessage>>("ChatData", { 
+                method: "GET" 
+            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12", chatName: options.chatName ?? "", problemId: options.problemId}));
+            
+            if (!existingPage) {
+                options.pages.push(data.body);
+            }
+            
+            return data;
+        },
+        getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ChatMessage>>) => firstPage.body.prevCursor ?? undefined,
+        getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<ChatMessage>>) => lastPage.body.nextCursor ?? undefined,
+        select: (data: any) => data.pages.map((p: any) => p.body.items).flat(),
+        get enabled() {
+            return !!options.problemId;
+        }
+    });
+
+    $infiniteQuery;
+    let allMessages = $derived(
+        options.pages
+            .flatMap(page => page.items)
+            .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime())
+    );
+    $inspect($infiniteQuery.data)
     let connection: signalR.HubConnection | undefined;
-
-
-    let hasFetchedInitialData: boolean = false;
-
-    const FetchFromApiSyncWrapper = async (problemId: string) : Promise<StandardResponseDto<CustomPageData<ChatMessage>>> => {
-        return await FetchFromApi<CustomPageData<ChatMessage>>("ChatData", {
-            method: "GET"
-        }, fetch, new URLSearchParams({ page: "1", pageSize: "12", chatName: options.chatName ?? "", problemId: problemId}))
-    }
-
-    $effect(() => {
-        if (hasFetchedInitialData || !options.problemId || options.pages.length > 0) return;
-        let problemIdSync = options.problemId; 
-        FetchFromApiSyncWrapper(problemIdSync).then((data: StandardResponseDto<CustomPageData<ChatMessage>>) => {
-            options.pages.push(data.body) 
-        }).catch((reason => {
-            console.log(reason);
-        }))
-        hasFetchedInitialData = true;
-    })
 
     onDestroy(async () => {
         if (connection){
@@ -50,93 +75,278 @@
         }
     });
 
-</script>
 
-<main class="w-full h-full bg-ide-card flex flex-col">
-    <div class="w-full h-10 shrink-0 sticky px-8 flex justify-start items-center">
-        <span class="rounded-md hover:bg-ide-dcard transition-colors duration-300 ease-out px-5 py-1">
-            {options.chatName ?? "New Chat"}
-        </span>
-    </div>
+    let htmlDivs: HTMLDivElement[] = $state([]);
+    let tiptapEditor: Editor | undefined;
 
-    <div class="w-full grow bg-blue-500 overflow-y-auto flex flex-col gap-1">
-        {#if connected}
-            {#if response}
-                <div>{response}</div>    
-            {:else}
-                <div>Thinking</div>
-            {/if}
-        {/if}
-    </div>
+    async function sendMessage() {
+        if (!query.trim() || isSending) return;
 
-    <div class="w-full sticky shrink-0 px-5 py-2 flex justify-center items-center">
-        <div {@attach node => {
-            let tiptapEditor: Editor = new Editor({
-                element: node,
-                extensions: [
-                    StarterKit,
-                    Placeholder.configure({
-                        placeholder: '<p>Enter your question here (the assistant is automatically clued in on your code)</p>'
-                    })
+        isSending = true;
+        let startedWithouChatName: boolean = options.chatName === undefined;
 
-                ],
-                onTransaction: () => {
-                    tiptapEditor = tiptapEditor; 
+        if (options.pages.length == 0){
+            options.pages.unshift({
+                currPage: 1,
+                pageSize: 12,
+                totalItems: 1,
+                items: []
+            })
+        }
+
+        options.pages[0].items.unshift({
+            fragments: [{
+                content: query,
+                type: "Text"
+            } as MessageFragment],
+            messageAuthor: "User"
+        } as ChatMessage)
+        
+        if (tiptapEditor) {
+            tiptapEditor.commands.clearContent();
+        }
+        
+        connection = new signalR.HubConnectionBuilder()
+        .withUrl(`${API_URL}/hubs/assistant`, {
+            withCredentials: true,
+            transport: signalR.HttpTransportType.WebSockets
+        })
+        .withAutomaticReconnect()
+        .build();            
+
+        try {
+            await connection.start()
+            connected = true;
+        }catch (err){
+            connected = false;
+            console.error("failed", err)
+            isSending = false;
+            return;
+        }
+
+        let currentlyReading: FragmentType | undefined;
+        let inserted: boolean = false;
+
+        try {
+            connection.stream("GetAssistance", {
+                exerciseId: options.problemId,
+                codeB64: btoa(options.getUserCode()),
+                query: btoa(query),
+                chatName: options.chatName
+            } as AssistantQuery).subscribe({
+                next: (messagePart: StreamingCompletionPart) => {
+                    if (!inserted){
+                        options.pages[0].items.unshift({
+                            fragments: [] as MessageFragment[],
+                            messageAuthor: "Assistant",
+                            createdOn: new Date(Date.now())
+                        });
+                        inserted = true;
+                    }
+
+                    let message: ChatMessage | undefined = options.pages.at(0)?.items?.at(0)
+                    if (!message) return;
+
+                    switch (messagePart.type){
+                        case "Code":
+                            if (currentlyReading !== "Code"){
+                                currentlyReading = "Code"
+                                message.fragments.unshift({
+                                    type: "Code",
+                                    content: ""
+                                } as MessageFragment)
+                            }
+                            message.fragments[0].content += messagePart.message;
+                            break;
+                        case "Text":
+                            if (currentlyReading !== "Text"){
+                                currentlyReading = "Text"
+                                message.fragments.unshift({
+                                    type: "Text",
+                                    content: ""
+                                } as MessageFragment)
+                            }
+                            message.fragments[0].content += messagePart.message;
+                            break;
+                        case "Name":
+                            if (startedWithouChatName){
+                                options.chatName = options.chatName ? options.chatName + messagePart.message : messagePart.message;
+                            }
+                            break;
+                    }
                 },
-                onUpdate: ({ editor }) => {
-                    query = editor.getText()
+                complete: () => {
+                    connected = false;
+                    isSending = false;
+                },
+                error: (err) => {
+                    connected = false;
+                    isSending = false;
                 }
             })
+        }catch(err){
+            isSending = false;
+        }
+    }
+</script>
 
-            return () => {
-                tiptapEditor.destroy()
-            }
-        }} class="w-full"></div>
-        <button onclick={async () => {
-            connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${API_URL}/hubs/assistant`, {
-                withCredentials: true,
-                transport: signalR.HttpTransportType.WebSockets
-            })
-            .withAutomaticReconnect()
-            .build();
-            try {
-                await connection.start()
-                connected = true;
-            }catch (err){
-                connected = false;
-                console.error("failed", err)
-            }
+<main class="w-full h-full bg-gradient-to-br from-ide-card to-ide-bg flex flex-col relative">
+    <div class="w-full h-12 shrink-0 sticky px-6 flex justify-start items-center border-b border-ide-bg/50 backdrop-blur-sm bg-ide-card/80">
+        <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
+            <span class="rounded-lg hover:bg-ide-dcard transition-all duration-300 ease-out px-4 py-1.5 text-ide-text-primary font-medium">
+                {options.chatName ?? "New Chat"}
+            </span>
+        </div>
+    </div>
 
-            try {
-                connection.stream("GetAssistance", {
-                    exerciseId: options.problemId,
-                    codeB64: btoa(options.getUserCode()),
-                    query: btoa(query),
-                    chatName: options.chatName
-                } as AssistantQuery).subscribe({
-                    next: (messagePart: StreamingCompletionPart) => {
-                        console.log(messagePart);
+    <div {@attach node => {
+        if (!htmlDivs[0]) return;
+        const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+            if (entries[0].isIntersecting){
+                console.log("fetch next")
+                $infiniteQuery.fetchNextPage();
+            }
+        },{
+            root: node,
+            rootMargin: '200px 0px 0px 0px',
+            threshold: 0
+        });
+        observer.observe(htmlDivs[htmlDivs.length - 1]);
+
+        return () => observer.disconnect();
+    }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
+        {#each allMessages as message, i}
+            {#if message.messageAuthor === "Assistant"}
+                {@render AssistantMessage(message, i)}
+            {:else}
+                {@render UserMessage(message, i)}
+            {/if}
+        {/each}
+    </div>
+
+    
+    <div class="w-full sticky shrink-0 px-6 py-4 flex justify-center items-center border-t border-ide-bg/30 backdrop-blur-md bg-ide-card/40">
+        <div class="w-full max-w-4xl relative">
+            <div {@attach node => {
+                tiptapEditor = new Editor({
+                    element: node,
+                    extensions: [
+                        StarterKit,
+                        Placeholder.configure({
+                            placeholder: 'Ask a question about your code... (Press Enter to send, Shift+Enter for new line)'
+                        })
+                    ],
+                    onTransaction: () => {
+                        tiptapEditor = tiptapEditor; 
                     },
-                    complete: () => {
-                        connected = false;
+                    onUpdate: ({ editor }) => {
+                        query = editor.getText()
                     },
-                    error: (err) => {
-                        connected = false;
+                    editorProps: {
+                        handleKeyDown: (view, event) => {
+                            if (event.key === 'Enter' && !event.shiftKey) {
+                                event.preventDefault();
+                                sendMessage();
+                                return true;
+                            }
+                            return false;
+                        }
                     }
                 })
-            }catch(err){}
-        }} class="px-3 py-1">
-            <SendMessageIconSvg options={{ class: "w-5 h-5 stroke-ide-text-primary stroke-[2]"}}/>
-        </button>
+
+                return () => {
+                    tiptapEditor?.destroy()
+                }
+            }} class="w-full editor-container"></div>
+            <button 
+                onclick={sendMessage} class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-lg transition-all duration-300 ease-out
+                       {isSending || !query.trim() 
+                           ? 'bg-ide-dcard/50 cursor-not-allowed opacity-50' 
+                           : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 active:scale-95'}"
+            >
+                {#if isSending}
+                    <div class="w-5 h-5 border-2 border-ide-text-primary/20 border-t-ide-text-primary rounded-full animate-spin"></div>
+                {:else}
+                    <SendMessageIconSvg options={{ class: "w-5 h-5 stroke-ide-text-primary stroke-[2]"}}/>
+                {/if}
+            </button>
+        </div>
     </div>
 </main>
 
+{#snippet UserMessage(message: ChatMessage, index: number)}
+    <div 
+        bind:this={htmlDivs[htmlDivs.length]} 
+        class="w-[85%] self-end py-3 px-4 flex rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex-col-reverse gap-3 border border-blue-500/20 backdrop-blur-sm shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 message-slide-in"
+        style="animation-delay: {index * 50}ms"
+    >
+        {#each message.fragments as fragment}
+            {#if fragment.type === "Code" || fragment.type === 1}
+                {@render CodeFragment(fragment.content)}
+            {:else}
+                {@render TextFragment(fragment.content)}
+            {/if}
+        {/each}
+    </div>
+{/snippet}
+
+{#snippet AssistantMessage(message: ChatMessage, index: number)}
+    <div 
+        bind:this={htmlDivs[htmlDivs.length]} 
+        class="w-[90%] self-start py-3 px-4 flex rounded-2xl bg-gradient-to-br from-ide-dcard/60 to-ide-card/40 flex-col-reverse gap-3 border border-ide-bg/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 message-slide-in"
+        style="animation-delay: {index * 50}ms"
+    >
+        <div class="flex items-center gap-2 pb-2 border-b border-ide-bg/30">
+            <div class="w-10 h-10 rounded-full overflow-hidden flex justify-center items-center bg-red-500">
+                <!-- <CloudfrontImage path={`Ducks/Outfits/duck-16d4a949-0f5f-481a-b9d6-e0329f9d7dd3.png`} cls={"w-15 h-15"}/> -->
+            </div>
+            <span class="text-xs text-ide-text-secondary font-medium">Assistant</span>
+        </div>
+        {#each message.fragments as fragment}
+            {#if fragment.type === "Code" || fragment.type === 1}
+                {@render CodeFragment(fragment.content)}
+            {:else}
+                {@render TextFragment(fragment.content)}
+            {/if}
+        {/each}
+    </div>
+{/snippet}
+
+{#snippet CodeFragment(content: string)}
+    <div class="rounded-xl overflow-hidden border border-ide-bg/30 shadow-inner hover:shadow-lg transition-shadow duration-300">
+        <div class="bg-ide-bg/50 px-4 py-2 flex items-center justify-between border-b border-ide-bg/30">
+            <span class="text-xs text-ide-text-secondary font-mono">Java</span>
+            <button onclick={() => {
+                navigator.clipboard.writeText(content);
+            }} class="p-2 hover:bg-ide-dcard transition-colors duration-300 ease-out rounded" style="corner-shape: squircle; border-radius: 100px;">
+                <CopyIconSvg options={{ class: "w-4 h-4 stroke-[2] stroke-ide-text-secondary hover:stroke-ide-text-primary transition-colors ease-out duration-300"}}/>
+            </button>
+        </div>
+        {@html `<pre class="hljs language-java text-xs px-4 py-3"><code>${hljs.highlight(content, { language: 'java' }).value}</code></pre>`}
+    </div>
+{/snippet}
+
+{#snippet TextFragment(content: string)}
+    <MarkdownRenderer options={{ markdown: content, class:"w-full text-ide-text-primary text-sm font-mono px-1 py-1 leading-relaxed"}}/>
+{/snippet}
+
 <style>
   :global(.tiptap) {
-    padding: 1rem;
-    background: var(--color-ide-card);
-    flex-grow: 0;
+    padding: 1rem 3.5rem 1rem 1rem;
+    background: var(--color-ide-dcard);
+    border-radius: 0.75rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    min-height: 3rem;
+    max-height: 12rem;
+    overflow-y: auto;
+  }
+  
+  :global(.tiptap:focus) {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    outline: none;
   }
   
   :global(.tiptap p.is-editor-empty:first-child::before) {
@@ -145,5 +355,65 @@
     float: left;
     height: 0;
     pointer-events: none;
+    opacity: 0.5;
+  }
+
+  :global(.tiptap p) {
+    margin: 0;
+  }
+
+  .messages-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .messages-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb {
+    background: var(--color-ide-dcard);
+    border-radius: 4px;
+  }
+
+  .messages-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ide-bg);
+  }
+
+  :global(.tiptap::-webkit-scrollbar) {
+    width: 6px;
+  }
+
+  :global(.tiptap::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  :global(.tiptap::-webkit-scrollbar-thumb) {
+    background: var(--color-ide-bg);
+    border-radius: 3px;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message-slide-in {
+    animation: slideIn 0.4s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 </style>

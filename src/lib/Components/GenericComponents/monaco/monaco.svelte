@@ -8,7 +8,7 @@
 	let {
 		editorContents = $bindable(),
 		readOnly
-	}: { editorContents: string; fontSize?: number; readOnly?: boolean;} = $props();
+	}: { editorContents: string | undefined; fontSize?: number; readOnly?: boolean;} = $props();
 
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
@@ -54,16 +54,17 @@
 		}
 	});
 
-	// $effect(() => {
-	// 	const content: string = editorContents;
-	// 	if (editor && monaco) {
-	// 		const position = editor.getPosition();
-	// 		editor.setValue(content);
-	// 		if (position) {
-	// 			editor.setPosition(position);
-	// 		}
-	// 	}
-	// });
+	$effect(() => {
+		if (!editorContents) return
+		const content: string = editorContents;
+		if (editor && monaco) {
+			const position = editor.getPosition();
+			editor.setValue(content);
+			if (position) {
+				editor.setPosition(position);
+			}
+		}
+	});
 
 	onDestroy(() => {
 		if (browser && monaco && editor) {

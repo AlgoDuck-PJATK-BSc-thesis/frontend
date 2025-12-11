@@ -18,8 +18,16 @@ export type ChatDetails = {
 }
 
 export type ChatMessage = {
-    message: string,
-    author: MessageAuthor
+    fragments: MessageFragment[],
+    messageAuthor: MessageAuthor,
+    createdOn: Date
 }
+
+export type MessageFragment = {
+    content: string,
+    type: FragmentType
+}
+
+export type FragmentType = "Code" | "Text" | 1 | 0;
 
 export type MessageAuthor = "User" | "Assistant";

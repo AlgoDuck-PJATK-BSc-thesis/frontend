@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import type { AssistantConversationMessage, ChatWindowComponentArgs, CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
-	import type { ProblemDetailsDto } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
-	import ChatWindow from '$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/ChatWindow.svelte';
+	import type { AutoSaveDto, ProblemDetailsDto } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
 	import { activeProfile } from '$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte';
 	import type { AssistantWizardControlPanelArgs, ComponentConfig, Label, Meta, MyTopLevelComponentArg, WizardComponentArg } from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
-	import WizardComponent from '$lib/Components/GenericComponents/layoutManager/WizardComponent.svelte';
-	import type { ChatList } from '$lib/types/domain/modules/problem/assistant';
+	import type { ChatList, ChatMessage } from '$lib/types/domain/modules/problem/assistant';
 	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 	import type { SolvePageLoadArgs } from '$lib/types/ui/modules/problem/solvePageLoadArgs';
 	import Ide from './Ide.svelte';
@@ -23,14 +21,20 @@
 
 	let loadedData: StandardResponseDto<ProblemDetailsDto> = $state({} as StandardResponseDto<ProblemDetailsDto>)
 	let loadedChatData: StandardResponseDto<ChatList> = $state({} as StandardResponseDto<ChatList>)
+	let loadedAutoSave: StandardResponseDto<AutoSaveDto | undefined> = $state({} as StandardResponseDto<AutoSaveDto | undefined>);
 
-		
+	$inspect(loadedAutoSave?.body?.userCodeB64 !== undefined && atob(loadedAutoSave.body.userCodeB64).trim() !== "")
+
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
 		config = {
-			'code-editor': { templateContents: loadedData.body.templateContents } as CodeEditorComponentArgs,
+			'code-editor': { 
+				userCode: loadedAutoSave?.body?.userCodeB64 !== undefined && atob(loadedAutoSave.body.userCodeB64).trim() !== "" ? atob(loadedAutoSave!.body!.userCodeB64) : loadedData.body.templateContents,
+				problemId: loadedData.body.problemId,
+				templateContents: loadedData.body.templateContents
+			 } as CodeEditorComponentArgs,
 			'terminal-comp':  { terminalContents: '' } as TerminalComponentArgs,
 			'problem-info':  (await data.problemLoadResponse).body as InfoPanelComponentArgs,
 			'test-cases-comp':  { 
@@ -46,7 +50,11 @@
 							component: {
 								compId: `${c.chatName}-comp`,
 								component: "ChatWindow",
-								options: {},
+								options: {
+									chatName: c.chatName,
+									problemId: loadedData.body.problemId,
+									pages: [] as CustomPageData<ChatMessage>[]
+								} as ChatWindowComponentArgs,
 								meta: {
 									label: {
 										commonName: c.chatName,
@@ -61,7 +69,8 @@
 		}
 		activeProfile.profile = "default";
 	});
-	
+
+
 	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
 		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
 			(target as ChatWindowComponentArgs).problemId = (config['problem-info'] as InfoPanelComponentArgs).problemId;
@@ -77,8 +86,6 @@
 			}
 		}
 	});
-
-	// $inspect(config);
 
   const insertTestCase = async (testCaseId: string) => {
     let res = await FetchFromApi<testCaseInsertResp>("TestCaseInsert", {

@@ -21,10 +21,12 @@
         <div class="w-full py-2 px-1">
             <button onclick={() => {
                 if (options.controlCallbacks?.insert){
+                    let dateNow: number = Date.now();
+                    let compId: string = `chat-${dateNow}`;
                     options.controlCallbacks!.insert({
-                        compId: 'new-chat',
+                        compId: compId,
                         compType: 'ChatWindow',
-                        compCommonName: 'New Chat',
+                        compCommonName: undefined,
                         compArgs: {
                             chatName: undefined,
                             pages: [] as CustomPageData<ChatMessage>[]
@@ -34,7 +36,7 @@
                 }
             }} class="flex w-full h-10 rounded-full flex-row justify-center gap-2 items-center bg-ide-dcard/50 transition-colors duration-300 ease-out hover:bg-ide-dcard">
                 <CrossIconSvg options={{ class: "h-4 w-4 stroke-ide-text-secondary rotate-45 stroke-[3]" }}/>
-                <span class="text-sm font-semibold">New Chat</span>
+                <span class="text-sm font-semibold text-ide-text-secondary">New Chat</span>
             </button>
         </div>
     </div>
@@ -43,7 +45,7 @@
         <div class="w-full flex flex-col items-center justify-start gap-1">
             {#each options.labels as label}
             <button onclick={() => {handleSelect(label.labelFor)}} class="w-full h-10 hover:bg-ide-dcard px-3 rounded-md">
-                <span class="w-full flex items-start">{label.commonName}</span>
+                <span class="w-full flex flex-nowrap overflow-hidden text-ide-text-secondary grow-0 items-start">{label.commonName ?? "New Chat"}</span>
             </button>
             {:else}
                 <div class="w-full grow bg-red-500">nothing just yet</div>
