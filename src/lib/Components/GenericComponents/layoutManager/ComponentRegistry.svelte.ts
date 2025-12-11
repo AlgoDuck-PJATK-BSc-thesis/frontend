@@ -28,6 +28,9 @@ import type { Component } from "svelte";
 
 export const activeProfile: { profile: string } = $state({ profile: 'default' });
 
+export const LayoutComponents: string[] = [ "TopLevelComponent", "WizardPanel", "SplitPanel" ] as const
+export type LayoutComponents = typeof LayoutComponents
+
 export const StaticBaselineComponents: Map<string, Component<any>> = new Map<string, Component<any>>();
 export const ComponentRegistry: Map<string, Map<string, Component<any>>> = new Map<string, Map<string, Component<any>>>();
 

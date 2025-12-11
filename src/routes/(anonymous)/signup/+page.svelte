@@ -13,7 +13,6 @@
 	let formData: SignUpDto = $state({} as SignUpDto);
 
 	const register = async () => {
-		console.log(formData);
 		let signup: StandardResponseDto = await FetchFromApi(
 			'Auth/register',
 			{
@@ -23,7 +22,6 @@
 			fetch
 		);
 
-		console.log(signup);
 		if (signup.status !== 'Success') {
 			console.log('returning');
 			return;

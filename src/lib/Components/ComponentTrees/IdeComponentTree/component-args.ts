@@ -1,5 +1,5 @@
 import type { StandardResponseDto } from "$lib/api/apiCall";
-import type { AssistantQuery, AssistantResponse } from "$lib/types/domain/modules/problem/assistant";
+import type { AssistantQuery, AssistantResponse, ChatMessage } from "$lib/types/domain/modules/problem/assistant";
 import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
 import type { CategoryDto, DifficultyDto, TagDto, TestCase } from "./IdeComponentArgs";
 
@@ -22,7 +22,8 @@ export interface TerminalComponentArgs extends DefaultLayoutTerminalComponentArg
 
 export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentArgs {
   templateContents: string,
-  problemId: string
+  userCode?: string,
+  problemId: string,
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs {
@@ -32,9 +33,11 @@ export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArg
 
 
 export interface ChatWindowComponentArgs extends DefaultLayoutTerminalComponentArgs {
-  chatName: string,
-  pages: CustomPageData<AssistantConversationMessage>[],
-  getFullAssistanceData: (chatname: string, query: string) => AssistantQuery
+  chatName?: string,
+  pages: CustomPageData<ChatMessage>[],
+  problemId: string,
+  getUserCode: () => string,
+  // getFullAssistanceData: (chatname: string, query: string) => AssistantQuery
 }
 
 export interface AssistantComponentArgs extends DefaultLayoutTerminalComponentArgs {

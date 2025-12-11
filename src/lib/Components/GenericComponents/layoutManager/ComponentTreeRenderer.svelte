@@ -1,61 +1,75 @@
 <script lang="ts">
-  import { untrack, type Component } from "svelte";
-  import type { ComponentConfig, ControlPanelArgsBuild, MyTopLevelComponentArg, WizardComponentArg } from "./ResizableComponentArg";
-  import { activeProfile, ComponentRegistry } from "./ComponentRegistry.svelte";
-	import { kbd } from "motion/react-client";
+  import type { Component } from "svelte";
+  import type { ComponentConfig, ControlPanelArgs, MyTopLevelComponentArg, ResizeableComponentArg, WizardComponentArg } from "./ResizableComponentArg";
+  import { activeProfile, ComponentRegistry, LayoutComponents } from "./ComponentRegistry.svelte";
 
   let { 
     componentTree, 
     componentOpts = $bindable(),
+    contextInjectors
   }: { 
     componentTree: ComponentConfig<any>
     componentOpts: Record<string, any>
+    contextInjectors?: Record<string, (options: any) => void> 
+
   } = $props();
+  
 
   let RootComp: Component<any> | undefined = $derived(
     ComponentRegistry.get(activeProfile.profile)?.get(componentTree.component)
   );
+  const hydrateLayout = (layout: ComponentConfig<MyTopLevelComponentArg<any>>, componentConfigurations: Record<string, object>): ComponentConfig<any> => {
+    const innerComponentType: string | undefined = layout?.options?.component?.component ?? layout?.component;
+    const componentId: string | undefined = layout?.options?.component?.compId ?? layout?.compId;
 
-  const hydrateLayout = (layout: ComponentConfig<any>, componentConfigurations: Record<string, object>): ComponentConfig<any> => {
-    const innerComponentType: string = layout.options.component.component;
-    const componentId: string = layout.options.component.compId;
-    const innerComponentConfig: ComponentConfig<any> = layout.options.component;
-
+    const innerComponentConfig: ComponentConfig<any> | undefined = layout?.options?.component ?? layout;
+      
     if (componentConfigurations[componentId]) {
-      Object.entries(componentConfigurations[componentId]).forEach(([k, v]) => {
-        innerComponentConfig.options[k] = v;
-      })
+      const tmp = innerComponentConfig.options;
+      innerComponentConfig.options = componentConfigurations[componentId];
+      Object.entries(tmp).forEach(([k, v]) => {
+        if (innerComponentConfig.options[k] === undefined){
+          innerComponentConfig.options[k] = v;
+        }
+      });
+    }else if (!LayoutComponents.some(c => c === innerComponentType)){
+      componentConfigurations[componentId] = innerComponentConfig.options;
     }
-    
+
+    if ((contextInjectors ?? {})[innerComponentType] !== undefined){
+      contextInjectors![innerComponentType]!(innerComponentConfig.options);
+    }
+
     if (innerComponentType === 'SplitPanel') {
-      innerComponentConfig.options.comp1 = hydrateLayout(innerComponentConfig.options.comp1, componentConfigurations);
-      innerComponentConfig.options.comp2 = hydrateLayout(innerComponentConfig.options.comp2, componentConfigurations);
+      (innerComponentConfig as ComponentConfig<ResizeableComponentArg<MyTopLevelComponentArg<any>, MyTopLevelComponentArg<any>>>).options.comp1 = hydrateLayout(innerComponentConfig.options.comp1, componentConfigurations);
+      (innerComponentConfig as ComponentConfig<ResizeableComponentArg<MyTopLevelComponentArg<any>, MyTopLevelComponentArg<any>>>).options.comp2 = hydrateLayout(innerComponentConfig.options.comp2, componentConfigurations);
     } else if (innerComponentType === 'WizardPanel') {
-      innerComponentConfig.options.components.forEach((c: any) => {
+      if ((contextInjectors ?? {})[(innerComponentConfig.options as WizardComponentArg).control.component]){
+        contextInjectors![(innerComponentConfig.options as WizardComponentArg).control.component]((innerComponentConfig.options as WizardComponentArg).control.options)
+      }
+      (innerComponentConfig as ComponentConfig<WizardComponentArg>).options.components.forEach((c: any) => {
         hydrateLayout(c, componentConfigurations)
       })
-      
-      innerComponentConfig.options.control.options.removeComp = (selected: string) => {
-        (innerComponentConfig.options as WizardComponentArg).components = (innerComponentConfig.options as WizardComponentArg).components.filter((c: ComponentConfig<MyTopLevelComponentArg<any>>) => c.options.component.compId !== selected);
-      };
-      
-      innerComponentConfig.options.control.options.swapCompenets = (comp1Index: number, comp2Index: number ) => {
-        let tmp: ComponentConfig<MyTopLevelComponentArg<any>> | undefined = (innerComponentConfig.options as WizardComponentArg).components.at(comp1Index);
-        if (!tmp) return;
-        innerComponentConfig.options.components[comp1Index] = innerComponentConfig.options.components[comp2Index];
-        innerComponentConfig.options.components[comp2Index] = tmp
-
-      };
-      
     }
     
     return layout; 
   };
 
+  let lastTreeId = $state<string>();
+  let lastOptsSnapshot = $state<string>();
+
   let hydratedLayout: ComponentConfig<any> | undefined = $state();
+
   $effect(() => {
-    hydratedLayout = hydrateLayout(componentTree, componentOpts);
-  });
+    const currentTreeId = componentTree.compId;
+    const currentOptsSnapshot = JSON.stringify(Object.keys(componentOpts));
+    
+    if (currentTreeId !== lastTreeId || currentOptsSnapshot !== lastOptsSnapshot) {
+        hydratedLayout = hydrateLayout(componentTree, componentOpts);
+        lastTreeId = currentTreeId;
+        lastOptsSnapshot = currentOptsSnapshot;
+    }
+});
 </script>
 
 <main class="w-full h-full">
