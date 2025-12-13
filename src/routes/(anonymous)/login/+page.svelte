@@ -4,7 +4,7 @@
 	import LandingPage from '$lib/Components/LandingPage.svelte';
 
 	type SignInDto = {
-		username: String;
+		userNameOrEmail: String;
 		password: String;
 	};
 
@@ -51,7 +51,7 @@
 						name="identifier"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.username}
+						bind:value={formData.userNameOrEmail}
 					/>
 				</label>
 

@@ -3,7 +3,7 @@
 	import type { AssistantConversationMessage, ChatWindowComponentArgs, CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import type { AutoSaveDto, ProblemDetailsDto } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
 	import { activeProfile } from '$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte';
-	import type { AssistantWizardControlPanelArgs, ComponentConfig, Label, Meta, MyTopLevelComponentArg, WizardComponentArg } from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
+	import type { ComponentConfig, ControlPanelArgs, InsertData, Label, Meta, MyTopLevelComponentArg, WizardComponentArg } from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
 	import type { ChatList, ChatMessage } from '$lib/types/domain/modules/problem/assistant';
 	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 	import type { SolvePageLoadArgs } from '$lib/types/ui/modules/problem/solvePageLoadArgs';
@@ -71,19 +71,44 @@
 	});
 
 
+	$inspect(config);
+
 	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
 		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
 			(target as ChatWindowComponentArgs).problemId = (config['problem-info'] as InfoPanelComponentArgs).problemId;
 			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs).templateContents;
 		},
 		"AssistantWizardControlPanel" : ( target: DefaultLayoutTerminalComponentArgs ) => {
-			(target as AssistantWizardControlPanelArgs).addInsertedComponentToRoot = (compId: string) => {
-				if (config[compId] === undefined){
-					config[compId] = {}
-					return true;
+			(target as ControlPanelArgs).controlCallbacks = {
+				...(target as ControlPanelArgs).controlCallbacks,	
+				addInsertedComponentToRoot: (compId: string) => {
+					if (config[compId] === undefined){
+						config[compId] = {}
+					}
+				},
+				checkIfHasNewComponent: (): string | undefined => {
+					return (config['assistant-wizard'] as WizardComponentArg).components.find(c => c.options.component.meta?.label?.commonName === undefined)?.compId;
+				},
+				insert: (InsertData: InsertData) => {
+					(config['assistant-wizard'] as WizardComponentArg).components.unshift({
+						compId: `${InsertData.compId}-wrapper`,
+						component: "TopLevelComponent",
+						options: {
+							component: {
+							compId: InsertData.compId,
+							component: InsertData.compType,
+							options: InsertData.compArgs ?? {},
+							meta: {
+								label: {
+								labelFor: InsertData.compId,
+								commonName: InsertData.compCommonName
+								}
+							}
+							}
+						},
+					} as ComponentConfig<MyTopLevelComponentArg<any>>)
 				}
-				return true;
-			}
+			};
 		}
 	});
 

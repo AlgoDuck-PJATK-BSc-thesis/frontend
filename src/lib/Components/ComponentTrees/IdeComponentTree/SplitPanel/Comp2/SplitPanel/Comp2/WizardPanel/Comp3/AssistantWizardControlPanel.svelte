@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { ChatWindowComponentArgs, AssistantConversationMessage } from "$lib/Components/ComponentTrees/IdeComponentTree/component-args";
-	import type { AssistantWizardControlPanelArgs, ControlPanelArgs } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
+	import type { ControlPanelArgs } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
 	import type { ChatMessage } from "$lib/types/domain/modules/problem/assistant";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
 
-    let { options = $bindable() }: { options: AssistantWizardControlPanelArgs } = $props();
+    let { options = $bindable() }: { options: ControlPanelArgs } = $props();
 
     const handleSelect = (selected: string) => {
         if (options.controlCallbacks?.select){
@@ -20,7 +20,7 @@
     <div class="w-full flex flex-col items-center">
         <div class="w-full py-2 px-1">
             <button onclick={() => {
-                if (options.controlCallbacks?.insert){
+                if (options.controlCallbacks?.insert && options.controlCallbacks.checkIfHasNewComponent && !options.controlCallbacks.checkIfHasNewComponent()){
                     let dateNow: number = Date.now();
                     let compId: string = `chat-${dateNow}`;
                     options.controlCallbacks!.insert({
@@ -32,7 +32,9 @@
                             pages: [] as CustomPageData<ChatMessage>[]
                         } as ChatWindowComponentArgs
                     });
-                    options.addInsertedComponentToRoot('new-chat');
+                    if (options.controlCallbacks?.addInsertedComponentToRoot){
+                        options.controlCallbacks.addInsertedComponentToRoot(compId);
+                    }
                 }
             }} class="flex w-full h-10 rounded-full flex-row justify-center gap-2 items-center bg-ide-dcard/50 transition-colors duration-300 ease-out hover:bg-ide-dcard">
                 <CrossIconSvg options={{ class: "h-4 w-4 stroke-ide-text-secondary rotate-45 stroke-[3]" }}/>

@@ -10,8 +10,8 @@
 	import { API_URL, FetchFromApi } from '$lib/api/apiCall';
 	import { userEditorPreferences, type editorLayout } from '$lib/stores/theme.svelte';
 	import * as signalR from '@microsoft/signalr';
+	import { type SubmissionStatus, type SubmissionResult } from '$lib/types/domain/modules/problem/solve';
 
-  
 	let { 
 		components = $bindable(),
 		contextInjectors
@@ -28,36 +28,26 @@
 	});
 
 	let isSettingsPanelShown = $state(false);
-
-	const executeCode = async (runner: boolean): Promise<void> => {
-		runner = true;
-		runner = false;
-	}
-
-	type SubmissionResult = {
-		stdOutput: string, 
-		stdErr: string,
-		executionTime: number,
-		testResults: TestResult[]
-		status: string
-	}
-
-	type TestResult = {
-		testId: string, 
-		isTestPassed: boolean
-	}
-
+	let executingState: SubmissionStatus | undefined = $state();
 	let connection: signalR.HubConnection | undefined;
 	let connected: boolean = false;
 
 
-	const submitCode = async (runner: boolean): Promise<void> => {
-		runner = true;
+	const executeCallback = async (): Promise<void> => {
+		
+	}
+
+
+	const submitCallback = async (): Promise<void> => {
+		if (!(components['code-editor'] as CodeEditorComponentArgs).userCode){
+			return;
+		}
+		executingState = 'Queuing';
 		
 		let res = await FetchFromApi<{ jobId: string }>("executor/Submit", {
 			method: "POST",
 			body: JSON.stringify({
-				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).userCode),
+				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).userCode!),
 				problemId: (components['problem-info'] as InfoPanelComponentArgs).problemId
 			})
 		});
@@ -73,8 +63,8 @@
 			.build();
 		
 		connection.on("ExecutionStatusUpdated", (executionResponse: SubmissionResult) => {
-			
-			if (executionResponse.status === "complete") {
+			executingState = executionResponse.status;
+			if (executionResponse.status === "Completed") {
 				(components['terminal-comp'] as TerminalComponentArgs).terminalContents = executionResponse.stdOutput;
 				(components['test-cases-comp'] as TestCaseComponentArgs).testCases = 
 					(components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => ({
@@ -84,20 +74,18 @@
 				
 				connection?.stop();
 				connected = false;
+				executingState = undefined;
 			}
 		});
 		
 		try {
 			await connection.start();
 			connected = true;
-			
 			await connection.invoke("SubscribeToJob", { jobId: jobId });
 			
 		} catch (err) {
 			connected = false;
 		}
-		
-		runner = false;
 	};
 </script>
 
@@ -107,8 +95,9 @@
 	{/if}
 	<div class="w-full h-[5%]">
 		<TopPanel
-		executeCallback={executeCode}
-		submitCallback={submitCode}
+		{executingState}
+		{executeCallback}
+		{submitCallback}
 		bind:isSettingsPanelShown
 		/>
 	</div>

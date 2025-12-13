@@ -59,20 +59,21 @@ export interface MyTopLevelComponentArg<T extends {}>{
 export interface ControlPanelArgs{
     labels: Label[],
     selectedElemId?: string,
-    controlCallbacks?: ControlCallbacks,
+    controlCallbacks?: Record<string, (...args: any[]) => any>,
     side: number,
     groups?: GroupData[],
+    components: ComponentConfig<MyTopLevelComponentArg<any>>[]
+
 }
 
-export interface AssistantWizardControlPanelArgs extends ControlPanelArgs {
-    addInsertedComponentToRoot: (compId: string) => boolean
-} 
 
 export interface ControlCallbacks {
     insert?: (InsertData: InsertData) => void,
     select?: (selected: string) => void,
     remove?: (compId: string) => void,
-    swap?: (comp1Index: number, comp2Index: number ) => void
+    swap?: (comp1Index: number, comp2Index: number ) => void,
+    contains?: (compId: string) => boolean,
+    addInsertedComponentToRoot?: (compId: string) => boolean,
 }
 
 export type InsertData = {

@@ -5,19 +5,27 @@
 	import LandingPage from '$lib/Components/LandingPage.svelte';
 
 	type SignUpDto = {
-		username: String;
-		email: String;
-		password: String;
+		username: string;
+		email: string;
+		password: string;
+		confirmPassword: string;
 	};
 
-	let formData: SignUpDto = $state({} as SignUpDto);
+	let formData: SignUpDto = $state({
+
+	} as SignUpDto);
+
+	let formDataToSubmit: SignUpDto = $derived({
+		...formData,
+		confirmPassword: formData.password
+	});
 
 	const register = async () => {
 		let signup: StandardResponseDto = await FetchFromApi(
 			'Auth/register',
 			{
 				method: 'POST',
-				body: JSON.stringify(formData)
+				body: JSON.stringify(formDataToSubmit)
 			},
 			fetch
 		);

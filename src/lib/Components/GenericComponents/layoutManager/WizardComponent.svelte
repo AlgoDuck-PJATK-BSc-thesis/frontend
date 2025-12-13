@@ -17,38 +17,10 @@
     labels: (options?.components ?? []).filter(comp => comp.options.component.meta !== undefined && comp.options.component.meta.label != undefined).map(comp => comp.options!.component.meta!.label!),
     selectedElemId: selectedElemId,
     controlCallbacks: {
-      select: (compId: string) => {
+      ...options?.control?.options?.controlCallbacks ?? {},
+      "select": (compId: string) => {
         selectedElemId = compId;
       },
-      insert: (InsertData: InsertData) => {
-        options.components.unshift({
-          compId: `${InsertData.compId}-wrapper`,
-          component: "TopLevelComponent",
-          options: {
-            component: {
-              compId: InsertData.compId,
-              component: InsertData.compType,
-              options: InsertData.compArgs ?? {},
-              meta: {
-                label: {
-                  labelFor: InsertData.compId,
-                  commonName: InsertData.compCommonName
-                }
-              }
-            }
-          },
-        } as ComponentConfig<MyTopLevelComponentArg<any>>)
-
-      },
-      remove: (compId: string) => {
-        options.components = options.components.filter(comp => comp.compId !== compId);
-      },
-      swap: (comp1Index: number, comp2Index: number) => {
-        let tmp: ComponentConfig<MyTopLevelComponentArg<any>> = options.components[comp1Index];
-          if (!tmp) return;
-        options.components[comp1Index] = options.components[comp2Index];
-        options.components[comp2Index] = tmp;
-      }
     },
     side: options?.side ?? 0 ,
     groups: options?.groups ?? []

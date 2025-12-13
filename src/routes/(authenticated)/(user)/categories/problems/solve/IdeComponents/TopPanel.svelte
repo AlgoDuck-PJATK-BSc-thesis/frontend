@@ -8,33 +8,22 @@
     import LayoutIconSvg from '$lib/svg/LayoutIconSvg.svelte';
 	import { fly } from 'svelte/transition';
 	import LayoutSelector from './LayoutSelector.svelte';
-
-    let isExecuting: boolean = $state(false);
-    let isSubmitting: boolean = $state(false);
+	import { type SubmissionStatus } from '$lib/types/domain/modules/problem/solve';
 
     let isLayoutSelectionVisible: boolean = $state(false);
 
     let {
+        executingState,
         executeCallback,
         submitCallback,
         isSettingsPanelShown = $bindable()
     }: {
-        executeCallback: (runner: boolean) => void;
-        submitCallback: (runner: boolean) => void;
+        executingState: SubmissionStatus | undefined,
+        executeCallback: () => Promise<void>;
+        submitCallback: () => Promise<void>;
         isSettingsPanelShown: boolean;
     } = $props();
 
-    const execute = (runner: boolean): void => {
-        isExecuting = true;
-        isSubmitting = false;
-        executeCallback(runner);
-    };
-
-    const submit = (runner: boolean): void => {
-        isSubmitting = true;
-        isExecuting = false;
-        submitCallback(runner);
-    };
 
     const toggleSettingsPanel = (): void => {
         isSettingsPanelShown = true;
@@ -50,36 +39,29 @@
 
     <div class="w-[8%] h-[70%] rounded-l flex justify-center shrink-0 items-center gap-[1px]">
         <button
-            class="h-full w-[20%] bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer flex justify-center items-center overflow-hidden transition-all duration-300 ease-in-out
-                {isSubmitting ? 'w-0 opacity-0 border-0' : isExecuting ? 'w-full' : 'w-1/2'}
-                {isSubmitting ? '' : 'border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}
-                {isExecuting ? 'rounded-md' : 'rounded-l-md'}"
-            onclick={() => {execute(isExecuting)}}
-            aria-label="run-code"
-        >
-            {#if isExecuting}
-                {@render LabeledRunner('Executing')}
+            class="h-full aspect-square bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer flex justify-center items-center overflow-hidden transition-all duration-300 ease-in-out
+                {executingState ? 'w-full rounded-md' : 'rounded-l-md border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}"
+            onclick={executeCallback}
+            aria-label="run-code">
+
+            {#if executingState}
+                {@render LabeledRunner(executingState)}
             {:else}
-                <div class="w-[75%] aspect-square">
+            <div class="h-full aspect-square">    
+                <div class="p-[20%]">
                     <Run />
                 </div>
+            </div>
             {/if}
         </button>
 
         <button
-            class="h-full flex justify-center gap-2 bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer text-ide-text-primary overflow-hidden transition-all duration-300 ease-in-out
-                {isExecuting ? 'w-0 opacity-0 border-0' : isSubmitting ? 'w-full' : 'w-1/2'}
-                {isExecuting ? '' : 'border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}
-                {isSubmitting ? 'rounded-md' : 'rounded-r-md'} 
-                items-center text-center"
-            onclick={() => {submit(isSubmitting)}}
+            class="h-full flex justify-center gap-2 bg-ide-card hover:bg-ide-card_hovered hover:cursor-pointer text-ide-text-primary overflow-hidden transition-all duration-300 ease-in-out items-center text-center
+                {executingState ? 'w-0 opacity-0 pointer-events-none' : 'w-full rounded-r-md border-1 border-ide-accent shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]'}"
+            onclick={submitCallback}
         >
-            {#if isSubmitting}
-                {@render LabeledRunner('Testing')}
-            {:else}
-                <Upload options={{ class: "h-[70%] aspect-square stroke-ide-text-primary" }} />
-                <span class="flex justify-center items-center text-ide-text-secondary">test</span>
-            {/if}
+            <Upload options={{ class: "h-[70%] aspect-square stroke-ide-text-primary" }} />
+            <span class="flex justify-center items-center text-ide-text-secondary">test</span>
         </button>
     </div>
 
