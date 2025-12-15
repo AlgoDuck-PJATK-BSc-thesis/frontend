@@ -1,51 +1,40 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import { API_URL } from '$lib/api/apiCall';
+	import { authApi } from '$lib/api/auth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
 
-	type SignUpDto = {
-		username: String;
-		email: String;
-		password: String;
-	};
-
-	let formData: SignUpDto = $state({} as SignUpDto);
+	let userName = $state('');
+	let email = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let error = $state<string | null>(null);
 
 	const register = async () => {
-		console.log(formData);
-		let signup: StandardResponseDto = await FetchFromApi(
-			'Auth/register',
-			{
-				method: 'POST',
-				body: JSON.stringify(formData)
-			},
-			fetch
-		);
+		error = null;
 
-		console.log(signup);
-		if (signup.status !== 'Success') {
-			console.log('returning');
+		if (password !== confirmPassword) {
+			error = 'Passwords do not match.';
 			return;
 		}
 
-		let signin = await FetchFromApi(
-			'Auth/login',
-			{
-				method: 'POST',
-				body: JSON.stringify({
-					username: formData.username,
-					password: formData.password
-				})
-			},
+		await authApi.register({ userName, email, password, confirmPassword }, fetch);
+
+		const loginRes = await authApi.login(
+			{ userNameOrEmail: userName, password, rememberMe: false },
 			fetch
 		);
-		console.log(signin);
 
-		if (signin.status === 'Success') {
-			goto('/home');
+		if (loginRes.twoFactorRequired) {
+			error = 'Two-factor authentication required (not wired yet).';
+			return;
 		}
+
+		await goto('/home');
 	};
+
+	const oauthUrl = (provider: string) => `${API_URL}/auth/oauth/${provider}`;
 </script>
 
 <svelte:head>
@@ -65,15 +54,14 @@
 		<div
 			class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
 		>
-			<form method="POST" class="mt-0 flex w-70 flex-col gap-2">
+			<form class="mt-0 flex w-70 flex-col gap-2" onsubmit={(e) => e.preventDefault()}>
 				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
 					<span>Username</span>
 					<input
 						type="text"
-						name="username"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.username}
+						bind:value={userName}
 					/>
 				</label>
 
@@ -81,10 +69,9 @@
 					<span>Email</span>
 					<input
 						type="email"
-						name="email"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.email}
+						bind:value={email}
 					/>
 				</label>
 
@@ -92,12 +79,25 @@
 					<span>Password</span>
 					<input
 						type="password"
-						name="password"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.password}
+						bind:value={password}
 					/>
 				</label>
+
+				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+					<span>Confirm Password</span>
+					<input
+						type="password"
+						required
+						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
+						bind:value={confirmPassword}
+					/>
+				</label>
+
+				{#if error}
+					<p class="mt-3 text-sm text-red-300">{error}</p>
+				{/if}
 			</form>
 
 			<p class="mt-6 text-center leading-snug">
@@ -127,7 +127,7 @@
 			<div class="mt-8 flex flex-col items-center gap-3">
 				<div class="flex items-center justify-center gap-4">
 					<a
-						href="/auth/oauth/google"
+						href={oauthUrl('google')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
 					>
 						<img
@@ -138,7 +138,7 @@
 					</a>
 
 					<a
-						href="/auth/oauth/github"
+						href={oauthUrl('github')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
 					>
 						<img
@@ -149,7 +149,7 @@
 					</a>
 
 					<a
-						href="/auth/oauth/facebook"
+						href={oauthUrl('facebook')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
 					>
 						<img

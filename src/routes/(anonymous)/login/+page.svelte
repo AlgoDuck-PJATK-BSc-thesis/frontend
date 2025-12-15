@@ -1,26 +1,28 @@
 <script lang="ts">
-	import { FetchFromApi } from '$lib/api/apiCall';
+	import { goto } from '$app/navigation';
+	import { API_URL } from '$lib/api/apiCall';
+	import { authApi } from '$lib/api/auth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
 
-	type SignInDto = {
-		username: String;
-		password: String;
-	};
-
-	let formData: SignInDto = $state({} as SignInDto);
+	let userNameOrEmail = $state('');
+	let password = $state('');
+	let rememberMe = $state(false);
+	let error = $state<string | null>(null);
 
 	const login = async () => {
-		let res = await FetchFromApi(
-			'Auth/login',
-			{
-				method: 'POST',
-				body: JSON.stringify(formData)
-			},
-			fetch
-		);
-		console.log(res);
+		error = null;
+		const res = await authApi.login({ userNameOrEmail, password, rememberMe }, fetch);
+
+		if (res.twoFactorRequired) {
+			error = 'Two-factor authentication required (not wired yet).';
+			return;
+		}
+
+		await goto('/home');
 	};
+
+	const oauthUrl = (provider: string) => `${API_URL}/auth/oauth/${provider}`;
 </script>
 
 <svelte:head>
@@ -41,17 +43,16 @@
 			class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
 		>
 			<form
-				method="POST"
 				class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-input-text)]"
+				onsubmit={(e) => e.preventDefault()}
 			>
 				<label class="flex flex-col">
 					<span>Username or Email</span>
 					<input
 						type="text"
-						name="identifier"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.username}
+						bind:value={userNameOrEmail}
 					/>
 				</label>
 
@@ -59,12 +60,20 @@
 					<span>Password</span>
 					<input
 						type="password"
-						name="password"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.password}
+						bind:value={password}
 					/>
 				</label>
+
+				<label class="mt-3 flex items-center gap-2">
+					<input type="checkbox" bind:checked={rememberMe} />
+					<span>Remember me</span>
+				</label>
+
+				{#if error}
+					<p class="mt-3 text-sm text-red-300">{error}</p>
+				{/if}
 			</form>
 
 			<p class="mt-6 text-center leading-snug">
@@ -94,7 +103,7 @@
 			<div class="mt-8 flex flex-col items-center gap-3">
 				<div class="flex items-center justify-center gap-4">
 					<a
-						href="/auth/oauth/google"
+						href={oauthUrl('google')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
 					>
 						<img
@@ -105,7 +114,7 @@
 					</a>
 
 					<a
-						href="/auth/oauth/github"
+						href={oauthUrl('github')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
 					>
 						<img
@@ -116,7 +125,7 @@
 					</a>
 
 					<a
-						href="/auth/oauth/facebook"
+						href={oauthUrl('facebook')}
 						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
 					>
 						<img
