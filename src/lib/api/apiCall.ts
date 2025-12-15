@@ -1,5 +1,3 @@
-export const API_URL: string = 'http://localhost:8080/api';
-
 export type QueryResult = 'Success' | 'Warning' | 'Error';
 
 export type StandardResponseDto<T = {}> = {
@@ -7,6 +5,13 @@ export type StandardResponseDto<T = {}> = {
 	message: string | null;
 	body: T;
 };
+
+const envUrl = (import.meta as any).env?.VITE_API_URL as string | undefined;
+
+export const API_URL: string =
+	typeof envUrl === 'string' && envUrl.trim().length > 0
+		? envUrl.trim().replace(/\/$/, '')
+		: 'http://localhost:8080/api';
 
 const getCookie = (name: string): string | null => {
 	if (typeof document === 'undefined') return null;
@@ -36,15 +41,20 @@ export const FetchJsonFromApi = async <TResult>(
 
 	const csrfToken = getCookie('csrf_token');
 
-	const res = await usedFetcher(url.toString(), {
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
-			...(fetchOptions.headers || {})
-		},
-		...fetchOptions
-	});
+	let res: Response;
+	try {
+		res = await usedFetcher(url.toString(), {
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+				...(fetchOptions.headers || {})
+			},
+			...fetchOptions
+		});
+	} catch {
+		throw new Error('Backend unavailable. Start the API container and try again.');
+	}
 
 	if (!res.ok) {
 		if (res.status === 401 && res.headers.get('X-Token-Expired') === 'true' && !replay) {

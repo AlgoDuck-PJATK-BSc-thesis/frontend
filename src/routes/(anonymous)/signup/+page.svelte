@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { API_URL } from '$lib/api/apiCall';
+	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
@@ -11,6 +11,14 @@
 	let confirmPassword = $state('');
 	let error = $state<string | null>(null);
 
+	let externalLoading = $state<string | null>(null);
+	let externalError = $state<string | null>(null);
+
+	const getSafeNext = () => {
+		const next = page.url.searchParams.get('next');
+		return next && next.startsWith('/') ? next : '/home';
+	};
+
 	const register = async () => {
 		error = null;
 
@@ -19,22 +27,57 @@
 			return;
 		}
 
-		await authApi.register({ userName, email, password, confirmPassword }, fetch);
+		try {
+			await authApi.register({ userName, email, password, confirmPassword }, fetch);
 
-		const loginRes = await authApi.login(
-			{ userNameOrEmail: userName, password, rememberMe: false },
-			fetch
-		);
+			const loginRes = await authApi.login(
+				{ userNameOrEmail: email || userName, password, rememberMe: false },
+				fetch
+			);
 
-		if (loginRes.twoFactorRequired) {
-			error = 'Two-factor authentication required (not wired yet).';
+			if (loginRes.twoFactorRequired) {
+				error = 'Two-factor authentication required (not wired yet).';
+				return;
+			}
+
+			await goto(getSafeNext());
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Sign up failed.';
+		}
+	};
+
+	const externalSignup = async (provider: 'google' | 'github' | 'facebook') => {
+		externalError = null;
+
+		const emailCandidate = email.trim();
+		if (!emailCandidate.includes('@')) {
+			externalError = 'Enter a valid email above before using external sign up.';
 			return;
 		}
 
-		await goto('/home');
-	};
+		externalLoading = provider;
+		try {
+			const externalUserId = (globalThis.crypto as any)?.randomUUID
+				? (globalThis.crypto as any).randomUUID()
+				: `dev-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-	const oauthUrl = (provider: string) => `${API_URL}/auth/oauth/${provider}`;
+			await authApi.externalLogin(
+				{
+					provider,
+					externalUserId,
+					email: emailCandidate,
+					displayName: userName.trim() || emailCandidate.split('@')[0] || emailCandidate
+				},
+				fetch
+			);
+
+			await goto(getSafeNext());
+		} catch (e) {
+			externalError = e instanceof Error ? e.message : 'External sign up failed.';
+		} finally {
+			externalLoading = null;
+		}
+	};
 </script>
 
 <svelte:head>
@@ -124,40 +167,50 @@
 				/>
 			</div>
 
+			{#if externalError}
+				<p class="mt-4 text-sm text-red-300">{externalError}</p>
+			{/if}
+
 			<div class="mt-8 flex flex-col items-center gap-3">
 				<div class="flex items-center justify-center gap-4">
-					<a
-						href={oauthUrl('google')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => externalSignup('google')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/google.png"
-							alt="Sign up with Google"
+							alt="Continue with Google"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href={oauthUrl('github')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => externalSignup('github')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/github.png"
-							alt="Sign up with GitHub"
+							alt="Continue with GitHub"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href={oauthUrl('facebook')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => externalSignup('facebook')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/facebook.png"
-							alt="Sign up with Facebook"
+							alt="Continue with Facebook"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 				</div>
 			</div>
 		</div>
