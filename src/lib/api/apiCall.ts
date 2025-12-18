@@ -43,7 +43,10 @@ export const FetchFromApi = async <TResult>(
     }
     throw new Error(`API Error ${query.status}: ${query.statusText}`);
   }
-  return await query.json();
+  let result = await query.json()
+  console.log(result);
+
+  return result;
 };
 
 

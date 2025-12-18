@@ -1,10 +1,11 @@
 <script lang="ts" generics="TCompletion extends Record<string, any>">
-    import type { Component, Snippet } from "svelte";
+    import type { Component } from "svelte";
+	import type { ComponentConfigStatic } from "./ComponentConfigStatic";
 
     interface Props {
         label: string;
         placeholder?: string;
-        getRecommendations: ((query: string) => Promise<TCompletion[]>)
+        getRecommendations: ((query: string) => TCompletion[])
         onSelect: (item: TCompletion) => void;
         suggestionCard: ComponentConfigStatic<TCompletion>,
         makeSelectedLabel?: ((item: TCompletion) => string)
@@ -73,7 +74,7 @@
                     </button>
                 {:else}
                     <div class="w-full px-4 py-3 transition-all text-left border-b last:border-b-0 bg-bg-alt">
-                        <p class="font-medium text-text">Nie znaleziono wyników</p>
+                        <p class="font-medium text-text">No matches</p>
                     </div>
                 {/each}
             </div>

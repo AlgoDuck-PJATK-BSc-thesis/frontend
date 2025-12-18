@@ -200,29 +200,30 @@
         </div>
     </div>
 
-    <div {@attach node => {
-        if (!htmlDivs[0]) return;
-        const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
-            if (entries[0].isIntersecting){
-                console.log("fetch next")
-                $infiniteQuery.fetchNextPage();
-            }
-        },{
-            root: node,
-            rootMargin: '200px 0px 0px 0px',
-            threshold: 0
-        });
-        observer.observe(htmlDivs[htmlDivs.length - 1]);
-
-        return () => observer.disconnect();
-    }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
-        {#each allMessages as message, i}
-            {#if message.messageAuthor === "Assistant"}
-                {@render AssistantMessage(message, i)}
-            {:else}
-                {@render UserMessage(message, i)}
-            {/if}
-        {/each}
+    <div class="chat-editor-wrapper">
+        <div {@attach node => {
+            if (!htmlDivs[0]) return;
+            const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+                if (entries[0].isIntersecting){
+                    console.log("fetch next")
+                    $infiniteQuery.fetchNextPage();
+                }
+            },{
+                root: node,
+                rootMargin: '200px 0px 0px 0px',
+                threshold: 0
+            });
+            observer.observe(htmlDivs[htmlDivs.length - 1]);
+            return () => observer.disconnect();
+        }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
+            {#each allMessages as message, i}
+                {#if message.messageAuthor === "Assistant"}
+                    {@render AssistantMessage(message, i)}
+                {:else}
+                    {@render UserMessage(message, i)}
+                {/if}
+            {/each}
+        </div>
     </div>
 
     
@@ -332,7 +333,7 @@
 {/snippet}
 
 <style>
-  :global(.tiptap) {
+  .chat-editor-wrapper :global(.tiptap) {
     padding: 1rem 3.5rem 1rem 1rem;
     background: var(--color-ide-dcard);
     border-radius: 0.75rem;
@@ -343,13 +344,13 @@
     overflow-y: auto;
   }
   
-  :global(.tiptap:focus) {
+  .chat-editor-wrapper :global(.tiptap:focus) {
     border-color: rgba(99, 102, 241, 0.3);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     outline: none;
   }
   
-  :global(.tiptap p.is-editor-empty:first-child::before) {
+  .chat-editor-wrapper :global(.tiptap p.is-editor-empty:first-child::before) {
     color: var(--color-ide-text-secondary);
     content: attr(data-placeholder);
     float: left;
@@ -358,8 +359,21 @@
     opacity: 0.5;
   }
 
-  :global(.tiptap p) {
+  .chat-editor-wrapper :global(.tiptap p) {
     margin: 0;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar) {
+    width: 6px;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar-thumb) {
+    background: var(--color-ide-bg);
+    border-radius: 3px;
   }
 
   .messages-container::-webkit-scrollbar {
@@ -379,18 +393,7 @@
     background: var(--color-ide-bg);
   }
 
-  :global(.tiptap::-webkit-scrollbar) {
-    width: 6px;
-  }
 
-  :global(.tiptap::-webkit-scrollbar-track) {
-    background: transparent;
-  }
-
-  :global(.tiptap::-webkit-scrollbar-thumb) {
-    background: var(--color-ide-bg);
-    border-radius: 3px;
-  }
 
   @keyframes slideIn {
     from {
