@@ -1,11 +1,12 @@
 import type { Component } from "svelte";
 
-export type TestCase = {
-    callFunc: MethodRecommendation,
-    callArgs: FunctionParam[],
+export type TestCaseCreateDto = {
     display: string,
     displayRes: string,
-    arrange: string,
+    arrangeB64: string,
+    callMethod: MethodRecommendation,
+    callArgs: FunctionParam[],
+    expected: FunctionParam,
     isPublic: boolean,
 }
 
@@ -40,3 +41,16 @@ export type HeaderOptions = {
     label: string;
 }
 
+export type problemCreationDto = {
+    templateB64: string,
+    problemTitle: string,
+    problemDescription: string,
+    difficultyId: string,
+    categoryId: string,
+    tags: TagCreateDto[],
+    testCases: TestCaseCreateDto[]
+}
+
+export type TagCreateDto = {
+    tagName: string
+}

@@ -3,7 +3,7 @@
     import Monaco from "$lib/Components/GenericComponents/monaco/monaco.svelte";
     import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import { Editor } from "@tiptap/core";
-    import type { FunctionParam, MethodRecommendation, SuggestedInputArgs, TestCase } from "./TestCase";
+    import type { FunctionParam, MethodRecommendation, SuggestedInputArgs, TestCaseCreateDto } from "./TestCase";
     import { Trie } from "./Trie";
 	import StarterKit from "@tiptap/starter-kit";
 	import Placeholder from "@tiptap/extension-placeholder";
@@ -19,18 +19,17 @@
     }: { 
         templateContents: string,
         testCaseNum: number,
-        testCase: TestCase
+        testCase: TestCaseCreateDto
     } = $props();
 
     let isExpanded: boolean = $state(true);
-    let editorContents: string = $state("public class TestCase{\n\tpublic static void main(String[] args){\n\t\t//your arrange goes here\n\t}\n}");
 
     let methodRecommendationTrie: Trie<MethodRecommendation> | undefined = $state();
     let variableRecommendationTrie: Trie<FunctionParam> | undefined = $state();
 
     $effect(() => { 
         const templateContentsInner = templateContents;
-        const editorContentsInner = editorContents;
+        const editorContentsInner = testCase.arrangeB64;
         
         const timeoutId = setTimeout(async () => {
             var res = await FetchFromApi<{methods: MethodRecommendation[], variables: FunctionParam[]}>("AnalysisResult", {
@@ -49,10 +48,19 @@
     });
 
     let methodSuggestionOptions: SuggestedInputArgs<MethodRecommendation> = $state({
-        onSelect: (selected: MethodRecommendation) => testCase.callFunc = selected,
+        onSelect: (selected: MethodRecommendation) => testCase.callMethod = selected,
         getCurrentRecommendationsForQuery: (prefix: string) => methodRecommendationTrie?.getAllSubtreeValues(prefix),
         DisplayComp: MethodRecommendationComp
     });
+
+    let targetSuggestionOptions: SuggestedInputArgs<FunctionParam> = $state({
+        onSelect: (selected: FunctionParam) => testCase.expected = selected,
+        getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
+        DisplayComp: VariableRecommendationComp
+    });
+    testCase.arrangeB64 = "public class TestCase{\n\tpublic static void main(String[] args){\n\t\t//your arrange goes here\n\t}\n}"; 
+    testCase.isPublic = true;
+    
 
 </script>
 
@@ -71,7 +79,7 @@
         </div>
         <div class="flex items-center">
             <span class="flex items-center gap-1.5 text-xs text-[#858585] uppercase tracking-wider">
-                {#if testCase.callFunc}
+                {#if testCase.callMethod}
                     <span class="w-2 h-2 rounded-full bg-[#89d185]"></span>
                     <span>Ready</span>
                 {:else}
@@ -91,7 +99,7 @@
                     <ToolTip options={{ tip: "How the input should be displayed to the user"}}/>
                 </div>
             <div class="h-[200px] border border-[#3c3c3c] rounded-sm overflow-hidden">
-                <Monaco bind:editorContents/>
+                <Monaco bind:editorContents={testCase.arrangeB64}/>
             </div>
             <div class="mt-4">
                 <div class="flex items-center justify-start gap-4 mb-3">
@@ -103,7 +111,7 @@
                 <SuggestedInput bind:options={methodSuggestionOptions}/>
             </div>
 
-            {#if testCase.callFunc}
+            {#if testCase.callMethod}
                 <div class="mt-4 pt-4 border-t border-[#3c3c3c]">
                     <div class="flex items-center justify-start gap-4 mb-3">
                         <div class="flex items-center gap-2">
@@ -112,7 +120,7 @@
                         <ToolTip options={{ tip: "The parameters with which the function will be called"}}/>
                     </div>
                     <div class="flex flex-col gap-2.5">
-                        {#each testCase.callFunc.functionParams as param, i}
+                        {#each testCase.callMethod.functionParams as param, i}
                             <div class="flex items-center gap-3 p-2 px-3 bg-[#2d2d2d] rounded border border-[#3c3c3c]">
                                 <span class="font-mono text-xs text-[#4ec9b0] bg-[#4ec9b0]/10 px-1.5 py-0.5 rounded whitespace-nowrap">{param.type}</span>
                                 <span class="font-mono text-xs text-[#9cdcfe] min-w-[80px]">{param.name}</span>
@@ -126,6 +134,16 @@
                     </div>
                 </div>
             {/if}
+            <div class="mt-4">
+                <div class="flex items-center justify-start gap-4 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="font-mono text-xs font-semibold text-[#569cd6] bg-[#569cd6]/10 px-2 py-0.5 rounded">Expected Output</span>
+                    </div>
+                    <ToolTip options={{ tip: "The expected value against which to compare function output"}}/>
+                </div>
+                <SuggestedInput bind:options={targetSuggestionOptions}/>
+            </div>
+
         </div>
 
         <div class="bg-[#252526] p-4">
