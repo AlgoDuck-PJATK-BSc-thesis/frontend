@@ -64,19 +64,30 @@ export type PasswordResetResetResponse = {
 	message: string;
 };
 
-export type ExternalLoginRequest = {
-	provider: string;
-	externalUserId: string;
-	email: string;
-	displayName: string;
+export type VerifyTwoFactorLoginRequest = {
+	challengeId: string;
+	code: string;
 };
 
-export type ExternalLoginResponse = {
+export type VerifyTwoFactorLoginResponse = {
 	message: string;
 	userId: string;
 	sessionId: string;
 	accessTokenExpiresAt: string;
 	refreshTokenExpiresAt: string;
+};
+
+export type StartEmailVerificationRequest = {
+	email: string;
+};
+
+export type StartEmailVerificationResponse = {
+	message: string;
+};
+
+export type UserByTokenRequest = {
+	userId: string;
+	token: string;
 };
 
 export const authApi = {
@@ -89,6 +100,23 @@ export const authApi = {
 					userNameOrEmail: req.userNameOrEmail,
 					password: req.password,
 					rememberMe: !!req.rememberMe
+				})
+			},
+			fetcher
+		);
+	},
+
+	verifyTwoFactorLogin: async (
+		req: VerifyTwoFactorLoginRequest,
+		fetcher?: typeof fetch
+	): Promise<VerifyTwoFactorLoginResponse> => {
+		return await FetchJsonFromApi<VerifyTwoFactorLoginResponse>(
+			'auth/twofactor/verify-login',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					challengeId: req.challengeId,
+					code: req.code
 				})
 			},
 			fetcher
@@ -113,6 +141,20 @@ export const authApi = {
 
 	me: async (fetcher?: typeof fetch): Promise<AuthUserDto> => {
 		return await FetchJsonFromApi<AuthUserDto>('auth/me', { method: 'GET' }, fetcher);
+	},
+
+	userByToken: async (req: UserByTokenRequest, fetcher?: typeof fetch): Promise<AuthUserDto> => {
+		return await FetchJsonFromApi<AuthUserDto>(
+			'auth/user-by-token',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					userId: req.userId,
+					token: req.token
+				})
+			},
+			fetcher
+		);
 	},
 
 	logout: async (fetcher?: typeof fetch): Promise<{ message: string }> => {
@@ -158,19 +200,16 @@ export const authApi = {
 		);
 	},
 
-	externalLogin: async (
-		req: ExternalLoginRequest,
+	startEmailVerification: async (
+		req: StartEmailVerificationRequest,
 		fetcher?: typeof fetch
-	): Promise<ExternalLoginResponse> => {
-		return await FetchJsonFromApi<ExternalLoginResponse>(
-			'auth/external-login',
+	): Promise<StartEmailVerificationResponse> => {
+		return await FetchJsonFromApi<StartEmailVerificationResponse>(
+			'auth/email-verification/start',
 			{
 				method: 'POST',
 				body: JSON.stringify({
-					provider: req.provider,
-					externalUserId: req.externalUserId,
-					email: req.email,
-					displayName: req.displayName
+					email: req.email
 				})
 			},
 			fetcher

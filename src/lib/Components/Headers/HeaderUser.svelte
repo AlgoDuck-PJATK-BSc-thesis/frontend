@@ -24,9 +24,6 @@
 		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline"
 			>AlgoDuck</a
 		>
-		{#if page.data.user?.userName}
-			<span class="ml-2 text-sm opacity-90">Hi, {page.data.user.userName}</span>
-		{/if}
 	</div>
 
 	<nav class="ml-6">
@@ -111,15 +108,6 @@
 				>
 					Settings
 				</a>
-			</li>
-			<li>
-				<button
-					type="button"
-					onclick={logout}
-					class="cursor-pointer border-0 bg-transparent p-0 font-semibold tracking-wider text-[color:var(--color-landingpage-subtitle)] hover:text-[color:var(--color-primary)]"
-				>
-					Logout
-				</button>
 			</li>
 		</ul>
 	</nav>

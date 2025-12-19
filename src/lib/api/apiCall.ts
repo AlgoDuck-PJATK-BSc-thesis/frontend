@@ -1,3 +1,5 @@
+import { PUBLIC_API_URL } from '$env/static/public';
+
 export type QueryResult = 'Success' | 'Warning' | 'Error';
 
 export type StandardResponseDto<T = {}> = {
@@ -6,12 +8,8 @@ export type StandardResponseDto<T = {}> = {
 	body: T;
 };
 
-const envUrl = (import.meta as any).env?.VITE_API_URL as string | undefined;
-
-export const API_URL: string =
-	typeof envUrl === 'string' && envUrl.trim().length > 0
-		? envUrl.trim().replace(/\/$/, '')
-		: 'http://localhost:8080/api';
+const base = (PUBLIC_API_URL ?? '').trim().replace(/\/+$/, '');
+export const API_URL: string = base ? `${base}/api` : '';
 
 const getCookie = (name: string): string | null => {
 	if (typeof document === 'undefined') return null;
@@ -31,6 +29,12 @@ export const FetchJsonFromApi = async <TResult>(
 	searchParams?: URLSearchParams,
 	replay: boolean = false
 ): Promise<TResult> => {
+	if (!API_URL) {
+		throw new Error(
+			'Missing PUBLIC_API_URL (set it in the frontend environment and restart the dev server).'
+		);
+	}
+
 	const usedFetcher = fetcher ?? fetch;
 	const cleanEndpoint = endpoint.replace(/^\//, '');
 	const url = new URL(`${API_URL}/${cleanEndpoint}`);
@@ -53,7 +57,7 @@ export const FetchJsonFromApi = async <TResult>(
 			...fetchOptions
 		});
 	} catch {
-		throw new Error('Backend unavailable. Start the API container and try again.');
+		throw new Error('Backend unavailable.');
 	}
 
 	if (!res.ok) {

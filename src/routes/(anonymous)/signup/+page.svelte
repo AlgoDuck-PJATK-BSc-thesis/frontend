@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
-	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import { redirectToOAuth } from '$lib/api/oauth';
 
 	let userName = $state('');
 	let email = $state('');
@@ -14,68 +15,47 @@
 	let externalLoading = $state<string | null>(null);
 	let externalError = $state<string | null>(null);
 
+	let oauthError = $derived(page.url.searchParams.get('oauthError'));
+	let oauthProvider = $derived(page.url.searchParams.get('provider'));
+
+	$effect(() => {
+		if (oauthError) {
+			externalError = `OAuth${oauthProvider ? ` (${oauthProvider})` : ''} failed. Please try again.`;
+		}
+	});
+
 	const getSafeNext = () => {
 		const next = page.url.searchParams.get('next');
 		return next && next.startsWith('/') ? next : '/home';
 	};
 
-	const register = async () => {
+	const signup = async () => {
 		error = null;
-
-		if (password !== confirmPassword) {
-			error = 'Passwords do not match.';
-			return;
-		}
-
 		try {
 			await authApi.register({ userName, email, password, confirmPassword }, fetch);
-
-			const loginRes = await authApi.login(
-				{ userNameOrEmail: email || userName, password, rememberMe: false },
-				fetch
-			);
-
-			if (loginRes.twoFactorRequired) {
-				error = 'Two-factor authentication required (not wired yet).';
-				return;
-			}
-
-			await goto(getSafeNext());
+			await goto('/login');
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Sign up failed.';
+			error = e instanceof Error ? e.message : 'Signup failed.';
 		}
 	};
 
-	const externalSignup = async (provider: 'google' | 'github' | 'facebook') => {
+	const startOAuth = (provider: 'google' | 'github' | 'microsoft') => {
 		externalError = null;
-
-		const emailCandidate = email.trim();
-		if (!emailCandidate.includes('@')) {
-			externalError = 'Enter a valid email above before using external sign up.';
-			return;
-		}
-
 		externalLoading = provider;
+
+		const next = getSafeNext();
+		const errorUrl = `/signup?next=${encodeURIComponent(next)}`;
+
 		try {
-			const externalUserId = (globalThis.crypto as any)?.randomUUID
-				? (globalThis.crypto as any).randomUUID()
-				: `dev-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-			await authApi.externalLogin(
-				{
-					provider,
-					externalUserId,
-					email: emailCandidate,
-					displayName: userName.trim() || emailCandidate.split('@')[0] || emailCandidate
-				},
-				fetch
+			redirectToOAuth(
+				provider,
+				next,
+				errorUrl,
+				provider === 'microsoft' ? { prompt: 'select_account' } : undefined
 			);
-
-			await goto(getSafeNext());
 		} catch (e) {
-			externalError = e instanceof Error ? e.message : 'External sign up failed.';
-		} finally {
 			externalLoading = null;
+			externalError = e instanceof Error ? e.message : 'OAuth start failed.';
 		}
 	};
 </script>
@@ -97,8 +77,11 @@
 		<div
 			class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
 		>
-			<form class="mt-0 flex w-70 flex-col gap-2" onsubmit={(e) => e.preventDefault()}>
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+			<form
+				class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-input-text)]"
+				onsubmit={(e) => e.preventDefault()}
+			>
+				<label class="flex flex-col">
 					<span>Username</span>
 					<input
 						type="text"
@@ -108,7 +91,7 @@
 					/>
 				</label>
 
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+				<label class="flex flex-col">
 					<span>Email</span>
 					<input
 						type="email"
@@ -118,7 +101,7 @@
 					/>
 				</label>
 
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+				<label class="flex flex-col">
 					<span>Password</span>
 					<input
 						type="password"
@@ -128,8 +111,8 @@
 					/>
 				</label>
 
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
-					<span>Confirm Password</span>
+				<label class="flex flex-col">
+					<span>Confirm password</span>
 					<input
 						type="password"
 						required
@@ -143,17 +126,7 @@
 				{/if}
 			</form>
 
-			<p class="mt-6 text-center leading-snug">
-				<a
-					href="/login"
-					class="inline-flex text-[color:var(--color-input-text)] hover:text-[color:var(--color-header-guest)]"
-				>
-					<span>Already have an account?</span>
-					<span class="ml-1 font-semibold">Log In</span>
-				</a>
-			</p>
-
-			<div class="mt-6 mb-0 flex justify-center">
+			<div class="mt-8 mb-2 flex justify-center">
 				<Button
 					size="medium"
 					label="→"
@@ -163,7 +136,7 @@
 					labelFontWeight="normal"
 					labelTracking="extra"
 					labelClass=""
-					onclick={register}
+					onclick={signup}
 				/>
 			</div>
 
@@ -176,8 +149,8 @@
 					<button
 						type="button"
 						disabled={externalLoading !== null}
-						onclick={() => externalSignup('google')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
+						onclick={() => startOAuth('google')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/google.png"
@@ -189,8 +162,8 @@
 					<button
 						type="button"
 						disabled={externalLoading !== null}
-						onclick={() => externalSignup('github')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
+						onclick={() => startOAuth('github')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/github.png"
@@ -202,12 +175,12 @@
 					<button
 						type="button"
 						disabled={externalLoading !== null}
-						onclick={() => externalSignup('facebook')}
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70 disabled:cursor-not-allowed disabled:opacity-60"
+						onclick={() => startOAuth('microsoft')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
-							src="/oauth/facebook.png"
-							alt="Continue with Facebook"
+							src="/oauth/microsoft.png"
+							alt="Continue with Microsoft"
 							class="h-12 w-12 object-contain"
 						/>
 					</button>
