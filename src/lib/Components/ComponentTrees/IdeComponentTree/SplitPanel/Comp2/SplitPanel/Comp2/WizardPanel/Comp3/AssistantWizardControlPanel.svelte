@@ -4,6 +4,7 @@
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
 	import type { ChatMessage } from "$lib/types/domain/modules/problem/assistant";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
+	import ChatPickerButton from "./ChatPickerButton.svelte";
 
     let { options = $bindable() }: { options: ControlPanelArgs } = $props();
 
@@ -14,6 +15,11 @@
             options.selectedElemId = selected;
         }
     }
+
+    let removeCallback: ((compId: string) => void) | undefined = $derived.by(() => {
+        if (!options.controlCallbacks?.remove) return undefined;
+        return options.controlCallbacks?.remove as (compId: string) => void
+    })
 </script>
 
 <main class="w-70 h-full bg-ide-card border-r-2 border-r-ide-dcard flex flex-col gap-3 justify-start items-center">
@@ -46,12 +52,13 @@
         <span class="w-full flex justify-start font-mono text-xs text-ide-text-secondary">Recent</span>
         <div class="w-full flex flex-col items-center justify-start gap-1">
             {#each options.labels as label}
-            <button onclick={() => {handleSelect(label.labelFor)}} class="w-full h-10 hover:bg-ide-dcard px-3 rounded-md">
-                <span class="w-full flex flex-nowrap overflow-hidden text-ide-text-secondary grow-0 items-start">{label.commonName ?? "New Chat"}</span>
-            </button>
+                <ChatPickerButton onclick={() => handleSelect(label.labelFor)} label={label.commonName ?? "New Chat"} deleteYourself={() => {
+                    if (removeCallback) removeCallback(label.labelFor)
+                }}/>
             {:else}
                 <div class="w-full grow bg-red-500">nothing just yet</div>
             {/each}
         </div>
     </div>
+
 </main>

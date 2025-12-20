@@ -63,7 +63,6 @@ export interface ControlPanelArgs{
     side: number,
     groups?: GroupData[],
     components: ComponentConfig<MyTopLevelComponentArg<any>>[]
-
 }
 
 

@@ -107,6 +107,9 @@
 							}
 						},
 					} as ComponentConfig<MyTopLevelComponentArg<any>>)
+				},
+				remove: (compId: string) => {
+					(config['assistant-wizard'] as WizardComponentArg).components = (config['assistant-wizard'] as WizardComponentArg).components.filter(comp => comp.options.component.compId !== compId);
 				}
 			};
 		}

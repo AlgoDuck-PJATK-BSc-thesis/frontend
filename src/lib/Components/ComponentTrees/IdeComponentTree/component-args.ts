@@ -16,6 +16,11 @@ export interface InfoPanelComponentArgs extends DefaultLayoutTerminalComponentAr
   tags: TagDto[]
 }
 
+
+export interface TipTapWithMdArgs extends DefaultLayoutTerminalComponentArgs {
+    editorContents: string
+}
+
 export interface TerminalComponentArgs extends DefaultLayoutTerminalComponentArgs {
     terminalContents: string
 }
