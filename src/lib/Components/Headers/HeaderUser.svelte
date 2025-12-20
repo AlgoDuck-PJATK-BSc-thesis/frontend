@@ -1,17 +1,19 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import coin from '$lib/images/headers/Coin.png';
-	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
-	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import { authApi } from '$lib/api/auth';
 
 	let coins = 1000000;
-	let level = 5;
 
-	const logout = () => {
-		alert('Logging out...');
-		window.location.href = 'http://localhost:5173';
+	const logout = async () => {
+		try {
+			await authApi.logout(fetch);
+		} finally {
+			await goto('/login');
+		}
 	};
 </script>
 
@@ -19,8 +21,8 @@
 	class="font-body sticky top-0 z-50 flex h-16 items-center justify-between border-b-4 border-[color:var(--color-bg-header-border)] bg-[color:var(--color-header-user)] px-8 py-4 text-[color:var(--color-landingpage-subtitle)]"
 >
 	<div class="flex items-center gap-6 whitespace-nowrap">
-		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline">
-			AlgoDuck</a
+		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline"
+			>AlgoDuck</a
 		>
 	</div>
 
@@ -38,7 +40,7 @@
 			<li>
 				<a
 					href="/categories"
-					aria-current={page.url.pathname === '/Categories' ? 'page' : undefined}
+					aria-current={page.url.pathname === '/categories' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Problems
@@ -53,7 +55,6 @@
 					Cohort
 				</a>
 			</li>
-
 			<li>
 				<a
 					href="/contest"
@@ -108,9 +109,6 @@
 					Settings
 				</a>
 			</li>
-			<!-- <div class=" relative mr-1 h-[1rem] w-[1rem] translate-y-[-0px]">
-					<ThemeToggle />
-				</div> -->
 		</ul>
 	</nav>
 
@@ -135,20 +133,5 @@
 				</div>
 			</PixelFrameMini>
 		</div>
-		<!-- <div class="h-10 w-20">
-			<DropDownSelect
-				options={{
-					options: SupportedLangs.map((l) => {
-						return {
-							key: l,
-							value: l
-						};
-					}),
-					onSelectCallback: (selected: Lang) => {
-						userThemePreference.lang = selected;
-					}
-				}}
-			/>
-		</div> -->
 	</div>
 </header>

@@ -1,25 +1,96 @@
 <script lang="ts">
-	import { FetchFromApi } from '$lib/api/apiCall';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { authApi } from '$lib/api/auth';
+	import { redirectToOAuth } from '$lib/api/oauth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
 
-	type SignInDto = {
-		username: String;
-		password: String;
+	let userNameOrEmail = $state('');
+	let password = $state('');
+	let rememberMe = $state(false);
+	let error = $state<string | null>(null);
+
+	let showForgot = $state(false);
+	let resetEmail = $state('');
+	let resetInfo = $state<string | null>(null);
+	let resetError = $state<string | null>(null);
+	let resetLoading = $state(false);
+
+	let externalLoading = $state<string | null>(null);
+	let externalError = $state<string | null>(null);
+
+	let oauthError = $derived(page.url.searchParams.get('oauthError'));
+	let oauthProvider = $derived(page.url.searchParams.get('provider'));
+
+	$effect(() => {
+		if (oauthError) {
+			externalError = `OAuth${oauthProvider ? ` (${oauthProvider})` : ''} failed. Please try again.`;
+		}
+	});
+
+	const getSafeNext = () => {
+		const next = page.url.searchParams.get('next');
+		return next && next.startsWith('/') ? next : '/home';
 	};
 
-	let formData: SignInDto = $state({} as SignInDto);
-
 	const login = async () => {
-		let res = await FetchFromApi(
-			'Auth/login',
-			{
-				method: 'POST',
-				body: JSON.stringify(formData)
-			},
-			fetch
-		);
-		console.log(res);
+		error = null;
+		try {
+			const res = await authApi.login({ userNameOrEmail, password, rememberMe }, fetch);
+
+			if (res.twoFactorRequired) {
+				const next = getSafeNext();
+				await goto(
+					`/auth/twofactor?challengeId=${encodeURIComponent(res.challengeId)}&next=${encodeURIComponent(next)}`
+				);
+				return;
+			}
+
+			await goto(getSafeNext());
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Login failed.';
+		}
+	};
+
+	const requestReset = async () => {
+		resetInfo = null;
+		resetError = null;
+
+		if (!resetEmail.trim()) {
+			resetError = 'Please enter your email.';
+			return;
+		}
+
+		resetLoading = true;
+		try {
+			const res = await authApi.requestPasswordReset({ email: resetEmail.trim() }, fetch);
+			resetInfo = res.message;
+		} catch (e) {
+			resetError = e instanceof Error ? e.message : 'Failed to request password reset.';
+		} finally {
+			resetLoading = false;
+		}
+	};
+
+	const startOAuth = (provider: 'google' | 'github' | 'microsoft') => {
+		externalError = null;
+		externalLoading = provider;
+
+		const next = getSafeNext();
+		const errorUrl = `/login?next=${encodeURIComponent(next)}`;
+
+		try {
+			redirectToOAuth(
+				provider,
+				next,
+				errorUrl,
+				provider === 'microsoft' ? { prompt: 'select_account' } : undefined
+			);
+		} catch (e) {
+			externalLoading = null;
+			externalError = e instanceof Error ? e.message : 'OAuth start failed.';
+		}
 	};
 </script>
 
@@ -41,17 +112,16 @@
 			class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
 		>
 			<form
-				method="POST"
 				class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-input-text)]"
+				onsubmit={(e) => e.preventDefault()}
 			>
 				<label class="flex flex-col">
 					<span>Username or Email</span>
 					<input
 						type="text"
-						name="identifier"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.username}
+						bind:value={userNameOrEmail}
 					/>
 				</label>
 
@@ -59,23 +129,83 @@
 					<span>Password</span>
 					<input
 						type="password"
-						name="password"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.password}
+						bind:value={password}
 					/>
 				</label>
-			</form>
 
-			<p class="mt-6 text-center leading-snug">
-				<a
-					href="/signup"
-					class="inline-flex text-[color:var(--color-input-text)] hover:text-[color:var(--color-header-guest)]"
-				>
-					<span>Don't have an account?</span>
-					<span class="ml-1 font-semibold">Sign Up</span>
-				</a>
-			</p>
+				<label class="mt-3 flex items-center gap-2">
+					<input type="checkbox" bind:checked={rememberMe} />
+					<span>Remember me</span>
+				</label>
+
+				<div class="mt-2 flex items-center justify-between">
+					<button
+						type="button"
+						onclick={() => {
+							showForgot = !showForgot;
+							resetInfo = null;
+							resetError = null;
+						}}
+						class="cursor-pointer border-0 bg-transparent p-0 text-sm underline opacity-90 hover:opacity-100"
+					>
+						Forgot password?
+					</button>
+				</div>
+
+				{#if showForgot}
+					<div class="mt-3 flex flex-col gap-2 rounded border border-white/10 p-3">
+						<label class="flex flex-col">
+							<span>Email</span>
+							<input
+								type="email"
+								class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
+								bind:value={resetEmail}
+								placeholder="you@example.com"
+							/>
+						</label>
+
+						<div class="mt-2 flex items-center gap-3">
+							<button
+								type="button"
+								disabled={resetLoading}
+								onclick={requestReset}
+								class="cursor-pointer rounded border-2 border-white/10 bg-white/80 px-3 py-2 text-black hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								{#if resetLoading}
+									Sending...
+								{:else}
+									Send reset link
+								{/if}
+							</button>
+
+							<button
+								type="button"
+								onclick={() => {
+									showForgot = false;
+									resetInfo = null;
+									resetError = null;
+								}}
+								class="cursor-pointer border-0 bg-transparent p-0 text-sm underline opacity-80 hover:opacity-100"
+							>
+								Cancel
+							</button>
+						</div>
+
+						{#if resetInfo}
+							<p class="mt-2 text-sm text-green-200">{resetInfo}</p>
+						{/if}
+						{#if resetError}
+							<p class="mt-2 text-sm text-red-300">{resetError}</p>
+						{/if}
+					</div>
+				{/if}
+
+				{#if error}
+					<p class="mt-3 text-sm text-red-300">{error}</p>
+				{/if}
+			</form>
 
 			<div class="mt-8 mb-2 flex justify-center">
 				<Button
@@ -91,40 +221,50 @@
 				/>
 			</div>
 
+			{#if externalError}
+				<p class="mt-4 text-sm text-red-300">{externalError}</p>
+			{/if}
+
 			<div class="mt-8 flex flex-col items-center gap-3">
 				<div class="flex items-center justify-center gap-4">
-					<a
-						href="/auth/oauth/google"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('google')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/google.png"
-							alt="Sign up with Google"
+							alt="Continue with Google"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href="/auth/oauth/github"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('github')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/github.png"
-							alt="Sign up with GitHub"
+							alt="Continue with GitHub"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href="/auth/oauth/facebook"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('microsoft')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
-							src="/oauth/facebook.png"
-							alt="Sign up with Facebook"
+							src="/oauth/microsoft.png"
+							alt="Continue with Microsoft"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 				</div>
 			</div>
 		</div>

@@ -1,47 +1,61 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
-	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import { page } from '$app/state';
+	import { authApi } from '$lib/api/auth';
 	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import { redirectToOAuth } from '$lib/api/oauth';
 
-	type SignUpDto = {
-		username: String;
-		email: String;
-		password: String;
+	let userName = $state('');
+	let email = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let error = $state<string | null>(null);
+
+	let externalLoading = $state<string | null>(null);
+	let externalError = $state<string | null>(null);
+
+	let oauthError = $derived(page.url.searchParams.get('oauthError'));
+	let oauthProvider = $derived(page.url.searchParams.get('provider'));
+
+	$effect(() => {
+		if (oauthError) {
+			externalError = `OAuth${oauthProvider ? ` (${oauthProvider})` : ''} failed. Please try again.`;
+		}
+	});
+
+	const getSafeNext = () => {
+		const next = page.url.searchParams.get('next');
+		return next && next.startsWith('/') ? next : '/home';
 	};
 
-	let formData: SignUpDto = $state({} as SignUpDto);
-
-	const register = async () => {
-		let signup: StandardResponseDto = await FetchFromApi(
-			'Auth/register',
-			{
-				method: 'POST',
-				body: JSON.stringify(formData)
-			},
-			fetch
-		);
-
-		if (signup.status !== 'Success') {
-			console.log('returning');
-			return;
+	const signup = async () => {
+		error = null;
+		try {
+			await authApi.register({ userName, email, password, confirmPassword }, fetch);
+			await goto('/login');
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Signup failed.';
 		}
+	};
 
-		let signin = await FetchFromApi(
-			'Auth/login',
-			{
-				method: 'POST',
-				body: JSON.stringify({
-					username: formData.username,
-					password: formData.password
-				})
-			},
-			fetch
-		);
-		console.log(signin);
+	const startOAuth = (provider: 'google' | 'github' | 'microsoft') => {
+		externalError = null;
+		externalLoading = provider;
 
-		if (signin.status === 'Success') {
-			goto('/home');
+		const next = getSafeNext();
+		const errorUrl = `/signup?next=${encodeURIComponent(next)}`;
+
+		try {
+			redirectToOAuth(
+				provider,
+				next,
+				errorUrl,
+				provider === 'microsoft' ? { prompt: 'select_account' } : undefined
+			);
+		} catch (e) {
+			externalLoading = null;
+			externalError = e instanceof Error ? e.message : 'OAuth start failed.';
 		}
 	};
 </script>
@@ -63,52 +77,56 @@
 		<div
 			class="relative z-10 flex w-full flex-col items-center rounded-3xl border border-white/10 p-10 px-14 py-12 pt-10 pb-14 text-left text-[var(--color-text-box)] shadow-[0_20px_50px_rgba(0,0,0,0.3),inset_0_0_0_1px_rgba(255,255,255,0.1),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-3xl"
 		>
-			<form method="POST" class="mt-0 flex w-70 flex-col gap-2">
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+			<form
+				class="mt-2 flex w-70 flex-col gap-2 text-left text-sm text-[color:var(--color-input-text)]"
+				onsubmit={(e) => e.preventDefault()}
+			>
+				<label class="flex flex-col">
 					<span>Username</span>
 					<input
 						type="text"
-						name="username"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.username}
+						bind:value={userName}
 					/>
 				</label>
 
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+				<label class="flex flex-col">
 					<span>Email</span>
 					<input
 						type="email"
-						name="email"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.email}
+						bind:value={email}
 					/>
 				</label>
 
-				<label class="flex flex-col text-left text-sm text-[color:var(--color-input-text)]">
+				<label class="flex flex-col">
 					<span>Password</span>
 					<input
 						type="password"
-						name="password"
 						required
 						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={formData.password}
+						bind:value={password}
 					/>
 				</label>
+
+				<label class="flex flex-col">
+					<span>Confirm password</span>
+					<input
+						type="password"
+						required
+						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
+						bind:value={confirmPassword}
+					/>
+				</label>
+
+				{#if error}
+					<p class="mt-3 text-sm text-red-300">{error}</p>
+				{/if}
 			</form>
 
-			<p class="mt-6 text-center leading-snug">
-				<a
-					href="/login"
-					class="inline-flex text-[color:var(--color-input-text)] hover:text-[color:var(--color-header-guest)]"
-				>
-					<span>Already have an account?</span>
-					<span class="ml-1 font-semibold">Log In</span>
-				</a>
-			</p>
-
-			<div class="mt-6 mb-0 flex justify-center">
+			<div class="mt-8 mb-2 flex justify-center">
 				<Button
 					size="medium"
 					label="→"
@@ -118,44 +136,54 @@
 					labelFontWeight="normal"
 					labelTracking="extra"
 					labelClass=""
-					onclick={register}
+					onclick={signup}
 				/>
 			</div>
 
+			{#if externalError}
+				<p class="mt-4 text-sm text-red-300">{externalError}</p>
+			{/if}
+
 			<div class="mt-8 flex flex-col items-center gap-3">
 				<div class="flex items-center justify-center gap-4">
-					<a
-						href="/auth/oauth/google"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('google')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/google.png"
-							alt="Sign up with Google"
+							alt="Continue with Google"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href="/auth/oauth/github"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('github')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
 							src="/oauth/github.png"
-							alt="Sign up with GitHub"
+							alt="Continue with GitHub"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 
-					<a
-						href="/auth/oauth/facebook"
-						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/100 shadow-md hover:bg-white/70"
+					<button
+						type="button"
+						disabled={externalLoading !== null}
+						onclick={() => startOAuth('microsoft')}
+						class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white/90 shadow-md hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 					>
 						<img
-							src="/oauth/facebook.png"
-							alt="Sign up with Facebook"
+							src="/oauth/microsoft.png"
+							alt="Continue with Microsoft"
 							class="h-12 w-12 object-contain"
 						/>
-					</a>
+					</button>
 				</div>
 			</div>
 		</div>
