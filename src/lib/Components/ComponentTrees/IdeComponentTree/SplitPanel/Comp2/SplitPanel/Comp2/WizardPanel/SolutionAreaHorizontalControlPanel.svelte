@@ -4,11 +4,11 @@
 
     let { options = $bindable() }: {options: ControlPanelArgs} = $props();
 
-    const handleSelect = (seleceted: string) => {
-        if (options.onSelect){
-            options.onSelect(seleceted);
+    const handleSelect = (selected: string) => {
+        if (options.controlCallbacks?.select){
+            options.controlCallbacks!.select(selected);
         }else{
-            options.selectedElemId = seleceted;
+            options.selectedElemId = selected;
         }
     }
 

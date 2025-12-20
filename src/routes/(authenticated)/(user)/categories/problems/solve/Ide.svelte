@@ -7,21 +7,25 @@
 	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
 	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
-	import { FetchFromApi } from '$lib/api/apiCall';
+	import { API_URL, FetchFromApi } from '$lib/api/apiCall';
 	import { userEditorPreferences, type editorLayout } from '$lib/stores/theme.svelte';
+	import * as signalR from '@microsoft/signalr';
+
   
 	let { 
 		components = $bindable(),
+		contextInjectors
 	}: { 
 		components: Record<string, DefaultLayoutTerminalComponentArgs>,
+	    contextInjectors?: Record<string, (options: any) => void> 
+
 	} = $props();
 
-
-	let layouts: Map<editorLayout, any> = new Map();
-
-	layouts.set('default', DefaultLayout);
-	layouts.set('tabbed', TabbedLayout);
-	layouts.set('split', SplitLayout); // thank f**k for non reactive maps
+	let layouts: Record<string, any> = $state({
+		'default': DefaultLayout,
+		'tabbed': TabbedLayout,
+		'split': SplitLayout
+	});
 
 	let isSettingsPanelShown = $state(false);
 
@@ -35,6 +39,7 @@
 		stdErr: string,
 		executionTime: number,
 		testResults: TestResult[]
+		status: string
 	}
 
 	type TestResult = {
@@ -42,25 +47,58 @@
 		isTestPassed: boolean
 	}
 
+	let connection: signalR.HubConnection | undefined;
+	let connected: boolean = false;
+
+
 	const submitCode = async (runner: boolean): Promise<void> => {
 		runner = true;
-		let res = await FetchFromApi<SubmissionResult>("executor/Submit", {
+		
+		let res = await FetchFromApi<{ jobId: string }>("executor/Submit", {
 			method: "POST",
 			body: JSON.stringify({
-				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).templateContents),
-				exerciseId: (components['problem-info'] as InfoPanelComponentArgs).problemId
+				codeB64: btoa((components['code-editor'] as CodeEditorComponentArgs).userCode),
+				problemId: (components['problem-info'] as InfoPanelComponentArgs).problemId
 			})
 		});
-		(components['terminal-comp'] as TerminalComponentArgs).terminalContents = res.body.stdOutput;
-		(components['test-cases-comp'] as TestCaseComponentArgs).testCases = (components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => {
-			return {
-				isPassed: res.body.testResults.find(ti => ti.testId == t.testCaseId)?.isTestPassed,
-				...t
+		
+		const jobId: string = res.body.jobId;
+		
+		connection = new signalR.HubConnectionBuilder()
+			.withUrl(`${API_URL}/hubs/execution-status`, {
+				withCredentials: true,
+				transport: signalR.HttpTransportType.WebSockets
+			})
+			.withAutomaticReconnect()
+			.build();
+		
+		connection.on("ExecutionStatusUpdated", (executionResponse: SubmissionResult) => {
+			
+			if (executionResponse.status === "complete") {
+				(components['terminal-comp'] as TerminalComponentArgs).terminalContents = executionResponse.stdOutput;
+				(components['test-cases-comp'] as TestCaseComponentArgs).testCases = 
+					(components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => ({
+						isPassed: executionResponse.testResults.find(ti => ti.testId == t.testCaseId)?.isTestPassed,
+						...t
+					}));
+				
+				connection?.stop();
+				connected = false;
 			}
-		})
+		});
+		
+		try {
+			await connection.start();
+			connected = true;
+			
+			await connection.invoke("SubscribeToJob", { jobId: jobId });
+			
+		} catch (err) {
+			connected = false;
+		}
+		
 		runner = false;
-	}
-	
+	};
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">
@@ -76,7 +114,8 @@
 	</div>
 	<div class="w-full h-[95%] flex p-[0.5%]">
 		<ComponentTreeRenderer
-		componentTree={layouts.get(userEditorPreferences.layout)} 
+		componentTree={layouts[userEditorPreferences.layout]} 
+		{contextInjectors}
 		bind:componentOpts={components}
 		/>
 	</div>

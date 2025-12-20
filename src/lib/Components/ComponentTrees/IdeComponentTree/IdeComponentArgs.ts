@@ -9,6 +9,11 @@ export type ProblemDetailsDto = {
   tags: TagDto[]
 }
 
+export type AutoSaveDto = {
+  problemId: string,
+  userCodeB64: string
+}
+
 export type CategoryDto = {
   name: string
 }
