@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+// import { PUBLIC_API_URL } from '$env/static/public';
 
 export type QueryResult = 'Success' | 'Warning' | 'Error';
 
@@ -8,8 +8,8 @@ export type StandardResponseDto<T = {}> = {
 	body: T;
 };
 
-const base = (PUBLIC_API_URL ?? '').trim().replace(/\/+$/, '');
-export const API_URL: string = base ? `${base}/api` : '';
+// const base = (PUBLIC_API_URL ?? '').trim().replace(/\/+$/, '');
+export const API_URL: string = "http://localhost:8080/api";
 
 const getCookie = (name: string): string | null => {
 	if (typeof document === 'undefined') return null;
@@ -80,6 +80,7 @@ export const FetchJsonFromApi = async <TResult>(
 		return undefined as unknown as TResult;
 	}
 
+	console.log(res);
 	return (await res.json()) as TResult;
 };
 
@@ -98,3 +99,5 @@ export const FetchFromApi = async <TResult>(
 		replay
 	);
 };
+
+
