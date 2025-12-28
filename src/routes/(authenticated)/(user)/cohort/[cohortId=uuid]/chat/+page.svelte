@@ -6,12 +6,15 @@
 	import { highlightJava } from '../../../../../../Utils/highlight';
 	import { cohortApi, type SendMessageResultDto, type CohortMemberDto } from '$lib/api/cohort';
 	import { authApi } from '$lib/api/auth';
-	import type { HubConnection } from '@microsoft/signalr';
+	import { HubConnectionState, type HubConnection } from '@microsoft/signalr';
 	import { createInfiniteQuery } from '@tanstack/svelte-query';
 	import type { InfiniteData } from '@tanstack/query-core';
 	import { derived, get } from 'svelte/store';
 	import { page as pageStore } from '$app/stores';
 	import { page as pageState } from '$app/state';
+	import { tick } from 'svelte';
+
+	const isBrowser = typeof window !== 'undefined';
 
 	type MessagesPageDto = Awaited<ReturnType<(typeof cohortApi)['getMessages']>>;
 
@@ -44,7 +47,7 @@
 	let members = $state<CohortMemberDto[]>([]);
 	let memberAvatarByUserId = $state<Record<string, string | null>>({});
 
-	const defaultAvatar = `Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
 
 	type LocalMessage = {
 		messageId: string;
@@ -66,6 +69,23 @@
 
 	let pendingImages = $state<PendingImage[]>([]);
 	let liveMessages = $state<LocalMessage[]>([]);
+	let didInitialScroll = $state(false);
+	let initialScrollToken = $state(0);
+
+	let fileInput = $state<HTMLInputElement | null>(null);
+	let detachScroll = $state<null | (() => void)>(null);
+
+	let lastAttemptedText = $state<string | null>(null);
+	let lastAttemptedImages = $state<PendingImage[]>([]);
+	let lastRejectRestoreArmed = $state(false);
+
+	const scrollStorageKey = $derived.by(() => (cohortId ? `cohort-chat-scroll:${cohortId}` : ''));
+
+	const rafTick = () =>
+		new Promise<void>((resolve) => {
+			if (!isBrowser) return resolve();
+			requestAnimationFrame(() => resolve());
+		});
 
 	const normalizeMediaType = (mt: unknown): 'Text' | 'Image' => {
 		if (mt === 1) return 'Image';
@@ -74,6 +94,18 @@
 			if (v === 'image') return 'Image';
 		}
 		return 'Text';
+	};
+
+	const extractSignalRError = (e: unknown): string => {
+		const raw = e instanceof Error ? e.message : typeof e === 'string' ? e : '';
+		const msg = (raw ?? '').toString();
+		const hubParts = msg.split('HubException:');
+		if (hubParts.length > 1) return hubParts.slice(1).join('HubException:').trim() || msg.trim();
+		const idx = msg.indexOf('ChatValidationException:');
+		if (idx >= 0) return msg.slice(idx + 'ChatValidationException:'.length).trim() || msg.trim();
+		const idx2 = msg.indexOf('Exception:');
+		if (idx2 >= 0) return msg.slice(idx2 + 'Exception:'.length).trim() || msg.trim();
+		return msg.trim() || 'Failed to send message.';
 	};
 
 	const queryOptionsStore = derived(cohortIdStore, (id) => ({
@@ -174,21 +206,122 @@
 
 	const runs = $derived.by(() => groupRuns(allMessages));
 
-	let fileInput = $state<HTMLInputElement | null>(null);
-	let detachScroll = $state<null | (() => void)>(null);
+	const getScrollEl = () =>
+		isBrowser ? (document.getElementById('chat-scroll') as HTMLDivElement | null) : null;
 
-	function scrollToBottom() {
-		requestAnimationFrame(() => {
-			const el = document.getElementById('chat-scroll');
-			el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-		});
-	}
+	const computeNearBottom = () => {
+		const el = getScrollEl();
+		if (!el) return true;
+		const gap = el.scrollHeight - (el.scrollTop + el.clientHeight);
+		return gap < 140;
+	};
+
+	const persistScroll = () => {
+		if (!isBrowser) return;
+		const key = scrollStorageKey;
+		if (!key) return;
+		const el = getScrollEl();
+		if (!el) return;
+
+		const payload = {
+			top: el.scrollTop,
+			atBottom: computeNearBottom()
+		};
+
+		try {
+			sessionStorage.setItem(key, JSON.stringify(payload));
+		} catch {}
+	};
+
+	const scrollToBottom = async (behavior: ScrollBehavior = 'auto') => {
+		if (!isBrowser) return;
+		await tick();
+		await rafTick();
+		const el = getScrollEl();
+		if (!el) return;
+		el.scrollTo({ top: el.scrollHeight, behavior });
+		await rafTick();
+		const el2 = getScrollEl();
+		if (!el2) return;
+		el2.scrollTo({ top: el2.scrollHeight, behavior: 'auto' });
+		persistScroll();
+	};
+
+	const restoreScroll = async (): Promise<{ hadPayload: boolean; wantsBottom: boolean }> => {
+		if (!isBrowser) return { hadPayload: false, wantsBottom: true };
+		const key = scrollStorageKey;
+		if (!key) return { hadPayload: false, wantsBottom: true };
+
+		let payload: { top: number; atBottom: boolean } | null = null;
+		try {
+			const raw = sessionStorage.getItem(key);
+			if (raw) payload = JSON.parse(raw) as { top: number; atBottom: boolean };
+		} catch {
+			payload = null;
+		}
+
+		if (!payload) {
+			await scrollToBottom('auto');
+			return { hadPayload: false, wantsBottom: true };
+		}
+
+		if (payload.atBottom) {
+			await scrollToBottom('auto');
+			return { hadPayload: true, wantsBottom: true };
+		}
+
+		await tick();
+		await rafTick();
+		const el = getScrollEl();
+		if (el) el.scrollTop = payload.top;
+		return { hadPayload: true, wantsBottom: false };
+	};
+
+	$effect(() => {
+		if (!isBrowser) return;
+		if (!cohortId) return;
+		const q = $query;
+		if (!didInitialScroll && q.isSuccess) {
+			didInitialScroll = true;
+			const token = (initialScrollToken = initialScrollToken + 1);
+			(async () => {
+				await tick();
+				await rafTick();
+				const info = await restoreScroll();
+				if (token !== initialScrollToken) return;
+
+				await rafTick();
+				const el = getScrollEl();
+				if (el && el.scrollTop === 0 && (info.wantsBottom || !info.hadPayload)) {
+					await scrollToBottom('auto');
+				}
+
+				if (token !== initialScrollToken) return;
+				if (info.wantsBottom) {
+					await new Promise<void>((r) => setTimeout(r, 120));
+					if (token !== initialScrollToken) return;
+					await scrollToBottom('auto');
+					await new Promise<void>((r) => setTimeout(r, 400));
+					if (token !== initialScrollToken) return;
+					await scrollToBottom('auto');
+				}
+			})();
+		}
+	});
 
 	const attachLazyLoad = () => {
-		const el = document.getElementById('chat-scroll');
+		if (!isBrowser) return null;
+		const el = getScrollEl();
 		if (!el) return null;
 
+		let raf = 0;
+
 		const onScroll = async () => {
+			if (raf) cancelAnimationFrame(raf);
+			raf = requestAnimationFrame(() => {
+				persistScroll();
+			});
+
 			if (el.scrollTop > 0) return;
 
 			const q = get(query);
@@ -200,11 +333,28 @@
 			requestAnimationFrame(() => {
 				const nextHeight = el.scrollHeight;
 				el.scrollTop = nextHeight - prevHeight;
+				persistScroll();
 			});
 		};
 
+		const onPageHide = () => {
+			persistScroll();
+		};
+
+		const onVisibility = () => {
+			if (document.visibilityState === 'hidden') persistScroll();
+		};
+
 		el.addEventListener('scroll', onScroll);
-		return () => el.removeEventListener('scroll', onScroll);
+		window.addEventListener('pagehide', onPageHide);
+		document.addEventListener('visibilitychange', onVisibility);
+
+		return () => {
+			if (raf) cancelAnimationFrame(raf);
+			el.removeEventListener('scroll', onScroll);
+			window.removeEventListener('pagehide', onPageHide);
+			document.removeEventListener('visibilitychange', onVisibility);
+		};
 	};
 
 	const refreshMembers = async () => {
@@ -215,6 +365,27 @@
 			for (const m of members) map[m.userId] = m.userAvatarUrl ?? null;
 			memberAvatarByUserId = map;
 		} catch {}
+	};
+
+	const showRejection = (reason: unknown) => {
+		const msg =
+			typeof reason === 'string' && reason.trim()
+				? reason.trim()
+				: 'This message violates our content rules.';
+		alert(msg);
+
+		if (lastRejectRestoreArmed) {
+			if (!message.trim() && lastAttemptedText && lastAttemptedText.trim()) {
+				message = lastAttemptedText;
+				resizeTextarea();
+			}
+
+			if (pendingImages.length === 0 && lastAttemptedImages.length > 0) {
+				pendingImages = lastAttemptedImages;
+			}
+
+			lastRejectRestoreArmed = false;
+		}
 	};
 
 	const onReceive = (msg: SendMessageResultDto) => {
@@ -232,9 +403,201 @@
 			isMine: mine
 		};
 
+		const shouldScroll = computeNearBottom();
 		liveMessages = [...liveMessages, local];
-		scrollToBottom();
+		if (shouldScroll) scrollToBottom('smooth');
 	};
+
+	const ensureConnected = async () => {
+		const c = conn;
+		if (!c) throw new Error('Chat connection unavailable.');
+
+		const getState = () => c.state as HubConnectionState;
+		if (getState() === HubConnectionState.Connected) return;
+
+		const s0 = getState();
+		if (s0 === HubConnectionState.Connecting || s0 === HubConnectionState.Reconnecting) {
+			for (let i = 0; i < 30; i++) {
+				await new Promise((r) => setTimeout(r, 100));
+				const s = getState();
+				if (s === HubConnectionState.Connected) return;
+				if (s === HubConnectionState.Disconnected) break;
+			}
+		}
+
+		if (getState() !== HubConnectionState.Connected) {
+			await c.start();
+		}
+	};
+
+	const sendText = async (text: string) => {
+		const trimmed = text.trim();
+		if (!trimmed) return;
+		await ensureConnected();
+		const c = conn;
+		if (!c) return;
+		try {
+			await c.invoke('SendMessage', {
+				cohortId,
+				content: trimmed,
+				mediaType: 0
+			});
+		} catch (e) {
+			showRejection(extractSignalRError(e));
+			throw e;
+		}
+	};
+
+	const sendImage = async (file: File) => {
+		await ensureConnected();
+		const uploaded = await cohortApi.uploadChatMedia(cohortId, file);
+		const c = conn;
+		if (!c) return;
+		try {
+			await c.invoke('SendMessage', {
+				cohortId,
+				content: '',
+				mediaType: 1,
+				mediaKey: uploaded.mediaKey,
+				mediaContentType: uploaded.contentType
+			});
+		} catch (e) {
+			showRejection(extractSignalRError(e));
+			throw e;
+		}
+	};
+
+	async function sendAll() {
+		const imgs = pendingImages;
+		const text = message;
+
+		if (imgs.length === 0 && text.trim().length === 0) return;
+
+		lastAttemptedText = text;
+		lastAttemptedImages = imgs;
+		lastRejectRestoreArmed = true;
+
+		const sentFromNearBottom = computeNearBottom();
+
+		let didClearText = false;
+
+		if (text.trim().length > 0) {
+			message = '';
+			didClearText = true;
+			resizeTextarea();
+		}
+
+		if (imgs.length > 0) {
+			pendingImages = [];
+		}
+
+		try {
+			if (imgs.length > 0) {
+				for (const p of imgs) {
+					await sendImage(p.file);
+					try {
+						URL.revokeObjectURL(p.previewUrl);
+					} catch {}
+				}
+			}
+
+			if (text.trim().length > 0) {
+				await sendText(text);
+			}
+
+			lastRejectRestoreArmed = false;
+			lastAttemptedText = null;
+			lastAttemptedImages = [];
+
+			if (sentFromNearBottom) {
+				scrollToBottom('smooth');
+			}
+		} catch {
+			if (didClearText && lastAttemptedText && lastAttemptedText.trim()) {
+				message = lastAttemptedText;
+				resizeTextarea();
+			}
+
+			if (imgs.length > 0) {
+				pendingImages = imgs;
+			}
+
+			lastRejectRestoreArmed = false;
+		}
+	}
+
+	function openPicker() {
+		if (fileInput) {
+			try {
+				fileInput.value = '';
+			} catch {}
+		}
+		fileInput?.click();
+	}
+
+	const inferContentType = (name: string): string | null => {
+		const lower = (name ?? '').toLowerCase();
+		if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+		if (lower.endsWith('.png')) return 'image/png';
+		if (lower.endsWith('.webp')) return 'image/webp';
+		if (lower.endsWith('.gif')) return 'image/gif';
+		return null;
+	};
+
+	function addFiles(files: File[]) {
+		const next: PendingImage[] = [];
+
+		for (const file of files) {
+			let f = file;
+
+			if (!f.type) {
+				const lower = (f.name ?? '').toLowerCase();
+				if (lower.endsWith('.heic') || lower.endsWith('.heif')) {
+					alert('HEIC/HEIF images are not supported. Please convert to JPG/PNG/WebP.');
+					continue;
+				}
+
+				const inferred = inferContentType(f.name);
+				if (!inferred) continue;
+				f = new File([f], f.name, { type: inferred });
+			}
+
+			if (!f.type.startsWith('image/')) continue;
+
+			const id =
+				typeof crypto !== 'undefined' && 'randomUUID' in crypto
+					? crypto.randomUUID()
+					: `${Date.now()}-${Math.random()}`;
+
+			const previewUrl = URL.createObjectURL(f);
+			next.push({ id, file: f, previewUrl });
+		}
+
+		if (next.length > 0) pendingImages = [...pendingImages, ...next];
+	}
+
+	function removePending(id: string) {
+		const found = pendingImages.find((p) => p.id === id);
+		if (found) {
+			try {
+				URL.revokeObjectURL(found.previewUrl);
+			} catch {}
+		}
+		pendingImages = pendingImages.filter((p) => p.id !== id);
+	}
+
+	async function onPickImage(e: Event) {
+		const target = e.currentTarget as HTMLInputElement | null;
+		if (!target) return;
+
+		const copied = target.files ? Array.from(target.files) : [];
+		try {
+			target.value = '';
+		} catch {}
+
+		if (copied.length === 0) return;
+		addFiles(copied);
+	}
 
 	$effect(() => {
 		if (!cohortId) return;
@@ -257,21 +620,33 @@
 			const nextConn = cohortApi.createChatConnection(cohortId, {
 				onReceiveMessage: (msg) => {
 					onReceive(msg);
-				},
-				onMessageRejected: (reason) => {
-					alert(reason);
 				}
 			});
 
+			nextConn.on('MessageRejected', (reason: unknown) => {
+				showRejection(reason);
+			});
+
+			const prev = conn;
 			conn = nextConn;
+
+			if (prev) {
+				try {
+					await prev.stop();
+				} catch {}
+			}
 
 			try {
 				await nextConn.start();
-			} catch {}
+			} catch {
+				if (active) conn = null;
+			}
 		})();
 
 		return () => {
 			active = false;
+
+			didInitialScroll = false;
 
 			if (detachScroll) detachScroll();
 			detachScroll = null;
@@ -280,217 +655,25 @@
 			conn = null;
 
 			if (c) {
-				(async () => {
-					try {
-						await c.stop();
-					} catch {}
-				})();
+				try {
+					c.stop();
+				} catch {}
 			}
-		};
-	});
 
-	$effect(() => {
-		return () => {
-			for (const p of pendingImages) {
+			const imgs = pendingImages;
+			pendingImages = [];
+			for (const p of imgs) {
 				try {
 					URL.revokeObjectURL(p.previewUrl);
 				} catch {}
 			}
+
+			liveMessages = [];
+			lastAttemptedText = null;
+			lastAttemptedImages = [];
+			lastRejectRestoreArmed = false;
 		};
 	});
-
-	const isBindingError = (e: unknown) => {
-		const msg = typeof e === 'string' ? e : (e as any)?.message;
-		if (!msg || typeof msg !== 'string') return false;
-		return msg.includes('Error binding arguments') || msg.includes('InvalidDataException');
-	};
-
-	const invokeSendMessage = async (payload: {
-		cohortId: string;
-		content: string | null;
-		mediaType: 0 | 1;
-		mediaKey: string | null;
-		mediaContentType: string | null;
-	}) => {
-		const c = conn;
-		if (!c) throw new Error('Chat connection is not available.');
-
-		const oneArg = {
-			cohortId: payload.cohortId,
-			content: payload.content,
-			input: payload.content,
-			message: payload.content,
-			text: payload.content,
-			mediaType: payload.mediaType,
-			mediaKey: payload.mediaKey,
-			mediaContentType: payload.mediaContentType
-		};
-
-		const withoutCohortId = {
-			content: payload.content,
-			input: payload.content,
-			message: payload.content,
-			text: payload.content,
-			mediaType: payload.mediaType,
-			mediaKey: payload.mediaKey,
-			mediaContentType: payload.mediaContentType
-		};
-
-		try {
-			await c.invoke('SendMessage', oneArg);
-			return;
-		} catch (e) {
-			if (!isBindingError(e)) throw e;
-		}
-
-		try {
-			await c.invoke('SendMessage', payload.cohortId, withoutCohortId);
-			return;
-		} catch (e) {
-			if (!isBindingError(e)) throw e;
-		}
-
-		await c.invoke('SendMessage', withoutCohortId);
-	};
-
-	async function sendTextMessage(text: string) {
-		if (!cohortId) return;
-
-		const payload = {
-			cohortId,
-			content: text,
-			mediaType: 0 as const,
-			mediaKey: null,
-			mediaContentType: null
-		};
-
-		try {
-			await invokeSendMessage(payload);
-		} catch (err) {
-			if (!isBindingError(err)) throw err;
-
-			await cohortApi.sendMessageRest(cohortId, {
-				content: text,
-				input: text,
-				message: text,
-				text: text,
-				mediaType: 'Text',
-				mediaKey: null,
-				mediaContentType: null
-			} as any);
-		}
-	}
-
-	async function sendImageMessage(file: File) {
-		if (!cohortId) return;
-
-		const uploaded = await cohortApi.uploadChatMedia(cohortId, file);
-
-		const payload = {
-			cohortId,
-			content: null,
-			mediaType: 1 as const,
-			mediaKey: uploaded.mediaKey,
-			mediaContentType: uploaded.contentType
-		};
-
-		try {
-			await invokeSendMessage(payload);
-		} catch (err) {
-			if (!isBindingError(err)) throw err;
-
-			await cohortApi.sendMessageRest(cohortId, {
-				content: null,
-				input: null,
-				message: null,
-				text: null,
-				mediaType: 'Image',
-				mediaKey: uploaded.mediaKey,
-				mediaContentType: uploaded.contentType
-			} as any);
-		}
-	}
-
-	async function sendAll() {
-		if (!cohortId) return;
-
-		const text = message.trim();
-		const imgs = [...pendingImages];
-
-		if (text === '' && imgs.length === 0) return;
-
-		if (text !== '') {
-			try {
-				await sendTextMessage(text);
-			} catch (err) {
-				const msg = err instanceof Error ? err.message : String(err);
-				alert(msg);
-				return;
-			}
-		}
-
-		message = '';
-		if (textareaRef) textareaRef.style.height = 'auto';
-
-		if (imgs.length > 0) {
-			let remaining: PendingImage[] = [];
-
-			for (let i = 0; i < imgs.length; i++) {
-				const p = imgs[i];
-				try {
-					await sendImageMessage(p.file);
-					try {
-						URL.revokeObjectURL(p.previewUrl);
-					} catch {}
-				} catch (err) {
-					const msg = err instanceof Error ? err.message : String(err);
-					alert(msg);
-					remaining = imgs.slice(i);
-					break;
-				}
-			}
-
-			pendingImages = remaining;
-		}
-
-		scrollToBottom();
-	}
-
-	function openPicker() {
-		fileInput?.click();
-	}
-
-	function addFiles(files: FileList) {
-		const next: PendingImage[] = [];
-		for (const file of Array.from(files)) {
-			if (!file.type.startsWith('image/')) continue;
-			const id =
-				typeof crypto !== 'undefined' && 'randomUUID' in crypto
-					? crypto.randomUUID()
-					: `${Date.now()}-${Math.random()}`;
-			const previewUrl = URL.createObjectURL(file);
-			next.push({ id, file, previewUrl });
-		}
-		if (next.length > 0) pendingImages = [...pendingImages, ...next];
-	}
-
-	function removePending(id: string) {
-		const found = pendingImages.find((p) => p.id === id);
-		if (found) {
-			try {
-				URL.revokeObjectURL(found.previewUrl);
-			} catch {}
-		}
-		pendingImages = pendingImages.filter((p) => p.id !== id);
-	}
-
-	async function onPickImage(e: Event) {
-		const target = e.currentTarget as HTMLInputElement;
-		const files = target.files;
-		target.value = '';
-		if (!files || files.length === 0) return;
-		addFiles(files);
-	}
 
 	async function renderMessage(text: string): Promise<string> {
 		const segments: string[] = [];
@@ -511,8 +694,8 @@
 
 			if (lang.toLowerCase() === 'java') {
 				segments.push(`
-						<div class="p-2 bg-[color:#0d0f14] text-[color:var(--color-text)] overflow-auto rounded text-sm">
-							${highlightJava(code)}
+							<div class="p-2 bg-[color:#0d0f14] text-[color:var(--color-text)] overflow-auto rounded text-sm">
+								${highlightJava(code)}
 			            </div>
 		           `);
 			} else {
@@ -629,6 +812,7 @@
 										<img
 											src={m.mediaUrl}
 											alt=""
+											style="display:block;max-width:100%;height:auto;margin:0 auto;"
 											class="h-auto max-h-[14rem] w-auto max-w-[14rem] rounded object-contain"
 										/>
 									{:else}

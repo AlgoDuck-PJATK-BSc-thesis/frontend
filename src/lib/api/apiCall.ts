@@ -43,12 +43,18 @@ const shouldSetJsonContentType = (body: RequestInit['body']): boolean => {
 	return true;
 };
 
+const isCsrfFailureMessage = (msg: string | null | undefined) => {
+	const m = (msg ?? '').trim().toLowerCase();
+	return m.includes('csrf validation failed');
+};
+
 export const FetchJsonFromApi = async <TResult>(
 	endpoint: string,
 	fetchOptions: RequestInit = {},
 	fetcher?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
 	searchParams?: URLSearchParams,
-	replay: boolean = false
+	replay: boolean = false,
+	csrfReplay: boolean = false
 ): Promise<TResult> => {
 	if (!API_URL) {
 		throw new Error(
@@ -89,26 +95,60 @@ export const FetchJsonFromApi = async <TResult>(
 
 	if (!res.ok) {
 		if (res.status === 401 && res.headers.get('X-Token-Expired') === 'true' && !replay) {
-			await FetchJsonFromApi('auth/refresh', { method: 'POST' }, fetcher, undefined, true);
-			return await FetchJsonFromApi<TResult>(endpoint, fetchOptions, fetcher, searchParams, true);
+			await FetchJsonFromApi(
+				'auth/refresh',
+				{ method: 'POST' },
+				fetcher,
+				undefined,
+				true,
+				csrfReplay
+			);
+			return await FetchJsonFromApi<TResult>(
+				endpoint,
+				fetchOptions,
+				fetcher,
+				searchParams,
+				true,
+				csrfReplay
+			);
 		}
 
 		const ct = res.headers.get('content-type') ?? '';
 		let msg = `API Error ${res.status}: ${res.statusText}`;
 
 		if (ct.includes('application/json')) {
+			let parsed: unknown = null;
+
 			try {
-				const data = (await res.json()) as unknown;
-				if (isStandardResponseDto(data)) {
-					const m = (data.message ?? '').toString().trim();
-					if (m) msg = m;
-				} else if (data && typeof data === 'object') {
-					const maybeMessage = (data as Record<string, unknown>).message;
-					if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
-						msg = maybeMessage.trim();
-					}
+				parsed = (await res.json()) as unknown;
+			} catch {
+				parsed = null;
+			}
+
+			let parsedMessage: string | null = null;
+
+			if (isStandardResponseDto(parsed)) {
+				const m = (parsed.message ?? '').toString().trim();
+				if (m) parsedMessage = m;
+			} else if (parsed && typeof parsed === 'object') {
+				const maybeMessage = (parsed as Record<string, unknown>).message;
+				if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
+					parsedMessage = maybeMessage.trim();
 				}
-			} catch {}
+			}
+
+			if (res.status === 403 && !csrfReplay && isCsrfFailureMessage(parsedMessage)) {
+				return await FetchJsonFromApi<TResult>(
+					endpoint,
+					fetchOptions,
+					fetcher,
+					searchParams,
+					replay,
+					true
+				);
+			}
+
+			if (parsedMessage) msg = parsedMessage;
 		} else {
 			try {
 				const detail = (await res.text()).trim();
@@ -132,13 +172,15 @@ export const FetchFromApi = async <TResult>(
 	fetchOptions: RequestInit = {},
 	fetcher?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
 	searchParams?: URLSearchParams,
-	replay: boolean = false
+	replay: boolean = false,
+	csrfReplay: boolean = false
 ): Promise<StandardResponseDto<TResult>> => {
 	return await FetchJsonFromApi<StandardResponseDto<TResult>>(
 		endpoint,
 		fetchOptions,
 		fetcher,
 		searchParams,
-		replay
+		replay,
+		csrfReplay
 	);
 };

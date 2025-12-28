@@ -1,6 +1,6 @@
 import { FetchFromApi, API_URL } from '$lib/api/apiCall';
 import * as signalR from '@microsoft/signalr';
-import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
+import { userApi, type UserLeaderboardEntryDto, type UserLeaderboardPageDto } from '$lib/api/user';
 
 export type CohortSummaryDto = {
 	cohortId: string;
@@ -109,6 +109,7 @@ export type LeaderboardItemDto = {
 	userName: string;
 	experience: number;
 	amountSolved: number;
+	cohortId: string | null;
 	userAvatarUrl: string | null;
 };
 
@@ -119,7 +120,78 @@ const normalizeApiOrigin = (v: string) => {
 
 const apiOriginFromApiUrl = () => normalizeApiOrigin(API_URL ?? '');
 
+const toAbsoluteMediaUrl = (maybeUrl: string | null | undefined) => {
+	if (!maybeUrl) return null;
+	const u = maybeUrl.trim();
+	if (!u) return null;
+	if (/^https?:\/\//i.test(u)) return u;
+	if (u.startsWith('data:')) return u;
+	const origin = apiOriginFromApiUrl();
+	if (!origin) return u;
+	if (u.startsWith('/')) return `${origin}${u}`;
+	return `${origin}/${u}`;
+};
+
+const normalizeAvatarPath = (maybePath: string | null | undefined) => {
+	if (!maybePath) return null;
+	const s = maybePath.trim();
+	if (!s) return null;
+	if (/^https?:\/\//i.test(s)) {
+		try {
+			const url = new URL(s);
+			return url.pathname.replace(/^\/+/, '');
+		} catch {
+			return s;
+		}
+	}
+	return s.replace(/^\/+/, '');
+};
+
 const pickActive = (items: CohortSummaryDto[]) => items.find((x) => x.isActive) ?? null;
+
+const normalizeMember = (m: any): CohortMemberDto => ({
+	userId: m.userId,
+	userName: m.username ?? m.userName ?? '',
+	userAvatarUrl: normalizeAvatarPath(m.userAvatarUrl ?? null)
+});
+
+const normalizeMessage = (m: any): CohortMessageDto => ({
+	messageId: m.messageId,
+	cohortId: m.cohortId,
+	userId: m.userId,
+	userName: m.userName ?? m.username ?? '',
+	userAvatarUrl: normalizeAvatarPath(m.userAvatarUrl ?? null),
+	content: m.content ?? null,
+	mediaType: m.mediaType,
+	mediaUrl: toAbsoluteMediaUrl(m.mediaUrl ?? null),
+	createdAt: m.createdAt,
+	isMine: !!m.isMine
+});
+
+const normalizeSendMessageResult = (m: any): SendMessageResultDto => ({
+	messageId: m.messageId,
+	cohortId: m.cohortId,
+	userId: m.userId,
+	userName: m.userName ?? m.username ?? '',
+	userAvatarUrl: normalizeAvatarPath(m.userAvatarUrl ?? null),
+	content: m.content ?? null,
+	mediaType: m.mediaType,
+	mediaUrl: toAbsoluteMediaUrl(m.mediaUrl ?? null),
+	createdAt: m.createdAt
+});
+
+const toLeaderboardItems = (page: UserLeaderboardPageDto): LeaderboardItemDto[] => {
+	const entries = page.entries ?? [];
+	return entries.map((e: UserLeaderboardEntryDto) => ({
+		rank: e.rank,
+		userId: e.userId,
+		userName: e.username,
+		experience: e.experience,
+		amountSolved: e.amountSolved,
+		cohortId: e.cohortId,
+		userAvatarUrl: normalizeAvatarPath(e.userAvatarUrl ?? null)
+	}));
+};
 
 export type CohortChatConnectionHandlers = {
 	onReceiveMessage?: (msg: SendMessageResultDto) => void;
@@ -238,11 +310,7 @@ export const cohortApi = {
 			page: b.page,
 			pageSize: b.pageSize,
 			totalCount: b.totalCount,
-			items: (b.items ?? []).map((m: any) => ({
-				userId: m.userId,
-				userName: m.username ?? m.userName,
-				userAvatarUrl: m.userAvatarUrl ?? null
-			}))
+			items: (b.items ?? []).map(normalizeMember)
 		};
 	},
 
@@ -260,6 +328,7 @@ export const cohortApi = {
 			all.push(...(next.items ?? []));
 			if (all.length >= total) break;
 		}
+
 		return all;
 	},
 
@@ -275,13 +344,39 @@ export const cohortApi = {
 		);
 
 		const items = res.body?.items ?? [];
-		return items.map((m: any) => ({
+		return items.map((m) => ({
 			userId: m.userId,
-			userName: m.username ?? m.userName,
-			userAvatarUrl: m.userAvatarUrl ?? null,
+			userName: m.username ?? m.userName ?? '',
+			userAvatarUrl: normalizeAvatarPath(m.userAvatarUrl ?? null),
 			lastSeenAt: m.lastSeenAt,
 			isActive: !!m.isActive
 		}));
+	},
+
+	getLeaderboard: async (
+		cohortId: string,
+		fetcher?: typeof fetch
+	): Promise<LeaderboardItemDto[]> => {
+		const id = cohortId.trim();
+		const pageSize = 100;
+
+		let page = 1;
+		let out: LeaderboardItemDto[] = [];
+
+		while (true) {
+			const result = await userApi.getCohortLeaderboard(id, page, pageSize, fetcher);
+			const batch = toLeaderboardItems(result);
+			out = out.concat(batch);
+
+			const totalUsers = result.totalUsers ?? out.length;
+			if (out.length >= totalUsers) break;
+			if (batch.length === 0) break;
+
+			page += 1;
+			if (page > 50) break;
+		}
+
+		return out;
 	},
 
 	getMessages: async (
@@ -289,10 +384,21 @@ export const cohortApi = {
 		opts?: { beforeCreatedAt?: string | null; pageSize?: number },
 		fetcher?: typeof fetch
 	): Promise<GetCohortMessagesResultDto> => {
+		const beforeCreatedAt = opts?.beforeCreatedAt ?? null;
+		const pageSize = opts?.pageSize ?? 30;
+		return await cohortApi.getMessagesPage(cohortId, beforeCreatedAt, pageSize, fetcher);
+	},
+
+	getMessagesPage: async (
+		cohortId: string,
+		beforeCreatedAt: string | null,
+		pageSize = 30,
+		fetcher?: typeof fetch
+	): Promise<GetCohortMessagesResultDto> => {
 		const id = cohortId.trim();
 		const sp = new URLSearchParams();
-		sp.set('pageSize', String(opts?.pageSize ?? 50));
-		if (opts?.beforeCreatedAt) sp.set('beforeCreatedAt', opts.beforeCreatedAt);
+		if (beforeCreatedAt) sp.set('beforeCreatedAt', beforeCreatedAt);
+		sp.set('pageSize', String(pageSize));
 
 		const res = await FetchFromApi<GetCohortMessagesResultDto>(
 			`cohorts/${encodeURIComponent(id)}/messages`,
@@ -303,18 +409,7 @@ export const cohortApi = {
 
 		const b = res.body;
 		return {
-			items: (b.items ?? []).map((m: any) => ({
-				messageId: m.messageId,
-				cohortId: m.cohortId,
-				userId: m.userId,
-				userName: m.userName ?? m.username,
-				userAvatarUrl: m.userAvatarUrl ?? null,
-				content: m.content ?? null,
-				mediaType: m.mediaType,
-				mediaUrl: m.mediaUrl ?? null,
-				createdAt: m.createdAt,
-				isMine: !!m.isMine
-			})),
+			items: (b.items ?? []).map(normalizeMessage),
 			nextCursor: b.nextCursor ?? null,
 			hasMore: !!b.hasMore
 		};
@@ -326,86 +421,83 @@ export const cohortApi = {
 		fetcher?: typeof fetch
 	): Promise<UploadMediaResultDto> => {
 		const id = cohortId.trim();
-		const form = new FormData();
-		form.append('file', file);
+		const fd = new FormData();
+		fd.append('file', file);
+
 		const res = await FetchFromApi<UploadMediaResultDto>(
 			`cohorts/${encodeURIComponent(id)}/chat/media`,
-			{ method: 'POST', body: form },
+			{ method: 'POST', body: fd as any },
 			fetcher
 		);
-		return res.body;
+
+		const b = res.body;
+		return {
+			mediaKey: b.mediaKey,
+			mediaUrl: toAbsoluteMediaUrl(b.mediaUrl) ?? b.mediaUrl,
+			contentType: b.contentType,
+			sizeBytes: b.sizeBytes
+		};
 	},
 
 	sendMessageRest: async (
 		cohortId: string,
-		dto: SendMessageRequestDto,
+		req: SendMessageRequestDto,
 		fetcher?: typeof fetch
 	): Promise<SendMessageResultDto> => {
 		const id = cohortId.trim();
 		const res = await FetchFromApi<SendMessageResultDto>(
 			`cohorts/${encodeURIComponent(id)}/chat/messages`,
-			{ method: 'POST', body: JSON.stringify(dto) },
+			{ method: 'POST', body: JSON.stringify(req) },
 			fetcher
 		);
-		return res.body;
+
+		return normalizeSendMessageResult(res.body);
 	},
 
-	createChatConnection: (cohortId: string, handlers?: CohortChatConnectionHandlers) => {
+	createChatConnection: (
+		cohortId: string,
+		handlers: CohortChatConnectionHandlers = {}
+	): signalR.HubConnection => {
 		const origin = apiOriginFromApiUrl();
-		const url = `${origin}/hubs/cohort-chat?cohortId=${encodeURIComponent(cohortId.trim())}`;
+		const hubUrl = `${origin}/hubs/cohort-chat?cohortId=${encodeURIComponent(cohortId)}`;
 
-		const conn = new signalR.HubConnectionBuilder()
-			.withUrl(url, { withCredentials: true })
-			.withAutomaticReconnect([0, 1000, 3000, 5000, 10000])
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl(hubUrl, { withCredentials: true })
+			.withAutomaticReconnect()
 			.build();
 
-		conn.on('ReceiveMessage', (msg: SendMessageResultDto) => {
+		connection.on('ReceiveMessage', (msg: any) => {
 			try {
-				handlers?.onReceiveMessage?.(msg);
-			} catch (err) {
-				handlers?.onError?.(err);
+				handlers.onReceiveMessage?.(normalizeSendMessageResult(msg));
+			} catch (e) {
+				handlers.onError?.(e);
 			}
 		});
 
-		conn.on('PresenceUpdated', (update: PresenceUpdatedDto) => {
+		connection.on('PresenceUpdated', (update: any) => {
 			try {
-				handlers?.onPresenceUpdated?.(update);
-			} catch (err) {
-				handlers?.onError?.(err);
+				handlers.onPresenceUpdated?.({
+					userId: update.userId,
+					isActive: !!update.isActive,
+					lastSeenAt: update.lastSeenAt
+				});
+			} catch (e) {
+				handlers.onError?.(e);
 			}
 		});
 
-		conn.on('MessageRejected', (reason: string) => {
+		connection.on('MessageRejected', (reason: any) => {
 			try {
-				handlers?.onMessageRejected?.(reason);
-			} catch (err) {
-				handlers?.onError?.(err);
+				handlers.onMessageRejected?.(String(reason ?? 'Message rejected.'));
+			} catch (e) {
+				handlers.onError?.(e);
 			}
 		});
 
-		return conn;
-	},
+		connection.onclose((err) => {
+			if (err) handlers.onError?.(err);
+		});
 
-	sendViaHub: async (
-		conn: signalR.HubConnection,
-		dto: { cohortId: string } & SendMessageRequestDto
-	) => {
-		await conn.invoke('SendMessage', dto);
-	},
-
-	getLeaderboard: async (
-		cohortId: string,
-		fetcher?: typeof fetch
-	): Promise<LeaderboardItemDto[]> => {
-		const page = await userApi.getCohortLeaderboard(cohortId, 1, 100, fetcher);
-		const entries = page.entries ?? [];
-		return entries.map((e: UserLeaderboardEntryDto) => ({
-			rank: e.rank,
-			userId: e.userId,
-			userName: e.username,
-			experience: e.experience,
-			amountSolved: e.amountSolved,
-			userAvatarUrl: e.userAvatarUrl ?? null
-		}));
+		return connection;
 	}
 };

@@ -8,7 +8,8 @@
 		cohortApi,
 		type CohortMemberDto,
 		type PresenceUpdatedDto,
-		type CohortDetailsDto
+		type CohortDetailsDto,
+		type CohortActiveMemberDto
 	} from '$lib/api/cohort';
 	import type { HubConnection } from '@microsoft/signalr';
 
@@ -25,12 +26,13 @@
 	let members = $state<CohortMemberDto[]>(data.members ?? []);
 
 	type PresenceState = { isActive: boolean; lastSeenAt: string };
+
 	let presence = $state<Record<string, PresenceState>>(
 		Object.fromEntries(
 			(data.activeMembers ?? []).map(
 				(m: { userId: string; lastSeenAt: string; isActive: boolean }) => [
 					m.userId,
-					{ isActive: true, lastSeenAt: m.lastSeenAt }
+					{ isActive: !!m.isActive, lastSeenAt: m.lastSeenAt }
 				]
 			)
 		)
@@ -40,14 +42,40 @@
 
 	let connection = $state<HubConnection | null>(null);
 	let pollHandle = $state<number | null>(null);
+	let tickHandle = $state<number | null>(null);
+	let nowTick = $state(Date.now());
 
-	const defaultAvatar = `Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
 
 	type User = {
 		name: string;
 		points: number;
 		isOnline: boolean;
 		avatarPath: string;
+		lastSeenShort: string;
+		lastSeenFull: string;
+	};
+
+	const formatLastSeen = (iso: string | null | undefined, nowMs: number) => {
+		if (!iso) return { short: '', full: '' };
+		const t = new Date(iso).getTime();
+		if (!Number.isFinite(t)) return { short: '', full: '' };
+
+		let diffSec = Math.floor((nowMs - t) / 1000);
+		if (diffSec < 0) diffSec = 0;
+
+		if (diffSec < 60) return { short: 'now', full: 'Active less than a minute ago' };
+
+		const min = Math.floor(diffSec / 60);
+		if (min < 60)
+			return { short: `${min}m`, full: `Active ${min} minute${min === 1 ? '' : 's'} ago` };
+
+		const hrs = Math.floor(min / 60);
+		if (hrs < 24)
+			return { short: `${hrs}h`, full: `Active ${hrs} hour${hrs === 1 ? '' : 's'} ago` };
+
+		const days = Math.floor(hrs / 24);
+		return { short: `${days}d`, full: `Active ${days} day${days === 1 ? '' : 's'} ago` };
 	};
 
 	const activeTab = $derived.by(() => {
@@ -56,13 +84,22 @@
 	});
 
 	const sortedUsers = $derived.by(() => {
+		const nowMs = nowTick;
+
 		const list: User[] = (members ?? []).map((m: CohortMemberDto) => {
 			const p = presence[m.userId];
+			const isOnline = !!p?.isActive;
+			const lastSeen = isOnline
+				? { short: '', full: 'Active now' }
+				: formatLastSeen(p?.lastSeenAt ?? null, nowMs);
+
 			return {
 				name: m.userName,
 				points: 0,
-				isOnline: !!p?.isActive,
-				avatarPath: m.userAvatarUrl ? m.userAvatarUrl : defaultAvatar
+				isOnline,
+				avatarPath: m.userAvatarUrl ? m.userAvatarUrl : defaultAvatar,
+				lastSeenShort: isOnline ? '' : lastSeen.short,
+				lastSeenFull: isOnline ? 'Active now' : lastSeen.full
 			};
 		});
 
@@ -75,10 +112,67 @@
 	});
 
 	const applyPresenceUpdate = (u: PresenceUpdatedDto) => {
+		const prev = presence[u.userId];
+		const nowIso = new Date().toISOString();
+
+		const nextLastSeen =
+			typeof u.lastSeenAt === 'string' && u.lastSeenAt.trim()
+				? u.lastSeenAt
+				: u.isActive
+					? nowIso
+					: prev?.isActive
+						? nowIso
+						: (prev?.lastSeenAt ?? '');
+
 		presence = {
 			...presence,
-			[u.userId]: { isActive: !!u.isActive, lastSeenAt: u.lastSeenAt }
+			[u.userId]: { isActive: !!u.isActive, lastSeenAt: nextLastSeen }
 		};
+	};
+
+	const mergePresence = (activeItems: CohortActiveMemberDto[]) => {
+		const byId: Record<string, CohortActiveMemberDto> = {};
+		for (const a of activeItems) byId[a.userId] = a;
+
+		const next: Record<string, PresenceState> = {};
+		const nowIso = new Date().toISOString();
+
+		for (const m of members ?? []) {
+			const prev = presence[m.userId];
+			const found = byId[m.userId];
+
+			if (found) {
+				const isActive = !!found.isActive;
+				const lastSeenAtRaw = typeof found.lastSeenAt === 'string' ? found.lastSeenAt.trim() : '';
+
+				if (isActive) {
+					next[m.userId] = {
+						isActive: true,
+						lastSeenAt: lastSeenAtRaw ? lastSeenAtRaw : (prev?.lastSeenAt ?? nowIso)
+					};
+				} else {
+					const lastSeenAt = lastSeenAtRaw
+						? lastSeenAtRaw
+						: prev?.isActive
+							? nowIso
+							: (prev?.lastSeenAt ?? '');
+
+					next[m.userId] = { isActive: false, lastSeenAt };
+				}
+
+				continue;
+			}
+
+			const wasActive = !!prev?.isActive;
+			const lastSeenAt = prev?.lastSeenAt ? prev.lastSeenAt : wasActive ? nowIso : '';
+
+			next[m.userId] = {
+				isActive: false,
+				lastSeenAt
+			};
+		}
+
+		presence = next;
 	};
 
 	const refreshMembersAndPresence = async () => {
@@ -88,9 +182,7 @@
 
 		try {
 			const active = await cohortApi.getActiveMembers(cohort.cohortId);
-			const next: Record<string, PresenceState> = {};
-			for (const a of active) next[a.userId] = { isActive: true, lastSeenAt: a.lastSeenAt };
-			presence = next;
+			mergePresence(active);
 		} catch {}
 	};
 
@@ -140,30 +232,43 @@
 	}
 
 	onMount(async () => {
+		await refreshMembersAndPresence();
+
 		try {
-			connection = cohortApi.createChatConnection(cohort.cohortId, {
+			const c = cohortApi.createChatConnection(cohort.cohortId, {
 				onPresenceUpdated: (u) => {
 					applyPresenceUpdate(u);
 				}
 			});
 
+			connection = c;
+
 			try {
-				await connection.start();
-			} catch {}
+				await c.start();
+			} catch {
+				connection = null;
+			}
 		} catch {
 			connection = null;
 		}
 
 		pollHandle = window.setInterval(refreshMembersAndPresence, 20000);
+		tickHandle = window.setInterval(() => {
+			nowTick = Date.now();
+		}, 30000);
 	});
 
 	onDestroy(async () => {
 		if (pollHandle) window.clearInterval(pollHandle);
 		pollHandle = null;
 
-		if (connection) {
+		if (tickHandle) window.clearInterval(tickHandle);
+		tickHandle = null;
+
+		const c = connection;
+		if (c) {
 			try {
-				await connection.stop();
+				await c.stop();
 			} catch {}
 		}
 		connection = null;
@@ -196,7 +301,7 @@
 			</div>
 
 			<CloudfrontImage
-				path={`Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`}
+				path={`Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`}
 				cls="h-[7rem] w-[7.2rem] -scale-x-100 drop-shadow-md "
 			/>
 		</div>
@@ -286,10 +391,15 @@
 							/>
 						</div>
 						<span
+							title={user.lastSeenFull}
 							class={`absolute right-0 bottom-0 h-4 w-4 rounded-full border-[2px] border-[color:var(--color-white)] ${
 								user.isOnline ? 'bg-green-400' : 'bg-gray-500'
-							}`}
-						></span>
+							} ${!user.isOnline && user.lastSeenShort ? 'flex items-center justify-center px-3 py-2 text-[0.55rem] leading-none font-semibold text-white' : ''}`}
+						>
+							{#if !user.isOnline && user.lastSeenShort}
+								{user.lastSeenShort}
+							{/if}
+						</span>
 					</div>
 
 					<PixelFrameSimple

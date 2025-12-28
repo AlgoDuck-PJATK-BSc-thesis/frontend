@@ -18,7 +18,7 @@
 	let items = $state<LeaderboardItemDto[]>([]);
 	let refreshHandle = $state<number | null>(null);
 
-	const defaultAvatar = `Ducks/Outfits/duck-03a4dced-f802-4cc5-b239-e0d4c3be9dcd.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
 
 	const pointsOf = (u: LeaderboardItemDto) => u.experience;
 
@@ -71,22 +71,28 @@
 				alt="Podium"
 			/>
 			<div class="absolute -top-[15.1rem] right-[4.5rem] z-10 -translate-x-50">
-				<CloudfrontImage
-					path={topUsers[0]?.avatarPath ?? defaultAvatar}
-					cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
-				/>
+				{#if topUsers[0]}
+					<CloudfrontImage
+						path={topUsers[0].avatarPath}
+						cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
+					/>
+				{/if}
 			</div>
 			<div class="absolute -top-[12.1rem] right-[11rem] z-10 -translate-x-50">
-				<CloudfrontImage
-					path={topUsers[1]?.avatarPath ?? defaultAvatar}
-					cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
-				/>
+				{#if topUsers[1]}
+					<CloudfrontImage
+						path={topUsers[1].avatarPath}
+						cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
+					/>
+				{/if}
 			</div>
 			<div class="absolute -top-[11.5rem] -right-[2rem] z-10 -translate-x-50">
-				<CloudfrontImage
-					path={topUsers[2]?.avatarPath ?? defaultAvatar}
-					cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
-				/>
+				{#if topUsers[2]}
+					<CloudfrontImage
+						path={topUsers[2].avatarPath}
+						cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2 "
+					/>
+				{/if}
 			</div>
 		</div>
 
