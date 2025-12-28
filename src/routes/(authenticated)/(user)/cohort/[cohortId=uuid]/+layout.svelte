@@ -291,7 +291,7 @@
 					class=" w-[16rem] overflow-auto rounded-3xl border-3 border-black bg-[color:var(--color-landingpage-subtitle)] px-5 py-2 text-sm font-semibold text-[color:var(--color-shadow-black)] shadow-lg"
 				>
 					<p class="leading-snug">
-						Welcome to {cohort.name}! <br />
+						Welcome to Cohort: {cohort.name}! <br />
 						Code to join: {cohort.joinCode ?? ''}
 					</p>
 				</div>
