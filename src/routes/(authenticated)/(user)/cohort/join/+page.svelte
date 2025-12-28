@@ -4,12 +4,15 @@
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 	import type { DuckDto } from '../../Shop/Dtos';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import { onMount } from 'svelte';
+	import { cohortApi } from '$lib/api/cohort';
 
 	let { data }: { data: { ducks: DuckDto[] } } = $props();
 
 	const ducks: DuckDto[] = data.ducks;
 
 	let cohortName = $state('');
+	let joinCode = $state('');
 
 	const pickTwoRandom = (list: DuckDto[]): [DuckDto, DuckDto] => {
 		const shuffled = [...list].sort(() => Math.random() - 0.5);
@@ -18,11 +21,75 @@
 
 	let [leftDuck, rightDuck] = pickTwoRandom(ducks);
 
-	function createCohort() {
-		if (!cohortName.trim()) return;
+	onMount(async () => {
+		const current = await cohortApi.getCurrent().catch(() => null);
+		if (current) goto(`/cohort/${current.cohortId}/chat`);
+	});
 
-		localStorage.setItem('userCohort', cohortName.trim());
-		goto(`/cohort/${cohortName.trim()}?view=chat`);
+	const handleAlreadyInCohort = async (attempt: () => Promise<any>) => {
+		const ok = confirm('You are already in a cohort. Leave your current cohort and continue?');
+		if (!ok) return null;
+		await cohortApi.leave();
+		return await attempt();
+	};
+
+	async function createFromName() {
+		const name = cohortName.trim();
+		if (!name) return;
+
+		const attempt = async () => await cohortApi.create({ name });
+
+		try {
+			const res = await attempt();
+			goto(`/cohort/${res.cohortId}/chat`);
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Failed to create cohort.';
+			if (typeof msg === 'string' && msg.toLowerCase().includes('already belongs to a cohort')) {
+				try {
+					const res2 = await handleAlreadyInCohort(attempt);
+					if (!res2) return;
+					goto(`/cohort/${res2.cohortId}/chat`);
+					return;
+				} catch (err2) {
+					const msg2 = err2 instanceof Error ? err2.message : 'Failed to switch cohorts.';
+					alert(msg2);
+					return;
+				}
+			}
+			alert(msg);
+		}
+	}
+
+	async function joinFromCode() {
+		const code = joinCode.trim();
+		if (!code) return;
+
+		const attempt = async () => await cohortApi.joinByCode({ code });
+
+		try {
+			const res = await attempt();
+			goto(`/cohort/${res.cohortId}/chat`);
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : 'Failed to join cohort.';
+			if (typeof msg === 'string' && msg.toLowerCase().includes('already belongs to a cohort')) {
+				try {
+					const res2 = await handleAlreadyInCohort(attempt);
+					if (!res2) return;
+					goto(`/cohort/${res2.cohortId}/chat`);
+					return;
+				} catch (err2) {
+					const msg2 = err2 instanceof Error ? err2.message : 'Failed to switch cohorts.';
+					alert(msg2);
+					return;
+				}
+			}
+			alert(msg);
+		}
+	}
+
+	async function submit() {
+		if (joinCode.trim()) return await joinFromCode();
+		return await createFromName();
 	}
 </script>
 
@@ -39,7 +106,7 @@
 	<PixelFrameSimple
 		className="relative bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] z-10 mb-8 w-full rounded-3xl border-xl border-white/10 p-10 py-12 text-left text-[var(--color-input-text)] backdrop-blur-3xl"
 	>
-		<div class="absolute -top-[9.3rem] left-35 z-10 -translate-x-1/2">
+		<div class="absolute -top-[8.8rem] left-35 z-10 -translate-x-1/2">
 			<div class="-gap-3 flex items-center">
 				<div class="relative left-4 translate-y-[-18px]">
 					<div
@@ -74,16 +141,28 @@
 			</div>
 		</div>
 
-		<h5 class="mt-2 mb-8 text-base text-[color:var(--color-landingpage-subtitle)]">
-			You can either create your own or ask a friend for an invite link
+		<h5 class="mb-4 text-base text-[color:var(--color-landingpage-subtitle)]">
+			You can either create your own cohort:
 		</h5>
 
 		<input
 			bind:value={cohortName}
-			placeholder="type a name for a new cohort"
+			placeholder="type a name for your cohort"
 			class="mb-10 w-full rounded border bg-white px-4 py-2 text-black"
 			onkeydown={(e) => {
-				if (e.key === 'Enter') createCohort();
+				if (e.key === 'Enter') createFromName();
+			}}
+		/>
+		<h5 class="mb-4 text-base text-[color:var(--color-landingpage-subtitle)]">
+			Or ask a friend for a code to join their cohort:
+		</h5>
+
+		<input
+			bind:value={joinCode}
+			placeholder="type a code to join your friend's cohort"
+			class="mb-6 w-full rounded border bg-white px-4 py-2 text-black"
+			onkeydown={(e) => {
+				if (e.key === 'Enter') joinFromCode();
 			}}
 		/>
 	</PixelFrameSimple>
@@ -97,6 +176,6 @@
 		labelFontWeight="normal"
 		labelTracking="extra"
 		labelClass=""
-		onclick={createCohort}
+		onclick={submit}
 	/>
 </section>

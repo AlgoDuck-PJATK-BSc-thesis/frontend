@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import coin from '$lib/images/headers/Coin.png';
-	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrameCoins from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameCoins.svelte';
 	import { authApi } from '$lib/api/auth';
 
 	let coins = 1000000;
@@ -26,7 +26,7 @@
 		>
 	</div>
 
-	<nav class="ml-6">
+	<nav class="mr-6 ml-6 overflow-y-auto">
 		<ul class="mr-4 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
 			<li>
 				<a
@@ -44,6 +44,15 @@
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Problems
+				</a>
+			</li>
+			<li>
+				<a
+					href="/learn"
+					aria-current={page.url.pathname === '/learn' ? 'page' : undefined}
+					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Learn
 				</a>
 			</li>
 			<li>
@@ -73,16 +82,7 @@
 					Leaderboard
 				</a>
 			</li>
-			<li>
-				<a
-					href="/visualizer"
-					aria-current={page.url.pathname === '/visualizer' ? 'page' : undefined}
-					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Visualizer
-				</a>
-			</li>
-			<li>
+			<!-- <li>
 				<a
 					href="/studytimer"
 					aria-current={page.url.pathname === '/studytimer' ? 'page' : undefined}
@@ -90,7 +90,7 @@
 				>
 					Study Timer
 				</a>
-			</li>
+			</li> -->
 			<li>
 				<a
 					href="/Shop"
@@ -118,8 +118,8 @@
 				<ThemeToggle />
 			</div>
 
-			<PixelFrameMini
-				className="bg-[color:var(--color-accent-3)] relative inline-flex items-center px-1 text-[1rem] tracking-widest"
+			<PixelFrameCoins
+				className="bg-[color:var(--color-background-coins-header)] relative inline-flex items-center px-1 text-[1rem] tracking-widest"
 			>
 				<div
 					class="relative z-10 inline-flex items-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
@@ -128,10 +128,10 @@
 					<img
 						src={coin}
 						alt="coin"
-						class="inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
+						class="mr-1 inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
 					/>
 				</div>
-			</PixelFrameMini>
+			</PixelFrameCoins>
 		</div>
 	</div>
 </header>
