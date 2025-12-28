@@ -148,7 +148,7 @@
                 {/each}
                 <button onclick={() => {
                     creationDto.testCases.push({} as TestCaseCreateDto)
-                }} class="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0e639c] text-white border-none rounded-sm text-sm font-medium cursor-pointer transition-colors hover:bg-[#1177bb] focus:outline focus:outline-1 focus:outline-[#007fd4] focus:outline-offset-2 self-start">
+                }} class="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0e639c] text-white border-none rounded-sm text-sm font-medium cursor-pointer transition-colors hover:bg-[#1177bb] focus:outline-[#007fd4] focus:outline-offset-2 self-start">
                     <CrossIconSvg options={{class: "w-3.5 h-3.5 stroke-white stroke-2 rotate-45"}}/>
                     <span>Add Test Case</span>
                 </button>

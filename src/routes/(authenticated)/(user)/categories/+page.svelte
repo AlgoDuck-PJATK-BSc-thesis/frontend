@@ -1,217 +1,255 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import Island from '$lib/images/Categories/Wysepka2.png'
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import Island from '$lib/images/Categories/Wysepka2.png';
+	import { onMount, tick } from 'svelte';
 	import type { CategoryDto } from './proxy+page';
 
-  let { data } : { data: { categories: CategoryDto[] } } = $props();
+	let { data }: { data: { categories: CategoryDto[] } } = $props();
 
-  let scrollableFrame : HTMLElement;
-  
-  const scrollableFrameComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
-    if (!scrollableFrame) return undefined;
-    return getComputedStyle(scrollableFrame);
-  });
-  
-  let main : HTMLElement;
-  
-  const mainComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
-    if (!main) return undefined;
-    return getComputedStyle(main);
-  });
+	let scrollableFrame: HTMLElement;
 
-  let categoryDivs: Array<HTMLElement> = $state([]);
-  
-  let lastXCoords : number;
-  let currXCoords : number;
+	const scrollableFrameComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
+		if (!scrollableFrame) return undefined;
+		return getComputedStyle(scrollableFrame);
+	});
 
-  let lastD1X : number;
-  let lastTime : number = 0;
+	let main: HTMLElement;
 
-  let windowWidth = $state(0);
-  let windowHeight = $state(0);
+	const mainComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
+		if (!main) return undefined;
+		return getComputedStyle(main);
+	});
 
-  let cancellationToken : number | null = null;
-  let isDragging : boolean = $state(false); 
+	let categoryDivs: Array<HTMLElement> = $state([]);
 
-  let clicked: boolean = $state(false);
+	let lastXCoords: number;
+	let currXCoords: number;
 
-  const updateBasedOnMouse = (x : number) => {
-    const dx : number = x - lastXCoords;
+	let lastD1X: number;
+	let lastTime: number = 0;
 
-    const newLeft : number = parseOptionalDimensions(scrollableFrameComputedStyle?.left) + dx
-    const maxLeft : number = parseOptionalDimensions(scrollableFrameComputedStyle?.width) - parseOptionalDimensions(mainComputedStyle?.width);
-    if (newLeft < 0 && Math.abs(newLeft) < maxLeft){
-      scrollableFrame.style.left = `${newLeft}px`
-    }
-  }
-  
-  const animateDragged = (currentTime : number) => {
-    if (!isDragging) {
-      cancellationToken = null;
-      return; 
-    }
-    
-    const deltaTime = (currentTime - lastTime) / 1000;
-    
-    if (deltaTime > 0 && lastTime !== 0) { 
-      const d1x = (currXCoords - lastXCoords) / deltaTime;
-      
-      updateBasedOnMouse(currXCoords);
-      
-      lastXCoords = currXCoords;
-      lastD1X = d1x;
-    }
-    
-    lastTime = currentTime; 
-    cancellationToken = requestAnimationFrame(animateDragged); 
-  }
-  
-  const handleDragged = (e: MouseEvent) => {
-    isDragging = true;
-    clicked = false;
-    currXCoords = e.x;
-  }
-  
-  
-  const bleedSpeed = () => {
-    if (Math.abs(lastD1X) < 10) {
-      cancellationToken = null;
-      return;
-    }
-    const dtxDampened = lastD1X / 100;
+	let windowWidth = $state(0);
+	let windowHeight = $state(0);
 
-    const left = parseOptionalDimensions(scrollableFrameComputedStyle?.left);
-    const newLeft = left + dtxDampened;
-    const maxLeft = parseOptionalDimensions(scrollableFrameComputedStyle?.width) - parseOptionalDimensions(mainComputedStyle?.width);
-    
-    if (newLeft <= 0 && Math.abs(newLeft) <= maxLeft) {
-      scrollableFrame.style.left = `${newLeft}px`;
-    } else {
-      cancellationToken = null;
-      return;
-    }
+	let cancellationToken: number | null = null;
+	let isDragging: boolean = $state(false);
 
-    lastD1X *= 0.95;
-     
-    cancellationToken = requestAnimationFrame(bleedSpeed);
-  }
+	let clicked: boolean = $state(false);
 
-  const handleMouseUp = () => {
-    document.body.style.userSelect = "";
+	let mouseDownX: number;
+	let mouseDownY: number;
+	const DEADZONE: number = 10;
 
-    isDragging = false;
-    
-    if (cancellationToken) {
-      cancelAnimationFrame(cancellationToken);
-      cancellationToken = null;
-    }
-    
-    if (Math.abs(lastD1X) > 50) {
-      cancellationToken = requestAnimationFrame(bleedSpeed);
-    }
-    
-    document.removeEventListener('mousemove', handleDragged);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }
-  
-  const handleMouseDown = (e : MouseEvent) => {
-    document.body.style.userSelect = "none"; 
-    if (cancellationToken) {
-      cancelAnimationFrame(cancellationToken);
-      cancellationToken = null;
-    }
+	const updateBasedOnMouse = (x: number) => {
+		const dx: number = x - lastXCoords;
 
-    isDragging = true; 
-    lastXCoords = e.x;
-    currXCoords = e.x;
-    lastD1X = 0;
-    lastTime = 0;
-    
-    document.addEventListener('mousemove', handleDragged);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    cancellationToken = requestAnimationFrame(animateDragged);
-  }
+		const newLeft: number = parseOptionalDimensions(scrollableFrameComputedStyle?.left) + dx;
+		const maxLeft: number =
+			parseOptionalDimensions(scrollableFrameComputedStyle?.width) -
+			parseOptionalDimensions(mainComputedStyle?.width);
+		if (newLeft < 0 && Math.abs(newLeft) < maxLeft) {
+			scrollableFrame.style.left = `${newLeft}px`;
+		}
+	};
 
-  export const parseComputedDimensions = (computedDimension: string) : number => {
-      return parseInt(computedDimension.replaceAll('px', ''))
-  }
+	const animateDragged = (currentTime: number) => {
+		if (!isDragging) {
+			cancellationToken = null;
+			return;
+		}
 
-  export const getOptionalDimesionsString = (dim: string | undefined) : string => {
-      return dim ?? "0px";
-  }
+		const deltaTime = (currentTime - lastTime) / 1000;
 
-  export const constGetOptionalDimensionsNumber = (dim: number | undefined) : number => {
-      return dim ?? 0;
-  }
+		if (deltaTime > 0 && lastTime !== 0) {
+			const d1x = (currXCoords - lastXCoords) / deltaTime;
 
-  export const parseOptionalDimensions = (dim: string | undefined) : number => {
-      return parseComputedDimensions(getOptionalDimesionsString(dim));
-  }
+			updateBasedOnMouse(currXCoords);
 
-  const selectCategory = (categoryName: string) : void => {
-    goto(`./categories/problems?category=${categoryName}`);
-  }
+			lastXCoords = currXCoords;
+			lastD1X = d1x;
+		}
+
+		lastTime = currentTime;
+		cancellationToken = requestAnimationFrame(animateDragged);
+	};
+
+	const handleDragged = (e: MouseEvent) => {
+		isDragging = true;
+		clicked = false;
+		currXCoords = e.x;
+	};
+
+	const bleedSpeed = () => {
+		if (Math.abs(lastD1X) < 10) {
+			cancellationToken = null;
+			return;
+		}
+		const dtxDampened = lastD1X / 100;
+
+		const left = parseOptionalDimensions(scrollableFrameComputedStyle?.left);
+		const newLeft = left + dtxDampened;
+		const maxLeft =
+			parseOptionalDimensions(scrollableFrameComputedStyle?.width) -
+			parseOptionalDimensions(mainComputedStyle?.width);
+
+		if (newLeft <= 0 && Math.abs(newLeft) <= maxLeft) {
+			scrollableFrame.style.left = `${newLeft}px`;
+		} else {
+			cancellationToken = null;
+			return;
+		}
+
+		lastD1X *= 0.95;
+
+		cancellationToken = requestAnimationFrame(bleedSpeed);
+	};
+
+	const handleMouseUp = () => {
+		document.body.style.userSelect = '';
+
+		isDragging = false;
+
+		if (cancellationToken) {
+			cancelAnimationFrame(cancellationToken);
+			cancellationToken = null;
+		}
+
+		if (Math.abs(lastD1X) > 50) {
+			cancellationToken = requestAnimationFrame(bleedSpeed);
+		}
+
+		document.removeEventListener('mousemove', handleDragged);
+		document.removeEventListener('mouseup', handleMouseUp);
+	};
+
+	const handleMouseDown = (e: MouseEvent) => {
+		document.body.style.userSelect = 'none';
+		if (cancellationToken) {
+			cancelAnimationFrame(cancellationToken);
+			cancellationToken = null;
+		}
+
+		isDragging = true;
+		lastXCoords = e.x;
+		currXCoords = e.x;
+		mouseDownX = e.x; 
+		mouseDownY = e.y;
+		lastD1X = 0;
+		lastTime = 0;
+
+		document.addEventListener('mousemove', handleDragged);
+		document.addEventListener('mouseup', handleMouseUp);
+
+		cancellationToken = requestAnimationFrame(animateDragged);
+	};
+
+	export const parseComputedDimensions = (computedDimension: string): number => {
+		return parseInt(computedDimension.replaceAll('px', ''));
+	};
+
+	export const getOptionalDimesionsString = (dim: string | undefined): string => {
+		return dim ?? '0px';
+	};
+
+	export const constGetOptionalDimensionsNumber = (dim: number | undefined): number => {
+		return dim ?? 0;
+	};
+
+	export const parseOptionalDimensions = (dim: string | undefined): number => {
+		return parseComputedDimensions(getOptionalDimesionsString(dim));
+	};
+
+	const selectCategory = (categoryName: string): void => {
+		goto(`./categories/problems?category=${categoryName}`);
+	};
+
+	const calculateIslandCoordinates = (): void => {
+		const clientRect: DOMRect = main.getBoundingClientRect();
+		const mainWidth: number = clientRect.width;
+		const mainHeight: number = clientRect.height;
+
+		const category1: HTMLElement | undefined = categoryDivs.at(0);
+		if (!category1) return;
+
+		const baselineIslandComputedStyle: CSSStyleDeclaration = getComputedStyle(category1);
+
+		const islandWidthParsed: number = parseComputedDimensions(baselineIslandComputedStyle.width);
+		const islandHeightParsed: number = parseComputedDimensions(baselineIslandComputedStyle.height);
+
+		const paddingX: number = islandWidthParsed / 2;
+		const paddingY: number = islandHeightParsed / 2;
+
+		const scrollableFrameWidthInPixels: number = Math.max(
+			paddingX + islandWidthParsed * 1.25 * categoryDivs.length,
+			mainWidth
+		);
+
+		const minY: number = paddingY;
+		const maxY: number = mainHeight - paddingY;
+		const legalRangeHeight: number = maxY - minY;
+		const halfRange: number = legalRangeHeight / 2;
+
+		scrollableFrame.style.width = `${scrollableFrameWidthInPixels}px`;
+
+		for (let i = 0; i < categoryDivs.length; ++i) {
+			const islandX: number = paddingX + islandWidthParsed * 1.25 * i;
+			const waveInput: number = (i / categoryDivs.length) * Math.PI * 4;
+			const islandY: number = minY + (Math.sin(waveInput) + 1) * halfRange;
 
 
-  const calculateIslandCoordinates = () : void => {
-    const clientRect: DOMRect = main.getBoundingClientRect();
-    const mainWidth: number = clientRect.width;
-    const mainHeight: number = clientRect.height;
+			categoryDivs[i].style.transform =
+				`translateX(${islandX}px) translateY(${islandY - islandHeightParsed / 2}px)`;
+		}
+	};
 
-    const category1: HTMLElement | undefined = categoryDivs.at(0);
-    if (!category1) return;
-    
-    const baselineIslandComputedStyle: CSSStyleDeclaration = getComputedStyle(category1);
-
-    const islandWidthParsed: number = parseComputedDimensions(baselineIslandComputedStyle.width);
-    const islandHeightParsed: number = parseComputedDimensions(baselineIslandComputedStyle.height);
-
-    const paddingX: number = islandWidthParsed / 2;
-    const paddingY: number = islandHeightParsed / 2;
-
-    const scrollableFrameWidthInPixels: number = Math.max(paddingX + islandWidthParsed * 1.25 * categoryDivs.length, mainWidth);
-
-    const minY: number = paddingY;
-    const maxY: number = mainHeight - paddingY;
-    const legalRangeHeight: number = maxY - minY;
-    const halfRange: number = legalRangeHeight / 2;
-    
-    scrollableFrame.style.width = `${scrollableFrameWidthInPixels}px`;
-    
-    for (let i = 0; i < categoryDivs.length; ++i){
-      const islandX: number = paddingX + islandWidthParsed * 1.25 * i;
-      const waveInput: number = (i / categoryDivs.length) * Math.PI * 4;
-      const islandY: number = minY + (Math.sin(waveInput) + 1) * halfRange;
-      
-      categoryDivs[i].style.transform = `translateX(${islandX}px) translateY(${islandY - islandHeightParsed / 2}px)`;
-    }
-  }
-
-  onMount(() => { 
-    calculateIslandCoordinates();
-  });
+	
+onMount(async () => {
+    await tick();
+    await tick();
+    requestAnimationFrame(() => {
+        calculateIslandCoordinates();
+    });
+});
 </script>
 
-<svelte:window on:resize={calculateIslandCoordinates} bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+<svelte:window
+	on:resize={calculateIslandCoordinates}
+	bind:innerWidth={windowWidth}
+	bind:innerHeight={windowHeight}
+/>
 
+<main bind:this={main} class="relative h-full w-full overflow-hidden">
+	<div
+		bind:this={scrollableFrame}
+		role="button"
+		tabindex="0"
+		class="bg-no-repeat-y absolute z-10 h-full min-w-full bg-[url(/src/lib/images/water.png)] bg-[length:auto_100%] bg-repeat-x hover:cursor-grab active:cursor-grabbing"
+		onmousedown={handleMouseDown}
+		onmouseup={handleMouseUp}
+	>
+		<div class="relative h-full w-full">
+			{#each data.categories as loadedCategory, i}
+				<button
+					bind:this={categoryDivs[i]}
+					class="z-50 absolute flex items-center justify-center rounded-full bg-transparent select-none hover:cursor-pointer"
+					onmousedown={(e) => {
+						clicked = true;
+						mouseDownX = e.x;
+						mouseDownY = e.y;
+					}}
+					onmouseup={(e) => {
+						const dx = Math.abs(e.x - mouseDownX);
+						const dy = Math.abs(e.y - mouseDownY);
+						const distance = Math.sqrt(dx * dx + dy * dy);
 
-<main bind:this={main} class="w-full h-full relative overflow-hidden">
-  <div bind:this={scrollableFrame}  role="button" tabindex="0" class="w-[300%] hover:cursor-grab active:cursor-grabbing h-full absolute z-10 bg-blue-900 bg-repeat-x bg-no-repeat-y bg-[length:auto_100%]"
-    onmousedown={handleMouseDown}
-    onmouseup={handleMouseUp}
-  >
-
-  <!-- TODO this hypothetically presents an interesting opportunity to use tatacks infinite query. More so for presentation reasons rather than an actual practical application but still may be fun -->
-    <div class="relative w-full h-full">
-      {#each data.categories as loadedCategory, i}
-        <button bind:this={categoryDivs[i]} class="w-100 h-100 absolute rounded-full flex hover:cursor-pointer z50 justify-center items-center bg-transparent select-none" 
-          onmousedown="{() => {clicked = true}}"
-          onmouseup="{() => {if (clicked) selectCategory(loadedCategory.categoryName)}}">
-          <img class="w-full" src="{Island}" alt="category thematic island" draggable="false"/>
-        </button>
-      {/each}
-    </div>
-  </div>
+						if (clicked && distance < DEADZONE) {
+							selectCategory(loadedCategory.categoryName);
+						}
+					}}
+				>
+					<img src={Island} alt="category thematic island" draggable="false" />
+				</button>
+			{/each}
+		</div>
+	</div>
 </main>

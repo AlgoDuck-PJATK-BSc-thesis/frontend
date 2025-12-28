@@ -55,11 +55,10 @@
     </div>
     <div class="w-full h-full flex flex-col justify-start px-3 gap-2">
         <span class="w-full flex justify-start font-mono text-xs text-ide-text-secondary">Recent</span>
-        <div class="w-full flex flex-col items-center justify-start gap-1">
+        <div class="w-full h-full flex flex-col items-center justify-start gap-1">
             {#each options.labels as label}
                 <ChatPickerButton onclick={() => handleSelect(label.labelFor)} label={label.commonName ?? "New Chat"} 
                 deleteYourself={async () => {
-                    console.log('deleting')
                     if (removeCallback){ 
                         return await removeCallback(label.labelFor);
                     }
@@ -73,7 +72,9 @@
                     };
                 }}/>
             {:else}
-                <div class="w-full grow bg-red-500">nothing just yet</div>
+                <div class="w-full h-full flex flex-col justify-center items-center">
+                    <span>nothing just yet. Click "New chat" to start chatting!</span>
+                </div>
             {/each}
         </div>
     </div>

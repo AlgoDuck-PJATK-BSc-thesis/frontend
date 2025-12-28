@@ -16,6 +16,10 @@
 	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
 	import { createInfiniteQuery } from "@tanstack/svelte-query";
 	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
+	import MessageIconSvg from "$lib/svg/EditorComponentIcons/MessageIconSvg.svelte";
+	import BugIconSvg from "$lib/svg/EditorComponentIcons/BugIconSvg.svelte";
+	import ReviewIconSvg from "$lib/svg/EditorComponentIcons/ReviewIconSvg.svelte";
+	import SuggestionComponent, { type SuggestionCardArgs } from "./SuggestionComponent.svelte";
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
     
@@ -78,7 +82,7 @@
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
 
-    async function sendMessage() {
+    const sendMessage = async () => {
         if (!query.trim() || isSending) return;
 
         isSending = true;
@@ -187,6 +191,20 @@
             isSending = false;
         }
     }
+
+    const suggestionPrompts: SuggestionCardArgs[] = [
+        { icon: BugIconSvg, prompt: "Help me debug this code" },
+        { icon: ReviewIconSvg, prompt: "Review my solution" }
+    ];
+
+    const useSuggestion = (prompt: string) => {
+        if (tiptapEditor) {
+            tiptapEditor.commands.setContent(prompt);
+            query = prompt;
+            sendMessage();
+        }
+    }
+
 </script>
 
 <main class="w-full h-full bg-gradient-to-br from-ide-card to-ide-bg flex flex-col relative">
@@ -203,7 +221,6 @@
             if (!htmlDivs[0]) return;
             const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
                 if (entries[0].isIntersecting){
-                    console.log("fetch next")
                     $infiniteQuery.fetchNextPage();
                 }
             },{
@@ -214,13 +231,17 @@
             observer.observe(htmlDivs[htmlDivs.length - 1]);
             return () => observer.disconnect();
         }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
-            {#each allMessages as message, i}
-                {#if message.messageAuthor === "Assistant"}
-                    {@render AssistantMessage(message, i)}
-                {:else}
-                    {@render UserMessage(message, i)}
-                {/if}
-            {/each}
+            {#if allMessages.length === 0}
+                {@render EmptyState()}
+            {:else}
+                {#each allMessages as message, i}
+                    {#if message.messageAuthor === "Assistant"}
+                        {@render AssistantMessage(message, i)}
+                    {:else}
+                        {@render UserMessage(message, i)}
+                    {/if}
+                {/each}
+            {/if}
         </div>
 
     
@@ -273,6 +294,41 @@
         </div>
     </div>
 </main>
+
+{#snippet EmptyState()}
+    <div class="w-full h-full flex flex-col items-center justify-center gap-10 empty-state-fade-in overflow-y-auto">
+            <div class="w-24 aspect-square rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30 shadow-lg shadow-purple-500/10">
+                <MessageIconSvg options={{ class: "w-12 h-12 stroke-[1.5] stroke-ide-text-primary"}}/>
+            </div>
+
+        <div class="text-center space-y-2">
+            <h3 class="text-xl font-semibold text-ide-text-primary">Start a Conversation</h3>
+            <p class="text-sm text-ide-text-secondary max-w-sm">
+                Ask me anything about your code. I can help you debug, explain concepts, or optimize your solution.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 max-w-md">
+            {#each suggestionPrompts as suggestion}
+                <SuggestionComponent options={{ 
+                    ...suggestion,
+                    onclick: () => useSuggestion(suggestion.prompt ?? "")
+                    }}/>
+            {/each}
+        </div>
+
+        <div class="flex items-center gap-8 text-xs text-ide-text-secondary/60">
+            <div class="flex flex-row gap-2 c">
+                <kbd class="px-2 py-1 rounded bg-ide-dcard/50 border border-ide-bg/30 font-mono">Enter</kbd>
+                <span class="flex items-center">to send</span>
+            </div>
+            <div class="flex flex-row gap-2 items-center">
+                <kbd class="px-2 py-1 rounded bg-ide-dcard/50 border border-ide-bg/30 font-mono">Shift + Enter</kbd>
+                <span class="flex items-center">for new line</span>
+            </div>
+        </div>
+    </div>
+{/snippet}
 
 {#snippet UserMessage(message: ChatMessage, index: number)}
     <div 
@@ -391,8 +447,6 @@
     background: var(--color-ide-bg);
   }
 
-
-
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -417,4 +471,59 @@
       opacity: 0.5;
     }
   }
+
+  /* Empty state animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .empty-state-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  @keyframes float1 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(5px, -8px);
+    }
+  }
+
+  @keyframes float2 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-6px, -5px);
+    }
+  }
+
+  @keyframes float3 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(4px, 6px);
+    }
+  }
+
+  @keyframes suggestionSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
 </style>

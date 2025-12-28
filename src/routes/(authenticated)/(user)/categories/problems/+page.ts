@@ -1,33 +1,9 @@
-import { FetchFromApi } from "$lib/api/apiCall";
-import type { Category } from "$lib/types/Category";
+import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
 import type { PageLoad } from "../$types";
+import type { ProblemDisplayDto } from "./solve/types";
 
-export const load: PageLoad = async ({ params, url, fetch }) : Promise<ProblemListPageLoadArg> => {
-
-    let response = await FetchFromApi<ProblemDisplayDto[]>("CategoryProblems", {
+export const load: PageLoad = ({ params, url, fetch }) : Promise<StandardResponseDto<ProblemDisplayDto[]>> => {
+    return FetchFromApi<ProblemDisplayDto[]>("CategoryProblems", {
         method: "GET"
-    }, fetch, new URLSearchParams({categoryName: "test category 4"}));
-
-    return {
-        problems: response.body 
-    };
-}
-
-export type ProblemListPageLoadArg = {
-    problems: ProblemDisplayDto[]
-}
-
-type ProblemDisplayDto = {
-    problemId: string, 
-    title: string,
-    difficulty: DifficultyDto,
-    tags: TagDto[]
-}
-
-type TagDto = {
-    name: string
-}
-
-type DifficultyDto = {
-    name: string
+    }, fetch, new URLSearchParams({ categoryName: url.searchParams.get("category") ?? "huh" }));;
 }
