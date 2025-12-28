@@ -164,6 +164,7 @@ export const FetchJsonFromApi = async <TResult>(
 		return undefined as unknown as TResult;
 	}
 
+	console.log(res);
 	return (await res.json()) as TResult;
 };
 

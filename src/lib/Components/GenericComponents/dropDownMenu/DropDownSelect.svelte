@@ -5,35 +5,35 @@
 
 	let { options }: { options: DropDownMenuOptions<K, V> } = $props();
 
-	let label: K | undefined = $state(options.options?.at(0)?.key);
+	// let label: K | undefined = $state(options.options?.at(0)?.key);
 
-	let dropDownMenuContents: HTMLDivElement;
-	let chevronIcon: HTMLDivElement;
+	// let dropDownMenuContents: HTMLDivElement;
+	// let chevronIcon: HTMLDivElement;
 
-	let dropDownData: DropDownData | undefined = $state()
-	const targetOptionHeight: string = `${Math.min(800, options.options.length * 100)}%`;
+	// let dropDownData: DropDownData | undefined = $state()
+	// const targetOptionHeight: string = `${Math.min(800, options.options.length * 100)}%`;
 
-	let isDropDownMenuShown: boolean = $state(false);
-	const toggleDropDown = (): void => {
-		if (!isDropDownMenuShown) {
-			isDropDownMenuShown = true;
-			showGroupElem(dropDownData!.groupId!, dropDownData!.menuId!, targetOptionHeight, () => { 
-				isDropDownMenuShown = false; 
-			});
-		} else {
-			hideGroupElem(dropDownData!.groupId!);
-		}
-	};
+	// let isDropDownMenuShown: boolean = $state(false);
+	// const toggleDropDown = (): void => {
+	// 	if (!isDropDownMenuShown) {
+	// 		isDropDownMenuShown = true;
+	// 		showGroupElem(dropDownData!.groupId!, dropDownData!.menuId!, targetOptionHeight, () => { 
+	// 			isDropDownMenuShown = false; 
+	// 		});
+	// 	} else {
+	// 		hideGroupElem(dropDownData!.groupId!);
+	// 	}
+	// };
 
-	const onSelect = (selected: KeyValuePair<K, V>): void => {
-		label = selected.key;
-		toggleDropDown();
-		options.onSelectCallback(selected.value);
-	};
+	// const onSelect = (selected: KeyValuePair<K, V>): void => {
+	// 	label = selected.key;
+	// 	toggleDropDown();
+	// 	options.onSelectCallback(selected.value);
+	// };
 
 </script>
 
-<main {@attach () => {
+<!-- <main {@attach () => {
 		dropDownData = registerGroupElem(options.groupId, {dropDown: dropDownMenuContents, chevron: chevronIcon})
 		}} 
 	class="w-full h-full text-text-alt bg-ide-card rounded-md relative">
@@ -63,4 +63,4 @@
 			</button>
 		{/each}
 	</div>
-</main>
+</main> -->

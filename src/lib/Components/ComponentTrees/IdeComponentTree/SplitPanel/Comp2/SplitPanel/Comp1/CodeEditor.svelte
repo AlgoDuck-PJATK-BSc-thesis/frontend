@@ -14,7 +14,6 @@
 
 
 	// TODO: make this more selective to not spam server
-	$inspect(options);
 	$effect(() => {
 		if (!options.userCode || options.templateContents === options.userCode) return
 		const currentCodeState: string = options.userCode;

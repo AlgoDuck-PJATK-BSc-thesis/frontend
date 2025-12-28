@@ -2,7 +2,6 @@
     import MarkdownRenderer from '$lib/Components/Misc/MarkdownRenderer.svelte';
     import type { InfoPanelComponentArgs } from '../../component-args';
     let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
-	// $inspect(options);
 </script>
 
 <main class="w-full h-full flex flex-col bg-ide-card overflow-y-auto overflow-x-hidden min-w-xl rounded-xl">

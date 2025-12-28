@@ -16,11 +16,5 @@
 </svelte:head>
 
 <main class="flex h-full w-full items-center justify-center overflow-hidden">
-	<div class="h-[90%] w-[75%]">
-		<HelperDuck
-			selectedDuck={data.ducks[Math.floor(Math.random() * data.ducks.length)]}
-			mode="solve"
-		/>
-		<AnimatedPond userDucks={data.ducks} />
-	</div>
+	<AnimatedPond userDucks={data.ducks} />
 </main>
