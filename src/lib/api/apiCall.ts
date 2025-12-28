@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from '$env/static/public';
+// import { PUBLIC_API_URL } from '$env/static/public';
 
 export type QueryResult = 'Success' | 'Warning' | 'Error';
 
@@ -164,6 +164,7 @@ export const FetchJsonFromApi = async <TResult>(
 		return undefined as unknown as TResult;
 	}
 
+	console.log(res);
 	return (await res.json()) as TResult;
 };
 
@@ -184,3 +185,5 @@ export const FetchFromApi = async <TResult>(
 		csrfReplay
 	);
 };
+
+

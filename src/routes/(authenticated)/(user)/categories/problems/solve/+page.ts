@@ -15,7 +15,7 @@ export const load: PageLoad = async ({ params, fetch, url }) : Promise<SolvePage
     chatList: FetchFromApi<ChatList>("Chat", {
       method: "GET"
     }, fetch, new URLSearchParams({problemId: problemId ?? ""})),
-    autoSave: FetchFromApi<AutoSaveDto>("Chat", {
+    autoSave: FetchFromApi<AutoSaveDto>("LoadAutoSave", {
       method: "GET"
     }, fetch, new URLSearchParams({problemId: problemId ?? ""}))
   };
