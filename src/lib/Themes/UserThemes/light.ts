@@ -33,11 +33,15 @@ export const light = {
 	'--color-bg-header-border': 'rgba(0,0,0,0.1)',
 
 	'--color-input-bg': 'rgba(0, 0, 0, 0.5)',
-	'--color-input-signature': '#7bd4ffc5',
+	'--color-input-signature': '#7bd4ff',
 	'--color-input-text': '#272525',
-	'--color-text-box': '#18252fc5',
+	'--color-text-box': '#18252f',
 
-	'--color-header-guest': '#2174c5',
-	'--color-header-user': '#206dd8c5',
-	'--color-logo-header': '#7fd2ffc5'
+	'--color-header-user': '#206dd8',
+	'--color-logo-header': '#7fd2ff',
+	'--color-frame-coins-header': '#5196ff',
+	'--color-background-coins-header': '#325eb6',
+
+	'--color-title-black': '#000000',
+	'--color-shadow-black': '#000000'
 };

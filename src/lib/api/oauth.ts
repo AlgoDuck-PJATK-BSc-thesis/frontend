@@ -13,17 +13,22 @@ function stripTrailingSlash(v: string) {
 	return v.endsWith('/') ? v.slice(0, -1) : v;
 }
 
+function normalizeApiOrigin(v: string) {
+	const s = stripTrailingSlash(v);
+	return s.endsWith('/api') ? s.slice(0, -4) : s;
+}
+
 export function buildOAuthStartUrl(
 	provider: Provider,
 	returnUrl?: string,
 	errorUrl?: string,
 	opts?: { prompt?: 'select_account' | 'login' }
 ) {
-	const api = stripTrailingSlash(requireApiUrl());
+	const apiOrigin = normalizeApiOrigin(requireApiUrl());
 	const r = safeRelative(returnUrl, '/home');
 	const e = safeRelative(errorUrl, '/login');
 
-	const url = new URL(`${api}/api/auth/oauth/${provider}/start`);
+	const url = new URL(`${apiOrigin}/api/auth/oauth/${provider}/start`);
 	url.searchParams.set('returnUrl', r);
 	url.searchParams.set('errorUrl', e);
 

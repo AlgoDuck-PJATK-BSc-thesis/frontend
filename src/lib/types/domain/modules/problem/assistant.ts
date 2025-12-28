@@ -14,7 +14,8 @@ export type ChatList = {
 }
 
 export type ChatDetails = {
-  chatName: string
+  chatName: string,
+  chatId: string,
 }
 
 export type ChatMessage = {

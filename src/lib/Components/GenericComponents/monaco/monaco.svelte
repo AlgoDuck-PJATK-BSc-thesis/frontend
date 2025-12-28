@@ -54,17 +54,17 @@
 		}
 	});
 
-	$effect(() => {
-		if (!editorContents) return
-		const content: string = editorContents;
-		if (editor && monaco) {
-			const position = editor.getPosition();
-			editor.setValue(content);
-			if (position) {
-				editor.setPosition(position);
-			}
-		}
-	});
+	// $effect(() => {
+	// 	if (!editorContents) return
+	// 	const content: string = editorContents;
+	// 	if (editor && monaco) {
+	// 		const position = editor.getPosition();
+	// 		editor.setValue(content);
+	// 		if (position) {
+	// 			editor.setPosition(position);
+	// 		}
+	// 	}
+	// });
 
 	onDestroy(() => {
 		if (browser && monaco && editor) {

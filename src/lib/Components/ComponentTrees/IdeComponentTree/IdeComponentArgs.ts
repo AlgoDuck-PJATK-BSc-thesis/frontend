@@ -11,7 +11,13 @@ export type ProblemDetailsDto = {
 
 export type AutoSaveDto = {
   problemId: string,
-  userCodeB64: string
+  userCodeB64: string,
+  testResults: TestingResult[]
+}
+
+export type TestingResult = {
+  isPassed: boolean,
+  testId: string,
 }
 
 export type CategoryDto = {

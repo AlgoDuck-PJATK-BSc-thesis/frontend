@@ -1,5 +1,6 @@
 import type { StandardResponseDto } from "$lib/api/apiCall";
 import type { AssistantQuery, AssistantResponse, ChatMessage } from "$lib/types/domain/modules/problem/assistant";
+import type { IntermediateStatus, TerminalStatus } from "$lib/types/domain/modules/problem/solve";
 import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
 import type { CategoryDto, DifficultyDto, TagDto, TestCase } from "./IdeComponentArgs";
 
@@ -16,8 +17,15 @@ export interface InfoPanelComponentArgs extends DefaultLayoutTerminalComponentAr
   tags: TagDto[]
 }
 
+
+export interface TipTapWithMdArgs extends DefaultLayoutTerminalComponentArgs {
+    editorContents: string
+}
+
 export interface TerminalComponentArgs extends DefaultLayoutTerminalComponentArgs {
-    terminalContents: string
+    stdOut: string
+    stdErr: string
+    status: IntermediateStatus | TerminalStatus | undefined
 }
 
 export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentArgs {
@@ -34,6 +42,7 @@ export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArg
 
 export interface ChatWindowComponentArgs extends DefaultLayoutTerminalComponentArgs {
   chatName?: string,
+  chatId?: string,
   pages: CustomPageData<ChatMessage>[],
   problemId: string,
   getUserCode: () => string,

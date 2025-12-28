@@ -15,7 +15,6 @@
     import 'highlight.js/styles/dark.css';
 	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
 	import { createInfiniteQuery } from "@tanstack/svelte-query";
-	import CloudfrontImage from "$lib/Components/Misc/CloudfrontImage.svelte";
 	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
@@ -44,29 +43,29 @@
 
             let data: StandardResponseDto<CustomPageData<ChatMessage>> = await FetchFromApi<CustomPageData<ChatMessage>>("ChatData", { 
                 method: "GET" 
-            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12", chatName: options.chatName ?? "", problemId: options.problemId}));
+            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12", chatId: options.chatId! }));
             
             if (!existingPage) {
                 options.pages.push(data.body);
             }
-            
+            console.log(data);
             return data;
         },
         getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ChatMessage>>) => firstPage.body.prevCursor ?? undefined,
         getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<ChatMessage>>) => lastPage.body.nextCursor ?? undefined,
         select: (data: any) => data.pages.map((p: any) => p.body.items).flat(),
         get enabled() {
-            return !!options.problemId;
+            return !!options.chatId;
         }
     });
 
-    $infiniteQuery;
+    $inspect($infiniteQuery);
+
     let allMessages = $derived(
         options.pages
             .flatMap(page => page.items)
             .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime())
     );
-    $inspect($infiniteQuery.data)
     let connection: signalR.HubConnection | undefined;
 
     onDestroy(async () => {
@@ -200,65 +199,65 @@
         </div>
     </div>
 
-    <div {@attach node => {
-        if (!htmlDivs[0]) return;
-        const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
-            if (entries[0].isIntersecting){
-                console.log("fetch next")
-                $infiniteQuery.fetchNextPage();
-            }
-        },{
-            root: node,
-            rootMargin: '200px 0px 0px 0px',
-            threshold: 0
-        });
-        observer.observe(htmlDivs[htmlDivs.length - 1]);
-
-        return () => observer.disconnect();
-    }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
-        {#each allMessages as message, i}
-            {#if message.messageAuthor === "Assistant"}
-                {@render AssistantMessage(message, i)}
-            {:else}
-                {@render UserMessage(message, i)}
-            {/if}
-        {/each}
-    </div>
+        <div {@attach node => {
+            if (!htmlDivs[0]) return;
+            const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+                if (entries[0].isIntersecting){
+                    console.log("fetch next")
+                    $infiniteQuery.fetchNextPage();
+                }
+            },{
+                root: node,
+                rootMargin: '200px 0px 0px 0px',
+                threshold: 0
+            });
+            observer.observe(htmlDivs[htmlDivs.length - 1]);
+            return () => observer.disconnect();
+        }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
+            {#each allMessages as message, i}
+                {#if message.messageAuthor === "Assistant"}
+                    {@render AssistantMessage(message, i)}
+                {:else}
+                    {@render UserMessage(message, i)}
+                {/if}
+            {/each}
+        </div>
 
     
     <div class="w-full sticky shrink-0 px-6 py-4 flex justify-center items-center border-t border-ide-bg/30 backdrop-blur-md bg-ide-card/40">
         <div class="w-full max-w-4xl relative">
-            <div {@attach node => {
-                tiptapEditor = new Editor({
-                    element: node,
-                    extensions: [
-                        StarterKit,
-                        Placeholder.configure({
-                            placeholder: 'Ask a question about your code... (Press Enter to send, Shift+Enter for new line)'
-                        })
-                    ],
-                    onTransaction: () => {
-                        tiptapEditor = tiptapEditor; 
-                    },
-                    onUpdate: ({ editor }) => {
-                        query = editor.getText()
-                    },
-                    editorProps: {
-                        handleKeyDown: (view, event) => {
-                            if (event.key === 'Enter' && !event.shiftKey) {
-                                event.preventDefault();
-                                sendMessage();
-                                return true;
+            <div class="w-full chat-editor-wrapper">
+                <div {@attach node => {
+                    tiptapEditor = new Editor({
+                        element: node,
+                        extensions: [
+                            StarterKit,
+                            Placeholder.configure({
+                                placeholder: 'Ask a question about your code... (Press Enter to send, Shift+Enter for new line)'
+                            })
+                        ],
+                        onTransaction: () => {
+                            tiptapEditor = tiptapEditor;
+                        },
+                        onUpdate: ({ editor }) => {
+                            query = editor.getText()
+                        },
+                        editorProps: {
+                            handleKeyDown: (view, event) => {
+                                if (event.key === 'Enter' && !event.shiftKey) {
+                                    event.preventDefault();
+                                    sendMessage();
+                                    return true;
+                                }
+                                return false;
                             }
-                            return false;
                         }
+                    })
+                    return () => {
+                        tiptapEditor?.destroy()
                     }
-                })
-
-                return () => {
-                    tiptapEditor?.destroy()
-                }
-            }} class="w-full editor-container"></div>
+                }} class="w-full"></div>
+            </div>
             <button 
                 onclick={sendMessage} class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-lg transition-all duration-300 ease-out
                        {isSending || !query.trim() 
@@ -332,7 +331,7 @@
 {/snippet}
 
 <style>
-  :global(.tiptap) {
+  .chat-editor-wrapper :global(.tiptap) {
     padding: 1rem 3.5rem 1rem 1rem;
     background: var(--color-ide-dcard);
     border-radius: 0.75rem;
@@ -343,13 +342,13 @@
     overflow-y: auto;
   }
   
-  :global(.tiptap:focus) {
+  .chat-editor-wrapper :global(.tiptap:focus) {
     border-color: rgba(99, 102, 241, 0.3);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     outline: none;
   }
   
-  :global(.tiptap p.is-editor-empty:first-child::before) {
+  .chat-editor-wrapper :global(.tiptap p.is-editor-empty:first-child::before) {
     color: var(--color-ide-text-secondary);
     content: attr(data-placeholder);
     float: left;
@@ -358,8 +357,21 @@
     opacity: 0.5;
   }
 
-  :global(.tiptap p) {
+  .chat-editor-wrapper :global(.tiptap p) {
     margin: 0;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar) {
+    width: 6px;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  .chat-editor-wrapper :global(.tiptap::-webkit-scrollbar-thumb) {
+    background: var(--color-ide-bg);
+    border-radius: 3px;
   }
 
   .messages-container::-webkit-scrollbar {
@@ -379,18 +391,7 @@
     background: var(--color-ide-bg);
   }
 
-  :global(.tiptap::-webkit-scrollbar) {
-    width: 6px;
-  }
 
-  :global(.tiptap::-webkit-scrollbar-track) {
-    background: transparent;
-  }
-
-  :global(.tiptap::-webkit-scrollbar-thumb) {
-    background: var(--color-ide-bg);
-    border-radius: 3px;
-  }
 
   @keyframes slideIn {
     from {
