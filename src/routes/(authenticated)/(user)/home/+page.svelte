@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AnimatedPond from '$lib/Components/AnimatedPond.svelte';
+	import AnimatedPond from '$lib/Components/Misc/Pond/AnimatedPond.svelte';
 	import HelperDuck from '$lib/Components/LayoutComponents/HelperDuck.svelte';
 
 	let { data } = $props();

@@ -9,7 +9,7 @@
 
 </script>
 
-<main class="w-full h-full flex flex-col bg-ide-card rounded-lg overflow-hidden border border-ide-accent/10">
+<main class="w-full h-full border border-ide-accent/10 flex flex-col bg-ide-card rounded-lg overflow-hidden border border-ide-accent/10">
     <div class="w-full h-10 bg-ide-dcard flex items-center justify-between px-4 border-b border-ide-accent/10">
         <button class="py-2 px-4 hover:cursor-pointer" onclick={() => {
 			options.stdOut = '';

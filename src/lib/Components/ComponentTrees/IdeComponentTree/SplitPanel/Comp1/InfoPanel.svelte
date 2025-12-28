@@ -4,7 +4,7 @@
     let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
 </script>
 
-<main class="w-full h-full flex flex-col bg-ide-card overflow-y-auto overflow-x-hidden min-w-xl rounded-xl">
+<main class="w-full h-full flex flex-col border border-ide-accent/10 bg-ide-card overflow-y-auto overflow-x-hidden min-w-xl rounded-xl">
     <div class="px-8 pt-8 pb-6 border-b border-ide-accent/20">
         <h2 class="text-3xl font-bold text-ide-text-primary mb-4">
             {options.title}

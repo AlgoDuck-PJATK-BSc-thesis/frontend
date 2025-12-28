@@ -18,7 +18,7 @@
         {@const Comp = ComponentRegistry.get(activeProfile.profile)!.get(label.icon?.component!)}
         <button 
         class="w-[70%] aspect-square rounded-md p-[5%] stroke-[1.5]
-        {options.selectedElemId === label.labelFor ? "stroke-ide-text-secondary border-2 bg-ide-accent/10 border-ide-accent" : "stroke-ide-text-primary bg-ide-bg hover:bg-ide-text-primary/10"}" 
+        {options.selectedElemId === label.labelFor ? "stroke-ide-text-secondary border-2 bg-ide-accent/10 border-ide-accent/50" : "stroke-ide-text-primary bg-ide-bg hover:bg-ide-text-primary/10"}" 
         onclick="{()=>{handleSelect(label.labelFor)}}">
             <Comp options={{class: "w-full h-full"}}/>
         </button>

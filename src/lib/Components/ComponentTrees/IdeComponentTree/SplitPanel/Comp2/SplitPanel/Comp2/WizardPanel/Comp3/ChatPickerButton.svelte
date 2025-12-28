@@ -84,7 +84,7 @@
 <div class="flex h-8 w-full flex-row transition-colors duration-300 ease-out">
     <button 
         onclick={() => { if (!isRenaming) onclick(); }} 
-        class="h-full w-full rounded-md px-3 hover:bg-ide-dcard overflow-hidden"
+        class="h-full w-full rounded-md hover:bg-ide-dcard overflow-hidden"
     >
         {#if isRenaming}
             <input 
@@ -92,15 +92,15 @@
                 onblur={handleRenameSubmit}
                 onkeydown={handleRenameKeydown}
                 bind:value={chatName} 
-                class="w-full h-full bg-transparent border-none outline-none text-ide-text-secondary text-left p-0 m-0" 
+                class="w-full h-full bg-transparent px-3 border-none outline-none text-ide-text-secondary text-left p-0 m-0" 
                 type="text"
             />
         {:else}
-            <div class="relative w-full h-full flex items-center overflow-hidden">
+            <div class="relative w-full h-full flex px-3 items-center overflow-hidden">
                 <span class="whitespace-nowrap text-ide-text-secondary">
                     {label}
                 </span>
-                <div class="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-ide-bg to-transparent pointer-events-none"></div>
+                <div class="absolute right-0 top-0 h-full w-12 bg-gradient-to-r from-transparent to-ide-card pointer-events-none"></div>
             </div>
         {/if}
     </button>
