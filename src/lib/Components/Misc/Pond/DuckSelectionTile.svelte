@@ -1,12 +1,14 @@
 <script lang="ts">
 	import ThreeDotIconSvg from "$lib/svg/EditorComponentIcons/ThreeDotIconSvg.svelte";
+	import type { DuckDto } from "./duckTypes";
 
-    let { options }: { options: { onclick: (() => Promise<void>) } } = $props();
+    let { options }: { options: { duck: DuckDto, onclick: (() => Promise<void>) } } = $props();
 
 	let isContextMenuVisible: boolean = $state(false);
 	let contextMenuRef: HTMLDivElement | null = $state(null);
 	let toggleButtonRef: HTMLButtonElement | null = $state(null);
 
+	$inspect(options);
 	$effect(() => {
 		if (!isContextMenuVisible) return;
 
@@ -48,7 +50,7 @@
                         await options.onclick();
                         isContextMenuVisible = false; }
                     }>
-					Select
+					{!options.duck.isSelectedForPond ? "Select" : "Deselect"}
 				</button>
 			</div>
 		</div>

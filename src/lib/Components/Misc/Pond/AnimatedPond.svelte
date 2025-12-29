@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import { userThemePreference } from "$lib/stores/theme.svelte";
-	import ThreeDotIconSvg from "$lib/svg/EditorComponentIcons/ThreeDotIconSvg.svelte";
-	import { style } from "motion/react-client";
 	import { fly } from "svelte/transition";
 	import DuckSelectionTile from "./DuckSelectionTile.svelte";
+	import { FetchFromApi } from "$lib/api/apiCall";
+	import type { DuckDto, PlantDto } from "./duckTypes";
+	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
+	import { data } from "motion/react-client";
 
-	let { userDucks }: { userDucks: { id: string }[] } = $props();
+	let { userItems }: { userItems: { ducks: DuckDto[], plants: PlantDto[] } } = $props();
 
 	interface rgba {
 		r: number;
@@ -48,7 +50,7 @@
 	const duckWidth: number = 100;
 	const duckHeight: number = 54
 
-	let ducks: { id: string }[] = $state(userDucks);
+	let PondSelectedDucks: DuckDto[] = $state(userItems.ducks.filter(d => d.isSelectedForPond));
 	const duckElements: Array<HTMLImageElement> = $state([]);
 	const duckPositionalDataArr: Array<duckPositionalData> = $state([]);
 
@@ -82,6 +84,34 @@
 
 	let pondPath: string = $derived(`/src/lib/images/ponds/Homepage_${userThemePreference.theme}.png`);
 	let workPondPath: string = $derived(`/src/lib/images/ponds/BlacknWhite.png`);
+
+
+	let isGridVisible: boolean = $state(false);
+	let isSelectionMenuVisible: boolean = $state(false);
+
+	/* TODO: rank */
+	let isDucksTabShown: boolean = $state(true);
+	let isPlantsTabShown: boolean = $state(true);
+	
+	const gridColumns: number = 24;
+	const gridRows: number = 11;
+
+	const gridElements: number = gridColumns * gridRows;
+
+	let isPointOnGridOccupied: boolean[] | undefined = $state()
+
+	type PlacedPlant = {
+		imageSrc: string,
+		relativeX: number,
+		relativeY: number,  
+		widthRatio: number, 
+		heightRatio: number  
+	}
+
+	let mainElemBoundingRect: number | undefined = $state();
+	let mainElem: HTMLElement;
+
+	let placedPlants: PlacedPlant[] = $state([]);
 
 	$effect(() => {
 		pondPath = pondPath;
@@ -447,60 +477,60 @@
 		duck.framesUntilNewDirection = Math.floor(Math.random() * 60) + 30;
 	};
 
-	const spawnDuck = async (duck: string, duckIndex: number) => {
+	const spawnDuck = async (duck: DuckDto, duckIndex: number) => {
 		if (!clientHeight || !clientWidth || !duckWidth || !duckHeight) return;
 		const centerX: number = clientWidth / 2 - duckWidth / 2; 
 		const centerY: number = clientHeight / 2 - duckHeight / 2; 
 		let duckSpawnX: number;
-			let duckSpawnY: number;
-			let attempts = 0;
-			const maxAttempts = 50;
+		let duckSpawnY: number;
+		let attempts = 0;
+		const maxAttempts = 50;
 
-			do {
-				const angle = (duckIndex / ducks.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-				const radius = minDuckDistance * 0.6 * (1 + duckIndex * 0.5) + Math.random() * 20;
-				
-				duckSpawnX = centerX + Math.cos(angle) * radius;
-				duckSpawnY = centerY + Math.sin(angle) * radius;
-				
-				attempts++;
-				
-				if (attempts >= maxAttempts) break;
-				
-			} while (
-				!isPositionValid(duckSpawnX, duckSpawnY) || 
-				wouldCollideWithDucks(duckSpawnX, duckSpawnY, duckIndex)
-			);
+		do {
+			const angle = (duckIndex / PondSelectedDucks.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+			const radius = minDuckDistance * 0.6 * (1 + duckIndex * 0.5) + Math.random() * 20;
+			
+			duckSpawnX = centerX + Math.cos(angle) * radius;
+			duckSpawnY = centerY + Math.sin(angle) * radius;
+			
+			attempts++;
+			
+			if (attempts >= maxAttempts) break;
+			
+		} while (
+			!isPositionValid(duckSpawnX, duckSpawnY) || 
+			wouldCollideWithDucks(duckSpawnX, duckSpawnY, duckIndex)
+		);
 
-			const startingDirection: number = Math.floor(Math.random() * numDirections);
+		const startingDirection: number = Math.floor(Math.random() * numDirections);
 
-			duckPositionalDataArr.push({
-				x: duckSpawnX,
-				y: duckSpawnY,
-				startX: duckSpawnX,
-				startY: duckSpawnY,
-				targetX: duckSpawnX,
-				targetY: duckSpawnY,
-				directionIndex: startingDirection,
-				moveProgress: 1,
-				isMoving: false,
-				isSwimming: false,
-				framesUntilNewDirection: Math.floor(Math.random() * 30)
-			});
+		duckPositionalDataArr.push({
+			x: duckSpawnX,
+			y: duckSpawnY,
+			startX: duckSpawnX,
+			startY: duckSpawnY,
+			targetX: duckSpawnX,
+			targetY: duckSpawnY,
+			directionIndex: startingDirection,
+			moveProgress: 1,
+			isMoving: false,
+			isSwimming: false,
+			framesUntilNewDirection: Math.floor(Math.random() * 30)
+		});
 
-			duckElements[duckIndex].style.left = `${duckSpawnX}px`;
-			duckElements[duckIndex].style.top = `${duckSpawnY}px`;
+		duckElements[duckIndex].style.left = `${duckSpawnX}px`;
+		duckElements[duckIndex].style.top = `${duckSpawnY}px`;
 	}
 
 	const loadDucks = async (): Promise<void> => {
-		ducks.forEach((d, i) => {
-			spawnDuck(d.id, i);
+		PondSelectedDucks.forEach((d, i) => {
+			spawnDuck(d, i);
 		})		
 		raf = requestAnimationFrame(animateDucks);
 	};
 
 	const animateDucks = (): void => {
-		for (let duckIndex = 0; duckIndex < ducks.length; ++duckIndex) {
+		for (let duckIndex = 0; duckIndex < PondSelectedDucks.length; ++duckIndex) {
 			if (!duckPositionalDataArr[duckIndex]) continue;
 			const duck = duckPositionalDataArr[duckIndex];
 			const duckElement: HTMLImageElement = duckElements[duckIndex];
@@ -553,7 +583,7 @@
 
 	onMount(() => {
 		ctx = canvas!.getContext('2d');
-		workCtx = workCanvas!.getContext('2d');
+		workCtx = workCanvas!.getContext('2d', { willReadFrequently: true });
 		
 		prevWidth = canvas?.parentElement?.clientWidth ?? canvas?.clientWidth ?? 406;
 		prevHeight = canvas?.parentElement?.clientHeight ?? canvas?.clientHeight ?? 210;
@@ -586,55 +616,69 @@
 		}
 	});
 
-	let isGridVisible: boolean = $state(false);
-	let isSelectionMenuVisible: boolean = $state(false);
-
-	/* TODO: rank */
-	let isDucksTabShown: boolean = $state(true);
-	let isPlantsTabShown: boolean = $state(true);
-	
-	const gridColumns: number = 24;
-	const gridRows: number = 11;
-
-	const gridElements: number = gridColumns * gridRows;
-
-	let grid: GridElement[] = $state(Array(gridElements).fill({ isOccupied: false } as GridElement));
-
-	type GridElement = {
-		div: HTMLDivElement
-		isOccupied: boolean
-	}
-	type PlacedPlant = {
-		imageSrc: string,
-		relativeX: number,
-		relativeY: number,  
-		widthRatio: number, 
-		heightRatio: number  
-	}
-
-	let mainElemBoundingRect: number | undefined = $state();
-	let mainElem: HTMLElement;
-
-	let placedPlants: PlacedPlant[] = $state([]);
 
 	 const highlightCell = (gridX: number, gridY: number) => {
 		if (!gridCanvas) return;
 		drawGrid(gridCanvas);
         const ctx = gridCanvas.getContext('2d');
         if (!ctx || !clientWidth || !clientHeight) return;
-        console.log('fillign');
+
         const cellWidth = clientWidth / gridColumns;
         const cellHeight = clientHeight / gridRows;
         
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+		const linearizedGridIndex: number = gridY * gridColumns + gridX;
+
+		if (!!isPointOnGridOccupied?.at(linearizedGridIndex)){
+			ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+		}else{
+			ctx.fillStyle = 'rgba(68, 239, 68, 0.5)';
+		}
+
         ctx.fillRect(gridX * cellWidth, gridY * cellHeight, cellWidth, cellHeight);
     };
 
 	let gridCanvas: HTMLCanvasElement | undefined = $state();
 
+	const InitializeGridData = (): void => {
+		if (!workCtx || !clientWidth || !clientHeight) return;
+		if (isPointOnGridOccupied) return;
+		
+		isPointOnGridOccupied = Array(gridElements).fill(false);
+		
+		const cellWidth = clientWidth / gridColumns;
+		const cellHeight = clientHeight / gridRows;
+		
+		for (let row = 0; row < gridRows; ++row) {
+			for (let col = 0; col < gridColumns; ++col) {
+				const cellImageData: ImageData = workCtx.getImageData(Math.floor(cellWidth * col), Math.floor(cellHeight * row), Math.floor(cellWidth), Math.floor(cellHeight));
+				
+				let blackPixelCount = 0;
+				const pixelsInCell = cellImageData.data.length / 4;
+				
+				for (let i = 0; i < cellImageData.data.length; i += 4) {
+					const r = cellImageData.data[i];
+					const g = cellImageData.data[i + 1];
+					const b = cellImageData.data[i + 2];
+					
+					if (r < 30 && g < 30 && b < 30) {
+						blackPixelCount++;
+					}
+				}
+				
+				const landRatio = blackPixelCount / pixelsInCell;
+				const gridIndex = row * gridColumns + col;
+				
+				const isMostlyLand = landRatio > 0.8;
+				
+				isPointOnGridOccupied[gridIndex] = !isMostlyLand;
+			}
+		}
+	};
+
 	const drawGrid = (node: HTMLCanvasElement) => {
 		if (!clientWidth || !clientHeight) return;
-			
+		InitializeGridData();
+
 		node.width = clientWidth;
 		node.height = clientHeight;
 		
@@ -664,42 +708,30 @@
 			ctx.stroke();
 		}
 	}
+
+	$inspect(PondSelectedDucks);
 </script>
 
 
 <main bind:this={mainElem} bind:offsetHeight={mainElemBoundingRect} bind:clientHeight bind:clientWidth class="relative w-full h-full">
 
-{#each placedPlants as placedPlant}
-    <img 
-        class="absolute z-200" 
-        style="
-            width: {placedPlant.widthRatio * (clientWidth ?? 0)}px; 
-            height: {placedPlant.heightRatio * (clientHeight ?? 0)}px; 
-            left: {placedPlant.relativeX * (clientWidth ?? 0)}px; 
-            top: {placedPlant.relativeY * (clientHeight ?? 0)}px;
-        "
-        src={placedPlant.imageSrc} 
-        alt="plant">
-{/each}
+	{#each placedPlants as placedPlant}
+		<img 
+			class="absolute z-200" 
+			style="width: {placedPlant.widthRatio * (clientWidth ?? 0)}px; 
+				height: {placedPlant.heightRatio * (clientHeight ?? 0)}px; 
+				left: {placedPlant.relativeX * (clientWidth ?? 0)}px; 
+				top: {placedPlant.relativeY * (clientHeight ?? 0)}px;"
+			src={placedPlant.imageSrc} 
+			alt="plant">
+	{/each}
 
 	{#if isGridVisible}
 		<canvas bind:this={gridCanvas} class="absolute z-901" width={clientWidth ?? 0} height={clientHeight ?? 0} style="width: {clientWidth}px; height: {clientHeight}px;" use:drawGrid></canvas>
 	{/if}
 	
 	{#if isSelectionMenuVisible}
-		<div transition:fly={{ x: -50, opacity: 0 }} class="w-xl h-[60%] bg-red-500 left-5 top-[10%] absolute z-500 flex flex-col justify-center">
-			<div class="w-full h-16 flex flex-row justify-start p-3 gap-3">
-				<button onclick={() => {isPlantsTabShown = false; isDucksTabShown = true;}} class="h-full w-30 bg-amber-500 rounded-md">ducks</button>
-				<button onclick={() => {isPlantsTabShown = true; isDucksTabShown = false;}} class="h-full w-30 bg-amber-500 rounded-md">plants</button>
-			</div>
-			<div class="w-full h-full overflow-hidden">		
-				{#if isDucksTabShown}	
-					{@render DuckTab()}
-				{:else if isPlantsTabShown}
-					{@render PlantTab()}					
-				{/if}
-			</div>
-		</div>
+		{@render SelectionMenu(userItems.ducks, userItems.plants)}
 	{:else}
 		<button onclick={() => { isSelectionMenuVisible = true }} class="w-12 h-40 fixed left-0 top-[calc(50%-20em)] z-999 bg-red-500">
 			huh
@@ -708,7 +740,7 @@
 
 	<canvas class="absolute z-10" bind:this={canvas} style="width: {clientWidth}px; height: {clientHeight}px;"></canvas>
 	<canvas class="absolute z-0 hidden" bind:this={workCanvas}></canvas>
-	{#each ducks as duck, i}
+	{#each PondSelectedDucks as duck, i}
 		<img 
 			src={idleGifPath}
 			alt="duck"
@@ -719,18 +751,32 @@
 	{/each}
 </main>
 
-{#snippet DuckTab()}
+{#snippet DuckTab(ducks: DuckDto[])}
 	<div class="flex flex-col h-full">
 		<div class="w-full h-12 px-3 flex-shrink-0">
 			<h4 class="text-lg font-semibold border-b-2 border-b-black py-2">Owned ducks</h4>
 		</div>
 		<div class="w-full flex-1 min-h-0 p-5 grid grid-cols-4 gap-3 overflow-y-auto">
-			{#each [...Array(100).keys()] as duck}
-				<DuckSelectionTile options={{ onclick: async () => {
-					let duck = {id: ""}
-					ducks.push(duck);
-					await tick();
-					spawnDuck(duck.id, 4);
+			{#each ducks as duck}
+				<DuckSelectionTile options={{ 
+					duck: duck,
+					onclick: async () => {
+					// await FetchFromApi("SelectItem", {
+					// 	method: "PUT",
+					// 	/* body: {
+					// 		itemId: 
+					// 	} */
+					// });
+					if (!duck.isSelectedForPond){
+						PondSelectedDucks.push(duck);
+						duck.isSelectedForPond = true;
+					}else{
+						PondSelectedDucks = PondSelectedDucks.filter(d => d.itemId !== duck.itemId);
+						duck.isSelectedForPond = false;
+					}
+
+					// await tick();
+					// spawnDuck(duck, 4);
 				}}}/>
 			{/each}
 		</div>
@@ -738,7 +784,7 @@
 {/snippet}
 
 
-{#snippet PlantTab()}
+{#snippet PlantTab(plants: PlantDto[])}
 	<div class="flex flex-col h-full">
 		<div class="w-full h-12 px-3 flex-shrink-0">
 			<h4 class="text-lg font-semibold border-b-2 border-b-black py-2">Owned plants</h4>
@@ -782,18 +828,22 @@
 						isGridVisible = false;
 						isSelectionMenuVisible = true;
 						
+						const linearizedGridIndex: number = gridElemIndexY * gridColumns + gridElemIndexX;
+
 						const mainRect: DOMRect = mainElem.getBoundingClientRect();
 
 						if (!clientHeight || !clientWidth) return;
 						const rowWidth: number = (clientWidth / gridColumns)
 						const rowHeight: number = (clientHeight / gridRows)
-						placedPlants.push({
-							relativeX: (gridElemIndexX * rowWidth - mainRect.left) / mainRect.width,
-							relativeY: (gridElemIndexY * rowHeight) / mainRect.height,
-							widthRatio: rowWidth / mainRect.width,
-							heightRatio: rowHeight / mainRect.height,
-							imageSrc: "/src/lib/images/store/plant.png"
-						})
+						if (isPointOnGridOccupied?.at(linearizedGridIndex) === false){
+							placedPlants.push({
+								relativeX: (gridElemIndexX * rowWidth - mainRect.left) / mainRect.width,
+								relativeY: (gridElemIndexY * rowHeight) / mainRect.height,
+								widthRatio: rowWidth / mainRect.width,
+								heightRatio: rowHeight / mainRect.height,
+								imageSrc: "/src/lib/images/store/plant.png"
+							})
+						}
 					}
 
 					node.onmousedown = () => {
@@ -819,5 +869,28 @@
 			</div>
 		{/each}
 	</div>
+	</div>
+{/snippet}
+
+{#snippet SelectionMenu(ducks: DuckDto[], plants: PlantDto[])}
+	<div transition:fly={{ x: -50, opacity: 0 }} class="w-xl h-[60%] bg-red-500 left-5 top-[10%] absolute z-500 rounded-xl">
+		<div class="w-full h-full flex flex-col justify-center">
+			<button onclick={() => {
+				isSelectionMenuVisible = false;
+			}} class="absolute w-8 h-8 rounded-[25%] bg-blue-500 p-1 top-3 right-3">
+				<CrossIconSvg options={{ class: "w-full h-full stroke-[2] stroke-black" }}/>
+			</button>
+			<div class="w-full h-16 flex flex-row justify-start p-3 gap-3">
+				<button onclick={() => {isPlantsTabShown = false; isDucksTabShown = true;}} class="h-full w-30 bg-amber-500 rounded-md">ducks</button>
+				<button onclick={() => {isPlantsTabShown = true; isDucksTabShown = false;}} class="h-full w-30 bg-amber-500 rounded-md">plants</button>
+			</div>
+			<div class="w-full h-full overflow-hidden">
+				{#if isDucksTabShown}
+					{@render DuckTab(ducks)}
+				{:else if isPlantsTabShown}
+					{@render PlantTab(plants)}
+				{/if}
+			</div>
+		</div>
 	</div>
 {/snippet}

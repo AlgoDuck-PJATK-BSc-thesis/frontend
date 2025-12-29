@@ -1,10 +1,13 @@
+import type { DuckDto, PlantDto } from "$lib/Components/Misc/Pond/duckTypes";
 import type { PageLoad } from "../delete-account/$types";
 
 export const load: PageLoad = async ({ fetch, params }) => { 
     return {
-        ducks: outfitCloudfrontUuids.map((id) => { return {
-            id: id,
-        }})
+        ducks: outfitCloudfrontUuids.map((id) => ({
+            itemId: id,
+            isSelectedForPond: true,
+        } as DuckDto)),
+        plants: [{} as PlantDto]
     };
 }
 
