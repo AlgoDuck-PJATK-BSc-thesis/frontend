@@ -40,8 +40,8 @@
                 })
             });
             console.log(res);
-            methodRecommendationTrie = new Trie<MethodRecommendation>(res.body.methods.map(e => ({ key: e.methodName, val: e })));
-            variableRecommendationTrie = new Trie<FunctionParam>(res.body.variables.map(e => ({ key: e.name, val: e })));
+            methodRecommendationTrie = new Trie<MethodRecommendation>(res.body.methods.map(e => ({ key: e.methodName, value: e })));
+            variableRecommendationTrie = new Trie<FunctionParam>(res.body.variables.map(e => ({ key: e.name, value: e })));
         }, 2000);
 
         return () => clearTimeout(timeoutId);

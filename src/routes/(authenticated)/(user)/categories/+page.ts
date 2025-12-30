@@ -7,7 +7,26 @@ export const load: PageLoad = async ({ params, url, fetch }) : Promise<{categori
     }, fetch);
 
     return {
-        categories: resp.body
+        categories: [
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+            { id: '', categoryName: 'test category 4'},
+        ]
     };
 }
 

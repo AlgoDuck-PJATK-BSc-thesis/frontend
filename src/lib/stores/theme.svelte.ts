@@ -4,7 +4,7 @@ export const SupportedLangs = ['pl', 'en'] as const;
 export type Lang = (typeof SupportedLangs)[number];
 
 export const userThemePreference: { theme: ThemeName; lang: Lang } = $state({
-	theme: 'light',
+	theme: 'dark',
 	lang: 'en'
 });
 
