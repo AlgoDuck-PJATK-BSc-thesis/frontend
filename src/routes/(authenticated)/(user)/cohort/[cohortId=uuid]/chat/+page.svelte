@@ -49,6 +49,8 @@
 
 	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
 
+	type DeliveryState = 'sending' | 'delivered' | 'read';
+
 	type LocalMessage = {
 		messageId: string;
 		userId: string;
@@ -59,6 +61,9 @@
 		mediaUrl: string | null;
 		createdAt: string;
 		isMine: boolean;
+		clientMessageId?: string | null;
+		deliveryState?: DeliveryState;
+		readByCount?: number | null;
 	};
 
 	type PendingImage = {
@@ -78,6 +83,11 @@
 	let lastAttemptedText = $state<string | null>(null);
 	let lastAttemptedImages = $state<PendingImage[]>([]);
 	let lastRejectRestoreArmed = $state(false);
+
+	let readByCountByMessageId = $state<Record<string, number>>({});
+
+	let lastMarkedReadMessageId = $state<string | null>(null);
+	let lastMarkedReadAtMs = $state(0);
 
 	const scrollStorageKey = $derived.by(() => (cohortId ? `cohort-chat-scroll:${cohortId}` : ''));
 
@@ -106,6 +116,11 @@
 		const idx2 = msg.indexOf('Exception:');
 		if (idx2 >= 0) return msg.slice(idx2 + 'Exception:'.length).trim() || msg.trim();
 		return msg.trim() || 'Failed to send message.';
+	};
+
+	const newClientMessageId = () => {
+		if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+		return `${Date.now()}-${Math.random()}`;
 	};
 
 	const queryOptionsStore = derived(cohortIdStore, (id) => ({
@@ -156,14 +171,12 @@
 
 	const allMessages = $derived.by(() => {
 		const merged = [...historyMessages, ...liveMessages];
-		const seen = new Set<string>();
-		const deduped: LocalMessage[] = [];
+		const byId = new Map<string, LocalMessage>();
 		for (const m of merged) {
 			if (!m.messageId) continue;
-			if (seen.has(m.messageId)) continue;
-			seen.add(m.messageId);
-			deduped.push(m);
+			byId.set(m.messageId, m);
 		}
+		const deduped = Array.from(byId.values());
 		deduped.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 		return deduped;
 	});
@@ -277,6 +290,41 @@
 		return { hadPayload: true, wantsBottom: false };
 	};
 
+	const getLastNonLocalMessageId = () => {
+		const msgs = allMessages;
+		for (let i = msgs.length - 1; i >= 0; i--) {
+			const id = msgs[i]?.messageId ?? '';
+			if (!id) continue;
+			if (id.startsWith('local-')) continue;
+			return id;
+		}
+		return null;
+	};
+
+	const markReadIfAppropriate = async () => {
+		if (!isBrowser) return;
+		if (!cohortId) return;
+		if (document.visibilityState !== 'visible') return;
+		if (!computeNearBottom()) return;
+
+		const c = conn;
+		if (!c) return;
+		if (c.state !== HubConnectionState.Connected) return;
+
+		const messageId = getLastNonLocalMessageId();
+		if (!messageId) return;
+
+		const nowMs = Date.now();
+		if (lastMarkedReadMessageId === messageId && nowMs - lastMarkedReadAtMs < 1500) return;
+
+		lastMarkedReadMessageId = messageId;
+		lastMarkedReadAtMs = nowMs;
+
+		try {
+			await c.invoke('MarkReadUpTo', messageId);
+		} catch {}
+	};
+
 	$effect(() => {
 		if (!isBrowser) return;
 		if (!cohortId) return;
@@ -305,6 +353,8 @@
 					if (token !== initialScrollToken) return;
 					await scrollToBottom('auto');
 				}
+
+				await markReadIfAppropriate();
 			})();
 		}
 	});
@@ -321,6 +371,10 @@
 			raf = requestAnimationFrame(() => {
 				persistScroll();
 			});
+
+			if (computeNearBottom()) {
+				markReadIfAppropriate();
+			}
 
 			if (el.scrollTop > 0) return;
 
@@ -343,6 +397,7 @@
 
 		const onVisibility = () => {
 			if (document.visibilityState === 'hidden') persistScroll();
+			if (document.visibilityState === 'visible') markReadIfAppropriate();
 		};
 
 		el.addEventListener('scroll', onScroll);
@@ -388,7 +443,29 @@
 		}
 	};
 
-	const onReceive = (msg: SendMessageResultDto) => {
+	const upsertLiveByClientId = (clientMessageId: string, next: LocalMessage) => {
+		const idx = liveMessages.findIndex((x) => x.clientMessageId === clientMessageId);
+		if (idx >= 0) {
+			const copy = [...liveMessages];
+			copy[idx] = next;
+			liveMessages = copy;
+			return true;
+		}
+		return false;
+	};
+
+	const upsertLiveByMessageId = (messageId: string, next: LocalMessage) => {
+		const idx = liveMessages.findIndex((x) => x.messageId === messageId);
+		if (idx >= 0) {
+			const copy = [...liveMessages];
+			copy[idx] = next;
+			liveMessages = copy;
+			return true;
+		}
+		return false;
+	};
+
+	const onReceive = (msg: SendMessageResultDto & { readByCount?: number | null }) => {
 		const mine = currentUserId ? msg.userId === currentUserId : false;
 
 		const local: LocalMessage = {
@@ -400,12 +477,82 @@
 			mediaType: normalizeMediaType(msg.mediaType as unknown),
 			mediaUrl: msg.mediaUrl ?? null,
 			createdAt: msg.createdAt,
-			isMine: mine
+			isMine: mine,
+			clientMessageId: (msg as any).clientMessageId ?? null,
+			deliveryState: mine ? 'delivered' : undefined,
+			readByCount: mine ? (msg.readByCount ?? null) : null
 		};
 
 		const shouldScroll = computeNearBottom();
-		liveMessages = [...liveMessages, local];
+
+		if (mine && local.clientMessageId) {
+			const replaced = upsertLiveByClientId(local.clientMessageId, local);
+			if (!replaced) liveMessages = [...liveMessages, local];
+		} else {
+			const replaced = upsertLiveByMessageId(local.messageId, local);
+			if (!replaced) liveMessages = [...liveMessages, local];
+		}
+
+		if (mine) {
+			const c = local.readByCount ?? null;
+			if (c && c > 0) {
+				readByCountByMessageId = { ...readByCountByMessageId, [local.messageId]: c };
+			}
+		}
+
 		if (shouldScroll) scrollToBottom('smooth');
+
+		markReadIfAppropriate();
+	};
+
+	const mineTailInfo = $derived.by(() => {
+		const msgs = allMessages;
+		const tail: LocalMessage[] = [];
+		for (let i = msgs.length - 1; i >= 0; i--) {
+			const m = msgs[i];
+			if (!m.isMine) break;
+			tail.unshift(m);
+		}
+
+		const last = tail.length > 0 ? tail[tail.length - 1] : null;
+
+		let lastPending: LocalMessage | null = null;
+		for (let i = tail.length - 1; i >= 0; i--) {
+			if (tail[i].deliveryState === 'sending') {
+				lastPending = tail[i];
+				break;
+			}
+		}
+
+		const statusTarget = lastPending ?? last;
+		const ids = new Set(tail.map((m) => m.messageId));
+
+		return {
+			ids,
+			statusTargetId: statusTarget?.messageId ?? null,
+			statusTarget
+		};
+	});
+
+	const statusForMessage = (m: LocalMessage) => {
+		const info = mineTailInfo;
+		if (!m.isMine) return null;
+		if (!info.ids.has(m.messageId)) return null;
+		if (!info.statusTargetId) return null;
+		if (info.statusTargetId !== m.messageId) return null;
+
+		const t = info.statusTarget;
+		if (!t) return null;
+
+		if (t.deliveryState === 'sending') return { kind: 'sending' as const };
+
+		const fromMap = readByCountByMessageId[m.messageId];
+		const fromMsg = t.readByCount ?? null;
+		const c = typeof fromMap === 'number' ? fromMap : (fromMsg ?? null);
+
+		if (c && c > 0) return { kind: 'read' as const, count: c };
+
+		return { kind: 'delivered' as const };
 	};
 
 	const ensureConnected = async () => {
@@ -430,38 +577,92 @@
 		}
 	};
 
-	const sendText = async (text: string) => {
+	const createOptimisticText = (text: string, clientMessageId: string): LocalMessage => {
+		const now = new Date().toISOString();
+		return {
+			messageId: `local-${clientMessageId}`,
+			userId: currentUserId ?? 'pending',
+			userName: 'you',
+			userAvatarUrl: null,
+			content: text,
+			mediaType: 'Text',
+			mediaUrl: null,
+			createdAt: now,
+			isMine: true,
+			clientMessageId,
+			deliveryState: 'sending',
+			readByCount: null
+		};
+	};
+
+	const createOptimisticImage = (previewUrl: string, clientMessageId: string): LocalMessage => {
+		const now = new Date().toISOString();
+		return {
+			messageId: `local-${clientMessageId}`,
+			userId: currentUserId ?? 'pending',
+			userName: 'you',
+			userAvatarUrl: null,
+			content: '',
+			mediaType: 'Image',
+			mediaUrl: previewUrl,
+			createdAt: now,
+			isMine: true,
+			clientMessageId,
+			deliveryState: 'sending',
+			readByCount: null
+		};
+	};
+
+	const sendTextOptimistic = async (text: string) => {
 		const trimmed = text.trim();
 		if (!trimmed) return;
 		await ensureConnected();
 		const c = conn;
 		if (!c) return;
+
+		const clientMessageId = newClientMessageId();
+		const local = createOptimisticText(trimmed, clientMessageId);
+		const shouldScroll = computeNearBottom();
+		liveMessages = [...liveMessages, local];
+		if (shouldScroll) scrollToBottom('smooth');
+
 		try {
 			await c.invoke('SendMessage', {
 				cohortId,
 				content: trimmed,
-				mediaType: 0
+				mediaType: 0,
+				clientMessageId
 			});
 		} catch (e) {
+			liveMessages = liveMessages.filter((m) => m.clientMessageId !== clientMessageId);
 			showRejection(extractSignalRError(e));
 			throw e;
 		}
 	};
 
-	const sendImage = async (file: File) => {
+	const sendImageOptimistic = async (file: File, previewUrl: string) => {
 		await ensureConnected();
-		const uploaded = await cohortApi.uploadChatMedia(cohortId, file);
 		const c = conn;
 		if (!c) return;
+
+		const clientMessageId = newClientMessageId();
+		const local = createOptimisticImage(previewUrl, clientMessageId);
+		const shouldScroll = computeNearBottom();
+		liveMessages = [...liveMessages, local];
+		if (shouldScroll) scrollToBottom('smooth');
+
 		try {
+			const uploaded = await cohortApi.uploadChatMedia(cohortId, file);
 			await c.invoke('SendMessage', {
 				cohortId,
 				content: '',
 				mediaType: 1,
 				mediaKey: uploaded.mediaKey,
-				mediaContentType: uploaded.contentType
+				mediaContentType: uploaded.contentType,
+				clientMessageId
 			});
 		} catch (e) {
+			liveMessages = liveMessages.filter((m) => m.clientMessageId !== clientMessageId);
 			showRejection(extractSignalRError(e));
 			throw e;
 		}
@@ -494,7 +695,7 @@
 		try {
 			if (imgs.length > 0) {
 				for (const p of imgs) {
-					await sendImage(p.file);
+					await sendImageOptimistic(p.file, p.previewUrl);
 					try {
 						URL.revokeObjectURL(p.previewUrl);
 					} catch {}
@@ -502,7 +703,7 @@
 			}
 
 			if (text.trim().length > 0) {
-				await sendText(text);
+				await sendTextOptimistic(text);
 			}
 
 			lastRejectRestoreArmed = false;
@@ -619,7 +820,7 @@
 
 			const nextConn = cohortApi.createChatConnection(cohortId, {
 				onReceiveMessage: (msg) => {
-					onReceive(msg);
+					onReceive(msg as any);
 				}
 			});
 
@@ -627,12 +828,25 @@
 				showRejection(reason);
 			});
 
-			const prev = conn;
+			nextConn.on('ReadReceiptUpdated', (payload: any) => {
+				const messageId = (payload?.messageId ?? null) as string | null;
+				const readByCount = (payload?.readByCount ?? null) as number | null;
+
+				if (!messageId) return;
+				if (!readByCount || readByCount <= 0) return;
+
+				const prev = readByCountByMessageId[messageId] ?? 0;
+				if (readByCount > prev) {
+					readByCountByMessageId = { ...readByCountByMessageId, [messageId]: readByCount };
+				}
+			});
+
+			const prevConn = conn;
 			conn = nextConn;
 
-			if (prev) {
+			if (prevConn) {
 				try {
-					await prev.stop();
+					await prevConn.stop();
 				} catch {}
 			}
 
@@ -640,7 +854,10 @@
 				await nextConn.start();
 			} catch {
 				if (active) conn = null;
+				return;
 			}
+
+			await markReadIfAppropriate();
 		})();
 
 		return () => {
@@ -669,6 +886,9 @@
 			}
 
 			liveMessages = [];
+			readByCountByMessageId = {};
+			lastMarkedReadMessageId = null;
+			lastMarkedReadAtMs = 0;
 			lastAttemptedText = null;
 			lastAttemptedImages = [];
 			lastRejectRestoreArmed = false;
@@ -693,11 +913,9 @@
 			}
 
 			if (lang.toLowerCase() === 'java') {
-				segments.push(`
-							<div class="p-2 bg-[color:#0d0f14] text-[color:var(--color-text)] overflow-auto rounded text-sm">
-								${highlightJava(code)}
-			            </div>
-		           `);
+				segments.push(
+					`<div class="p-2 bg-[color:#0d0f14] text-[color:var(--color-text)] overflow-auto rounded text-sm">${highlightJava(code)}</div>`
+				);
 			} else {
 				segments.push(
 					`<pre class="block w-full whitespace-pre-wrap font-mono text-sm bg-[color:var(--color-bg)] text-[color:var(--color-text)] p-2 rounded overflow-auto">${escapeHtml(code)}</pre>`
@@ -721,7 +939,7 @@
 		escaped = escaped.replace(/`([^`]+?)`/g, (_m, p1) => {
 			const index = inlinePlaceholders.length;
 			inlinePlaceholders.push(
-				`<code class="px-2 py-1 bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-mono rounded">${escapeHtml(p1)}</code>`
+				`<code class="px-1 py-1 bg-[color:var(--color-bg)] text-[color:var(--color-text)] font-mono rounded">${escapeHtml(p1)}</code>`
 			);
 			return `__INLINE_${index}__`;
 		});
@@ -791,36 +1009,53 @@
 							</div>
 						{/if}
 
-						<div class={`flex flex-col gap-2 ${run.isMine ? 'items-end' : 'items-start'}`}>
+						<div class={`flex w-full flex-col gap-2 ${run.isMine ? 'items-end' : 'items-start'}`}>
 							<span class="text-xs text-[color:var(--color-landingpage-subtitle)]">
 								{run.userName}
 								{run.timeLabel}
 							</span>
 
 							{#each run.items as m}
-								<PixelFrameChat
-									className={`px-5 py-3 text-sm max-w-[70%] break-words
-									${
-										run.isMine
-											? 'bg-[color:var(--color-chat-right)] text-[color:var(--color-text)] '
-											: 'bg-[color:var(--color-chat-left)] text-[color:var(--color-text)] '
-									}
-								`}
-									side={run.isMine ? 'right' : 'left'}
-								>
-									{#if m.mediaType === 'Image' && m.mediaUrl}
-										<img
-											src={m.mediaUrl}
-											alt=""
-											style="display:block;max-width:100%;height:auto;margin:0 auto;"
-											class="h-auto max-h-[14rem] w-auto max-w-[14rem] rounded object-contain"
-										/>
-									{:else}
-										{#await renderMessage(m.content ?? '') then html}
-											{@html html}
-										{/await}
+								<div class={`flex w-full flex-col ${run.isMine ? 'items-end' : 'items-start'}`}>
+									<PixelFrameChat
+										className={`px-5 py-3 text-sm max-w-[70%] break-words whitespace-normal
+										${
+											run.isMine
+												? 'bg-[color:var(--color-chat-right)] text-[color:var(--color-text)] '
+												: 'bg-[color:var(--color-chat-left)] text-[color:var(--color-text)] '
+										}
+									`}
+										side={run.isMine ? 'right' : 'left'}
+									>
+										{#if m.mediaType === 'Image' && m.mediaUrl}
+											<img
+												src={m.mediaUrl}
+												alt=""
+												style="display:block;max-width:100%;height:auto;margin:0 auto;"
+												class="h-auto max-h-[14rem] w-auto max-w-[14rem] rounded object-contain"
+											/>
+										{:else}
+											{#await renderMessage(m.content ?? '') then html}{@html html}{/await}
+										{/if}
+									</PixelFrameChat>
+
+									{#if run.isMine}
+										{@const s = statusForMessage(m)}
+										{#if s?.kind === 'sending'}
+											<div class="mt-1 text-xs text-[color:var(--color-landingpage-subtitle)]">
+												Sending<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+											</div>
+										{:else if s?.kind === 'delivered'}
+											<div class="mt-1 text-xs text-[color:var(--color-landingpage-subtitle)]">
+												Delivered
+											</div>
+										{:else if s?.kind === 'read'}
+											<div class="mt-1 text-xs text-[color:var(--color-landingpage-subtitle)]">
+												Read by {s.count}
+											</div>
+										{/if}
 									{/if}
-								</PixelFrameChat>
+								</div>
 							{/each}
 						</div>
 					</div>
@@ -906,5 +1141,30 @@
 <style>
 	:global(#chat-scroll) {
 		scroll-behavior: smooth;
+	}
+
+	.dots span {
+		display: inline-block;
+		animation: dotPulse 1s infinite;
+	}
+
+	.dots span:nth-child(2) {
+		animation-delay: 0.15s;
+	}
+
+	.dots span:nth-child(3) {
+		animation-delay: 0.3s;
+	}
+
+	@keyframes dotPulse {
+		0% {
+			opacity: 0.2;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0.2;
+		}
 	}
 </style>

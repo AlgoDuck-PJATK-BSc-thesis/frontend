@@ -14,6 +14,7 @@ export const light = {
 	'--color-primary': '#fd9fff',
 
 	'--color-accent-1': '#2359be',
+	'--color-accent-2': '#7fd2ff',
 	'--color-accent-3': '#4866f4',
 	'--color-accent-4': '#344aa3',
 
@@ -37,6 +38,7 @@ export const light = {
 	'--color-input-text': '#272525',
 	'--color-text-box': '#18252f',
 
+	'--color-header-guest': '#2683d1',
 	'--color-header-user': '#206dd8',
 	'--color-logo-header': '#7fd2ff',
 	'--color-frame-coins-header': '#5196ff',

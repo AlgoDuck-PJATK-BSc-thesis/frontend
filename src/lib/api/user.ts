@@ -25,6 +25,7 @@ export type UserDto = {
 	coins?: number;
 	cohortId?: string | null;
 	userAvatarUrl?: string | null;
+	s3AvatarUrl?: string | null;
 };
 
 export type UserStatisticsDto = {

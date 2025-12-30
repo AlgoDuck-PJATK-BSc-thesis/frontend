@@ -3,22 +3,72 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import PixelFrameCoins from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameCoins.svelte';
+	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 	import { authApi } from '$lib/api/auth';
-	import { userApi } from '$lib/api/user';
+	import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
 	import { onMount } from 'svelte';
 
 	let coins = $state<number>(0);
-	let points = $state<number>(0);
 
+	let myUserId = $state<string>('');
+	let myAvatarUrl = $state<string>('');
+	let avatarOverride = $state<string>('');
+
+	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
 	const coinSrc = '/headers/coin.png';
-	const starSrc = '/headers/star.png';
+
+	const normalizeToCloudfrontKey = (value: string): string => {
+		const v = (value ?? '').toString().trim();
+		if (!v) return '';
+		if (v.startsWith('http://') || v.startsWith('https://')) {
+			try {
+				const u = new URL(v);
+				const p = (u.pathname ?? '').replace(/^\/+/, '').trim();
+				return p || '';
+			} catch {
+				return '';
+			}
+		}
+		return v;
+	};
 
 	const refreshHeaderStats = async () => {
 		try {
 			const s = await userApi.getMyStatistics(fetch);
 			if (typeof s.coins === 'number') coins = s.coins;
-			if (typeof s.experience === 'number') points = s.experience;
 		} catch {}
+	};
+
+	const tryResolveAvatarFromLeaderboard = async () => {
+		if (!myUserId) return;
+		try {
+			const all = await userApi.getGlobalLeaderboardAll(fetch);
+			const hit = all.find((x: UserLeaderboardEntryDto) => x.userId === myUserId);
+			const url = (hit?.userAvatarUrl ?? '').toString().trim();
+			if (url) avatarOverride = url;
+		} catch {}
+	};
+
+	const refreshMe = async () => {
+		try {
+			const me = await userApi.getMe(fetch);
+
+			myUserId = (me.userId ?? '').toString().trim();
+
+			const s3 = (me.s3AvatarUrl ?? '').toString().trim();
+			const u = (me.userAvatarUrl ?? '').toString().trim();
+
+			myAvatarUrl = s3 || u || '';
+
+			if (!myAvatarUrl) {
+				avatarOverride = '';
+				await tryResolveAvatarFromLeaderboard();
+			}
+		} catch {
+			myUserId = '';
+			myAvatarUrl = '';
+			avatarOverride = '';
+		}
 	};
 
 	const logout = async () => {
@@ -33,10 +83,6 @@
 		await goto('/Shop');
 	};
 
-	const goLeaderboard = async () => {
-		await goto('/leaderboard');
-	};
-
 	const onKey = async (e: KeyboardEvent, fn: () => Promise<void>) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
@@ -45,7 +91,7 @@
 	};
 
 	onMount(async () => {
-		await refreshHeaderStats();
+		await Promise.all([refreshHeaderStats(), refreshMe()]);
 	});
 </script>
 
@@ -57,26 +103,6 @@
 			>AlgoDuck</a
 		>
 		<div>
-			<PixelFrameCoins
-				className="bg-[color:var(--color-background-coins-header)] relative inline-flex min-w-[9rem] items-center px-1 text-[1rem] tracking-widest"
-			>
-				<div
-					class="relative z-10 inline-flex items-center justify-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
-					role="button"
-					tabindex="0"
-					aria-label="Open leaderboard"
-					onclick={goLeaderboard}
-					onkeydown={(e) => onKey(e, goLeaderboard)}
-				>
-					<span class="mr-1">{points.toLocaleString()}</span>
-					<img
-						src={starSrc}
-						alt="points"
-						class="mr-1 inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
-					/>
-				</div>
-			</PixelFrameCoins>
-
 			<PixelFrameCoins
 				className="bg-[color:var(--color-background-coins-header)] relative inline-flex min-w-[9rem] items-center px-1 text-[1rem] tracking-widest"
 			>
@@ -100,7 +126,9 @@
 	</div>
 
 	<nav class="mr-6 ml-6 overflow-y-auto">
-		<ul class="mr-4 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
+		<ul
+			class="mr-4 flex list-none items-center gap-6 font-semibold tracking-wider whitespace-nowrap"
+		>
 			<li>
 				<a
 					href="/home"
@@ -166,15 +194,6 @@
 			</li>
 			<li>
 				<a
-					href="/user/me"
-					aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
-					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Profile
-				</a>
-			</li>
-			<li>
-				<a
 					href="/settings"
 					aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
@@ -182,6 +201,27 @@
 					Settings
 				</a>
 			</li>
+
+			<li>
+				<a
+					href="/user/me"
+					aria-label="Profile"
+					aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
+					class="no-underline"
+				>
+					<div
+						class="h-10 w-10 overflow-hidden rounded-full border-3 border-white bg-[color:var(--color-primary)] shadow"
+					>
+						<CloudfrontImage
+							path={normalizeToCloudfrontKey(
+								(avatarOverride || myAvatarUrl || defaultAvatar).toString()
+							) || defaultAvatar}
+							cls="h-full w-full -translate-x-[-20%] -translate-y-[-15%] scale-[200%] object-cover object-[left_top]"
+						/>
+					</div>
+				</a>
+			</li>
+
 			<li>
 				<div class="relative w-16">
 					<ThemeToggle />
