@@ -5,7 +5,7 @@
     let { options = $bindable() }: { options: TerminalComponentArgs } = $props();
 
     // $inspect(isTerminalStatus(options.status));
-    $inspect(isIntermediateStatus(options.status));
+    // $inspect(isIntermediateStatus(options.status));
 
 </script>
 

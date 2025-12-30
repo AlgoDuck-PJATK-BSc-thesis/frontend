@@ -1,14 +1,14 @@
 <script lang="ts">
 	import ThreeDotIconSvg from "$lib/svg/EditorComponentIcons/ThreeDotIconSvg.svelte";
-	import type { DuckDto } from "./duckTypes";
+	import type { OwnedDuck, UsedDuckDto } from "./duckTypes";
 
-    let { options }: { options: { duck: DuckDto, onclick: (() => Promise<void>) } } = $props();
+    let { options }: { options: { duck: UsedDuckDto, onclick: ((duck: OwnedDuck) => Promise<void>) } } = $props();
 
 	let isContextMenuVisible: boolean = $state(false);
 	let contextMenuRef: HTMLDivElement | null = $state(null);
 	let toggleButtonRef: HTMLButtonElement | null = $state(null);
 
-	$inspect(options);
+	// $inspect(options);
 	$effect(() => {
 		if (!isContextMenuVisible) return;
 
@@ -39,7 +39,7 @@
 		class="absolute hover:bg-amber-600 rounded-[20%] w-[20%] h-[20%] right-[10%] top-[10%]">
 		<ThreeDotIconSvg options={{ class: "w-full h-full stroke-black stroke-[2]" }} />
 	</button>
-	<img src="https://d3018wbyyxg1xc.cloudfront.net/Ducks/Outfits/duck-3cf1b82e-704a-4f2b-8bc0-af22b41dec14.png" alt="duck">
+	<img src={`https://d3018wbyyxg1xc.cloudfront.net/Ducks/Outfits/duck-${options.duck.itemId}.png`} alt="duck">
 	{#if isContextMenuVisible}
 		<div bind:this={contextMenuRef}
 			class="w-50 h-25 absolute z-500 top-[30%] right-[10%] mt-2 flex flex-col rounded-lg bg-blue-400">
@@ -47,7 +47,7 @@
 				<button
 					class="w-full h-full py-3 hover:bg-blue-900 rounded-md"
 					onclick={async () => { 
-                        await options.onclick();
+                        await options.onclick(options.duck);
                         isContextMenuVisible = false; }
                     }>
 					{!options.duck.isSelectedForPond ? "Select" : "Deselect"}

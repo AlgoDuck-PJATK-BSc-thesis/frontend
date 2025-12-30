@@ -63,7 +63,7 @@
         }
     });
 
-    $inspect($infiniteQuery);
+    // $inspect($infiniteQuery);
 
     let allMessages = $derived(
         options.pages
