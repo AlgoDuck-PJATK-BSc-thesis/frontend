@@ -153,7 +153,7 @@
 			>
 				<CloudfrontImage
 					path={avatarPath}
-					cls="h-full w-full -translate-x-[-10%] -translate-y-[-0%] scale-[1.5] object-cover object-[left_top]"
+					cls="h-full w-full -translate-x-[-0%] -translate-y-[2%] scale-[1.2] object-cover object-[left_top]"
 				/>
 			</div>
 

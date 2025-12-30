@@ -8,10 +8,14 @@ export const userThemePreference: { theme: ThemeName; lang: Lang } = $state({
 	lang: 'en'
 });
 
-export const userEditorPreferences: { theme: EditorThemeName; fontSize: number, layout: editorLayout } = $state({
+export const userEditorPreferences: {
+	theme: EditorThemeName;
+	fontSize: number;
+	layout: editorLayout;
+} = $state({
 	theme: 'vs-dark',
 	fontSize: 16,
-	layout: "default"
+	layout: 'default'
 });
 
-export type editorLayout = "default" | "tabbed" | "split" 
+export type editorLayout = 'default' | 'tabbed' | 'split';

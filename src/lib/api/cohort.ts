@@ -95,6 +95,7 @@ export type SendMessageResultDto = {
 	mediaType: ChatMediaType;
 	mediaUrl: string | null;
 	createdAt: string;
+	clientMessageId: string | null;
 };
 
 export type PresenceUpdatedDto = {
@@ -177,7 +178,8 @@ const normalizeSendMessageResult = (m: any): SendMessageResultDto => ({
 	content: m.content ?? null,
 	mediaType: m.mediaType,
 	mediaUrl: toAbsoluteMediaUrl(m.mediaUrl ?? null),
-	createdAt: m.createdAt
+	createdAt: m.createdAt,
+	clientMessageId: m.clientMessageId ?? null
 });
 
 const toLeaderboardItems = (page: UserLeaderboardPageDto): LeaderboardItemDto[] => {
