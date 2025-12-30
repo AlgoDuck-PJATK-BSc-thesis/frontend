@@ -42,7 +42,7 @@
 	});
 </script>
 
-<main class="w-full h-full relative">
+<main class="w-full h-full relative border border-ide-accent/10">
 	<Monaco bind:editorContents={options.userCode} />
 	<span class="absolute z-50 bottom-[1%] left-[1%] text-ide-text-secondary backdrop-blur-xs">{savingState}</span>
 </main>

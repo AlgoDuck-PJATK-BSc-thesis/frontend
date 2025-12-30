@@ -1,3 +1,5 @@
+import type { KeyValuePair } from "$lib/Components/GenericComponents/dropDownMenu/DropDownSelectOptions";
+
 class TrieNode<TNodeVal> {
   children: Map<string, TrieNode<TNodeVal>>;
   value: TNodeVal | null;
@@ -13,12 +15,12 @@ class TrieNode<TNodeVal> {
 export class Trie<TNodeVal> {
   private root: TrieNode<TNodeVal>;
 
-  constructor(entries?: Array<{ key: string; val: TNodeVal }>) {
+  constructor(entries?: Array<KeyValuePair<string, TNodeVal>>) {
     this.root = new TrieNode<TNodeVal>();
     
     if (entries) {
       for (const entry of entries) {
-        this.add(entry.key, entry.val);
+        this.add(entry.key, entry.value);
       }
     }
   }
