@@ -15,7 +15,7 @@
 	let items = $state<LeaderboardItemDto[]>([]);
 	let refreshHandle = $state<number | null>(null);
 
-	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
 
 	const pointsOf = (u: LeaderboardItemDto) => u.experience;
 

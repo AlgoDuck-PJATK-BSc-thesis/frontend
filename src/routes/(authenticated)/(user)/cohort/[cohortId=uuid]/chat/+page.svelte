@@ -3,6 +3,7 @@
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
+	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
 	import { highlightJava } from '../../../../../../Utils/highlight';
 	import { cohortApi, type SendMessageResultDto, type CohortMemberDto } from '$lib/api/cohort';
 	import { authApi } from '$lib/api/auth';
@@ -47,7 +48,7 @@
 	let members = $state<CohortMemberDto[]>([]);
 	let memberAvatarByUserId = $state<Record<string, string | null>>({});
 
-	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
 
 	type DeliveryState = 'sending' | 'delivered' | 'read';
 
@@ -1043,7 +1044,7 @@
 										{@const s = statusForMessage(m)}
 										{#if s?.kind === 'sending'}
 											<div class="mt-1 text-xs text-[color:var(--color-landingpage-subtitle)]">
-												Sending<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+												<LoadingDots label="Sending" ariaLabel="Sending" />
 											</div>
 										{:else if s?.kind === 'delivered'}
 											<div class="mt-1 text-xs text-[color:var(--color-landingpage-subtitle)]">
@@ -1141,30 +1142,5 @@
 <style>
 	:global(#chat-scroll) {
 		scroll-behavior: smooth;
-	}
-
-	.dots span {
-		display: inline-block;
-		animation: dotPulse 1s infinite;
-	}
-
-	.dots span:nth-child(2) {
-		animation-delay: 0.15s;
-	}
-
-	.dots span:nth-child(3) {
-		animation-delay: 0.3s;
-	}
-
-	@keyframes dotPulse {
-		0% {
-			opacity: 0.2;
-		}
-		50% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0.2;
-		}
 	}
 </style>

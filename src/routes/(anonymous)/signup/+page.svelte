@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import { redirectToOAuth } from '$lib/api/oauth';
 

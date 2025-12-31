@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 
 	let code = $state('');
 	let error = $state<string | null>(null);

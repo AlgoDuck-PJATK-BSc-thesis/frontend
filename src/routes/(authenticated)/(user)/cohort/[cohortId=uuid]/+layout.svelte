@@ -63,7 +63,7 @@
 
 	let lastReportMs = 0;
 
-	const defaultAvatar = `Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
 
 	type User = {
 		name: string;
@@ -505,7 +505,7 @@
 			</div>
 
 			<CloudfrontImage
-				path={`Ducks/Outfits/duck-052b219a-ec0b-430a-a7db-95c5db35dfce.png`}
+				path={`Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`}
 				cls="h-[7rem] w-[7.2rem] -scale-x-100 drop-shadow-md "
 			/>
 		</div>

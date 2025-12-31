@@ -4,7 +4,7 @@
 	import { authApi } from '$lib/api/auth';
 	import { redirectToOAuth } from '$lib/api/oauth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 
 	let userNameOrEmail = $state('');
 	let password = $state('');
