@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 
 	let email = $state<string | null>(null);
 	let loading = $state(false);

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { FetchJsonFromApi } from '$lib/api/apiCall';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
 
 	type PageData<T> = {
 		items: T[];
@@ -88,19 +89,33 @@
 		params.set('pageSize', String(allPageSize));
 
 		try {
-			const data = await FetchJsonFromApi<PageData<CohortRow>>(
+			const res = await FetchFromApi<PageData<CohortRow>>(
 				'admin/cohorts',
 				{ method: 'GET' },
 				fetchWithTimeout,
 				params
 			);
+
 			if (my !== reqSeq) return;
-			allResult = data;
-			allPage = data.currPage;
-			allPageSize = data.pageSize;
+
+			const body = (res as StandardResponseDto<PageData<CohortRow>>).body;
+
+			allResult = body ?? {
+				items: [],
+				currPage: allPage,
+				pageSize: allPageSize,
+				totalItems: 0,
+				prevCursor: null,
+				nextCursor: null
+			};
+
+			allPage = allResult.currPage;
+			allPageSize = allResult.pageSize;
+
 			allLoadedOnce = true;
 		} catch (e) {
 			if (my !== reqSeq) return;
+
 			error = e instanceof Error ? e.message : 'Failed to load cohorts.';
 			allLoadedOnce = true;
 			allResult = {
@@ -130,21 +145,29 @@
 		params.set('pageSize', String(searchPageSize));
 
 		try {
-			const data = await FetchJsonFromApi<SearchCohortsResult>(
+			const res = await FetchFromApi<SearchCohortsResult>(
 				'admin/cohorts/search',
 				{ method: 'GET' },
 				fetchWithTimeout,
 				params
 			);
+
 			if (my !== reqSeq) return;
 
-			searchResult = data;
-			searchPage = data.name.currPage;
-			searchPageSize = data.name.pageSize;
+			const body = (res as StandardResponseDto<SearchCohortsResult>).body;
+
+			searchResult = body ?? {
+				idMatch: null,
+				name: { items: [], currPage: searchPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
+			};
+
+			searchPage = searchResult.name.currPage;
+			searchPageSize = searchResult.name.pageSize;
 
 			searchedOnce = true;
 		} catch (e) {
 			if (my !== reqSeq) return;
+
 			error = e instanceof Error ? e.message : 'Failed to search cohorts.';
 			resetSearchResult();
 			searchedOnce = true;
@@ -285,8 +308,8 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8] loading-line">
-							Loading<span class="dot">.</span><span class="dot d2">.</span><span class="dot d3">.</span>
+						<div class="text-sm text-[#a8a8a8]">
+							<LoadingDots />
 						</div>
 					{:else if !allLoadedOnce}
 						<div class="text-sm text-[#a8a8a8]">Click Load to fetch cohorts.</div>
@@ -297,17 +320,19 @@
 							<table class="w-full text-sm border-collapse">
 								<thead>
 									<tr class="text-left text-[#e7e7e7]">
+										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Cohort ID</th>
 										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Name</th>
 										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Active</th>
-										<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by</th>
+										<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by user</th>
 									</tr>
 								</thead>
 								<tbody>
 									{#each allResult.items as c (c.cohortId)}
 										<tr class="text-[#cccccc]">
+											<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{c.cohortId}</td>
 											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.name}</td>
 											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.isActive ? 'yes' : 'no'}</td>
-											<td class="py-2 pr-0 border-b border-[#2a2a2a]">{c.createdByUserId}</td>
+											<td class="py-2 pr-0 border-b border-[#2a2a2a] font-mono text-xs">{c.createdByUserId}</td>
 										</tr>
 									{/each}
 								</tbody>
@@ -343,7 +368,7 @@
 							id="cohorts_search_query"
 							bind:value={searchQuery}
 							class="w-full bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
-							placeholder="Cohort name or cohortId (GUID)"
+							placeholder="Type part of cohort name (GUID also supported)"
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									searchPage = 1;
@@ -396,17 +421,18 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8] loading-line">
-							Loading<span class="dot">.</span><span class="dot d2">.</span><span class="dot d3">.</span>
+						<div class="text-sm text-[#a8a8a8]">
+							<LoadingDots />
 						</div>
 					{:else if searchedOnce}
 						{#if searchResult.idMatch}
 							<div class="border border-[#3c3c3c] rounded bg-[#1f1f1f] px-4 py-3">
 								<div class="text-xs text-[#a8a8a8] uppercase tracking-wider">ID match</div>
 								<div class="mt-2 flex flex-col gap-1">
+									<div class="text-xs text-[#a8a8a8] font-mono">{searchResult.idMatch.cohortId}</div>
 									<div class="text-sm text-[#e7e7e7]">{searchResult.idMatch.name}</div>
 									<div class="text-xs text-[#a8a8a8]">Active: {searchResult.idMatch.isActive ? 'yes' : 'no'}</div>
-									<div class="text-xs text-[#a8a8a8]">Created by: {searchResult.idMatch.createdByUserId}</div>
+									<div class="text-xs text-[#a8a8a8] font-mono">Created by user: {searchResult.idMatch.createdByUserId}</div>
 								</div>
 							</div>
 						{/if}
@@ -425,17 +451,19 @@
 										<table class="w-full text-sm border-collapse">
 											<thead>
 												<tr class="text-left text-[#e7e7e7]">
+													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Cohort ID</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Name</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Active</th>
-													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by</th>
+													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by user</th>
 												</tr>
 											</thead>
 											<tbody>
 												{#each searchResult.name.items as c (c.cohortId)}
 													<tr class="text-[#cccccc]">
+														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{c.cohortId}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.name}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.isActive ? 'yes' : 'no'}</td>
-														<td class="py-2 pr-0 border-b border-[#2a2a2a]">{c.createdByUserId}</td>
+														<td class="py-2 pr-0 border-b border-[#2a2a2a] font-mono text-xs">{c.createdByUserId}</td>
 													</tr>
 												{/each}
 											</tbody>
@@ -449,44 +477,10 @@
 							<div class="text-sm text-[#a8a8a8]">No results.</div>
 						{/if}
 					{:else}
-						<div class="text-sm text-[#a8a8a8]">Enter a query and click Search.</div>
+						<div class="text-sm text-[#a8a8a8]">Type a query (e.g. “abc”) and click Search.</div>
 					{/if}
 				</div>
 			</div>
 		{/if}
 	</div>
 </main>
-
-<style>
-	.loading-line {
-		display: inline-flex;
-		align-items: baseline;
-		gap: 0;
-	}
-
-	.dot {
-		display: inline-block;
-		width: 0.35em;
-		animation: dotblink 1.2s infinite ease-in-out;
-	}
-
-	.d2 {
-		animation-delay: 0.15s;
-	}
-
-	.d3 {
-		animation-delay: 0.3s;
-	}
-
-	@keyframes dotblink {
-		0% {
-			opacity: 0.15;
-		}
-		20% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0.15;
-		}
-	}
-</style>

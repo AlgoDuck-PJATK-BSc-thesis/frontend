@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { FetchJsonFromApi } from '$lib/api/apiCall';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
 
 	type PageData<T> = {
 		items: T[];
@@ -103,19 +104,33 @@
 		params.set('pageSize', String(allPageSize));
 
 		try {
-			const data = await FetchJsonFromApi<PageData<UserRow>>(
+			const res = await FetchFromApi<PageData<UserRow>>(
 				'admin/users',
 				{ method: 'GET' },
 				fetchWithTimeout,
 				params
 			);
+
 			if (my !== reqSeq) return;
-			allResult = data;
-			allPage = data.currPage;
-			allPageSize = data.pageSize;
+
+			const body = (res as StandardResponseDto<PageData<UserRow>>).body;
+
+			allResult = body ?? {
+				items: [],
+				currPage: allPage,
+				pageSize: allPageSize,
+				totalItems: 0,
+				prevCursor: null,
+				nextCursor: null
+			};
+
+			allPage = allResult.currPage;
+			allPageSize = allResult.pageSize;
+
 			allLoadedOnce = true;
 		} catch (e) {
 			if (my !== reqSeq) return;
+
 			error = e instanceof Error ? e.message : 'Failed to load users.';
 			allLoadedOnce = true;
 			allResult = {
@@ -147,24 +162,31 @@
 		params.set('emailPageSize', String(searchPageSize));
 
 		try {
-			const data = await FetchJsonFromApi<SearchUsersResult>(
+			const res = await FetchFromApi<SearchUsersResult>(
 				'admin/users/search',
 				{ method: 'GET' },
 				fetchWithTimeout,
 				params
 			);
+
 			if (my !== reqSeq) return;
 
-			searchResult = data;
+			const body = (res as StandardResponseDto<SearchUsersResult>).body;
 
-			usernamePage = data.username.currPage;
-			emailPage = data.email.currPage;
+			searchResult = body ?? {
+				idMatch: null,
+				username: { items: [], currPage: usernamePage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null },
+				email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
+			};
 
-			searchPageSize = data.username.pageSize;
+			usernamePage = searchResult.username.currPage;
+			emailPage = searchResult.email.currPage;
+			searchPageSize = searchResult.username.pageSize;
 
 			searchedOnce = true;
 		} catch (e) {
 			if (my !== reqSeq) return;
+
 			error = e instanceof Error ? e.message : 'Failed to search users.';
 			resetSearchResult();
 			searchedOnce = true;
@@ -318,8 +340,8 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8] loading-line">
-							Loading<span class="dot">.</span><span class="dot d2">.</span><span class="dot d3">.</span>
+						<div class="text-sm text-[#a8a8a8]">
+							<LoadingDots />
 						</div>
 					{:else if !allLoadedOnce}
 						<div class="text-sm text-[#a8a8a8]">Click Load to fetch users.</div>
@@ -330,6 +352,7 @@
 							<table class="w-full text-sm border-collapse">
 								<thead>
 									<tr class="text-left text-[#e7e7e7]">
+										<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
 										<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
 										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
 										<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
@@ -338,6 +361,7 @@
 								<tbody>
 									{#each allResult.items as u (u.userId)}
 										<tr class="text-[#cccccc]">
+											<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
 											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
 											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
 											<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
@@ -381,7 +405,7 @@
 							id="users_search_query"
 							bind:value={searchQuery}
 							class="w-full bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
-							placeholder="Username, email, or userId (GUID)"
+							placeholder="Type part of username/email (GUID also supported)"
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									usernamePage = 1;
@@ -412,14 +436,15 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8] loading-line">
-							Loading<span class="dot">.</span><span class="dot d2">.</span><span class="dot d3">.</span>
+						<div class="text-sm text-[#a8a8a8]">
+							<LoadingDots />
 						</div>
 					{:else if searchedOnce}
 						{#if searchResult.idMatch}
 							<div class="border border-[#3c3c3c] rounded bg-[#1f1f1f] px-4 py-3">
 								<div class="text-xs text-[#a8a8a8] uppercase tracking-wider">ID match</div>
 								<div class="mt-2 flex flex-col gap-1">
+									<div class="text-xs text-[#a8a8a8] font-mono">{searchResult.idMatch.userId}</div>
 									<div class="text-sm text-[#e7e7e7]">{searchResult.idMatch.username}</div>
 									<div class="text-xs text-[#a8a8a8]">{searchResult.idMatch.email}</div>
 									<div class="text-xs text-[#a8a8a8]">{searchResult.idMatch.roles.join(', ')}</div>
@@ -460,6 +485,7 @@
 										<table class="w-full text-sm border-collapse">
 											<thead>
 												<tr class="text-left text-[#e7e7e7]">
+													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
 													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
@@ -468,6 +494,7 @@
 											<tbody>
 												{#each searchResult.username.items as u (u.userId)}
 													<tr class="text-[#cccccc]">
+														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
 														<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
@@ -513,6 +540,7 @@
 										<table class="w-full text-sm border-collapse">
 											<thead>
 												<tr class="text-left text-[#e7e7e7]">
+													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
 													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
 													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
@@ -521,6 +549,7 @@
 											<tbody>
 												{#each searchResult.email.items as u (u.userId)}
 													<tr class="text-[#cccccc]">
+														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
 														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
 														<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
@@ -537,44 +566,10 @@
 							<div class="text-sm text-[#a8a8a8]">No results.</div>
 						{/if}
 					{:else}
-						<div class="text-sm text-[#a8a8a8]">Enter a query and click Search.</div>
+						<div class="text-sm text-[#a8a8a8]">Type a query (e.g. “abc”) and click Search.</div>
 					{/if}
 				</div>
 			</div>
 		{/if}
 	</div>
 </main>
-
-<style>
-	.loading-line {
-		display: inline-flex;
-		align-items: baseline;
-		gap: 0;
-	}
-
-	.dot {
-		display: inline-block;
-		width: 0.35em;
-		animation: dotblink 1.2s infinite ease-in-out;
-	}
-
-	.d2 {
-		animation-delay: 0.15s;
-	}
-
-	.d3 {
-		animation-delay: 0.3s;
-	}
-
-	@keyframes dotblink {
-		0% {
-			opacity: 0.15;
-		}
-		20% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0.15;
-		}
-	}
-</style>

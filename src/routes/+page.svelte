@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 	import HeaderGuest from '$lib/Components/Headers/HeaderGuest.svelte';
 </script>
 
