@@ -10,7 +10,6 @@
 	import TestCaseFileTreeRoot from './HelperComponents/TestCaseFileTreeRoot.svelte';
 	
 	let { options = $bindable() }: { options: TestCaseComponentArgs } = $props();
-
 	let publicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => tc.isPublic));
 	let nonPublicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => !tc.isPublic));
 

@@ -17,7 +17,7 @@ export const isTerminalStatus = (status: IntermediateStatus | TerminalStatus | u
 
 export type SubmissionResult = {
     stdOutput: string, 
-    stdErr: string,
+    stdError: string,
     executionTime: number,
     testResults: TestResult[]
     status: IntermediateStatus | TerminalStatus

@@ -1,17 +1,25 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import { userThemePreference } from "$lib/stores/theme.svelte";
-	import { fly } from "svelte/transition";
-	import DuckSelectionTile from "./DuckSelectionTile.svelte";
-	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
-	import type { Coords, duckPositionalData, OwnedDuck, OwnedPlantDto, UsedDuckDto, UsedPlantDto } from "./duckTypes";
-	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
-	import { createInfiniteQuery } from "@tanstack/svelte-query";
-	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
+	import { onMount, tick } from 'svelte';
+	import { userThemePreference } from '$lib/stores/theme.svelte';
+	import { fly } from 'svelte/transition';
+	import DuckSelectionTile from './DuckSelectionTile.svelte';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import type {
+		Coords,
+		duckPositionalData,
+		OwnedDuck,
+		OwnedPlantDto,
+		UsedDuckDto,
+		UsedPlantDto
+	} from './duckTypes';
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
+	import { createInfiniteQuery, useQueryClient } from '@tanstack/svelte-query';
+	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 
-	let { userItems }: { userItems: { ducks: UsedDuckDto[], plants: UsedPlantDto[] } } = $props();
+	let { userItems }: { userItems: { ducks: UsedDuckDto[]; plants: UsedPlantDto[] } } = $props();
 
-	
+	const queryClient = useQueryClient();
+
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let workCanvas: HTMLCanvasElement | null = $state(null);
 	
@@ -20,10 +28,10 @@
 	
 	let imageIsLoaded: boolean = $state(false);
 	let workCanvasPixelData: ImageData | null = null;
-	
-	const duckWidth: number = 100;
-	const duckHeight: number = 54
-	
+
+	const duckHeight: number = 100;
+	const duckWidth: number = duckHeight * 1.07;
+
 	let PondSelectedDucks: UsedDuckDto[] = $state(userItems.ducks);
 	let placedPlants: UsedPlantDto[] = $state(userItems.plants);
 	$inspect(placedPlants);
@@ -33,7 +41,7 @@
 
 	const idleGifPath: string = '/Idle.gif';
 	const swimmingGifPath: string = '/Swimming.gif';
-	
+
 	const directionVectors: Array<{ x: number; y: number }> = [
 		{ x: 0, y: -1 },
 		{ x: 0.5, y: -0.5 },
@@ -46,8 +54,8 @@
 	];
 
 	const numDirections: number = directionVectors.length;
-	
-	const stepDistance: number = 120; 
+
+	const stepDistance: number = 120;
 	const moveDuration: number = 182;
 	const forwardBiasStrength: number = 0.3;
 
@@ -59,9 +67,10 @@
 	let prevWidth: number = 0;
 	let prevHeight: number = 0;
 
-	let pondPath: string = $derived(`/src/lib/images/ponds/Homepage_${userThemePreference.theme}.png`);
+	let pondPath: string = $derived(
+		`/src/lib/images/ponds/Homepage_${userThemePreference.theme}.png`
+	);
 	let workPondPath: string = $derived(`/src/lib/images/ponds/BlacknWhite.png`);
-
 
 	let isGridVisible: boolean = $state(false);
 	let isSelectionMenuVisible: boolean = $state(false);
@@ -69,45 +78,55 @@
 	/* TODO: rank */
 	let isDucksTabShown: boolean = $state(true);
 	let isPlantsTabShown: boolean = $state(true);
-	
+
 	const gridColumns: number = 24;
 	const gridRows: number = 11;
 
 	const gridElements: number = gridColumns * gridRows;
 
-	let isPointOnGridOccupied: boolean[] | undefined = $state()
+	let isPointOnGridOccupied: boolean[] | undefined = $state();
 
-	let mainElemBoundingRect: number | undefined = $state();
 	let mainElem: HTMLElement;
 
 	const duckQuery = createInfiniteQuery({
-        queryKey: [ "OwnedDucks" ],
-        initialPageParam: 1,
-        queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
-            return await FetchFromApi<CustomPageData<OwnedDuck>>("OwnedDucks", { 
-                method: "GET" 
-            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12" }));  
-        },
-        getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<OwnedDuck>>) => firstPage.body.prevCursor ?? undefined,
-        getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<OwnedDuck>>) => lastPage.body.nextCursor ?? undefined,
-        select: (data: any) => data.pages.map((p: any) => p.body.items).flat()
-    });
+		queryKey: ['OwnedDucks'],
+		initialPageParam: 1,
+		queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
+			return await FetchFromApi<CustomPageData<OwnedDuck>>(
+				'OwnedDucks',
+				{
+					method: 'GET'
+				},
+				fetch,
+				new URLSearchParams({ page: `${pageParam}`, pageSize: '12' })
+			);
+		},
+		getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<OwnedDuck>>) =>
+			firstPage.body.prevCursor ?? undefined,
+		getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<OwnedDuck>>) =>
+			lastPage.body.nextCursor ?? undefined,
+		select: (data: any) => data.pages.map((p: any) => p.body.items).flat()
+	});
 
-    const plantQuery = createInfiniteQuery({
-        queryKey: [ "OwnedPlants" ],
-        initialPageParam: 1,
-        queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
-            return await FetchFromApi<CustomPageData<OwnedPlantDto>>("OwnedPlants", { 
-                method: "GET" 
-            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12" }));  
-        },
-        getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<OwnedPlantDto>>) => firstPage.body.prevCursor ?? undefined,
-        getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<OwnedPlantDto>>) => lastPage.body.nextCursor ?? undefined,
-        select: (data: any) => data.pages.map((p: any) => p.body.items).flat()
-    });	
-
-	// $inspect($duckQuery.data);
-
+	const plantQuery = createInfiniteQuery({
+		queryKey: ['OwnedPlants'],
+		initialPageParam: 1,
+		queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
+			return await FetchFromApi<CustomPageData<OwnedPlantDto>>(
+				'OwnedPlants',
+				{
+					method: 'GET'
+				},
+				fetch,
+				new URLSearchParams({ page: `${pageParam}`, pageSize: '12' })
+			);
+		},
+		getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<OwnedPlantDto>>) =>
+			firstPage.body.prevCursor ?? undefined,
+		getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<OwnedPlantDto>>) =>
+			lastPage.body.nextCursor ?? undefined,
+		select: (data: any) => data.pages.map((p: any) => p.body.items).flat()
+	});
 
 	$effect(() => {
 		pondPath = pondPath;
@@ -115,7 +134,10 @@
 		loadPond();
 	});
 
-	const getRelativeCoordinates = (e: MouseEvent, element: HTMLElement): { x: number, y: number } => {
+	const getRelativeCoordinates = (
+		e: MouseEvent,
+		element: HTMLElement
+	): { x: number; y: number } => {
 		const rect: DOMRect = element.getBoundingClientRect();
 		return {
 			x: e.clientX - rect.left,
@@ -195,10 +217,10 @@
 		const finishResize = () => {
 			for (let i = 0; i < duckPositionalDataArr.length; i++) {
 				const duck = duckPositionalDataArr[i];
-				
+
 				duck.x *= scaleX;
 				duck.y *= scaleY;
-				
+
 				duck.startX *= scaleX;
 				duck.startY *= scaleY;
 				duck.targetX *= scaleX;
@@ -207,7 +229,7 @@
 				if (!isPositionValid(duck.x, duck.y)) {
 					const centerX = newWidth / 2 - duckWidth / 2;
 					const centerY = newHeight / 2 - duckHeight / 2;
-					
+
 					for (let t = 0; t <= 1; t += 0.1) {
 						const testX = duck.x + (centerX - duck.x) * t;
 						const testY = duck.y + (centerY - duck.y) * t;
@@ -252,7 +274,12 @@
 		const roundedCol = Math.floor(col);
 		const roundedRow = Math.floor(row);
 
-		if (roundedCol <= 0 || roundedRow <= 0 || roundedCol >= workCanvas!.width - 1 || roundedRow >= workCanvas!.height - 1)
+		if (
+			roundedCol <= 0 ||
+			roundedRow <= 0 ||
+			roundedCol >= workCanvas!.width - 1 ||
+			roundedRow >= workCanvas!.height - 1
+		)
 			return null;
 
 		const width = workCanvas!.width;
@@ -264,29 +291,40 @@
 	const isPositionValid = (x: number, y: number): boolean => {
 		if (!duckWidth || !duckHeight || !clientWidth || !clientHeight) return false;
 
-		const centerX = x + Math.floor(duckWidth / 2);
-		const centerY = y + Math.floor(duckHeight / 2);
+		const checkPoints = [
+			{ x: x, y: y },
+			{ x: x + duckWidth, y: y },
+			{ x: x, y: y + duckHeight },
+			{ x: x + duckWidth, y: y + duckHeight },
+			{ x: x + duckWidth / 2, y: y + duckHeight / 2 }
+		];
 
-		if (centerX < 0 || centerY < 0 || centerX >= clientWidth || centerY >= clientHeight) {
-			return false;
+		for (const point of checkPoints) {
+			if (point.x < 0 || point.y < 0 || point.x >= clientWidth || point.y >= clientHeight) {
+				return false;
+			}
+
+			const pixel = samplePixel(point.x, point.y);
+			if (!pixel) return false;
+
+			if (pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0 && pixel[3] === 255) {
+				return false;
+			}
 		}
 
-		const pixel = samplePixel(centerX, centerY);
-		if (!pixel) return false;
-
-		return !(pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0 && pixel[3] == 255);
+		return true;
 	};
 
 	const wouldCollideWithDucks = (x: number, y: number, excludeDuckIndex: number): boolean => {
 		const centerX = x + duckWidth / 2;
 		const centerY = y + duckHeight / 2;
-		
+
 		for (let i = 0; i < duckPositionalDataArr.length; i++) {
 			if (i === excludeDuckIndex) continue;
-			
+
 			const otherDuck = duckPositionalDataArr[i];
 			let otherX: number, otherY: number;
-			
+
 			if (otherDuck.isMoving) {
 				const easedProgress = easeOutQuad(Math.min(otherDuck.moveProgress, 1));
 				otherX = otherDuck.startX + (otherDuck.targetX - otherDuck.startX) * easedProgress;
@@ -295,19 +333,19 @@
 				otherX = otherDuck.x;
 				otherY = otherDuck.y;
 			}
-			
+
 			const otherCenterX = otherX + duckWidth / 2;
 			const otherCenterY = otherY + duckHeight / 2;
-			
+
 			const dx = centerX - otherCenterX;
 			const dy = centerY - otherCenterY;
 			const distance = Math.sqrt(dx * dx + dy * dy);
-			
+
 			if (distance < minDuckDistance) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	};
 
@@ -321,38 +359,15 @@
 		return 1 - (1 - t) * (1 - t);
 	};
 
-	const getMaxSafeDistance = (startX: number, startY: number, dirIndex: number, maxDist: number = stepDistance * 3): number => {
+	const getMaxSafeDistanceForDuck = (
+		startX: number,
+		startY: number,
+		dirIndex: number,
+		duckIndex: number,
+		maxDist: number = stepDistance * 3
+	): number => {
 		const dir = directionVectors[dirIndex];
-		
-		const endX = startX + dir.x * maxDist;
-		const endY = startY + dir.y * maxDist;
 
-		if (isPositionValid(endX, endY)) {
-			return maxDist;
-		}
-
-		let minSafe = 0;
-		let maxUnsafe = maxDist;
-		const precision = 2;
-
-		while (maxUnsafe - minSafe > precision) {
-			const mid = (minSafe + maxUnsafe) / 2;
-			const testX = startX + dir.x * mid;
-			const testY = startY + dir.y * mid;
-
-			if (isPositionValid(testX, testY)) {
-				minSafe = mid;
-			} else {
-				maxUnsafe = mid;
-			}
-		}
-
-		return minSafe;
-	};
-
-	const getMaxSafeDistanceForDuck = (startX: number, startY: number, dirIndex: number, duckIndex: number, maxDist: number = stepDistance * 3): number => {
-		const dir = directionVectors[dirIndex];
-		
 		const endX = startX + dir.x * maxDist;
 		const endY = startY + dir.y * maxDist;
 
@@ -379,34 +394,30 @@
 		return minSafe;
 	};
 
-	const clipMovement = (startX: number, startY: number, dirIndex: number, targetDistance: number): number => {
+	const clipMovementForDuck = (
+		startX: number,
+		startY: number,
+		dirIndex: number,
+		targetDistance: number,
+		duckIndex: number
+	): number => {
 		const dir = directionVectors[dirIndex];
-		
+
 		const endX = startX + dir.x * targetDistance;
 		const endY = startY + dir.y * targetDistance;
-		
-		if (isPositionValid(endX, endY)) {
-			return targetDistance;
-		}
 
-		const safeDistance = getMaxSafeDistance(startX, startY, dirIndex, targetDistance);
-		
-		const buffer = 5;
-		return Math.max(0, safeDistance - buffer);
-	};
-
-	const clipMovementForDuck = (startX: number, startY: number, dirIndex: number, targetDistance: number, duckIndex: number): number => {
-		const dir = directionVectors[dirIndex];
-		
-		const endX = startX + dir.x * targetDistance;
-		const endY = startY + dir.y * targetDistance;
-		
 		if (isPositionValidForDuck(endX, endY, duckIndex)) {
 			return targetDistance;
 		}
 
-		const safeDistance = getMaxSafeDistanceForDuck(startX, startY, dirIndex, duckIndex, targetDistance);
-		
+		const safeDistance = getMaxSafeDistanceForDuck(
+			startX,
+			startY,
+			dirIndex,
+			duckIndex,
+			targetDistance
+		);
+
 		const buffer = 5;
 		return Math.max(0, safeDistance - buffer);
 	};
@@ -442,10 +453,7 @@
 			const safeDistance = clipMovementForDuck(duck.x, duck.y, i, stepDistance, duckIndex);
 			safeDistances.push(safeDistance);
 
-			const dirDiff = Math.min(
-				Math.abs(i - currentDir),
-				numDirections - Math.abs(i - currentDir)
-			);
+			const dirDiff = Math.min(Math.abs(i - currentDir), numDirections - Math.abs(i - currentDir));
 			const forwardBias = 1 + forwardBiasStrength * (numDirections / 2 - dirDiff);
 
 			const weight = safeDistance > 5 ? safeDistance * forwardBias : 0;
@@ -479,26 +487,26 @@
 
 	const spawnDuck = async (duck: UsedDuckDto, duckIndex: number) => {
 		if (!clientHeight || !clientWidth || !duckWidth || !duckHeight) return;
-		const centerX: number = clientWidth / 2 - duckWidth / 2; 
-		const centerY: number = clientHeight / 2 - duckHeight / 2; 
+		const centerX: number = clientWidth / 2 - duckWidth / 2;
+		const centerY: number = clientHeight / 2 - duckHeight / 2;
 		let duckSpawnX: number;
 		let duckSpawnY: number;
 		let attempts = 0;
 		const maxAttempts = 50;
 
 		do {
-			const angle = (duckIndex / PondSelectedDucks.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+			const angle =
+				(duckIndex / PondSelectedDucks.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
 			const radius = minDuckDistance * 0.6 * (1 + duckIndex * 0.5) + Math.random() * 20;
-			
+
 			duckSpawnX = centerX + Math.cos(angle) * radius;
 			duckSpawnY = centerY + Math.sin(angle) * radius;
-			
+
 			attempts++;
-			
+
 			if (attempts >= maxAttempts) break;
-			
 		} while (
-			!isPositionValid(duckSpawnX, duckSpawnY) || 
+			!isPositionValid(duckSpawnX, duckSpawnY) ||
 			wouldCollideWithDucks(duckSpawnX, duckSpawnY, duckIndex)
 		);
 
@@ -520,12 +528,12 @@
 
 		duckElements[duckIndex].style.left = `${duckSpawnX}px`;
 		duckElements[duckIndex].style.top = `${duckSpawnY}px`;
-	}
+	};
 
 	const loadDucks = async (): Promise<void> => {
 		PondSelectedDucks.forEach((d, i) => {
 			spawnDuck(d, i);
-		})		
+		});
 		raf = requestAnimationFrame(animateDucks);
 	};
 
@@ -584,15 +592,18 @@
 	onMount(() => {
 		ctx = canvas!.getContext('2d');
 		workCtx = workCanvas!.getContext('2d', { willReadFrequently: true });
-		
+
 		prevWidth = canvas?.parentElement?.clientWidth ?? canvas?.clientWidth ?? 406;
 		prevHeight = canvas?.parentElement?.clientHeight ?? canvas?.clientHeight ?? 210;
-		
+
 		loadPond();
-		setTimeout(loadDucks, 10);
+		setTimeout(async () => {
+			await tick();
+			loadDucks();
+		});
 
 		window.addEventListener('resize', debouncedResize);
-		
+
 		if (window.visualViewport) {
 			window.visualViewport.addEventListener('resize', debouncedResize);
 		}
@@ -607,8 +618,8 @@
 		};
 	});
 
-	let clientHeight: number | undefined = $state()
-	let clientWidth: number | undefined = $state()
+	let clientHeight: number | undefined = $state();
+	let clientWidth: number | undefined = $state();
 
 	$effect(() => {
 		if (clientWidth !== undefined && clientHeight !== undefined) {
@@ -616,8 +627,7 @@
 		}
 	});
 
-
-	const highlightCell = (coords: {x: number, y: number}[]) => {
+	const highlightCell = (coords: { x: number; y: number }[]) => {
 		if (!gridCanvas || !mainElem) return;
 		drawGrid(gridCanvas);
 		const ctx = gridCanvas.getContext('2d');
@@ -629,18 +639,18 @@
 
 		const cellWidth = visualWidth / gridColumns;
 		const cellHeight = visualHeight / gridRows;
-		
-		coords.forEach(c => {
+
+		coords.forEach((c) => {
 			const linearizedGridIndex: number = c.y * gridColumns + c.x;
-	
-			if (!!isPointOnGridOccupied?.at(linearizedGridIndex)){
+
+			if (!!isPointOnGridOccupied?.at(linearizedGridIndex)) {
 				ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
 			} else {
 				ctx.fillStyle = 'rgba(68, 239, 68, 0.5)';
 			}
-	
+
 			ctx.fillRect(c.x * cellWidth, c.y * cellHeight, cellWidth, cellHeight);
-		})
+		});
 	};
 
 	let gridCanvas: HTMLCanvasElement | undefined = $state();
@@ -648,37 +658,53 @@
 	const InitializeGridData = (): void => {
 		if (!workCtx || !clientWidth || !clientHeight) return;
 		if (isPointOnGridOccupied) return;
-		
+
 		isPointOnGridOccupied = Array(gridElements).fill(false);
-		
+
 		const cellWidth = clientWidth / gridColumns;
 		const cellHeight = clientHeight / gridRows;
-		
+
 		for (let row = 0; row < gridRows; ++row) {
 			for (let col = 0; col < gridColumns; ++col) {
-				const cellImageData: ImageData = workCtx.getImageData(Math.floor(cellWidth * col), Math.floor(cellHeight * row), Math.floor(cellWidth), Math.floor(cellHeight));
-				
+				const cellImageData: ImageData = workCtx.getImageData(
+					Math.floor(cellWidth * col),
+					Math.floor(cellHeight * row),
+					Math.floor(cellWidth),
+					Math.floor(cellHeight)
+				);
+
 				let blackPixelCount = 0;
 				const pixelsInCell = cellImageData.data.length / 4;
-				
+
 				for (let i = 0; i < cellImageData.data.length; i += 4) {
 					const r = cellImageData.data[i];
 					const g = cellImageData.data[i + 1];
 					const b = cellImageData.data[i + 2];
-					
+
 					if (r < 30 && g < 30 && b < 30) {
 						blackPixelCount++;
 					}
 				}
-				
+
 				const landRatio = blackPixelCount / pixelsInCell;
 				const gridIndex = row * gridColumns + col;
-				
+
 				const isMostlyLand = landRatio > 0.8;
-				
+
 				isPointOnGridOccupied[gridIndex] = !isMostlyLand;
 			}
 		}
+		placedPlants.forEach((plant) => {
+			if (!isPointOnGridOccupied) return;
+			for (let row = plant.gridY; row < plant.gridY + plant.height; ++row) {
+				for (let col = plant.gridX; col < plant.gridX + plant.width; ++col) {
+					if (row >= 0 && row < gridRows && col >= 0 && col < gridColumns) {
+						const gridIndex = row * gridColumns + col;
+						isPointOnGridOccupied[gridIndex] = true;
+					}
+				}
+			}
+		});
 	};
 
 	const drawGrid = (node: HTMLCanvasElement) => {
@@ -691,17 +717,17 @@
 
 		node.width = visualWidth;
 		node.height = visualHeight;
-		
+
 		const ctx = node.getContext('2d');
 		if (!ctx) return;
-		
+
 		ctx.clearRect(0, 0, visualWidth, visualHeight);
 		ctx.strokeStyle = 'rgba(55, 65, 81, 0.5)';
-		ctx.lineWidth = 1; 
-		
+		ctx.lineWidth = 1;
+
 		const cellWidth = visualWidth / gridColumns;
 		const cellHeight = visualHeight / gridRows;
-		
+
 		for (let i = 0; i <= gridColumns; i++) {
 			const x = Math.floor(i * cellWidth) + 0.5;
 			ctx.beginPath();
@@ -709,7 +735,7 @@
 			ctx.lineTo(x, visualHeight);
 			ctx.stroke();
 		}
-		
+
 		for (let i = 0; i <= gridRows; i++) {
 			const y = Math.floor(i * cellHeight) + 0.5;
 			ctx.beginPath();
@@ -717,265 +743,308 @@
 			ctx.lineTo(visualWidth, y);
 			ctx.stroke();
 		}
-	}
+	};
 
 	const getSubgridForPlant = (mouseCoords: Coords, plant: OwnedPlantDto): Coords[] => {
-		const leftCells: number = Math.floor((plant.width - 1) / 2)
-		const topCells: number = Math.floor((plant.height - 1) / 2)
-		
+		const leftCells: number = Math.floor((plant.width - 1) / 2);
+		const topCells: number = Math.floor((plant.height - 1) / 2);
+
 		let gridPaintStartX: number = mouseCoords.x - leftCells;
 		let gridPaintStartY: number = mouseCoords.y - topCells;
 
 		const gridPaintEndX = gridPaintStartX + plant.width;
 		const gridPaintEndY = gridPaintStartY + plant.height;
 
-		if (gridPaintEndX >= gridColumns){
-			const diff: number = gridPaintEndX - gridColumns; 
+		if (gridPaintEndX >= gridColumns) {
+			const diff: number = gridPaintEndX - gridColumns;
 			gridPaintStartX -= diff;
 		}
 
-		if (gridPaintEndY >= gridRows){
-			const diff: number = gridPaintEndY - gridRows; 
+		if (gridPaintEndY >= gridRows) {
+			const diff: number = gridPaintEndY - gridRows;
 			gridPaintStartY -= diff;
 		}
 
 		let coords: Coords[] = [];
-		for (let row = Math.max(0, gridPaintStartY); row < gridPaintEndY; ++row){
-			for (let col = Math.max(0, gridPaintStartX); col < gridPaintEndX; ++col){
-				coords.push({x: col, y: row});
+		for (let row = Math.max(0, gridPaintStartY); row < gridPaintEndY; ++row) {
+			for (let col = Math.max(0, gridPaintStartX); col < gridPaintEndX; ++col) {
+				coords.push({ x: col, y: row });
 			}
 		}
 
 		return coords;
-	}
-
+	};
 </script>
 
-
-<main bind:this={mainElem} bind:clientHeight bind:clientWidth class="relative w-full h-full">
-
+<main bind:this={mainElem} bind:clientHeight bind:clientWidth class="relative h-full w-full">
 	{#each placedPlants as placedPlant}
-		{console.log(placedPlant.itemId)}
-		<img 
-			class="absolute z-200" 
+		<div class="absolute z-200 flex flex-col justify-center items-center"
 			style="width: {placedPlant.width * (clientWidth / gridColumns)}px; 
 				height: {placedPlant.height * (clientHeight / gridRows)}px; 
 				left: {placedPlant.gridX * (clientWidth / gridColumns)}px; 
-				top: {placedPlant.gridY * (clientHeight / gridRows)}px;"
-			src="/src/lib/images/store/plant.png"
-			alt="plant">
+				top: {placedPlant.gridY * (clientHeight / gridRows)}px;">
+			<img src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${placedPlant.itemId}.png`} alt="plant" srcset="">
+		</div>
 	{/each}
 
 	{#if isGridVisible}
 		<canvas bind:this={gridCanvas} class="absolute z-901" use:drawGrid></canvas>
 	{/if}
-	
+
 	{#if isSelectionMenuVisible}
 		{@render SelectionMenu(userItems.ducks, userItems.plants)}
 	{:else}
-		<button onclick={() => { isSelectionMenuVisible = true }} class="w-12 h-40 fixed left-0 top-[calc(50%-20em)] z-999 bg-red-500">
+		<button
+			onclick={() => {
+				isSelectionMenuVisible = true;
+			}}
+			class="fixed top-[calc(50%-20em)] left-0 z-999 h-40 w-12 bg-red-500"
+		>
 			huh
 		</button>
 	{/if}
 
-	<canvas class="absolute z-10" bind:this={canvas} style="width: {clientWidth}px; height: {clientHeight}px;"></canvas>
+	<canvas
+		class="absolute z-10"
+		bind:this={canvas}
+		style="width: {clientWidth}px; height: {clientHeight}px;"
+	></canvas>
 	<canvas class="absolute z-0 hidden" bind:this={workCanvas}></canvas>
 	{#each PondSelectedDucks as duck, i}
-		<img 
+		<img
 			src={idleGifPath}
 			alt="duck"
-			class="absolute z-20 rounded-100 overflow-hidden"
-			style="height: {duckWidth}px;"
+			class="rounded-100 absolute z-20 overflow-hidden"
+			style="height: {duckHeight}px;"
 			bind:this={duckElements[i]}
 		/>
 	{/each}
 </main>
 
 {#snippet DuckTab()}
-	<div class="flex flex-col h-full">
-		<div class="w-full h-12 px-3 flex-shrink-0">
-			<h4 class="text-lg font-semibold border-b-2 border-b-black py-2">Owned ducks</h4>
+	<div class="flex h-full flex-col">
+		<div class="h-12 w-full flex-shrink-0 px-3">
+			<h4 class="border-b-2 border-b-black py-2 text-lg font-semibold">Owned ducks</h4>
 		</div>
-		<div class="w-full flex-1 min-h-0 p-5 grid grid-cols-4 gap-3 overflow-y-auto">
-			{#each $duckQuery.data as duck}
-				<DuckSelectionTile options={{ 
-					duck: duck,
-					onclick: async () => {
+		<div class="grid min-h-0 w-full flex-1 grid-cols-4 gap-3 overflow-y-auto p-5">
+			{#each $duckQuery.data as duck, i}
+				<DuckSelectionTile
+					options={{
+						duck: duck,
+						onclick: async () => {
+							const endpoint = duck.isSelectedForPond ? 'DropItem' : 'SelectItem';
 
-					if (!duck.isSelectedForPond){
-						PondSelectedDucks.push(duck);
-						duck.isSelectedForPond = true;
+							await FetchFromApi(
+								endpoint,
+								{
+									method: 'PUT',
+									body: JSON.stringify({ itemId: duck.itemId })
+								},
+								fetch
+							);
 
-						let res = await FetchFromApi<{ itemId: string }>("SelectItem", {
-							method: "PUT",
-							body: JSON.stringify({
-								itemId: duck.itemId
-							})
-						}, fetch);
+							if (!duck.isSelectedForPond) {
+								let newLenght: number = PondSelectedDucks.push(duck);
+								spawnDuck(duck, newLenght - 1);
+							} else {
+								PondSelectedDucks = PondSelectedDucks.filter((d) => d.itemId !== duck.itemId);
+							}
+							console.log($duckQuery.data);
 
-						console.log(res.body);
-					}else{
-						PondSelectedDucks = PondSelectedDucks.filter(d => d.itemId !== duck.itemId);
-						duck.isSelectedForPond = false;
-
-						let res = await FetchFromApi<{ itemId: string }>("DropItem", {
-							method: "PUT",
-							body: JSON.stringify({
-								itemId: duck.itemId
-							})
-						}, fetch);
-
-						console.log(res.body);
-					}
-				}}}/>
+							queryClient.setQueryData(['OwnedDucks'], (oldData: any) => {
+								if (!oldData) return oldData;
+								return {
+									...oldData,
+									pages: oldData.pages.map((page: any) => ({
+										...page,
+										body: {
+											...page.body,
+											items: page.body.items.map((d: OwnedDuck) =>
+												d.itemId === duck.itemId
+													? { ...d, isSelectedForPond: duck.isSelectedForPond ? false : true }
+													: d
+											)
+										}
+									}))
+								};
+							});
+						}
+					}}
+				/>
 			{/each}
 		</div>
 	</div>
 
 {/snippet}
 
-
 {#snippet PlantTab()}
-	<div class="flex flex-col h-full">
-		<div class="w-full h-12 px-3 flex-shrink-0">
-			<h4 class="text-lg font-semibold border-b-2 border-b-black py-2">Owned plants</h4>
+	<div class="flex h-full flex-col">
+		<div class="h-12 w-full flex-shrink-0 px-3">
+			<h4 class="border-b-2 border-b-black py-2 text-lg font-semibold">Owned plants</h4>
 		</div>
-		<div class="w-full flex-1 min-h-0 p-5 grid grid-cols-4 gap-3 overflow-y-auto">
-		{#each $plantQuery.data as plant}
-			<div class="w-full flex items-center justify-center p-[15%] relative aspect-square rounded-[25%] bg-blue-500">
-				<button class="w-full h-full" {@attach node => {
-					let startingHeight: number;
-					let startingWidth: number;
+		<div class="grid min-h-0 w-full flex-1 grid-cols-4 gap-3 overflow-y-auto p-5">
+			{#each $plantQuery.data as plant}
+				<div
+					class="relative flex aspect-square w-full items-center justify-center rounded-[25%] bg-blue-500 p-[15%]"
+				>
+					<button
+						class="h-full w-full"
+						{@attach (node) => {
+							let startingHeight: number;
+							let startingWidth: number;
 
-					let startingX: number;
-					let startingY: number;
+							let startingX: number;
+							let startingY: number;
 
-					let gridElemIndexX: number;
-					let gridElemIndexY: number;
-			
-					const handleMouseMove = (e: MouseEvent) => {
-						if (!mainElem) return;
-						
-						const relCoords = getRelativeCoordinates(e, mainElem);
-						const mainRect = mainElem.getBoundingClientRect();
-						
-						const cellWidth = mainRect.width / gridColumns;
-						const cellHeight = mainRect.height / gridRows;
-						
-						gridElemIndexX = Math.floor(relCoords.x / cellWidth);
-						gridElemIndexY = Math.floor(relCoords.y / cellHeight);
-						
-						gridElemIndexX = Math.max(0, Math.min(gridColumns - 1, gridElemIndexX));
-						gridElemIndexY = Math.max(0, Math.min(gridRows - 1, gridElemIndexY));
+							let gridElemIndexX: number;
+							let gridElemIndexY: number;
 
-						highlightCell(getSubgridForPlant({ x: gridElemIndexX, y: gridElemIndexY }, plant));
+							const handleMouseMove = (e: MouseEvent) => {
+								if (!mainElem) return;
 
-						const dx: number = startingX - e.clientX;
-						const dy: number = startingY - e.clientY;
+								const relCoords = getRelativeCoordinates(e, mainElem);
+								const mainRect = mainElem.getBoundingClientRect();
 
-						node.style.transform = `translateX(${-dx}px) translateY(${-dy}px)`;
-					}
+								const cellWidth = mainRect.width / gridColumns;
+								const cellHeight = mainRect.height / gridRows;
 
-					const handleMouseUp = async () => {
-						node.style.transform = '';
-						node.style.position = '';
-						node.style.width = '';
-						node.style.height = '';
+								gridElemIndexX = Math.floor(relCoords.x / cellWidth);
+								gridElemIndexY = Math.floor(relCoords.y / cellHeight);
 
-						document.removeEventListener('mousemove', handleMouseMove);
-						document.removeEventListener('mouseup', handleMouseUp);
+								gridElemIndexX = Math.max(0, Math.min(gridColumns - 1, gridElemIndexX));
+								gridElemIndexY = Math.max(0, Math.min(gridRows - 1, gridElemIndexY));
 
-						isGridVisible = false;
-						isSelectionMenuVisible = true;
-						
-						const linearizedGridIndex: number = gridElemIndexY * gridColumns + gridElemIndexX;
+								highlightCell(getSubgridForPlant({ x: gridElemIndexX, y: gridElemIndexY }, plant));
 
-						if (!clientHeight || !clientWidth || !mainElem) return;
-						
-						let plantSubgrid: Coords[] = getSubgridForPlant({ x: gridElemIndexX, y: gridElemIndexY }, plant)
+								const dx: number = startingX - e.clientX;
+								const dy: number = startingY - e.clientY;
 
-						let illegalCells: Coords[] = plantSubgrid.filter(c => {
-							const linearizedGridIndex: number = c.y * gridColumns + c.x;
-							return isPointOnGridOccupied?.at(linearizedGridIndex);
-						})
+								node.style.transform = `translateX(${-dx}px) translateY(${-dy}px)`;
+							};
 
-						console.log(illegalCells);
+							const handleMouseUp = async () => {
+								node.style.transform = '';
+								node.style.position = '';
+								node.style.width = '';
+								node.style.height = '';
 
-						const rowWidth: number = clientWidth / gridColumns;
-						const rowHeight: number = clientHeight / gridRows;
-						
-						if (illegalCells.length != 0){
-							// TODO: signal illegal cells
-							return;
-						}
-						
-						if (isPointOnGridOccupied){
-							plantSubgrid.forEach(c => {
-								const linearizedGridIndex: number = c.y * gridColumns + c.x;
-								isPointOnGridOccupied![linearizedGridIndex] = true;
-							});
-						}
+								document.removeEventListener('mousemove', handleMouseMove);
+								document.removeEventListener('mouseup', handleMouseUp);
 
-						let res = await FetchFromApi("EmplacePlant", {
-							method: "PUT",
-							body: JSON.stringify({
-								itemId: plant.itemId,
-								gridX: plantSubgrid[0].x,
-								gridY: plantSubgrid[0].y
-							})
-						});
-						if (res.status === "Success"){
-							placedPlants.push({
-								gridX: plantSubgrid[0].x,
-								gridY: plantSubgrid[0].y,
-								width: plant.width,
-								height: plant.height,
-								itemId: "/src/lib/images/store/plant.png"
-							} as UsedPlantDto);
-						}
+								isGridVisible = false;
+								isSelectionMenuVisible = true;
 
-					}
+								if (!clientHeight || !clientWidth || !mainElem) return;
 
-					node.onmousedown = (e: MouseEvent) => {
-						let imgDomRect: DOMRect = node.getBoundingClientRect();
+								let plantSubgrid: Coords[] = getSubgridForPlant(
+									{ x: gridElemIndexX, y: gridElemIndexY },
+									plant
+								);
 
-						startingHeight = imgDomRect.height;
-						startingWidth = imgDomRect.width;
-						node.style.width = `${startingWidth}px`;
-						node.style.height = `${startingHeight}px`;
-						node.style.position = 'fixed';
+								let illegalCells: Coords[] = plantSubgrid.filter((c) => {
+									const linearizedGridIndex: number = c.y * gridColumns + c.x;
+									return isPointOnGridOccupied?.at(linearizedGridIndex);
+								});
 
-						startingX = imgDomRect.left + startingWidth / 2;
-						startingY = imgDomRect.top + startingHeight / 2;
-						
-						document.addEventListener('mousemove', handleMouseMove);
-						document.addEventListener('mouseup', handleMouseUp);
+								console.log(illegalCells);
 
-						isGridVisible = true;
-						isSelectionMenuVisible = false;
-					}
-				}}>
-					<img class="w-full h-full select-none pointer-events-none" src="/src/lib/images/store/plant.png" alt="plant">
-				</button>
-			</div>
-		{/each}
-	</div>
+								const rowWidth: number = clientWidth / gridColumns;
+								const rowHeight: number = clientHeight / gridRows;
+
+								if (illegalCells.length != 0) {
+									// TODO: signal illegal cells
+									return;
+								}
+
+								if (isPointOnGridOccupied) {
+									plantSubgrid.forEach((c) => {
+										const linearizedGridIndex: number = c.y * gridColumns + c.x;
+										isPointOnGridOccupied![linearizedGridIndex] = true;
+									});
+								}
+
+								let res = await FetchFromApi('EmplacePlant', {
+									method: 'PUT',
+									body: JSON.stringify({
+										itemId: plant.itemId,
+										gridX: plantSubgrid[0].x,
+										gridY: plantSubgrid[0].y
+									})
+								});
+								if (res.status === 'Success') {
+									placedPlants.push({
+										gridX: plantSubgrid[0].x,
+										gridY: plantSubgrid[0].y,
+										width: plant.width,
+										height: plant.height,
+										itemId: plant.itemId
+									} as UsedPlantDto);
+								}
+							};
+
+							node.onmousedown = (e: MouseEvent) => {
+								let imgDomRect: DOMRect = node.getBoundingClientRect();
+
+								startingHeight = imgDomRect.height;
+								startingWidth = imgDomRect.width;
+								node.style.width = `${startingWidth}px`;
+								node.style.height = `${startingHeight}px`;
+								node.style.position = 'fixed';
+
+								startingX = imgDomRect.left + startingWidth / 2;
+								startingY = imgDomRect.top + startingHeight / 2;
+
+								document.addEventListener('mousemove', handleMouseMove);
+								document.addEventListener('mouseup', handleMouseUp);
+
+								isGridVisible = true;
+								isSelectionMenuVisible = false;
+							};
+						}}
+					>
+						<img
+							class="pointer-events-none h-full w-full select-none"
+							src="/src/lib/images/store/plant.png"
+							alt="plant"
+						/>
+					</button>
+				</div>
+			{/each}
+		</div>
 	</div>
 {/snippet}
 
 {#snippet SelectionMenu(ducks: UsedDuckDto[], plants: UsedPlantDto[])}
-	<div transition:fly={{ x: -50, opacity: 0 }} class="w-xl h-[60%] bg-red-500 left-5 top-[10%] absolute z-500 rounded-xl">
-		<div class="w-full h-full flex flex-col justify-center">
-			<button onclick={() => {
-				isSelectionMenuVisible = false;
-			}} class="absolute w-8 h-8 rounded-[25%] bg-blue-500 p-1 top-3 right-3">
-				<CrossIconSvg options={{ class: "w-full h-full stroke-[2] stroke-black" }}/>
+	<div
+		transition:fly={{ x: -50, opacity: 0 }}
+		class="absolute top-[10%] left-5 z-500 h-[60%] w-xl rounded-xl bg-red-500"
+	>
+		<div class="flex h-full w-full flex-col justify-center">
+			<button
+				onclick={() => {
+					isSelectionMenuVisible = false;
+				}}
+				class="absolute top-3 right-3 h-8 w-8 rounded-[25%] bg-blue-500 p-1"
+			>
+				<CrossIconSvg options={{ class: 'w-full h-full stroke-[2] stroke-black' }} />
 			</button>
-			<div class="w-full h-16 flex flex-row justify-start p-3 gap-3">
-				<button onclick={() => {isPlantsTabShown = false; isDucksTabShown = true;}} class="h-full w-30 bg-amber-500 rounded-md">ducks</button>
-				<button onclick={() => {isPlantsTabShown = true; isDucksTabShown = false;}} class="h-full w-30 bg-amber-500 rounded-md">plants</button>
+			<div class="flex h-16 w-full flex-row justify-start gap-3 p-3">
+				<button
+					onclick={() => {
+						isPlantsTabShown = false;
+						isDucksTabShown = true;
+					}}
+					class="h-full w-30 rounded-md bg-amber-500">ducks</button
+				>
+				<button
+					onclick={() => {
+						isPlantsTabShown = true;
+						isDucksTabShown = false;
+					}}
+					class="h-full w-30 rounded-md bg-amber-500">plants</button
+				>
 			</div>
-			<div class="w-full h-full overflow-hidden">
+			<div class="h-full w-full overflow-hidden">
 				{#if isDucksTabShown}
 					{@render DuckTab()}
 				{:else if isPlantsTabShown}

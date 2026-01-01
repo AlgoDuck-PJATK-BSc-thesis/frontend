@@ -3,6 +3,7 @@
 	import Island from '$lib/images/Categories/Wysepka2.png';
 	import { onMount, tick } from 'svelte';
 	import type { CategoryDto } from './proxy+page';
+	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
 
 	let { data }: { data: { categories: CategoryDto[] } } = $props();
 
@@ -202,14 +203,17 @@
 		}
 	};
 
-	
-onMount(async () => {
-    await tick();
-    await tick();
-    requestAnimationFrame(() => {
-        calculateIslandCoordinates();
-    });
-});
+	let initialized: boolean = false;	
+	$effect(() => {
+		if (initialized) return;
+		const localMain = main;
+		const category1: HTMLElement | undefined = categoryDivs.at(0);
+
+		requestAnimationFrame(() => {
+			calculateIslandCoordinates();
+			initialized = true;
+		});
+	});
 </script>
 
 <svelte:window

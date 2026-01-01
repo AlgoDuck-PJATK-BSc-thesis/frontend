@@ -66,15 +66,6 @@ export interface ControlPanelArgs{
 }
 
 
-export interface ControlCallbacks {
-    insert?: (InsertData: InsertData) => void,
-    select?: (selected: string) => void,
-    remove?: (compId: string) => void,
-    swap?: (comp1Index: number, comp2Index: number ) => void,
-    contains?: (compId: string) => boolean,
-    addInsertedComponentToRoot?: (compId: string) => boolean,
-}
-
 export type InsertData = {
     compId: string,
     compType: string, 
@@ -83,6 +74,6 @@ export type InsertData = {
 }
 
 export interface ControlPanelArgsBuild extends ControlPanelArgs{
-    removeComp: (compId: string) => void
-    swapCompenets: (comp1Index: number, comp2Index: number ) => void
+    removeComp?: (compId: string) => void
+    swapComponents?: (comp1Index: number, comp2Index: number ) => void
 }
