@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { userEditorPreferences, type editorLayout } from "$lib/stores/theme.svelte";
+	import { FetchFromApi } from "$lib/api/apiCall";
+	import { userEditorPreferences } from "$lib/stores/theme.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
+	import { createQuery } from "@tanstack/svelte-query";
+	import { fly } from "svelte/transition";
+
+	let { options }: { options : { registerAndSelectLayout: ((layoutId: string) => Promise<void>) } } = $props();
 
 	let defaultSidebar: HTMLDivElement;
 	let defaultEditor: HTMLDivElement;
@@ -13,7 +18,7 @@
 	let tabbedSlider: HTMLDivElement;
 	let tabbedTimeout: NodeJS.Timeout | undefined;
 
-	const setLayout = (layout: editorLayout) => {
+	const setLayout = (layout: string) => {
 		userEditorPreferences.layout = layout;
 	}
 
@@ -55,9 +60,25 @@
 		}
 		tabbedSlider.style.transform = '';
 	}
+
+	type CustomLayout = {
+		layoutId: string,
+		layoutName: string
+	}
+
+	const customLayoutQuery = createQuery({
+		queryKey: [ "custom-layouts" ],
+		queryFn: async () => {
+			return await FetchFromApi<CustomLayout[]>("CustomLayouts", {
+				method: 'GET',
+			})
+		}
+	});
+
+	$inspect($customLayoutQuery.data?.body)
 </script>
 
-<main class="w-full h-full bg-ide-bg z-100 border border-ide-accent rounded-lg flex flex-col">
+<main transition:fly={{y: -30, duration: 200}} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent rounded-lg flex flex-col">
 	<span class="py-3 px-5 text-lg justify-start w-full text-ide-text-primary font-semibold border-b border-b-ide-accent/30">
 		Layouts
 	</span>
@@ -69,7 +90,7 @@
 			onfocus={animateDefaultIn}
 			onmouseout={animateDefaultOut}
 			onblur={animateDefaultOut}
-			class="w-full h-full flex flex-col items-center hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent rounded"
+			class="w-full h-28 flex flex-col items-center hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent rounded"
 		>
 			<div class="w-full h-full bg-ide-card flex flex-row p-0.5 gap-0.5">
 				<div
@@ -89,7 +110,7 @@
 			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Default</span>
 		</button>
 
-		<div class="w-full h-full flex flex-col">
+		<div class="w-full h-28 flex flex-col">
 			<button
 				onclick={() => setLayout('tabbed')}
 				onmouseover={animateTabbedIn}
@@ -118,7 +139,7 @@
 			onfocus={animateSplitIn}
 			onmouseout={animateSplitOut}
 			onblur={animateSplitOut}
-			class="w-full h-full flex flex-col items-center hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent rounded"
+			class="w-full h-28 flex flex-col items-center hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent rounded"
 		>
 			<div class="w-full h-full">
 				<div class="w-full h-full bg-ide-card flex flex-row p-0.5 gap-0.5">
@@ -144,12 +165,20 @@
 			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Ide demon</span>
 		</button>
 
-		<div class="w-full h-full flex flex-col justify-center items-center">
+		{#each $customLayoutQuery.data?.body ?? [] as layout}
+			<button onclick={async () => {
+				await options.registerAndSelectLayout(layout.layoutId);
+			}} class="w-full h-28 flex flex-col justify-end gap-0.5 p-0.5">
+				<div class="w-full h-full hover:cursor-pointer bg-ide-card border border-ide-accent/50 focus:outline-none focus:ring-2 focus:ring-ide-accent rounded flex flex-row gap-0.5"></div>
+				<span class="px-3 justify-center text-xs font-mono flex flex-col text-ide-text-primary">{layout.layoutName}</span>
+			</button>
+		{/each}
+		<div class="w-full h-28 flex flex-col justify-center items-center">
 			<button
 				onclick={() => goto('solve/editor')}
 				class="w-full h-full flex justify-center items-center bg-ide-card border border-ide-accent/50 rounded-xs hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent"
 			>
-				<CrossIconSvg options={{ class: "h-10 w-10 rotate-45 stroke-ide-text-primary stroke-[4]" }} />
+				<CrossIconSvg options={{ class: "h-6 w-6 rotate-45 stroke-ide-text-primary stroke-[3]" }} />
 			</button>
 			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Build your own</span>
 		</div>

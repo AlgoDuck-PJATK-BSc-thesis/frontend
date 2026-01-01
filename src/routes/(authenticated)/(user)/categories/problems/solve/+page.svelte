@@ -28,7 +28,11 @@
 		activeProfile.profile = "placeholder";
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
-		loadedAutoSave = await data.autoSave;
+		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
+			loadedAutoSave = value
+		}).catch((reason: any) => {
+			console.log(reason);
+		})
 
 		console.log(loadedAutoSave.body);
 

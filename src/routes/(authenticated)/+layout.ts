@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
-import { authApi } from '$lib/api/auth';
+import { authApi, type AuthUserDto } from '$lib/api/auth';
+import { UserData } from '$lib/stores/userData.svelte';
 
 export const ssr = false;
 

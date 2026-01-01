@@ -52,7 +52,6 @@
             if (!existingPage) {
                 options.pages.push(data.body);
             }
-            console.log(data);
             return data;
         },
         getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ChatMessage>>) => firstPage.body.prevCursor ?? undefined,
@@ -63,7 +62,7 @@
         }
     });
 
-    $inspect($infiniteQuery);
+    // $inspect($infiniteQuery);
 
     let allMessages = $derived(
         options.pages
