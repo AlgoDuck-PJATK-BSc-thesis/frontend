@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
+	import CohortsTable from '$lib/Components/Admin/CohortsTable.svelte';
+	import CohortMembersPanel from '$lib/Components/Admin/CohortMembersPanel.svelte';
 
 	type PageData<T> = {
 		items: T[];
@@ -15,12 +17,34 @@
 		cohortId: string;
 		name: string;
 		isActive: boolean;
-		createdByUserId: string;
+		createdByUserId: string | null;
+		createdByDisplay: string;
 	};
 
 	type SearchCohortsResult = {
 		idMatch: CohortRow | null;
 		name: PageData<CohortRow>;
+	};
+
+	type CohortMemberRow = {
+		userId: string;
+		userName: string;
+		email: string;
+		joinedAt?: string | null;
+	};
+
+	type CohortMembersResult = {
+		cohortId: string;
+		totalMembers?: number;
+		members?: CohortMemberRow[];
+	};
+
+	type CohortMembersState = {
+		loaded: boolean;
+		loading: boolean;
+		error: string | null;
+		totalMembers: number;
+		members: CohortMemberRow[];
 	};
 
 	type Mode = 'all' | 'search';
@@ -56,6 +80,9 @@
 
 	let reqSeq = 0;
 
+	let expanded = $state<Record<string, boolean>>({});
+	let membersByCohort = $state<Record<string, CohortMembersState>>({});
+
 	const fetchWithTimeout: typeof fetch = (input, init) => {
 		const controller = new AbortController();
 		const t = setTimeout(() => controller.abort(), 15000);
@@ -64,6 +91,38 @@
 	};
 
 	const totalPages = (totalItems: number, pageSize: number) => Math.max(1, Math.ceil(totalItems / pageSize));
+
+	const normalizeCohortRow = (raw: any): CohortRow => {
+		const createdByUserId =
+			raw?.createdByUserId === null || raw?.createdByUserId === undefined ? null : String(raw.createdByUserId);
+
+		const createdByDisplay =
+			typeof raw?.createdByDisplay === 'string' && raw.createdByDisplay.trim()
+				? raw.createdByDisplay
+				: createdByUserId
+					? createdByUserId
+					: 'Deleted user';
+
+		return {
+			cohortId: String(raw?.cohortId ?? ''),
+			name: String(raw?.name ?? ''),
+			isActive: Boolean(raw?.isActive),
+			createdByUserId,
+			createdByDisplay
+		};
+	};
+
+	const normalizePageData = (raw: any): PageData<CohortRow> => {
+		const itemsRaw = Array.isArray(raw?.items) ? raw.items : [];
+		return {
+			items: itemsRaw.map(normalizeCohortRow),
+			currPage: typeof raw?.currPage === 'number' ? raw.currPage : 1,
+			pageSize: typeof raw?.pageSize === 'number' ? raw.pageSize : allPageSize,
+			totalItems: typeof raw?.totalItems === 'number' ? raw.totalItems : 0,
+			prevCursor: raw?.prevCursor ?? null,
+			nextCursor: raw?.nextCursor ?? null
+		};
+	};
 
 	const resetSearchResult = () => {
 		searchResult = {
@@ -79,6 +138,82 @@
 		};
 	};
 
+	const ensureMembersState = (cohortId: string) => {
+		if (membersByCohort[cohortId]) return;
+		membersByCohort = {
+			...membersByCohort,
+			[cohortId]: { loaded: false, loading: false, error: null, totalMembers: 0, members: [] }
+		};
+	};
+
+	const loadMembers = async (cohortId: string) => {
+		ensureMembersState(cohortId);
+
+		const current = membersByCohort[cohortId];
+		if (current.loading) return;
+
+		membersByCohort = {
+			...membersByCohort,
+			[cohortId]: { ...current, loading: true, error: null }
+		};
+
+		try {
+			const res = await FetchFromApi<CohortMembersResult>(
+				`admin/cohorts/${encodeURIComponent(cohortId)}/members`,
+				{ method: 'GET' },
+				fetchWithTimeout
+			);
+
+			const body = (res as StandardResponseDto<CohortMembersResult>).body;
+
+			const members = Array.isArray(body?.members) ? body.members : [];
+			const total = typeof body?.totalMembers === 'number' ? body.totalMembers : members.length;
+
+			membersByCohort = {
+				...membersByCohort,
+				[cohortId]: {
+					loaded: true,
+					loading: false,
+					error: null,
+					totalMembers: total,
+					members
+				}
+			};
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to load cohort members.';
+			const prev = membersByCohort[cohortId] ?? {
+				loaded: false,
+				loading: false,
+				error: null,
+				totalMembers: 0,
+				members: []
+			};
+
+			membersByCohort = {
+				...membersByCohort,
+				[cohortId]: { ...prev, loading: false, error: msg }
+			};
+		}
+	};
+
+	const toggleExpanded = async (cohortId: string) => {
+		const next = !expanded[cohortId];
+		expanded = { ...expanded, [cohortId]: next };
+
+		if (next) {
+			ensureMembersState(cohortId);
+			if (!membersByCohort[cohortId].loaded) await loadMembers(cohortId);
+		}
+	};
+
+	const collapseAllExpanded = () => {
+		expanded = {};
+	};
+
+	const clearMembersCache = () => {
+		membersByCohort = {};
+	};
+
 	const loadAll = async () => {
 		const my = ++reqSeq;
 		loading = true;
@@ -89,30 +224,21 @@
 		params.set('pageSize', String(allPageSize));
 
 		try {
-			const res = await FetchFromApi<PageData<CohortRow>>(
-				'admin/cohorts',
-				{ method: 'GET' },
-				fetchWithTimeout,
-				params
-			);
+			const res = await FetchFromApi<PageData<CohortRow>>('admin/cohorts', { method: 'GET' }, fetchWithTimeout, params);
 
 			if (my !== reqSeq) return;
 
 			const body = (res as StandardResponseDto<PageData<CohortRow>>).body;
 
-			allResult = body ?? {
-				items: [],
-				currPage: allPage,
-				pageSize: allPageSize,
-				totalItems: 0,
-				prevCursor: null,
-				nextCursor: null
-			};
+			const normalized = normalizePageData(body);
+
+			allResult = normalized;
 
 			allPage = allResult.currPage;
 			allPageSize = allResult.pageSize;
 
 			allLoadedOnce = true;
+			collapseAllExpanded();
 		} catch (e) {
 			if (my !== reqSeq) return;
 
@@ -145,32 +271,34 @@
 		params.set('pageSize', String(searchPageSize));
 
 		try {
-			const res = await FetchFromApi<SearchCohortsResult>(
-				'admin/cohorts/search',
-				{ method: 'GET' },
-				fetchWithTimeout,
-				params
-			);
+			const res = await FetchFromApi<SearchCohortsResult>('admin/cohorts/search', { method: 'GET' }, fetchWithTimeout, params);
 
 			if (my !== reqSeq) return;
 
 			const body = (res as StandardResponseDto<SearchCohortsResult>).body;
 
-			searchResult = body ?? {
-				idMatch: null,
-				name: { items: [], currPage: searchPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
+			const idMatchRaw = body?.idMatch ?? null;
+			const nameRaw = body?.name ?? null;
+
+			searchResult = {
+				idMatch: idMatchRaw ? normalizeCohortRow(idMatchRaw) : null,
+				name: normalizePageData(nameRaw)
 			};
 
 			searchPage = searchResult.name.currPage;
 			searchPageSize = searchResult.name.pageSize;
 
 			searchedOnce = true;
+			collapseAllExpanded();
+			clearMembersCache();
 		} catch (e) {
 			if (my !== reqSeq) return;
 
 			error = e instanceof Error ? e.message : 'Failed to search cohorts.';
 			resetSearchResult();
 			searchedOnce = true;
+			collapseAllExpanded();
+			clearMembersCache();
 		} finally {
 			if (my === reqSeq) loading = false;
 		}
@@ -181,6 +309,9 @@
 		loading = false;
 		error = null;
 		mode = next;
+
+		collapseAllExpanded();
+		clearMembersCache();
 
 		if (next === 'search') {
 			searchedOnce = false;
@@ -213,6 +344,16 @@
 		searchPage = searchResult.name.nextCursor;
 		await runSearch();
 	};
+
+	const rowDetailsId = (cohortId: string) => `cohort_details_${cohortId}`;
+
+	const defaultMembersState = (): CohortMembersState => ({
+		loaded: false,
+		loading: false,
+		error: null,
+		totalMembers: 0,
+		members: []
+	});
 </script>
 
 <main class="w-full min-h-screen bg-[#1e1e1e] text-[#cccccc] font-sans">
@@ -308,36 +449,20 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8]">
-							<LoadingDots />
-						</div>
+						<div class="text-sm text-[#a8a8a8]"><LoadingDots /></div>
 					{:else if !allLoadedOnce}
 						<div class="text-sm text-[#a8a8a8]">Click Load to fetch cohorts.</div>
 					{:else if allResult.items.length === 0}
 						<div class="text-sm text-[#a8a8a8]">No cohorts.</div>
 					{:else}
-						<div class="overflow-x-auto">
-							<table class="w-full text-sm border-collapse">
-								<thead>
-									<tr class="text-left text-[#e7e7e7]">
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Cohort ID</th>
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Name</th>
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Active</th>
-										<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by user</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each allResult.items as c (c.cohortId)}
-										<tr class="text-[#cccccc]">
-											<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{c.cohortId}</td>
-											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.name}</td>
-											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.isActive ? 'yes' : 'no'}</td>
-											<td class="py-2 pr-0 border-b border-[#2a2a2a] font-mono text-xs">{c.createdByUserId}</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
+						<CohortsTable
+							cohorts={allResult.items}
+							expanded={expanded}
+							membersByCohort={membersByCohort}
+							onToggle={toggleExpanded}
+							onReloadMembers={loadMembers}
+							rowDetailsId={rowDetailsId}
+						/>
 					{/if}
 				</div>
 			</div>
@@ -421,9 +546,7 @@
 					{/if}
 
 					{#if loading}
-						<div class="text-sm text-[#a8a8a8]">
-							<LoadingDots />
-						</div>
+						<div class="text-sm text-[#a8a8a8]"><LoadingDots /></div>
 					{:else if searchedOnce}
 						{#if searchResult.idMatch}
 							<div class="border border-[#3c3c3c] rounded bg-[#1f1f1f] px-4 py-3">
@@ -432,7 +555,29 @@
 									<div class="text-xs text-[#a8a8a8] font-mono">{searchResult.idMatch.cohortId}</div>
 									<div class="text-sm text-[#e7e7e7]">{searchResult.idMatch.name}</div>
 									<div class="text-xs text-[#a8a8a8]">Active: {searchResult.idMatch.isActive ? 'yes' : 'no'}</div>
-									<div class="text-xs text-[#a8a8a8] font-mono">Created by user: {searchResult.idMatch.createdByUserId}</div>
+									<div class="text-xs text-[#a8a8a8]">Created by: {searchResult.idMatch.createdByDisplay}</div>
+
+									<div class="mt-3">
+										<button
+											type="button"
+											onclick={() => toggleExpanded(searchResult.idMatch!.cohortId)}
+											aria-expanded={expanded[searchResult.idMatch.cohortId] ? 'true' : 'false'}
+											aria-controls={rowDetailsId(searchResult.idMatch.cohortId)}
+											class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a]"
+										>
+											{expanded[searchResult.idMatch.cohortId] ? 'Hide members' : 'Show members'}
+										</button>
+									</div>
+
+									{#if expanded[searchResult.idMatch.cohortId]}
+										<div id={rowDetailsId(searchResult.idMatch.cohortId)} class="mt-3 border border-[#3c3c3c] rounded bg-[#252526] px-3 py-3">
+											<CohortMembersPanel
+												cohort={searchResult.idMatch}
+												state={membersByCohort[searchResult.idMatch.cohortId] ?? defaultMembersState()}
+												onReload={loadMembers}
+											/>
+										</div>
+									{/if}
 								</div>
 							</div>
 						{/if}
@@ -447,28 +592,14 @@
 								{#if searchResult.name.totalItems === 0}
 									<div class="text-sm text-[#a8a8a8]">No results.</div>
 								{:else}
-									<div class="overflow-x-auto">
-										<table class="w-full text-sm border-collapse">
-											<thead>
-												<tr class="text-left text-[#e7e7e7]">
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Cohort ID</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Name</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Active</th>
-													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Created by user</th>
-												</tr>
-											</thead>
-											<tbody>
-												{#each searchResult.name.items as c (c.cohortId)}
-													<tr class="text-[#cccccc]">
-														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{c.cohortId}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.name}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{c.isActive ? 'yes' : 'no'}</td>
-														<td class="py-2 pr-0 border-b border-[#2a2a2a] font-mono text-xs">{c.createdByUserId}</td>
-													</tr>
-												{/each}
-											</tbody>
-										</table>
-									</div>
+									<CohortsTable
+										cohorts={searchResult.name.items}
+										expanded={expanded}
+										membersByCohort={membersByCohort}
+										onToggle={toggleExpanded}
+										onReloadMembers={loadMembers}
+										rowDetailsId={rowDetailsId}
+									/>
 								{/if}
 							</div>
 						</div>
