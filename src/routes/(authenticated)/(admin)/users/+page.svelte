@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
+	import RoleFilterButtons from '$lib/Components/Admin/RoleFilterButtons.svelte';
+	import UsersTable from '$lib/Components/Admin/UsersTable.svelte';
 
 	type PageData<T> = {
 		items: T[];
@@ -25,8 +27,10 @@
 	};
 
 	type Mode = 'all' | 'search';
+	type RoleFilter = 'all' | 'users' | 'admins';
 
 	let mode = $state<Mode>('all');
+	let roleFilter = $state<RoleFilter>('all');
 
 	let allPage = $state(1);
 	let allPageSize = $state(20);
@@ -72,6 +76,30 @@
 	const usernameTotalPages = $derived(totalPages(searchResult.username.totalItems, searchResult.username.pageSize));
 	const emailTotalPages = $derived(totalPages(searchResult.email.totalItems, searchResult.email.pageSize));
 
+	const isAdminRoles = (roles: string[]) => (roles ?? []).some((r) => r.toLowerCase() === 'admin');
+
+	const passesRoleFilter = (u: UserRow) => {
+		if (roleFilter === 'all') return true;
+		const isAdmin = isAdminRoles(u.roles ?? []);
+		if (roleFilter === 'admins') return isAdmin;
+		return !isAdmin;
+	};
+
+	const filterRows = (rows: UserRow[]) => (rows ?? []).filter(passesRoleFilter);
+
+	const filteredAllItems = $derived(filterRows(allResult.items));
+	const filteredUsernameItems = $derived(filterRows(searchResult.username.items));
+	const filteredEmailItems = $derived(filterRows(searchResult.email.items));
+	const filteredIdMatch = $derived(searchResult.idMatch && passesRoleFilter(searchResult.idMatch) ? searchResult.idMatch : null);
+
+	const hasUnfilteredSearchResults = $derived(
+		Boolean(searchResult.idMatch) || searchResult.username.totalItems > 0 || searchResult.email.totalItems > 0
+	);
+
+	const hasFilteredSearchResults = $derived(
+		Boolean(filteredIdMatch) || filteredUsernameItems.length > 0 || filteredEmailItems.length > 0
+	);
+
 	const resetSearchResult = () => {
 		searchResult = {
 			idMatch: null,
@@ -104,12 +132,7 @@
 		params.set('pageSize', String(allPageSize));
 
 		try {
-			const res = await FetchFromApi<PageData<UserRow>>(
-				'admin/users',
-				{ method: 'GET' },
-				fetchWithTimeout,
-				params
-			);
+			const res = await FetchFromApi<PageData<UserRow>>('admin/users', { method: 'GET' }, fetchWithTimeout, params);
 
 			if (my !== reqSeq) return;
 
@@ -348,28 +371,16 @@
 					{:else if allResult.items.length === 0}
 						<div class="text-sm text-[#a8a8a8]">No users.</div>
 					{:else}
-						<div class="overflow-x-auto">
-							<table class="w-full text-sm border-collapse">
-								<thead>
-									<tr class="text-left text-[#e7e7e7]">
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
-										<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
-										<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each allResult.items as u (u.userId)}
-										<tr class="text-[#cccccc]">
-											<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
-											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
-											<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
-											<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
-										</tr>
-									{/each}
-								</tbody>
-							</table>
+						<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+							<div class="text-xs text-[#a8a8a8]">Showing {filteredAllItems.length} of {allResult.items.length} on this page</div>
+							<RoleFilterButtons bind:value={roleFilter} disabled={loading} />
 						</div>
+
+						{#if filteredAllItems.length === 0}
+							<div class="text-sm text-[#a8a8a8]">No users for selected role filter on this page.</div>
+						{:else}
+							<UsersTable users={filteredAllItems} />
+						{/if}
 					{/if}
 				</div>
 			</div>
@@ -416,19 +427,25 @@
 						/>
 					</div>
 
-					<div class="flex items-center gap-2">
-						<button
-							type="button"
-							onclick={() => {
-								usernamePage = 1;
-								emailPage = 1;
-								runSearch();
-							}}
-							disabled={loading || !searchQuery.trim()}
-							class="px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							Search
-						</button>
+					<div class="flex flex-wrap items-center justify-between gap-3">
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								onclick={() => {
+									usernamePage = 1;
+									emailPage = 1;
+									runSearch();
+								}}
+								disabled={loading || !searchQuery.trim()}
+								class="px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								Search
+							</button>
+						</div>
+
+						{#if searchedOnce}
+							<RoleFilterButtons bind:value={roleFilter} disabled={loading || !hasUnfilteredSearchResults} />
+						{/if}
 					</div>
 
 					{#if error}
@@ -440,14 +457,14 @@
 							<LoadingDots />
 						</div>
 					{:else if searchedOnce}
-						{#if searchResult.idMatch}
+						{#if filteredIdMatch}
 							<div class="border border-[#3c3c3c] rounded bg-[#1f1f1f] px-4 py-3">
 								<div class="text-xs text-[#a8a8a8] uppercase tracking-wider">ID match</div>
 								<div class="mt-2 flex flex-col gap-1">
-									<div class="text-xs text-[#a8a8a8] font-mono">{searchResult.idMatch.userId}</div>
-									<div class="text-sm text-[#e7e7e7]">{searchResult.idMatch.username}</div>
-									<div class="text-xs text-[#a8a8a8]">{searchResult.idMatch.email}</div>
-									<div class="text-xs text-[#a8a8a8]">{searchResult.idMatch.roles.join(', ')}</div>
+									<div class="text-xs text-[#a8a8a8] font-mono">{filteredIdMatch.userId}</div>
+									<div class="text-sm text-[#e7e7e7]">{filteredIdMatch.username}</div>
+									<div class="text-xs text-[#a8a8a8]">{filteredIdMatch.email}</div>
+									<div class="text-xs text-[#a8a8a8]">{filteredIdMatch.roles.join(', ')}</div>
 								</div>
 							</div>
 						{/if}
@@ -455,8 +472,9 @@
 						<div class="border border-[#3c3c3c] rounded overflow-hidden">
 							<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c] flex items-center justify-between gap-3">
 								<div class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Username matches</div>
-								<div class="flex items-center gap-3">
+								<div class="flex flex-wrap items-center gap-3">
 									<div class="text-xs text-[#a8a8a8]">Total: {searchResult.username.totalItems}</div>
+									<div class="text-xs text-[#a8a8a8]">Showing: {filteredUsernameItems.length}</div>
 									<div class="text-xs text-[#a8a8a8]">Page {searchResult.username.currPage} / {usernameTotalPages}</div>
 									<button
 										type="button"
@@ -480,29 +498,10 @@
 							<div class="p-4">
 								{#if searchResult.username.totalItems === 0}
 									<div class="text-sm text-[#a8a8a8]">No username matches.</div>
+								{:else if filteredUsernameItems.length === 0}
+									<div class="text-sm text-[#a8a8a8]">No username matches for selected role filter on this page.</div>
 								{:else}
-									<div class="overflow-x-auto">
-										<table class="w-full text-sm border-collapse">
-											<thead>
-												<tr class="text-left text-[#e7e7e7]">
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
-													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
-												</tr>
-											</thead>
-											<tbody>
-												{#each searchResult.username.items as u (u.userId)}
-													<tr class="text-[#cccccc]">
-														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
-														<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
-													</tr>
-												{/each}
-											</tbody>
-										</table>
-									</div>
+									<UsersTable users={filteredUsernameItems} />
 								{/if}
 							</div>
 						</div>
@@ -510,8 +509,9 @@
 						<div class="border border-[#3c3c3c] rounded overflow-hidden">
 							<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c] flex items-center justify-between gap-3">
 								<div class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Email matches</div>
-								<div class="flex items-center gap-3">
+								<div class="flex flex-wrap items-center gap-3">
 									<div class="text-xs text-[#a8a8a8]">Total: {searchResult.email.totalItems}</div>
+									<div class="text-xs text-[#a8a8a8]">Showing: {filteredEmailItems.length}</div>
 									<div class="text-xs text-[#a8a8a8]">Page {searchResult.email.currPage} / {emailTotalPages}</div>
 									<button
 										type="button"
@@ -535,34 +535,19 @@
 							<div class="p-4">
 								{#if searchResult.email.totalItems === 0}
 									<div class="text-sm text-[#a8a8a8]">No email matches.</div>
+								{:else if filteredEmailItems.length === 0}
+									<div class="text-sm text-[#a8a8a8]">No email matches for selected role filter on this page.</div>
 								{:else}
-									<div class="overflow-x-auto">
-										<table class="w-full text-sm border-collapse">
-											<thead>
-												<tr class="text-left text-[#e7e7e7]">
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">User</th>
-													<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
-													<th class="py-2 pr-0 border-b border-[#3c3c3c]">Roles</th>
-												</tr>
-											</thead>
-											<tbody>
-												{#each searchResult.email.items as u (u.userId)}
-													<tr class="text-[#cccccc]">
-														<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
-														<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
-														<td class="py-2 pr-0 border-b border-[#2a2a2a]">{u.roles.join(', ')}</td>
-													</tr>
-												{/each}
-											</tbody>
-										</table>
-									</div>
+									<UsersTable users={filteredEmailItems} />
 								{/if}
 							</div>
 						</div>
 
-						{#if !searchResult.idMatch && searchResult.username.totalItems === 0 && searchResult.email.totalItems === 0}
+						{#if hasUnfilteredSearchResults && !hasFilteredSearchResults}
+							<div class="text-sm text-[#a8a8a8]">No results for selected role filter.</div>
+						{/if}
+
+						{#if !hasUnfilteredSearchResults}
 							<div class="text-sm text-[#a8a8a8]">No results.</div>
 						{/if}
 					{:else}
