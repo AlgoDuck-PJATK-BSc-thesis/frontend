@@ -58,7 +58,7 @@
 <div
 	in:fly={{ x: 300, duration: 300 }}
 	out:fade={{ duration: 200 }}
-	class="pointer-events-auto flex fixed top-[20%] right-[1%] items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-bg border-card border-2"
+	class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-white text-black border-2"
 >
     <Comp options={compOptions}/>
 	<p class="flex-1 text-sm font-medium">{toast.message}</p>

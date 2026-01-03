@@ -100,6 +100,9 @@ export const InitializeRegistryDefault = (): void => {
     
     builder.set('Editor', EditorBuilder);
     builder.set('EditorIconSvg', CodeEditorIconSvg);
+    
+    builder.set('AssistantIconSvg', AssistantIconSvg);
+
 
     builder.set("PlaceholderPanelIconSvg", CodeEditorIconSvg);
     

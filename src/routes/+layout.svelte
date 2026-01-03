@@ -7,6 +7,7 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { onMount } from 'svelte';
 	import { FetchFromApi } from '$lib/api/apiCall';
+	import ToastProvider from '$lib/Components/Notifications/ToastProvider.svelte';
 
 	let togglePanelFn: () => void;
 
@@ -28,8 +29,6 @@
 		let res = await FetchFromApi("user/profile", {
 			method: "GET"
 		}, fetch);
-
-		console.log(res);
 	});
 </script>
 
@@ -40,7 +39,7 @@
 	<div class="h-screen w-screen">
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
-		
+	<ToastProvider/>
 		<main class="h-full w-full">
 			{@render children?.()}
 		</main>

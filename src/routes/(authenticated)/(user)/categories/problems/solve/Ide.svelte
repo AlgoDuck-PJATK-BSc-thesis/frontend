@@ -8,9 +8,10 @@
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
 	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import { API_URL, FetchFromApi } from '$lib/api/apiCall';
-	import { userEditorPreferences, type editorLayout } from '$lib/stores/theme.svelte';
+	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 	import * as signalR from '@microsoft/signalr';
 	import { isTerminalStatus, type IntermediateStatus, type SubmissionResult, type TerminalStatus } from '$lib/types/domain/modules/problem/solve';
+	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
 
 	let { 
 		components = $bindable(),
@@ -64,11 +65,24 @@
 			executingState = executionResponse.status;
 			if (isTerminalStatus(executionResponse.status)) {
 				(components['terminal-comp'] as TerminalComponentArgs).stdOut = executionResponse.stdOutput;
-				(components['terminal-comp'] as TerminalComponentArgs).stdErr = executionResponse.stdErr;
+				(components['terminal-comp'] as TerminalComponentArgs).stdErr = executionResponse.stdError;
 				
+				switch(executingState as TerminalStatus){
+					case "Completed":
+						console.log("toasting");
+						toast.success(executingState);
+						break;
+					case "CompilationFailure":
+					case "RuntimeError":
+					case "ServiceFailure":
+					case "Timeout":
+						console.log("toasting");
+						toast.error(executingState);
+						break;
+				}
+
 				connection?.stop();
 				connected = false;
-				executingState = undefined;
 			}
 		});
 		
@@ -109,21 +123,44 @@
 		
 		connection.on("ExecutionStatusUpdated", (executionResponse: SubmissionResult) => {
 			(components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.status;
-			console.log(executionResponse);
 			executingState = executionResponse.status;
 			if (isTerminalStatus(executionResponse.status)) {
 				(components['terminal-comp'] as TerminalComponentArgs).stdOut = executionResponse.stdOutput;
-				(components['terminal-comp'] as TerminalComponentArgs).stdErr = executionResponse.stdErr;
+				(components['terminal-comp'] as TerminalComponentArgs).stdErr = executionResponse.stdError;
 				
 				(components['test-cases-comp'] as TestCaseComponentArgs).testCases = 
 					(components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => ({
 						isPassed: executionResponse.testResults.find(ti => ti.testId == t.testCaseId)?.isTestPassed,
 						...t
 					}));
-				
 				connection?.stop();
 				connected = false;
+
+				switch(executingState as TerminalStatus){
+					case "Completed":
+						toast.success(executingState);
+						if (executionResponse.testResults.length > 0){
+							if (executionResponse.testResults.some(t => !t.isTestPassed)){
+								toast.warning(`${executionResponse.testResults.filter(t => !t.isTestPassed).length}/${executionResponse.testResults.length} test passed`)
+							}else{
+								setTimeout(() => {
+									toast.success(`${executionResponse.testResults.length}/${executionResponse.testResults.length} test passed`)
+								}, 500);
+							}
+						}
+						toast.success
+						break;
+					case "CompilationFailure":
+					case "RuntimeError":
+					case "ServiceFailure":
+					case "Timeout":
+						console.log("toasting");
+						toast.error(executingState);
+						break;
+				}
 				executingState = undefined;
+			}else{
+						console.log("not terminal");
 			}
 		});
 		
@@ -136,6 +173,20 @@
 			connected = false;
 		}
 	};
+
+	const registerAndSelectLayout = async (layoutId: string): Promise<void> => {
+		if (!layouts[layoutId]){
+			let res = await FetchFromApi<{ layoutId: string, layoutContents: string }>("CustomLayoutDetails", {
+				method: "GET"
+			}, fetch, new URLSearchParams({ layoutId: layoutId }))
+
+			console.log(res.body.layoutContents);
+			layouts[layoutId] = res.body.layoutContents;
+		}
+		if (layouts[layoutId])
+			userEditorPreferences.layout = layoutId;
+
+	} 
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">
@@ -144,6 +195,7 @@
 	{/if}
 	<div class="w-full h-[5%]">
 		<TopPanel
+		{registerAndSelectLayout}
 		{executingState}
 		{executeCallback}
 		{submitCallback}

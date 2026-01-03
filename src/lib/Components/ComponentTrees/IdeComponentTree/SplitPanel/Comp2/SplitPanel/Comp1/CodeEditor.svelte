@@ -19,14 +19,12 @@
 		const currentCodeState: string = options.userCode;
 		options.userCode = currentCodeState;
 		if (!options || !options?.problemId || !options?.userCode) return;
-		else console.log('saving');
 		const templateContents: string = options.userCode;
 		savingState = "unsaved";
 		if (lastTimeout){
 			clearTimeout(lastTimeout);
 		}
 		lastTimeout = setTimeout(async () => {
-			console.log("posting");
 			savingState = "saving";
 			const res = await FetchFromApi("AutoSave", {
 				method: 'POST',

@@ -194,6 +194,15 @@
 			</li>
 			<li>
 				<a
+					href="/user/me"
+					aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
+					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Profile
+				</a>
+			</li>
+			<li>
+				<a
 					href="/settings"
 					aria-current={page.url.pathname === '/settings' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
@@ -230,5 +239,6 @@
 		</ul>
 	</nav>
 
+	<div class="flex h-full flex-row items-center justify-center gap-2"></div>
 	<div class="flex h-full flex-row items-center justify-center gap-2"></div>
 </header>

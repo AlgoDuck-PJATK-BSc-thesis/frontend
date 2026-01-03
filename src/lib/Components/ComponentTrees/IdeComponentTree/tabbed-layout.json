@@ -1,14 +1,14 @@
 {
-  "compId": "root-1765037181662-0",
+  "compId": "root-1767198734054-0",
   "component": "TopLevelComponent",
   "options": {
     "component": {
-      "compId": "wizard-1765037183793-3",
+      "compId": "wizard-1767198739318-7",
       "component": "WizardPanel",
       "options": {
         "components": [
           {
-            "compId": "wrapper-1765037185085-5",
+            "compId": "wrapper-1767198741431-9",
             "component": "TopLevelComponent",
             "options": {
               "component": {
@@ -30,7 +30,7 @@
             }
           },
           {
-            "compId": "wrapper-1765037186492-8",
+            "compId": "wrapper-1767198742451-12",
             "component": "TopLevelComponent",
             "options": {
               "component": {
@@ -52,7 +52,7 @@
             }
           },
           {
-            "compId": "wrapper-1765037187715-11",
+            "compId": "wrapper-1767198743532-15",
             "component": "TopLevelComponent",
             "options": {
               "component": {
@@ -74,7 +74,7 @@
             }
           },
           {
-            "compId": "wrapper-1765037189285-14",
+            "compId": "wrapper-1767198744548-18",
             "component": "TopLevelComponent",
             "options": {
               "component": {
@@ -94,11 +94,41 @@
                 }
               }
             }
+          },
+          {
+            "compId": "wrapper-1767198745298-21",
+            "component": "TopLevelComponent",
+            "options": {
+              "component": {
+                "compId": "assistant-wizard",
+                "component": "TerminalWizardPanel",
+                "options": {
+                  "components": [],
+                  "side": 3,
+                  "control": {
+                    "compId": "wizard-control-panel",
+                    "component": "AssistantWizardControlPanel",
+                    "options": {}
+                  }
+                },
+                "meta": {
+                  "label": {
+                    "commonName": "Assistant",
+                    "labelFor": "assistant-wizard",
+                    "icon": {
+                      "compId": "assistant-icon",
+                      "component": "AssistantIconSvg",
+                      "options": {}
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "side": 0,
         "control": {
-          "compId": "control-1765037183793-4",
+          "compId": "control-1767198739318-8",
           "component": "SolutionAreaControlPanelHorizontal",
           "options": {}
         }

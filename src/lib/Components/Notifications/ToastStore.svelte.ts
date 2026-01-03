@@ -14,7 +14,7 @@ class ToastStore {
 		const id = Math.random().toString(36).substring(2, 9);
 		const toast: Toast = { id, message, type, duration };
 		
-		this.toasts = [...this.toasts, toast];
+		this.toasts.push(toast);
 
 		if (duration > 0) {
 			setTimeout(() => {
