@@ -15,7 +15,7 @@
 	let items = $state<LeaderboardItemDto[]>([]);
 	let refreshHandle = $state<number | null>(null);
 
-	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 
 	const pointsOf = (u: LeaderboardItemDto) => u.experience;
 
@@ -121,7 +121,7 @@
 					>
 						<CloudfrontImage
 							path={user.userAvatarUrl ? user.userAvatarUrl : defaultAvatar}
-							cls="h-full w-full -translate-x-[-10%] -translate-y-[-10%] scale-[1.5] object-cover object-[left_top]"
+							cls="h-full w-full -translate-x-[-10%] -translate-y-[0%] scale-[1.5] object-cover object-[left_top]"
 						/>
 					</div>
 

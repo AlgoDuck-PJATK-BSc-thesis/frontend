@@ -1,6 +1,12 @@
+<script context="module" lang="ts">
+	export interface $$Props {
+		value?: 'all' | 'users' | 'admins';
+		disabled?: boolean;
+	}
+</script>
+
 <script lang="ts">
-	export let value: 'all' | 'users' | 'admins' = 'all';
-	export let disabled: boolean = false;
+	let { value = $bindable('all'), disabled = false } = $props() as $$Props;
 
 	const setValue = (v: 'all' | 'users' | 'admins') => {
 		if (disabled) return;
