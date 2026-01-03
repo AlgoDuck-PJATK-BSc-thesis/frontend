@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Tab } from '$lib/Components/Admin/Users/types';
+	import type { Tab } from '$lib/types/Admin';
 
 	type Props = {
 		tab: Tab;

@@ -66,28 +66,6 @@
 		onNext,
 		onToggleSelect
 	} = $props() as Props;
-
-	const isSelected = (id: string) => (selectedUserIds ?? []).includes(id);
-
-	const allOnPageSelected = $derived(
-		(filteredItems ?? []).length > 0 && (filteredItems ?? []).every((u) => isSelected(u.userId))
-	);
-
-	const toggleAllOnPage = () => {
-		const rows = filteredItems ?? [];
-		if (rows.length === 0) return;
-
-		if (allOnPageSelected) {
-			for (const u of rows) {
-				if (isSelected(u.userId)) onToggleSelect(u);
-			}
-			return;
-		}
-
-		for (const u of rows) {
-			if (!isSelected(u.userId)) onToggleSelect(u);
-		}
-	};
 </script>
 
 <div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
@@ -153,19 +131,7 @@
 			<div class="text-sm text-[#a8a8a8]">No users.</div>
 		{:else}
 			<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-				<div class="flex flex-wrap items-center gap-3">
-					<button
-						type="button"
-						onclick={toggleAllOnPage}
-						disabled={disabled || (filteredItems?.length ?? 0) === 0}
-						class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{allOnPageSelected ? 'Unselect all on page' : 'Select all on page'}
-					</button>
-
-					<div class="text-xs text-[#a8a8a8]">Showing {filteredItems.length} of {allResult.items.length} on this page</div>
-				</div>
-
+				<div class="text-xs text-[#a8a8a8]">Showing {filteredItems.length} of {allResult.items.length} on this page</div>
 				<RoleFilterButtons bind:value={roleFilter} disabled={disabled} />
 			</div>
 
@@ -176,6 +142,7 @@
 					users={filteredItems}
 					selectedUserIds={selectedUserIds}
 					disabled={disabled}
+					showSelectAll={true}
 					onToggleSelect={onToggleSelect}
 				/>
 			{/if}
