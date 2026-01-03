@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
-	import CohortsTable from '$lib/Components/Admin/CohortsTable.svelte';
-	import CohortMembersPanel from '$lib/Components/Admin/CohortMembersPanel.svelte';
+	import CohortsTable from './Tables/CohortsTable.svelte';
+	import CohortMembersPanel from './Panels/CohortMembersPanel.svelte';
 
 	type PageData<T> = {
 		items: T[];

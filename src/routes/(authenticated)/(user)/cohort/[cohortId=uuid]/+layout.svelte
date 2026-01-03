@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
+	import type { DuckDto } from '../../Shop/Dtos';
 	import {
 		cohortApi,
 		type CohortMemberDto,
@@ -18,6 +19,7 @@
 			cohort: CohortDetailsDto;
 			members: CohortMemberDto[];
 			activeMembers: { userId: string; lastSeenAt: string; isActive: boolean }[];
+			ducks: DuckDto[];
 		};
 		children: () => any;
 	}>();
@@ -63,7 +65,20 @@
 
 	let lastReportMs = 0;
 
-	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
+
+	const ducks: DuckDto[] = data.ducks ?? [];
+
+	const pickOneRandomDuck = (list: DuckDto[]): DuckDto | null => {
+		const shuffled = [...list].sort(() => Math.random() - 0.5);
+		return shuffled.length ? shuffled[0] : null;
+	};
+
+	let welcomeDuck = $state<DuckDto | null>(pickOneRandomDuck(ducks));
+
+	const welcomeDuckPath = $derived.by(() =>
+		welcomeDuck ? `Ducks/Outfits/duck-${welcomeDuck.id}.png` : defaultAvatar
+	);
 
 	type User = {
 		name: string;
@@ -505,7 +520,7 @@
 			</div>
 
 			<CloudfrontImage
-				path={`Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`}
+				path={welcomeDuckPath}
 				cls="h-[7rem] w-[7.2rem] -scale-x-100 drop-shadow-md "
 			/>
 		</div>
@@ -591,7 +606,7 @@
 						>
 							<CloudfrontImage
 								path={user.avatarPath}
-								cls="h-full w-full -translate-x-[-15%] -translate-y-[-5%] scale-[1.5] object-cover object-[left_top]"
+								cls="h-full w-full -translate-x-[-15%] -translate-y-[0%] scale-[1.5] object-cover object-[left_top]"
 							/>
 						</div>
 

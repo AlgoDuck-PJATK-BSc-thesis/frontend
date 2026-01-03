@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CohortMembersPanel from '$lib/Components/Admin/CohortMembersPanel.svelte';
+	import CohortMembersPanel from '../Panels/CohortMembersPanel.svelte';
 
 	type CohortRow = {
 		cohortId: string;

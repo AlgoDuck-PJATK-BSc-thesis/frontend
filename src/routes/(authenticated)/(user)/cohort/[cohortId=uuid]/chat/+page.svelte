@@ -48,7 +48,7 @@
 	let members = $state<CohortMemberDto[]>([]);
 	let memberAvatarByUserId = $state<Record<string, string | null>>({});
 
-	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 
 	type DeliveryState = 'sending' | 'delivered' | 'read';
 

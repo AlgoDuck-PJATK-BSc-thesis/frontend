@@ -1,8 +1,16 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
-	import RoleFilterButtons from '$lib/Components/Admin/RoleFilterButtons.svelte';
-	import UsersTable from '$lib/Components/Admin/UsersTable.svelte';
+
+	import UserCreateForm from './Forms/UserCreateForm.svelte';
+	import UserUpdateForm from './Forms/UserUpdateForm.svelte';
+	import UserDeleteForm from './Forms/UserDeleteForm.svelte';
+
+	import UsersHeader from './UsersHeader.svelte';
+	import SelectedUsersPanel from './Panels/SelectedUsersPanel.svelte';
+	import UsersAllPanel from './Panels/UsersAllPanel.svelte';
+	import UsersSearchPanel from './Panels/UsersSearchPanel.svelte';
 
 	type PageData<T> = {
 		items: T[];
@@ -26,11 +34,51 @@
 		email: PageData<UserRow>;
 	};
 
-	type Mode = 'all' | 'search';
+	type Tab = 'all' | 'search' | 'create' | 'update' | 'delete';
 	type RoleFilter = 'all' | 'users' | 'admins';
+	type CreateRole = 'user' | 'admin';
+	type UpdateRole = 'keep' | 'user' | 'admin';
 
-	let mode = $state<Mode>('all');
-	let roleFilter = $state<RoleFilter>('all');
+	type CreateUserResult = {
+		userId: string;
+		email: string;
+		username: string;
+		role: string;
+		emailVerified: boolean;
+	};
+
+	type UpdateUserResult = {
+		userId: string;
+		email: string;
+		username: string;
+		roles: string[];
+	};
+
+	type SelectionSnapshotV2 = {
+		version: 2;
+		selectedRoleFilter: RoleFilter;
+		allRoleFilter: RoleFilter;
+		searchRoleFilter: RoleFilter;
+		selectedUsers: UserRow[];
+		selectedExpanded: Record<string, boolean>;
+		selectedOpen: boolean;
+		activeUserId: string | null;
+	};
+
+	const UserCreateFormAny = UserCreateForm as unknown as any;
+	const UserUpdateFormAny = UserUpdateForm as unknown as any;
+	const UserDeleteFormAny = UserDeleteForm as unknown as any;
+
+	const UsersHeaderAny = UsersHeader as unknown as any;
+	const SelectedUsersPanelAny = SelectedUsersPanel as unknown as any;
+	const UsersAllPanelAny = UsersAllPanel as unknown as any;
+	const UsersSearchPanelAny = UsersSearchPanel as unknown as any;
+
+	let tab = $state<Tab>('create');
+
+	let selectedRoleFilter = $state<RoleFilter>('all');
+	let allRoleFilter = $state<RoleFilter>('all');
+	let searchRoleFilter = $state<RoleFilter>('all');
 
 	let allPage = $state(1);
 	let allPageSize = $state(20);
@@ -38,12 +86,27 @@
 
 	let searchQuery = $state('');
 	let searchPageSize = $state(20);
-
 	let usernamePage = $state(1);
 	let emailPage = $state(1);
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+
+	let selectedUsers = $state<UserRow[]>([]);
+	let selectedExpanded = $state<Record<string, boolean>>({});
+	let selectedOpen = $state(true);
+	let activeUserId = $state<string | null>(null);
+
+	let creating = $state(false);
+	let createError = $state<string | null>(null);
+	let createdUser = $state<CreateUserResult | null>(null);
+
+	let saving = $state(false);
+	let updateError = $state<string | null>(null);
+	let updateSuccess = $state<UpdateUserResult | null>(null);
+
+	let deleting = $state(false);
+	let deleteError = $state<string | null>(null);
 
 	let allResult = $state<PageData<UserRow>>({
 		items: [],
@@ -61,8 +124,10 @@
 	});
 
 	let searchedOnce = $state(false);
-
 	let reqSeq = 0;
+
+	const storageKey = 'algoduck_admin_users_selection_v2';
+	let storageReady = $state(false);
 
 	const fetchWithTimeout: typeof fetch = (input, init) => {
 		const controller = new AbortController();
@@ -71,34 +136,128 @@
 		return fetch(input, merged).finally(() => clearTimeout(t));
 	};
 
-	const totalPages = (totalItems: number, pageSize: number) => Math.max(1, Math.ceil(totalItems / pageSize));
-
-	const usernameTotalPages = $derived(totalPages(searchResult.username.totalItems, searchResult.username.pageSize));
-	const emailTotalPages = $derived(totalPages(searchResult.email.totalItems, searchResult.email.pageSize));
+	const unwrap = <T,>(res: unknown): T | null => {
+		const anyRes = res as { body?: T } | null;
+		if (anyRes && typeof anyRes === 'object' && 'body' in anyRes) return (anyRes as { body?: T }).body ?? null;
+		return (res as T) ?? null;
+	};
 
 	const isAdminRoles = (roles: string[]) => (roles ?? []).some((r) => r.toLowerCase() === 'admin');
 
-	const passesRoleFilter = (u: UserRow) => {
-		if (roleFilter === 'all') return true;
+	const passesRoleFilter = (filter: RoleFilter, u: UserRow) => {
+		if (filter === 'all') return true;
 		const isAdmin = isAdminRoles(u.roles ?? []);
-		if (roleFilter === 'admins') return isAdmin;
+		if (filter === 'admins') return isAdmin;
 		return !isAdmin;
 	};
 
-	const filterRows = (rows: UserRow[]) => (rows ?? []).filter(passesRoleFilter);
+	const filterRows = (filter: RoleFilter, rows: UserRow[]) => (rows ?? []).filter((u) => passesRoleFilter(filter, u));
 
-	const filteredAllItems = $derived(filterRows(allResult.items));
-	const filteredUsernameItems = $derived(filterRows(searchResult.username.items));
-	const filteredEmailItems = $derived(filterRows(searchResult.email.items));
-	const filteredIdMatch = $derived(searchResult.idMatch && passesRoleFilter(searchResult.idMatch) ? searchResult.idMatch : null);
+	const filteredAllItems = $derived(filterRows(allRoleFilter, allResult.items));
+	const filteredUsernameItems = $derived(filterRows(searchRoleFilter, searchResult.username.items));
+	const filteredEmailItems = $derived(filterRows(searchRoleFilter, searchResult.email.items));
+	const selectedFiltered = $derived(filterRows(selectedRoleFilter, selectedUsers));
 
-	const hasUnfilteredSearchResults = $derived(
+	const selectedUserIds = $derived(selectedUsers.map((u) => u.userId));
+
+	const totalPages = (totalItems: number, pageSize: number) => Math.max(1, Math.ceil(totalItems / pageSize));
+	const allTotalPages = $derived(totalPages(allResult.totalItems, allResult.pageSize));
+	const usernameTotalPages = $derived(totalPages(searchResult.username.totalItems, searchResult.username.pageSize));
+	const emailTotalPages = $derived(totalPages(searchResult.email.totalItems, searchResult.email.pageSize));
+
+	const hasAnySearchResults = $derived(
 		Boolean(searchResult.idMatch) || searchResult.username.totalItems > 0 || searchResult.email.totalItems > 0
 	);
 
-	const hasFilteredSearchResults = $derived(
-		Boolean(filteredIdMatch) || filteredUsernameItems.length > 0 || filteredEmailItems.length > 0
+	const idMatchHiddenByFilter = $derived(
+		Boolean(searchResult.idMatch) && !passesRoleFilter(searchRoleFilter, searchResult.idMatch as UserRow)
 	);
+
+	const activeUser = $derived(activeUserId ? selectedUsers.find((u) => u.userId === activeUserId) ?? null : null);
+
+	const isSelected = (userId: string) => selectedUsers.some((u) => u.userId === userId);
+
+	const normalizeRoles = (roles: string[]) => (roles ?? []).slice().map((r) => r.toLowerCase()).sort().join('|');
+
+	const ensureActive = () => {
+		if (activeUserId && selectedUsers.some((u) => u.userId === activeUserId)) return;
+		activeUserId = selectedUsers.length > 0 ? selectedUsers[selectedUsers.length - 1].userId : null;
+	};
+
+	const setActive = (userId: string) => {
+		activeUserId = userId;
+		selectedOpen = true;
+	};
+
+	const addSelected = (u: UserRow) => {
+		if (!selectedUsers.some((x) => x.userId === u.userId)) {
+			selectedUsers = [...selectedUsers, u];
+			selectedExpanded = { ...selectedExpanded, [u.userId]: false };
+		}
+		activeUserId = u.userId;
+		selectedOpen = true;
+	};
+
+	const removeSelected = (userId: string) => {
+		selectedUsers = selectedUsers.filter((u) => u.userId !== userId);
+		const { [userId]: _d, ...rest } = selectedExpanded;
+		selectedExpanded = rest;
+		if (activeUserId === userId) ensureActive();
+	};
+
+	const toggleSelect = (u: UserRow) => {
+		if (isSelected(u.userId)) removeSelected(u.userId);
+		else addSelected(u);
+	};
+
+	const toggleSelectMaybe = (u: UserRow | null) => {
+		if (u) toggleSelect(u);
+	};
+
+	const clearAllSelected = () => {
+		selectedUsers = [];
+		selectedExpanded = {};
+		activeUserId = null;
+		selectedOpen = true;
+	};
+
+	const toggleSelectedSection = () => {
+		selectedOpen = !selectedOpen;
+	};
+
+	const toggleSelectedDetails = (userId: string) => {
+		selectedExpanded = { ...selectedExpanded, [userId]: !selectedExpanded[userId] };
+		setActive(userId);
+	};
+
+	const expandAllSelected = () => {
+		selectedOpen = true;
+		const next: Record<string, boolean> = {};
+		for (const u of selectedUsers) next[u.userId] = true;
+		selectedExpanded = next;
+	};
+
+	const collapseAllSelected = () => {
+		const next: Record<string, boolean> = {};
+		for (const u of selectedUsers) next[u.userId] = false;
+		selectedExpanded = next;
+	};
+
+	const refreshSelectedFrom = (rows: UserRow[]) => {
+		if (selectedUsers.length === 0) return;
+		const map = new Map((rows ?? []).map((r) => [r.userId, r] as const));
+		let changed = false;
+		const next = selectedUsers.map((u) => {
+			const newer = map.get(u.userId);
+			if (!newer) return u;
+			const same =
+				newer.email === u.email && newer.username === u.username && normalizeRoles(newer.roles ?? []) === normalizeRoles(u.roles ?? []);
+			if (same) return u;
+			changed = true;
+			return newer;
+		});
+		if (changed) selectedUsers = next;
+	};
 
 	const resetSearchResult = () => {
 		searchResult = {
@@ -111,15 +270,29 @@
 				prevCursor: null,
 				nextCursor: null
 			},
-			email: {
-				items: [],
-				currPage: emailPage,
-				pageSize: searchPageSize,
-				totalItems: 0,
-				prevCursor: null,
-				nextCursor: null
-			}
+			email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
 		};
+	};
+
+	const switchTab = (next: Tab) => {
+		reqSeq += 1;
+		loading = false;
+		error = null;
+		createError = null;
+		updateError = null;
+		deleteError = null;
+		createdUser = null;
+		updateSuccess = null;
+
+		tab = next;
+
+		if (next === 'search') {
+			searchedOnce = false;
+			searchQuery = '';
+			usernamePage = 1;
+			emailPage = 1;
+			resetSearchResult();
+		}
 	};
 
 	const loadAll = async () => {
@@ -133,11 +306,9 @@
 
 		try {
 			const res = await FetchFromApi<PageData<UserRow>>('admin/users', { method: 'GET' }, fetchWithTimeout, params);
-
 			if (my !== reqSeq) return;
 
-			const body = (res as StandardResponseDto<PageData<UserRow>>).body;
-
+			const body = unwrap<PageData<UserRow>>(res as StandardResponseDto<PageData<UserRow>>);
 			allResult = body ?? {
 				items: [],
 				currPage: allPage,
@@ -151,19 +322,12 @@
 			allPageSize = allResult.pageSize;
 
 			allLoadedOnce = true;
+			refreshSelectedFrom(allResult.items);
 		} catch (e) {
 			if (my !== reqSeq) return;
-
 			error = e instanceof Error ? e.message : 'Failed to load users.';
 			allLoadedOnce = true;
-			allResult = {
-				items: [],
-				currPage: allPage,
-				pageSize: allPageSize,
-				totalItems: 0,
-				prevCursor: null,
-				nextCursor: null
-			};
+			allResult = { items: [], currPage: allPage, pageSize: allPageSize, totalItems: 0, prevCursor: null, nextCursor: null };
 		} finally {
 			if (my === reqSeq) loading = false;
 		}
@@ -185,51 +349,36 @@
 		params.set('emailPageSize', String(searchPageSize));
 
 		try {
-			const res = await FetchFromApi<SearchUsersResult>(
-				'admin/users/search',
-				{ method: 'GET' },
-				fetchWithTimeout,
-				params
-			);
-
+			const res = await FetchFromApi<SearchUsersResult>('admin/users/search', { method: 'GET' }, fetchWithTimeout, params);
 			if (my !== reqSeq) return;
 
-			const body = (res as StandardResponseDto<SearchUsersResult>).body;
-
-			searchResult = body ?? {
-				idMatch: null,
-				username: { items: [], currPage: usernamePage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null },
-				email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
-			};
+			const body = unwrap<SearchUsersResult>(res as StandardResponseDto<SearchUsersResult>);
+			searchResult =
+				body ?? {
+					idMatch: null,
+					username: { items: [], currPage: usernamePage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null },
+					email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
+				};
 
 			usernamePage = searchResult.username.currPage;
 			emailPage = searchResult.email.currPage;
 			searchPageSize = searchResult.username.pageSize;
 
 			searchedOnce = true;
+
+			const merged = [
+				...(searchResult.username.items ?? []),
+				...(searchResult.email.items ?? []),
+				...(searchResult.idMatch ? [searchResult.idMatch] : [])
+			];
+			refreshSelectedFrom(merged);
 		} catch (e) {
 			if (my !== reqSeq) return;
-
 			error = e instanceof Error ? e.message : 'Failed to search users.';
 			resetSearchResult();
 			searchedOnce = true;
 		} finally {
 			if (my === reqSeq) loading = false;
-		}
-	};
-
-	const switchMode = (next: Mode) => {
-		reqSeq += 1;
-		loading = false;
-		error = null;
-		mode = next;
-
-		if (next === 'search') {
-			searchedOnce = false;
-			searchQuery = '';
-			usernamePage = 1;
-			emailPage = 1;
-			resetSearchResult();
 		}
 	};
 
@@ -268,293 +417,359 @@
 		emailPage = searchResult.email.nextCursor;
 		await runSearch();
 	};
+
+	const onSearchFromStart = () => {
+		usernamePage = 1;
+		emailPage = 1;
+		runSearch();
+	};
+
+	const onSearchPageSizeChanged = () => {
+		usernamePage = 1;
+		emailPage = 1;
+		resetSearchResult();
+	};
+
+	const createUser = async (payload: { email: string; password: string; role: CreateRole; emailVerified: boolean; username: string | null }) => {
+		if (creating || saving || deleting) return;
+
+		if (payload.role === 'admin') {
+			const ok = confirm('Create a new admin account?');
+			if (!ok) return;
+		}
+
+		createError = null;
+		createdUser = null;
+		creating = true;
+
+		try {
+			const res = await FetchFromApi<CreateUserResult>(
+				'admin/users',
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						email: payload.email,
+						password: payload.password,
+						role: payload.role,
+						emailVerified: payload.emailVerified,
+						username: payload.username
+					})
+				},
+				fetchWithTimeout
+			);
+
+			const body = unwrap<CreateUserResult>(res as StandardResponseDto<CreateUserResult>);
+			createdUser = body ?? null;
+
+			if (createdUser) {
+				addSelected({
+					userId: createdUser.userId,
+					email: createdUser.email,
+					username: createdUser.username,
+					roles: [createdUser.role]
+				});
+			}
+
+			if (allLoadedOnce) {
+				allPage = 1;
+				await loadAll();
+			}
+		} catch (e) {
+			createError = e instanceof Error ? e.message : 'Failed to create user.';
+		} finally {
+			creating = false;
+		}
+	};
+
+	const updateUser = async (payload: { userId: string; username: string | null; role: UpdateRole }) => {
+		if (creating || saving || deleting) return;
+
+		const bodyPayload: Record<string, string> = {};
+		if (payload.username) bodyPayload.username = payload.username;
+		if (payload.role !== 'keep') bodyPayload.role = payload.role;
+
+		if (Object.keys(bodyPayload).length === 0) {
+			updateError = 'No changes to save.';
+			return;
+		}
+
+		if (payload.role === 'admin') {
+			const ok = confirm('Promote this user to admin?');
+			if (!ok) return;
+		}
+
+		updateError = null;
+		updateSuccess = null;
+		saving = true;
+
+		try {
+			const res = await FetchFromApi<UpdateUserResult>(
+				`admin/users/${encodeURIComponent(payload.userId)}`,
+				{ method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyPayload) },
+				fetchWithTimeout
+			);
+
+			const body = unwrap<UpdateUserResult>(res as StandardResponseDto<UpdateUserResult>);
+			updateSuccess = body ?? null;
+
+			if (updateSuccess) {
+				const updated: UserRow = {
+					userId: updateSuccess.userId,
+					email: updateSuccess.email,
+					username: updateSuccess.username,
+					roles: updateSuccess.roles ?? []
+				};
+
+				const idx = selectedUsers.findIndex((u) => u.userId === updated.userId);
+				if (idx >= 0) {
+					const next = [...selectedUsers];
+					next[idx] = updated;
+					selectedUsers = next;
+				} else {
+					selectedUsers = [...selectedUsers, updated];
+					selectedExpanded = { ...selectedExpanded, [updated.userId]: false };
+				}
+
+				activeUserId = updated.userId;
+				selectedOpen = true;
+			}
+
+			if (allLoadedOnce) await loadAll();
+			if (searchedOnce && searchQuery.trim()) await runSearch();
+		} catch (e) {
+			updateError = e instanceof Error ? e.message : 'Failed to update user.';
+		} finally {
+			saving = false;
+		}
+	};
+
+	const deleteUserNoConfirm = async (userId: string) => {
+		await FetchFromApi(`admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' }, fetchWithTimeout);
+		if (isSelected(userId)) removeSelected(userId);
+	};
+
+	const deleteUser = async (userId: string) => {
+		if (creating || saving || deleting) return;
+
+		const ok = confirm('Are you sure you want to delete this user? This cannot be undone.');
+		if (!ok) return;
+
+		deleteError = null;
+		deleting = true;
+
+		try {
+			await deleteUserNoConfirm(userId);
+
+			if (allLoadedOnce) await loadAll();
+			if (searchedOnce && searchQuery.trim()) await runSearch();
+		} catch (e) {
+			deleteError = e instanceof Error ? e.message : 'Failed to delete user.';
+		} finally {
+			deleting = false;
+		}
+	};
+
+	const deleteAllSelected = async () => {
+		if (creating || saving || deleting) return;
+		if (selectedUsers.length === 0) return;
+
+		const ok = confirm(`Delete ${selectedUsers.length} selected user(s)? This cannot be undone.`);
+		if (!ok) return;
+
+		deleteError = null;
+		deleting = true;
+
+		const ids = selectedUsers.map((u) => u.userId);
+		try {
+			for (const id of ids) {
+				await deleteUserNoConfirm(id);
+			}
+
+			if (allLoadedOnce) await loadAll();
+			if (searchedOnce && searchQuery.trim()) await runSearch();
+		} catch (e) {
+			deleteError = e instanceof Error ? e.message : 'Failed to delete selected users.';
+		} finally {
+			deleting = false;
+		}
+	};
+
+	onMount(() => {
+		if (typeof window === 'undefined') return;
+
+		const rawV2 = window.localStorage.getItem(storageKey);
+		if (rawV2) {
+			try {
+				const parsed = JSON.parse(rawV2) as SelectionSnapshotV2;
+				if (parsed && typeof parsed === 'object' && parsed.version === 2) {
+					selectedRoleFilter = parsed.selectedRoleFilter ?? selectedRoleFilter;
+					allRoleFilter = parsed.allRoleFilter ?? allRoleFilter;
+					searchRoleFilter = parsed.searchRoleFilter ?? searchRoleFilter;
+
+					selectedUsers = Array.isArray(parsed.selectedUsers) ? parsed.selectedUsers : [];
+					selectedExpanded = parsed.selectedExpanded && typeof parsed.selectedExpanded === 'object' ? parsed.selectedExpanded : {};
+					selectedOpen = typeof parsed.selectedOpen === 'boolean' ? parsed.selectedOpen : true;
+					activeUserId = typeof parsed.activeUserId === 'string' ? parsed.activeUserId : null;
+
+					ensureActive();
+
+					const fixedExpanded: Record<string, boolean> = {};
+					for (const u of selectedUsers) fixedExpanded[u.userId] = Boolean(selectedExpanded[u.userId]);
+					selectedExpanded = fixedExpanded;
+
+					storageReady = true;
+					return;
+				}
+			} catch {
+				window.localStorage.removeItem(storageKey);
+			}
+		}
+
+		storageReady = true;
+	});
+
+	$effect(() => {
+		if (!storageReady) return;
+		if (typeof window === 'undefined') return;
+
+		const snapshot: SelectionSnapshotV2 = {
+			version: 2,
+			selectedRoleFilter,
+			allRoleFilter,
+			searchRoleFilter,
+			selectedUsers,
+			selectedExpanded,
+			selectedOpen,
+			activeUserId
+		};
+
+		try {
+			window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+		} catch {
+			window.localStorage.removeItem(storageKey);
+		}
+	});
 </script>
 
 <main class="w-full min-h-screen bg-[#1e1e1e] text-[#cccccc] font-sans">
 	<div class="max-w-6xl mx-auto p-6 flex flex-col gap-6">
-		<div class="py-4 border-b border-[#3c3c3c] mb-2 flex items-end justify-between">
-			<h2 class="text-2xl font-normal text-[#e7e7e7] tracking-tight">Users</h2>
+		<UsersHeaderAny tab={tab} onSwitchTab={switchTab} />
 
-			<div class="flex items-center gap-2">
+		{#if selectedUsers.length > 0 && tab !== 'create'}
+			<SelectedUsersPanelAny
+				bind:roleFilter={selectedRoleFilter}
+				disabled={loading || creating || saving || deleting}
+				selectedUsers={selectedUsers}
+				selectedFiltered={selectedFiltered}
+				selectedExpanded={selectedExpanded}
+				selectedOpen={selectedOpen}
+				activeUserId={activeUserId}
+				activeUser={activeUser}
+				onToggleOpen={toggleSelectedSection}
+				onExpandAll={expandAllSelected}
+				onCollapseAll={collapseAllSelected}
+				onClearAll={clearAllSelected}
+				onSetActive={setActive}
+				onToggleDetails={toggleSelectedDetails}
+				onRemove={removeSelected}
+			/>
+		{/if}
+
+		{#if tab === 'create'}
+			<UserCreateFormAny
+				disabled={loading || saving || deleting}
+				creating={creating}
+				error={createError}
+				created={createdUser}
+				onCreate={createUser}
+			/>
+		{/if}
+
+		{#if tab === 'update'}
+			<UserUpdateFormAny
+				disabled={loading || creating || deleting}
+				saving={saving}
+				error={updateError}
+				success={updateSuccess}
+				initialUserId={activeUserId ?? ''}
+				onUpdate={updateUser}
+			/>
+		{/if}
+
+		{#if tab === 'delete'}
+			<div class="flex items-center justify-end gap-3">
 				<button
 					type="button"
-					onclick={() => switchMode('all')}
-					class={`px-3 py-1.5 rounded-sm text-xs font-semibold tracking-wider border ${
-						mode === 'all'
-							? 'bg-[#0e639c] text-white border-[#0e639c]'
-							: 'bg-[#2d2d2d] text-[#e7e7e7] border-[#3c3c3c] hover:bg-[#3a3a3a]'
-					}`}
+					onclick={deleteAllSelected}
+					disabled={loading || creating || saving || deleting || selectedUsers.length === 0}
+					class="px-3 py-2 bg-[#a1260d] text-white rounded-sm text-xs font-medium hover:bg-[#b83318] disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					ALL
-				</button>
-				<button
-					type="button"
-					onclick={() => switchMode('search')}
-					class={`px-3 py-1.5 rounded-sm text-xs font-semibold tracking-wider border ${
-						mode === 'search'
-							? 'bg-[#0e639c] text-white border-[#0e639c]'
-							: 'bg-[#2d2d2d] text-[#e7e7e7] border-[#3c3c3c] hover:bg-[#3a3a3a]'
-					}`}
-				>
-					SEARCH
+					{#if deleting}
+						<LoadingDots />
+					{:else}
+						Delete all selected ({selectedUsers.length})
+					{/if}
 				</button>
 			</div>
-		</div>
 
-		{#if mode === 'all'}
-			<div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
-				<div class="flex items-center justify-between gap-2.5 px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-					<h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">All users</h3>
+			<UserDeleteFormAny
+				disabled={loading || creating || saving}
+				deleting={deleting}
+				error={deleteError}
+				initialUserId={activeUserId ?? ''}
+				onDelete={deleteUser}
+			/>
+		{/if}
 
-					<div class="flex items-center gap-3">
-						<label for="users_all_pagesize" class="text-xs text-[#a8a8a8]">Page size</label>
-						<select
-							id="users_all_pagesize"
-							bind:value={allPageSize}
-							class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-2 py-1 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
-						>
-							<option value={10}>10</option>
-							<option value={20}>20</option>
-							<option value={50}>50</option>
-							<option value={100}>100</option>
-						</select>
+		{#if tab === 'all'}
+			<UsersAllPanelAny
+				bind:roleFilter={allRoleFilter}
+				bind:pageSize={allPageSize}
+				loading={loading}
+				error={error}
+				allLoadedOnce={allLoadedOnce}
+				allResult={allResult}
+				filteredItems={filteredAllItems}
+				selectedUserIds={selectedUserIds}
+				totalPages={allTotalPages}
+				disabled={loading || creating || saving || deleting}
+				onLoad={async () => {
+					allPage = 1;
+					await loadAll();
+				}}
+				onPrev={allPrev}
+				onNext={allNext}
+				onToggleSelect={toggleSelect}
+			/>
+		{/if}
 
-						<button
-							type="button"
-							onclick={async () => {
-								allPage = 1;
-								await loadAll();
-							}}
-							disabled={loading}
-							class="ml-3 px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							Load
-						</button>
-
-						<div class="ml-4 flex items-center gap-2">
-							<button
-								type="button"
-								onclick={allPrev}
-								disabled={loading || !allLoadedOnce || !allResult.prevCursor}
-								class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Prev
-							</button>
-
-							<div class="text-xs text-[#a8a8a8]">
-								Page {allResult.currPage} / {totalPages(allResult.totalItems, allResult.pageSize)}
-							</div>
-
-							<button
-								type="button"
-								onclick={allNext}
-								disabled={loading || !allLoadedOnce || !allResult.nextCursor}
-								class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Next
-							</button>
-						</div>
-					</div>
-				</div>
-
-				<div class="p-4">
-					{#if error}
-						<div class="text-sm text-[#ffb4b4] mb-3">{error}</div>
-					{/if}
-
-					{#if loading}
-						<div class="text-sm text-[#a8a8a8]">
-							<LoadingDots />
-						</div>
-					{:else if !allLoadedOnce}
-						<div class="text-sm text-[#a8a8a8]">Click Load to fetch users.</div>
-					{:else if allResult.items.length === 0}
-						<div class="text-sm text-[#a8a8a8]">No users.</div>
-					{:else}
-						<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-							<div class="text-xs text-[#a8a8a8]">Showing {filteredAllItems.length} of {allResult.items.length} on this page</div>
-							<RoleFilterButtons bind:value={roleFilter} disabled={loading} />
-						</div>
-
-						{#if filteredAllItems.length === 0}
-							<div class="text-sm text-[#a8a8a8]">No users for selected role filter on this page.</div>
-						{:else}
-							<UsersTable users={filteredAllItems} />
-						{/if}
-					{/if}
-				</div>
-			</div>
-		{:else}
-			<div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
-				<div class="flex items-center justify-between gap-2.5 px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-					<h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Search users</h3>
-
-					<div class="flex items-center gap-3">
-						<label for="users_search_pagesize" class="text-xs text-[#a8a8a8]">Page size</label>
-						<select
-							id="users_search_pagesize"
-							bind:value={searchPageSize}
-							onchange={() => {
-								usernamePage = 1;
-								emailPage = 1;
-								resetSearchResult();
-							}}
-							class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-2 py-1 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
-						>
-							<option value={10}>10</option>
-							<option value={20}>20</option>
-							<option value={50}>50</option>
-							<option value={100}>100</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="p-4 flex flex-col gap-4">
-					<div class="flex flex-col gap-2">
-						<label for="users_search_query" class="text-xs text-[#a8a8a8]">Query</label>
-						<input
-							id="users_search_query"
-							bind:value={searchQuery}
-							class="w-full bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
-							placeholder="Type part of username/email (GUID also supported)"
-							onkeydown={(e) => {
-								if (e.key === 'Enter') {
-									usernamePage = 1;
-									emailPage = 1;
-									runSearch();
-								}
-							}}
-						/>
-					</div>
-
-					<div class="flex flex-wrap items-center justify-between gap-3">
-						<div class="flex items-center gap-2">
-							<button
-								type="button"
-								onclick={() => {
-									usernamePage = 1;
-									emailPage = 1;
-									runSearch();
-								}}
-								disabled={loading || !searchQuery.trim()}
-								class="px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Search
-							</button>
-						</div>
-
-						{#if searchedOnce}
-							<RoleFilterButtons bind:value={roleFilter} disabled={loading || !hasUnfilteredSearchResults} />
-						{/if}
-					</div>
-
-					{#if error}
-						<div class="text-sm text-[#ffb4b4]">{error}</div>
-					{/if}
-
-					{#if loading}
-						<div class="text-sm text-[#a8a8a8]">
-							<LoadingDots />
-						</div>
-					{:else if searchedOnce}
-						{#if filteredIdMatch}
-							<div class="border border-[#3c3c3c] rounded bg-[#1f1f1f] px-4 py-3">
-								<div class="text-xs text-[#a8a8a8] uppercase tracking-wider">ID match</div>
-								<div class="mt-2 flex flex-col gap-1">
-									<div class="text-xs text-[#a8a8a8] font-mono">{filteredIdMatch.userId}</div>
-									<div class="text-sm text-[#e7e7e7]">{filteredIdMatch.username}</div>
-									<div class="text-xs text-[#a8a8a8]">{filteredIdMatch.email}</div>
-									<div class="text-xs text-[#a8a8a8]">{filteredIdMatch.roles.join(', ')}</div>
-								</div>
-							</div>
-						{/if}
-
-						<div class="border border-[#3c3c3c] rounded overflow-hidden">
-							<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c] flex items-center justify-between gap-3">
-								<div class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Username matches</div>
-								<div class="flex flex-wrap items-center gap-3">
-									<div class="text-xs text-[#a8a8a8]">Total: {searchResult.username.totalItems}</div>
-									<div class="text-xs text-[#a8a8a8]">Showing: {filteredUsernameItems.length}</div>
-									<div class="text-xs text-[#a8a8a8]">Page {searchResult.username.currPage} / {usernameTotalPages}</div>
-									<button
-										type="button"
-										onclick={usernamePrev}
-										disabled={loading || !searchResult.username.prevCursor}
-										class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-									>
-										Prev
-									</button>
-									<button
-										type="button"
-										onclick={usernameNext}
-										disabled={loading || !searchResult.username.nextCursor}
-										class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-									>
-										Next
-									</button>
-								</div>
-							</div>
-
-							<div class="p-4">
-								{#if searchResult.username.totalItems === 0}
-									<div class="text-sm text-[#a8a8a8]">No username matches.</div>
-								{:else if filteredUsernameItems.length === 0}
-									<div class="text-sm text-[#a8a8a8]">No username matches for selected role filter on this page.</div>
-								{:else}
-									<UsersTable users={filteredUsernameItems} />
-								{/if}
-							</div>
-						</div>
-
-						<div class="border border-[#3c3c3c] rounded overflow-hidden">
-							<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c] flex items-center justify-between gap-3">
-								<div class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Email matches</div>
-								<div class="flex flex-wrap items-center gap-3">
-									<div class="text-xs text-[#a8a8a8]">Total: {searchResult.email.totalItems}</div>
-									<div class="text-xs text-[#a8a8a8]">Showing: {filteredEmailItems.length}</div>
-									<div class="text-xs text-[#a8a8a8]">Page {searchResult.email.currPage} / {emailTotalPages}</div>
-									<button
-										type="button"
-										onclick={emailPrev}
-										disabled={loading || !searchResult.email.prevCursor}
-										class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-									>
-										Prev
-									</button>
-									<button
-										type="button"
-										onclick={emailNext}
-										disabled={loading || !searchResult.email.nextCursor}
-										class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
-									>
-										Next
-									</button>
-								</div>
-							</div>
-
-							<div class="p-4">
-								{#if searchResult.email.totalItems === 0}
-									<div class="text-sm text-[#a8a8a8]">No email matches.</div>
-								{:else if filteredEmailItems.length === 0}
-									<div class="text-sm text-[#a8a8a8]">No email matches for selected role filter on this page.</div>
-								{:else}
-									<UsersTable users={filteredEmailItems} />
-								{/if}
-							</div>
-						</div>
-
-						{#if hasUnfilteredSearchResults && !hasFilteredSearchResults}
-							<div class="text-sm text-[#a8a8a8]">No results for selected role filter.</div>
-						{/if}
-
-						{#if !hasUnfilteredSearchResults}
-							<div class="text-sm text-[#a8a8a8]">No results.</div>
-						{/if}
-					{:else}
-						<div class="text-sm text-[#a8a8a8]">Type a query (e.g. “abc”) and click Search.</div>
-					{/if}
-				</div>
-			</div>
+		{#if tab === 'search'}
+			<UsersSearchPanelAny
+				bind:roleFilter={searchRoleFilter}
+				bind:searchQuery={searchQuery}
+				bind:searchPageSize={searchPageSize}
+				loading={loading}
+				error={error}
+				searchedOnce={searchedOnce}
+				hasAnySearchResults={hasAnySearchResults}
+				searchResult={searchResult}
+				filteredUsernameItems={filteredUsernameItems}
+				filteredEmailItems={filteredEmailItems}
+				usernameTotalPages={usernameTotalPages}
+				emailTotalPages={emailTotalPages}
+				idMatchHiddenByFilter={idMatchHiddenByFilter}
+				selectedUserIds={selectedUserIds}
+				disabled={loading || creating || saving || deleting}
+				onSearchFromStart={onSearchFromStart}
+				onPageSizeChanged={onSearchPageSizeChanged}
+				onUsernamePrev={usernamePrev}
+				onUsernameNext={usernameNext}
+				onEmailPrev={emailPrev}
+				onEmailNext={emailNext}
+				onToggleSelect={toggleSelect}
+				onToggleSelectMaybe={toggleSelectMaybe}
+			/>
 		{/if}
 	</div>
 </main>

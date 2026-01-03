@@ -14,7 +14,7 @@
 	let myAvatarUrl = $state<string>('');
 	let avatarOverride = $state<string>('');
 
-	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55642.png`;
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 	const coinSrc = '/headers/coin.png';
 
 	const normalizeToCloudfrontKey = (value: string): string => {
