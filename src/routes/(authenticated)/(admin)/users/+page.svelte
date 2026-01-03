@@ -482,12 +482,23 @@
 		}
 	};
 
-	const updateUser = async (payload: { userId: string; username: string | null; role: UpdateRole }) => {
+	const updateUser = async (payload: {
+		userId: string;
+		username: string | null;
+		role: UpdateRole;
+		email?: string | null;
+		password?: string | null;
+	}) => {
 		if (creating || saving || deleting) return;
 
 		const bodyPayload: Record<string, string> = {};
 		if (payload.username) bodyPayload.username = payload.username;
 		if (payload.role !== 'keep') bodyPayload.role = payload.role;
+
+		const emailTrimmed = payload.email ? payload.email.trim() : '';
+		if (emailTrimmed) bodyPayload.email = emailTrimmed;
+
+		if (payload.password) bodyPayload.password = payload.password;
 
 		if (Object.keys(bodyPayload).length === 0) {
 			updateError = 'No changes to save.';

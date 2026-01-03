@@ -81,7 +81,7 @@
 				onclick={onToggleOpen}
 				disabled={disabled}
 				aria-label={selectedOpen ? 'Collapse selected users section' : 'Expand selected users section'}
-				class="w-9 h-9 flex items-center justify-center bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-sm font-semibold hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="w-9 h-9 flex items-center justify-center bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-lg font-semibold hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{selectedOpen ? '▴' : '▾'}
 			</button>
@@ -171,11 +171,15 @@
 	{:else}
 		<div class="p-3">
 			{#if activeUser}
-				<div class="text-sm text-[#a8a8a8] font-mono break-all">{activeUser.userId}</div>
-				<div class="mt-1 text-xs text-[#a8a8a8] flex flex-wrap items-center gap-x-3 gap-y-1">
-					<span>{(activeUser.roles ?? []).join(', ')}</span>
-					<span>{activeUser.username}</span>
-					<span>{activeUser.email}</span>
+				<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+					<div class="text-sm text-[#a8a8a8] font-mono break-all">{activeUser.userId}</div>
+					<div class="text-xs text-[#a8a8a8] flex flex-wrap items-center gap-x-3 gap-y-1">			
+						<span>{(activeUser.roles ?? []).join(', ')}</span>
+						<span>{activeUser.username}</span>
+						<span>{activeUser.email}</span>
+						<span class="mx-1 text-[#3c3c3c]">|</span>
+						<span>(expand to see all selected users)</span>
+					</div>
 				</div>
 			{:else}
 				<div class="text-sm text-[#a8a8a8]">No active user.</div>
