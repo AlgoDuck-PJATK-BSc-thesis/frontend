@@ -83,7 +83,10 @@
 
 <div class="flex h-8 w-full flex-row transition-colors duration-300 ease-out">
     <button 
-        onclick={() => { if (!isRenaming) onclick(); }} 
+        onclick={() => { 
+            if (!isRenaming)
+                onclick(); 
+            }} 
         class="h-full w-full rounded-md hover:bg-ide-dcard overflow-hidden"
     >
         {#if isRenaming}
@@ -112,7 +115,7 @@
             }} 
             class="w-full h-full hover:bg-ide-dcard flex flex-col rounded-[25%] justify-center items-center"
         >
-            <ThreeDotIconSvg options={{ class: 'h-6 w-6 stroke-[2] stroke-black' }}/>
+            <ThreeDotIconSvg options={{ class: 'h-6 w-6 stroke-[2] stroke-ide-text-secondary' }}/>
         </button>
         {#if isHelperDialogShown}
             <div 
@@ -127,7 +130,7 @@
                         }} 
                         class="flex w-full flex-row items-center justify-start gap-2 rounded-md px-3 ease-out hover:bg-ide-dcard"
                     >
-                        <PenIconSvg options={{ class: 'h-3 w-3 stroke-[1] stroke-black' }} />
+                        <PenIconSvg options={{ class: 'h-3 w-3 stroke-[1] stroke-text-secondary' }} />
                         <span class="py-1">Rename</span>
                     </button>
                 </div>
@@ -136,7 +139,7 @@
                         onclick={toggleDeleteDialog} 
                         class="flex w-full flex-row items-center justify-start gap-2 rounded-md px-3 hover:bg-ide-dcard"
                     >
-                        <BinIconSvg options={{ class: 'h-3 w-3 stroke-[1] stroke-black' }} />
+                        <BinIconSvg options={{ class: 'h-3 w-3 stroke-[1] stroke-text-secondary' }} />
                         <span class="py-1">Delete</span>
                     </button>
                 </div>
@@ -165,9 +168,11 @@
             <div class="flex flex-row justify-end gap-1">
                 <button class="px-3 py-1 rounded-md border-2 border-ide-dcard" onclick={toggleDeleteDialog}>cancel</button>
                 <button 
-                    onclick={() => {
-                        toggleDeleteDialog();
-                        deleteYourself();
+                    onclick={async () => {
+                        deleteYourself().then((value: boolean) => {
+                            if (value)
+                                toggleDeleteDialog();
+                        });
                     }} 
                     class="px-3 py-1 rounded-md border-2 border-ide-dcard"
                 >

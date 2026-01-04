@@ -32,7 +32,7 @@
 	let executingState: IntermediateStatus | TerminalStatus | undefined = $state();
 	let connection: signalR.HubConnection | undefined;
 	let connected: boolean = false;
-
+	let problemId: string | undefined = $derived((components['problem-info'] as InfoPanelComponentArgs)?.problemId)
 
 	const executeCallback = async (): Promise<void> => {
 		if (!(components['code-editor'] as CodeEditorComponentArgs).userCode){
@@ -61,7 +61,6 @@
 		
 		connection.on("ExecutionStatusUpdated", (executionResponse: SubmissionResult) => {
 			(components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.status;
-			console.log(executionResponse);
 			executingState = executionResponse.status;
 			if (isTerminalStatus(executionResponse.status)) {
 				(components['terminal-comp'] as TerminalComponentArgs).stdOut = executionResponse.stdOutput;
@@ -69,14 +68,12 @@
 				
 				switch(executingState as TerminalStatus){
 					case "Completed":
-						console.log("toasting");
 						toast.success(executingState);
 						break;
 					case "CompilationFailure":
 					case "RuntimeError":
 					case "ServiceFailure":
 					case "Timeout":
-						console.log("toasting");
 						toast.error(executingState);
 						break;
 				}
@@ -159,8 +156,6 @@
 						break;
 				}
 				executingState = undefined;
-			}else{
-						console.log("not terminal");
 			}
 		});
 		
@@ -195,6 +190,7 @@
 	{/if}
 	<div class="w-full h-[5%]">
 		<TopPanel
+		problemId={problemId}
 		{registerAndSelectLayout}
 		{executingState}
 		{executeCallback}

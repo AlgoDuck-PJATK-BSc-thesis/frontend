@@ -7,6 +7,7 @@
 	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import CreationModal from "./CreationModal.svelte";
 	import { FetchFromApi } from "$lib/api/apiCall";
+	import ToolTip from "../../../../../(admin)/problem/ToolTip.svelte";
 
 	type Coords = { x: number; y: number };
 
@@ -592,7 +593,7 @@
 	return () => {
 		activeProfile.profile = 'default';
 	};
-	}} class="w-full h-full flex bg-ide-dcard flex-row">
+	}} class="w-full h-full flex bg-ide-dcard flex-row rounded-xl overflow-hidden">
 	<div class="w-56 h-full bg-ide-card flex flex-col border-r border-ide-accent/20">
 		<div class="px-4 py-3 border-b border-ide-accent/20">
 			<span class="font-semibold text-lg text-ide-text-primary">Components</span>
@@ -602,9 +603,11 @@
 			<div class="border-b border-ide-accent/10">
 				<button 
 					onclick={() => isLayoutHarmonicaExpanded = !isLayoutHarmonicaExpanded} 
-					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors"
-				>
-					<span class="text-sm font-medium text-ide-text-secondary">Layout</span>
+					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
+					<div class="flex flex-row gap-3">
+						<span class="text-sm font-medium text-ide-text-secondary">Layout</span>
+						<ToolTip options={{ tip: "These components contain hold the useful stuff in an arranged way"}}/>	
+					</div>
 					<div class="h-3 w-3 transition-transform duration-150 ease-out {isLayoutHarmonicaExpanded ? 'rotate-90' : ''}">
 						<ChevronIconSvg options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
 					</div>
@@ -645,11 +648,12 @@
 			</div>
 
 			<div class="border-b border-ide-accent/10">
-				<button 
-					onclick={() => isContentHarmonicaExpanded = !isContentHarmonicaExpanded} 
-					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors"
-				>
-					<span class="text-sm font-medium text-ide-text-secondary">Content</span>
+				<button onclick={() => isContentHarmonicaExpanded = !isContentHarmonicaExpanded} 
+					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
+					<div class="flex flex-row gap-3">
+						<span class="text-sm font-medium text-ide-text-secondary">Content</span>
+						<ToolTip options={{ tip: "These components contain the useful stuff" }}/>	
+					</div>
 					<div class="h-3 w-3 transition-transform duration-150 ease-out {isContentHarmonicaExpanded ? 'rotate-90' : ''}">
 						<ChevronIconSvg options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
 					</div>

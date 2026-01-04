@@ -2,6 +2,6 @@
   let {}: { } = $props();
 </script>
 
-<main class="w-full h-full">
+<main class="w-full h-full bg-gray-500/20">
 
 </main>

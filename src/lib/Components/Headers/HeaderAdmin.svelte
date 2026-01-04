@@ -3,7 +3,7 @@
 </script>
 
 <header
-	class="font-body sticky top-0 z-50 flex h-16 items-center justify-between border-b-4 border-[color:var(--color-bg-header-border)] bg-[color:var(--color-header-user)] px-8 py-4 text-[color:var(--color-landingpage-subtitle)]"
+	class="font-body sticky top-0 z-50  flex h-16 items-center justify-between border-b-4 border-[color:var(--color-bg-header-border)] bg-[color:var(--color-header-user)] px-8 py-4 text-[color:var(--color-landingpage-subtitle)]"
 >
 	<div class="flex items-center gap-6 whitespace-nowrap">
 		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline">AlgoDuck</a>

@@ -1,5 +1,4 @@
 import { FetchFromApi, FetchJsonFromApi } from '$lib/api/apiCall';
-import { FetchFromApi, FetchJsonFromApi } from '$lib/api/apiCall';
 
 export type UserLeaderboardEntryDto = {
 	rank: number;
@@ -198,77 +197,79 @@ export const userApi = {
 		);
 	},
 
-	getMe: async (fetcher?: typeof fetch): Promise<UserDto> => {
-		const res = await FetchFromApi<UserDto>('user/me', { method: 'GET' }, fetcher);
-		return res.body;
-	},
+	/* Commented these out since git stacked them when auto merging. Pretty sure these are the old ones to be deleted but just to make sure */
 
-	getMyStatistics: async (fetcher?: typeof fetch): Promise<UserStatisticsDto> => {
-		const res = await FetchFromApi<UserStatisticsDto>(
-			'user/statistics',
-			{ method: 'GET' },
-			fetcher
-		);
-		return res.body;
-	},
+	// getMe: async (fetcher?: typeof fetch): Promise<UserDto> => {
+	// 	const res = await FetchFromApi<UserDto>('user/me', { method: 'GET' }, fetcher);
+	// 	return res.body;
+	// },
 
-	getUserById: async (userId: string, fetcher?: typeof fetch): Promise<UserDto> => {
-		const res = await FetchFromApi<UserDto>(`user/${userId}`, { method: 'GET' }, fetcher);
-		return res.body;
-	},
+	// getMyStatistics: async (fetcher?: typeof fetch): Promise<UserStatisticsDto> => {
+	// 	const res = await FetchFromApi<UserStatisticsDto>(
+	// 		'user/statistics',
+	// 		{ method: 'GET' },
+	// 		fetcher
+	// 	);
+	// 	return res.body;
+	// },
 
-	getUserStatisticsById: async (
-		userId: string,
-		fetcher?: typeof fetch
-	): Promise<UserStatisticsDto> => {
-		const res = await FetchFromApi<UserStatisticsDto>(
-			`user/${userId}/statistics`,
-			{ method: 'GET' },
-			fetcher
-		);
-		return res.body;
-	},
+	// getUserById: async (userId: string, fetcher?: typeof fetch): Promise<UserDto> => {
+	// 	const res = await FetchFromApi<UserDto>(`user/${userId}`, { method: 'GET' }, fetcher);
+	// 	return res.body;
+	// },
 
-	getUserAchievementsById: async (
-		userId: string,
-		request?: Record<string, string | number | boolean | null | undefined>,
-		fetcher?: typeof fetch
-	): Promise<UserAchievementDto[]> => {
-		const sp = new URLSearchParams();
-		if (request) {
-			for (const [k, v] of Object.entries(request)) {
-				if (v === undefined || v === null) continue;
-				sp.set(k, String(v));
-			}
-		}
+	// getUserStatisticsById: async (
+	// 	userId: string,
+	// 	fetcher?: typeof fetch
+	// ): Promise<UserStatisticsDto> => {
+	// 	const res = await FetchFromApi<UserStatisticsDto>(
+	// 		`user/${userId}/statistics`,
+	// 		{ method: 'GET' },
+	// 		fetcher
+	// 	);
+	// 	return res.body;
+	// },
 
-		const res = await FetchFromApi<UserAchievementDto[]>(
-			`user/${userId}/achievements`,
-			{ method: 'GET' },
-			fetcher,
-			sp
-		);
-		return res.body;
-	},
+	// getUserAchievementsById: async (
+	// 	userId: string,
+	// 	request?: Record<string, string | number | boolean | null | undefined>,
+	// 	fetcher?: typeof fetch
+	// ): Promise<UserAchievementDto[]> => {
+	// 	const sp = new URLSearchParams();
+	// 	if (request) {
+	// 		for (const [k, v] of Object.entries(request)) {
+	// 			if (v === undefined || v === null) continue;
+	// 			sp.set(k, String(v));
+	// 		}
+	// 	}
 
-	getUserRankings: async (
-		query: Record<string, string | number | boolean | null | undefined>,
-		fetcher?: typeof fetch
-	): Promise<UserRankingsDto> => {
-		const sp = new URLSearchParams();
-		for (const [k, v] of Object.entries(query)) {
-			if (v === undefined || v === null) continue;
-			sp.set(k, String(v));
-		}
+	// 	const res = await FetchFromApi<UserAchievementDto[]>(
+	// 		`user/${userId}/achievements`,
+	// 		{ method: 'GET' },
+	// 		fetcher,
+	// 		sp
+	// 	);
+	// 	return res.body;
+	// },
 
-		return await FetchJsonFromApi<UserRankingsDto>('user/rankings', { method: 'GET' }, fetcher, sp);
-	},
+	// getUserRankings: async (
+	// 	query: Record<string, string | number | boolean | null | undefined>,
+	// 	fetcher?: typeof fetch
+	// ): Promise<UserRankingsDto> => {
+	// 	const sp = new URLSearchParams();
+	// 	for (const [k, v] of Object.entries(query)) {
+	// 		if (v === undefined || v === null) continue;
+	// 		sp.set(k, String(v));
+	// 	}
 
-	getMyLeaderboardPosition: async (fetcher?: typeof fetch): Promise<UserLeaderboardPositionDto> => {
-		return await FetchJsonFromApi<UserLeaderboardPositionDto>(
-			'user/leaderboard/me',
-			{ method: 'GET' },
-			fetcher
-		);
-	}
+	// 	return await FetchJsonFromApi<UserRankingsDto>('user/rankings', { method: 'GET' }, fetcher, sp);
+	// },
+
+	// getMyLeaderboardPosition: async (fetcher?: typeof fetch): Promise<UserLeaderboardPositionDto> => {
+	// 	return await FetchJsonFromApi<UserLeaderboardPositionDto>(
+	// 		'user/leaderboard/me',
+	// 		{ method: 'GET' },
+	// 		fetcher
+	// 	);
+	// }
 };

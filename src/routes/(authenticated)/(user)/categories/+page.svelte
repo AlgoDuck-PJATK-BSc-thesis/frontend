@@ -205,15 +205,20 @@
 
 	let initialized: boolean = false;	
 	$effect(() => {
-		if (initialized) return;
-		const localMain = main;
-		const category1: HTMLElement | undefined = categoryDivs.at(0);
+    if (initialized) return;
+    if (!main) return;
+    if (categoryDivs.length !== data.categories.length) return;
+    if (categoryDivs.some(div => !div)) return;
 
-		requestAnimationFrame(() => {
-			calculateIslandCoordinates();
-			initialized = true;
-		});
-	});
+    tick().then(() => {
+		setTimeout(()=>{
+			requestAnimationFrame(() => {
+				calculateIslandCoordinates();
+				initialized = true;
+			});
+		}, 20);
+    });
+});
 </script>
 
 <svelte:window

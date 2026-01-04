@@ -14,6 +14,7 @@
 		HARD: 'bg-red-200/20 border-red-500'
 	};
 
+
 	let difficultyFilters: Difficulty[] = $state(Difficulties.map(d => d as Difficulty));
 	let searchQuery: string = $state('');
 
@@ -121,6 +122,7 @@
 		</div>
 
 		{#await data}
+
 			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 				{#each Array(6) as _}
 					<div
@@ -137,13 +139,15 @@
 					</div>
 				{/each}
 			</div>
-		{:then resolvedData}
-			{@const allProblems = resolvedData.body}
-			{@const searchIndex = buildSearchIndex(allProblems)}
-			{@const problems = filterProblems(allProblems, searchIndex)}
-			
-			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-				{#each problems as problem}
+			{:then resolvedData}
+			{console.log(resolvedData)}
+
+		{@const allProblems = resolvedData.body}
+		{@const searchIndex = buildSearchIndex(allProblems)}
+		{@const problems = filterProblems(allProblems, searchIndex)}
+		
+		<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+			{#each problems as problem}
 					<button
 						onclick={() => goto(`problems/solve/?problem=${problem.problemId}`)}
 						class="flex border-ide-accent/10 border-1 w-full flex-col items-start justify-center gap-2 rounded-xl bg-ide-card px-6 py-7 pb-10 transition-colors hover:cursor-pointer hover:bg-ide-card/50"

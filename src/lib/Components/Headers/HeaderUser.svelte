@@ -7,6 +7,7 @@
 	import { authApi } from '$lib/api/auth';
 	import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
 	import { onMount } from 'svelte';
+	import { UserData } from '$lib/stores/userData.svelte';
 
 	let coins = $state<number>(0);
 
@@ -36,6 +37,7 @@
 		try {
 			const s = await userApi.getMyStatistics(fetch);
 			if (typeof s.coins === 'number') coins = s.coins;
+			else coins = UserData.user.coins;
 		} catch {}
 	};
 

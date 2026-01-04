@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
+	import { clickOutside } from "$lib/actions/clickOutside";
 	import { FetchFromApi } from "$lib/api/apiCall";
 	import { userEditorPreferences } from "$lib/stores/theme.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
 	import { createQuery } from "@tanstack/svelte-query";
 	import { fly } from "svelte/transition";
 
-	let { options }: { options : { registerAndSelectLayout: ((layoutId: string) => Promise<void>) } } = $props();
+	let { registerAndSelectLayout, isVisible = $bindable() }: { isVisible: boolean, registerAndSelectLayout: ((layoutId: string) => Promise<void>) } = $props();
 
 	let defaultSidebar: HTMLDivElement;
 	let defaultEditor: HTMLDivElement;
@@ -78,7 +79,7 @@
 	$inspect($customLayoutQuery.data?.body)
 </script>
 
-<main transition:fly={{y: -30, duration: 200}} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent rounded-lg flex flex-col">
+<main use:clickOutside={() => isVisible = false} transition:fly={{y: -30, duration: 200}} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent rounded-lg flex flex-col">
 	<span class="py-3 px-5 text-lg justify-start w-full text-ide-text-primary font-semibold border-b border-b-ide-accent/30">
 		Layouts
 	</span>
@@ -167,7 +168,7 @@
 
 		{#each $customLayoutQuery.data?.body ?? [] as layout}
 			<button onclick={async () => {
-				await options.registerAndSelectLayout(layout.layoutId);
+				await registerAndSelectLayout(layout.layoutId);
 			}} class="w-full h-28 flex flex-col justify-end gap-0.5 p-0.5">
 				<div class="w-full h-full hover:cursor-pointer bg-ide-card border border-ide-accent/50 focus:outline-none focus:ring-2 focus:ring-ide-accent rounded flex flex-row gap-0.5"></div>
 				<span class="px-3 justify-center text-xs font-mono flex flex-col text-ide-text-primary">{layout.layoutName}</span>
