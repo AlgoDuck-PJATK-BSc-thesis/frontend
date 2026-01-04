@@ -31,7 +31,7 @@
     let connected: boolean = $state(false);
     let isSending: boolean = $state(false);
 
-    let query: string = $state("");
+    let userQuery: string = $state("");
     type FragmentType = "Code" | "Text" | "Name" | "Id";
 
     type StreamingCompletionPart = {
@@ -91,7 +91,7 @@
     let tiptapEditor: Editor | undefined;
 
     const sendMessage = async () => {
-        if (!query.trim() || isSending) return;
+        if (!userQuery.trim() || isSending) return;
 
         isSending = true;
         let startedWithouChatName: boolean = options.chatName === undefined;
@@ -107,7 +107,7 @@
 
         options.pages[0].items.unshift({
             fragments: [{
-                content: query,
+                content: userQuery,
                 type: "Text"
             } as MessageFragment],
             messageAuthor: "User"
@@ -139,11 +139,11 @@
         let inserted: boolean = false;
 
         try {
-            console.log(query);
+            console.log(userQuery);
             connection.stream("GetAssistance", {
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
-                query: query,
+                'query': userQuery,
                 chatId: chatId
             } as AssistantQuery).subscribe({
                 next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
@@ -220,8 +220,8 @@
     const useSuggestion = (prompt: string) => {
         if (tiptapEditor) {
             tiptapEditor.commands.setContent(prompt);
-            query = prompt;
-            console.log(query);
+            userQuery = prompt;
+            console.log(userQuery);
             sendMessage();
         }
     }
@@ -282,7 +282,7 @@
                             tiptapEditor = tiptapEditor;
                         },
                         onUpdate: ({ editor }) => {
-                            query = editor.getText()
+                            userQuery = editor.getText()
                         },
                         editorProps: {
                             handleKeyDown: (view, event) => {
@@ -302,7 +302,7 @@
             </div>
             <button 
                 onclick={sendMessage} class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-lg transition-all duration-300 ease-out
-                       {isSending || !query.trim() 
+                       {isSending || !userQuery.trim() 
                            ? 'bg-ide-dcard/50 cursor-not-allowed opacity-50' 
                            : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 active:scale-95'}"
             >

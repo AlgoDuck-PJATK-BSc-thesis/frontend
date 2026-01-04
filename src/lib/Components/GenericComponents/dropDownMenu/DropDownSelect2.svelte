@@ -1,8 +1,8 @@
 <script lang="ts" generics="K extends Record<string, any>, V">
-	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import type { Component } from "svelte";
 	import { hideGroupElem, registerGroupElem, showGroupElem, type DropDownData } from "./DropDownSelectGroups.svelte";
 	import type { DisplayCompArgs, DropDownMenuOptions2, KeyValuePair } from "./DropDownSelectOptions";
+	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
 
 	let { options }: { options: DropDownMenuOptions2<K, V> } = $props();
 
@@ -41,7 +41,7 @@
             <DisplayComp options={{isSelected: false,  content: label }}/>            
             <div class="h-full aspect-sqaure pointer-events-none absolute right-0 {dropDownData.isVisible ? "rotate-90" : ""}">
                 <div class="w-full h-full p-[30%]">
-                    <ChevronIconSvg options={{class: "w-full h-full stroke-white"}}/>
+                    <ChevronIconSvgNew options={{class: "w-full h-full stroke-white"}}/>
                 </div>
             </div>
         </button>

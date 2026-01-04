@@ -8,8 +8,8 @@ export type TestCaseCreateDto = {
     callArgs: FunctionParam[],
     expected: FunctionParam,
     isPublic: boolean,
+    orderMatters: boolean,
 }
-
 
 export type MethodRecommendation = {
     methodName: string,
@@ -53,4 +53,31 @@ export type problemCreationDto = {
 
 export type TagCreateDto = {
     tagName: string
+}
+
+export type AnalysisResultDto = {
+    methods: MethodRecommendation[],
+    variables: VariableRecommendation[]
+}
+
+export type VariableRecommendation = {
+    type: string,
+    name: string
+}
+
+export type ValidationResponseStatus = "Queued" | "Pending" | "Succeeded" | "Failed";
+
+export type ValidationResponse = {
+    status: ValidationResponseStatus
+}
+
+export type JobData = {
+    problemId: string,
+    commissioningUserId: string,
+    response: ValidationResponse
+}
+
+export type CreateUnverifiedProblemDto = {
+    jobId: string,
+    problemId: string
 }

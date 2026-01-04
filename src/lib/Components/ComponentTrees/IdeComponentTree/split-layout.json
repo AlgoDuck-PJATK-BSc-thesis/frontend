@@ -1,127 +1,173 @@
 {
-  "compId": "root-wrapper",
+  "compId": "root-1767541429676-0",
   "component": "TopLevelComponent",
   "options": {
     "component": {
-      "compId": "root",
+      "compId": "placeholder-1767541429676-1",
       "component": "SplitPanel",
       "options": {
         "axis": 0,
-        "initialComp1Proportions": 0.25,
         "comp1": {
-          "compId": "problem-info-wrapper",
+          "compId": "wrapper-1767541431591-3",
           "component": "TopLevelComponent",
           "options": {
             "component": {
-              "compId": "problem-info",
-              "component": "InfoPanel",
-              "options": {},
-          "meta": {
-            "clampVal": 0.025,
-            "clamp": {
-              "component": "ProblemInfoClamp",
-              "options": {}
-            }
-          }
+              "compId": "assistant-wizard",
+              "component": "TerminalWizardPanel",
+              "options": {
+                "components": [],
+                "side": 3,
+                "control": {
+                  "compId": "wizard-control-panel",
+                  "component": "AssistantWizardControlPanel",
+                  "options": {}
+                }
+              },
+              "meta": {
+                "label": {
+                  "commonName": "Assistant",
+                  "labelFor": "assistant-wizard",
+                  "icon": {
+                    "compId": "assistant-icon",
+                    "component": "AssistantIconSvg",
+                    "options": {}
+                  }
+                }
+              }
             }
           }
         },
         "comp2": {
-          "compId": "right-side-split-wrapper",
+          "compId": "wrapper-1767541431591-5",
           "component": "TopLevelComponent",
           "options": {
             "component": {
-              "compId": "right-side-split",
+              "compId": "inner-1767541431591-6",
               "component": "SplitPanel",
               "options": {
-                "meta": {
-            "clampVal": 0.025,
-            "clamp": {
-              "component": "RightSideClamp",
-              "options": {}
-            }
-          },
-                "axis": 0,
-                "initialComp1Proportions": 0.5,
+                "axis": 1,
                 "comp1": {
-                  "compId": "editor-terminal-split-wrapper",
+                  "compId": "wrapper-1767541434961-9",
                   "component": "TopLevelComponent",
                   "options": {
                     "component": {
-                        "meta": {
-                    "clampVal": 0.025,
-                    "clamp": {
-                      "component": "EditorTerminalClamp",
-                      "options": {}
-                    }
-                  },
-                      "compId": "editor-terminal-split",
+                      "compId": "inner-1767541434961-10",
                       "component": "SplitPanel",
                       "options": {
-                        "axis": 1,
-                        "initialComp1Proportions": 0.6,
+                        "axis": 0,
                         "comp1": {
-                          "compId": "code-editor-wrapper",
+                          "compId": "wrapper-1767541438744-17",
                           "component": "TopLevelComponent",
                           "options": {
                             "component": {
-                              "compId": "code-editor",
-                              "component": "Editor",
+                              "compId": "terminal-comp",
+                              "component": "Terminal",
                               "options": {},
-                          "meta": {
-                            "clampVal": 0.025,
-                            "clamp": {
-                              "component": "EditorClamp",
-                              "options": {}
-                            }
-                          }
+                              "meta": {
+                                "label": {
+                                  "commonName": "Terminal",
+                                  "labelFor": "terminal-comp",
+                                  "icon": {
+                                    "compId": "someComp",
+                                    "component": "EditorIconSvg",
+                                    "options": {}
+                                  }
+                                }
+                              }
                             }
                           }
                         },
                         "comp2": {
-                          "compId": "test-cases-comp-wrapper",
+                          "compId": "wrapper-1767541438744-19",
                           "component": "TopLevelComponent",
                           "options": {
                             "component": {
-                              "compId": "test-cases-comp",
-                              "component": "TestCases",
-                              "options": {},
-                          "meta": {
-                            "clampVal": 0.025,
-                            "clamp": {
-                              "component": "TestCasesClamp",
-                              "options": {}
+                              "compId": "inner-1767541438744-20",
+                              "component": "SplitPanel",
+                              "options": {
+                                "axis": 1,
+                                "comp1": {
+                                  "compId": "wrapper-1767541441490-23",
+                                  "component": "TopLevelComponent",
+                                  "options": {
+                                    "component": {
+                                      "compId": "test-cases-comp",
+                                      "component": "TestCases",
+                                      "options": {},
+                                      "meta": {
+                                        "label": {
+                                          "commonName": "Test Cases",
+                                          "labelFor": "test-cases-comp",
+                                          "icon": {
+                                            "compId": "someComp",
+                                            "component": "TestCasesIconSvg",
+                                            "options": {}
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "comp2": {
+                                  "compId": "wrapper-1767541441490-25",
+                                  "component": "TopLevelComponent",
+                                  "options": {
+                                    "component": {
+                                      "compId": "code-editor",
+                                      "component": "Editor",
+                                      "options": {},
+                                      "meta": {
+                                        "label": {
+                                          "commonName": "Code Editor",
+                                          "labelFor": "code-editor",
+                                          "icon": {
+                                            "compId": "someComp",
+                                            "component": "TerminalIconSvg",
+                                            "options": {}
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "initialComp1Proportions": 0.5
+                              }
                             }
                           }
-                            }
+                        },
+                        "initialComp1Proportions": 0.2899061032863847
+                      }
+                    }
+                  }
+                },
+                "comp2": {
+                  "compId": "wrapper-1767541434961-11",
+                  "component": "TopLevelComponent",
+                  "options": {
+                    "component": {
+                      "compId": "problem-info",
+                      "component": "InfoPanel",
+                      "options": {},
+                      "meta": {
+                        "label": {
+                          "commonName": "Problem Info",
+                          "labelFor": "problem-info",
+                          "icon": {
+                            "compId": "someComp",
+                            "component": "InfoPanelIconSvg",
+                            "options": {}
                           }
                         }
                       }
                     }
                   }
                 },
-                "comp2": {
-                  "compId": "terminal-comp-wrapper",
-                  "component": "TopLevelComponent",
-                  "options": {
-                    "component": {
-                        "meta": {
-                    "clampVal": 0.025,
-                    "clamp": {
-                      "component": "TerminalClamp",
-                      "options": {}
-                    }
-                  },
-                      "compId": "terminal-comp",
-                      "component": "Terminal",
-                      "options": {}
-                    }
-                  }
-                }
+                "initialComp1Proportions": 0.6623188405797109
               }
             }
           }
-        }
+        },
+        "initialComp1Proportions": 0.33896620278330153
       }
     }
   }

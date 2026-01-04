@@ -10,8 +10,9 @@
 	import { loadImageToCanvas } from './gridUtils';
 	import type { ItemType, OwnedDuck, OwnedPlantDto, UsedDuckDto, UsedPlantDto } from '$lib/Components/Misc/Pond/duckTypes';
 	import DuckSelectionTile from '$lib/Components/Misc/Pond/DuckSelectionTile.svelte';
-	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
 	import SpinnerIconSvg from '$lib/svg/EditorComponentIcons/SpinnerIconSvg.svelte';
+	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
 
 	let { userItems }: { userItems: { ducks: UsedDuckDto[]; plants: UsedPlantDto[] } } = $props();
 
@@ -359,10 +360,9 @@
 					class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-red-100"
 					aria-label="Close menu"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
+					<CrossIconSvg options={{ class: 'w-5 h-5 stroke-[3] stroke-slate-600 hover:text-red-500'}}/>
+
+			</button>
 			</div>
 
 			<div class="flex gap-2 border-b border-slate-200 px-4 py-2">
