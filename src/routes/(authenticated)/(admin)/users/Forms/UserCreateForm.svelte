@@ -27,7 +27,13 @@
 		onCreate: (payload: CreatePayload) => void;
 	};
 
-	let { disabled = false, creating = false, error = null, created = null, onCreate } = $props() as Props;
+	let {
+		disabled = false,
+		creating = false,
+		error = null,
+		created = null,
+		onCreate
+	} = $props() as Props;
 
 	let email = $state('');
 	let role = $state<CreateRole>('user');
@@ -103,7 +109,8 @@
 		return `admin_${n}`;
 	};
 
-	const generateUsernameForRole = (r: CreateRole) => (r === 'admin' ? generateAdminUsername() : generateUserUsername());
+	const generateUsernameForRole = (r: CreateRole) =>
+		r === 'admin' ? generateAdminUsername() : generateUserUsername();
 
 	const generatePassword = (len: number) => {
 		const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -121,12 +128,7 @@
 			for (let i = 0; i < len; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
 		}
 
-		const req = [
-			alphabet.slice(0, 26),
-			alphabet.slice(26, 52),
-			alphabet.slice(52, 62),
-			specials
-		];
+		const req = [alphabet.slice(0, 26), alphabet.slice(26, 52), alphabet.slice(52, 62), specials];
 
 		for (let i = 0; i < req.length; i++) {
 			const idx = randomInt(0, out.length - 1);
@@ -182,40 +184,43 @@
 	};
 </script>
 
-<div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
-	<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-		<h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Create user</h3>
+<div class="overflow-hidden rounded border border-admin-border-primary bg-admin-bg-secondary">
+	<div class="border-b border-admin-border-primary bg-admin-bg-tertiary px-4 py-3">
+		<h3 class="text-xs font-semibold tracking-wider text-admin-text-primary uppercase">
+			Create user
+		</h3>
 	</div>
 
-	<div class="p-4 flex flex-col gap-4">
+	<div class="flex flex-col gap-4 p-4">
 		{#if error}
-			<div class="text-sm text-[#ffb4b4]">{error}</div>
+			<div class="text-sm text-admin-danger-text">{error}</div>
 		{/if}
 
 		{#if created}
-			<div class="text-sm text-[#b7f7c7]">
-				Created: <span class="font-mono text-xs">{created.userId}</span> — {created.username} ({created.role}) — verified: {created.emailVerified ? 'yes' : 'no'}
+			<div class="text-sm text-admin-accent-link">
+				Created: <span class="font-mono text-xs">{created.userId}</span> — {created.username} ({created.role})
+				— verified: {created.emailVerified ? 'yes' : 'no'}
 			</div>
 		{/if}
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_create_email" class="text-xs text-[#a8a8a8]">Email</label>
+			<label for="admin_create_email" class="text-xs text-admin-text-muted">Email</label>
 			<input
 				id="admin_create_email"
 				type="email"
 				bind:value={email}
 				disabled={disabled || creating}
-				class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			/>
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_create_role" class="text-xs text-[#a8a8a8]">Role</label>
+			<label for="admin_create_role" class="text-xs text-admin-text-muted">Role</label>
 			<select
 				id="admin_create_role"
 				bind:value={role}
 				disabled={disabled || creating}
-				class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			>
 				<option value="user">user</option>
 				<option value="admin">admin</option>
@@ -223,31 +228,36 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_create_verified" class="text-xs text-[#a8a8a8]">Email verified</label>
-			<div class="flex items-center gap-2 bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2">
+			<label for="admin_create_verified" class="text-xs text-admin-text-muted">Email verified</label
+			>
+			<div
+				class="flex items-center gap-2 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2"
+			>
 				<input
 					id="admin_create_verified"
 					type="checkbox"
 					bind:checked={emailVerified}
 					disabled={disabled || creating}
-					class="accent-[#0e639c]"
+					class="accent-admin-accent-primary"
 				/>
-				<span class="text-sm text-[#e7e7e7]">{emailVerified ? 'true' : 'false'}</span>
+				<span class="text-sm text-admin-text-primary">{emailVerified ? 'true' : 'false'}</span>
 			</div>
 		</div>
 
 		<div class="flex flex-col gap-2">
 			<div class="flex items-center justify-between">
-				<label for="admin_create_username" class="text-xs text-[#a8a8a8]">Username</label>
+				<label for="admin_create_username" class="text-xs text-admin-text-muted">Username</label>
 			</div>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				<div class="flex items-center border border-[#3c3c3c] rounded-sm overflow-hidden">
+			<div class="flex flex-wrap items-center gap-2">
+				<div
+					class="flex items-center overflow-hidden rounded-sm border border-admin-border-primary"
+				>
 					<button
 						type="button"
 						onclick={() => (usernameMode = 'manual')}
 						disabled={disabled || creating}
-						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'manual' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'manual' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Type
 					</button>
@@ -255,7 +265,7 @@
 						type="button"
 						onclick={() => (usernameMode = 'generate')}
 						disabled={disabled || creating}
-						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'generate' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'generate' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Generate
 					</button>
@@ -267,7 +277,7 @@
 					bind:value={username}
 					readonly={usernameMode === 'generate'}
 					disabled={disabled || creating}
-					class={`flex-1 min-w-[240px] bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50 ${usernameMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${usernameMode === 'generate' ? 'font-mono' : ''}`}
 				/>
 
 				{#if usernameMode === 'generate'}
@@ -275,7 +285,7 @@
 						type="button"
 						onclick={regenerateUsername}
 						disabled={disabled || creating}
-						class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+						class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Regenerate
 					</button>
@@ -284,15 +294,17 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_create_password" class="text-xs text-[#a8a8a8]">Password</label>
+			<label for="admin_create_password" class="text-xs text-admin-text-muted">Password</label>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				<div class="flex items-center border border-[#3c3c3c] rounded-sm overflow-hidden">
+			<div class="flex flex-wrap items-center gap-2">
+				<div
+					class="flex items-center overflow-hidden rounded-sm border border-admin-border-primary"
+				>
 					<button
 						type="button"
 						onclick={() => (passwordMode = 'manual')}
 						disabled={disabled || creating}
-						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'manual' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'manual' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Type
 					</button>
@@ -300,7 +312,7 @@
 						type="button"
 						onclick={() => (passwordMode = 'generate')}
 						disabled={disabled || creating}
-						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'generate' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'generate' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Generate
 					</button>
@@ -312,14 +324,14 @@
 					bind:value={password}
 					readonly={passwordMode === 'generate'}
 					disabled={disabled || creating}
-					class={`flex-1 min-w-[240px] bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50 ${passwordMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${passwordMode === 'generate' ? 'font-mono' : ''}`}
 				/>
 
 				<button
 					type="button"
 					onclick={() => (showPassword = !showPassword)}
 					disabled={disabled || creating}
-					class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{showPassword ? 'Hide' : 'Show'}
 				</button>
@@ -329,7 +341,7 @@
 						type="button"
 						onclick={regeneratePassword}
 						disabled={disabled || creating}
-						class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+						class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Regenerate
 					</button>
@@ -342,7 +354,7 @@
 				type="button"
 				onclick={submit}
 				disabled={disabled || creating || !canSubmit()}
-				class="px-3 py-2 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="rounded-sm bg-admin-accent-primary px-3 py-2 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{#if creating}
 					<LoadingDots />

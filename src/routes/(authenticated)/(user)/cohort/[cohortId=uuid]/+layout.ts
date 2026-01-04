@@ -2,7 +2,7 @@ import type { LayoutLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { cohortApi } from '$lib/api/cohort';
 import type { DuckDto } from '../../Shop/Dtos';
-import { loadDucks } from '../../Shop/loadDucks';
+import { getDucksPaged } from '$lib/api/ducks';
 
 export const load: LayoutLoad = async ({ params, url, fetch }) => {
 	const current = await cohortApi.getCurrent(fetch).catch(() => null);
@@ -14,10 +14,15 @@ export const load: LayoutLoad = async ({ params, url, fetch }) => {
 		throw redirect(302, `/cohort/${current.cohortId}/${dest}`);
 	}
 
+	const loadDuckIds = async (): Promise<DuckDto[]> => {
+		const { ducks } = await getDucksPaged(fetch, 0, 50);
+		return ducks.map((d) => ({ id: d.id }));
+	};
+
 	const [members, activeMembers, ducks] = await Promise.all([
 		cohortApi.getAllMembers(current.cohortId, fetch).catch(() => []),
 		cohortApi.getActiveMembers(current.cohortId, fetch).catch(() => []),
-		loadDucks().catch(() => [] as DuckDto[])
+		loadDuckIds().catch(() => [] as DuckDto[])
 	]);
 
 	return {

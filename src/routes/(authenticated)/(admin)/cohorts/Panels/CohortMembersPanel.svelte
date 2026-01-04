@@ -94,37 +94,37 @@
 	};
 </script>
 
-<div class="bg-[#1f1f1f]">
+<div class="bg-admin-bg-primary">
 	{#if state.error}
-		<div class="text-sm text-[#ffb4b4] mb-2">{state.error}</div>
+		<div class="mb-2 text-sm text-admin-danger-text">{state.error}</div>
 	{/if}
 
 	{#if actionError}
-		<div class="text-sm text-[#ffb4b4] mb-2">{actionError}</div>
+		<div class="mb-2 text-sm text-admin-danger-text">{actionError}</div>
 	{/if}
 
-	<div class="flex items-center justify-between gap-3 mb-3">
+	<div class="mb-3 flex items-center justify-between gap-3">
 		<div class="flex flex-col gap-1">
-			<div class="text-xs text-[#a8a8a8]">Members count: {state.totalMembers}</div>
+			<div class="text-xs text-admin-text-muted">Members count: {state.totalMembers}</div>
 		</div>
 
 		<button
 			type="button"
 			onclick={() => onReload(cohort.cohortId)}
 			disabled={state.loading || adding || removingUserId !== null}
-			class="px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+			class="rounded-sm bg-admin-accent-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			Reload members
 		</button>
 	</div>
 
-	<div class="flex flex-col gap-2 mb-4">
-		<label for={addInputId} class="text-xs text-[#a8a8a8]">Add member by User ID</label>
+	<div class="mb-4 flex flex-col gap-2">
+		<label for={addInputId} class="text-xs text-admin-text-muted">Add member by User ID</label>
 		<div class="flex items-center gap-2">
 			<input
 				id={addInputId}
 				bind:value={addUserId}
-				class="flex-1 bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
+				class="flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover"
 				placeholder="GUID"
 				disabled={adding || removingUserId !== null}
 				onkeydown={(e) => {
@@ -135,7 +135,7 @@
 				type="button"
 				onclick={addMember}
 				disabled={!addUserId.trim() || adding || removingUserId !== null}
-				class="px-3 py-2 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="rounded-sm bg-admin-accent-primary px-3 py-2 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{#if adding}
 					<LoadingDots />
@@ -147,14 +147,14 @@
 	</div>
 
 	{#if state.loading}
-		<div class="text-sm text-[#a8a8a8]"><LoadingDots /></div>
+		<div class="text-sm text-admin-text-muted"><LoadingDots /></div>
 	{:else if (state.members?.length ?? 0) === 0}
-		<div class="text-sm text-[#a8a8a8]">No members.</div>
+		<div class="text-sm text-admin-text-muted">No members.</div>
 	{:else}
 		<CohortMembersTable
 			members={state.members}
 			onRemove={removeMember}
-			removingUserId={removingUserId}
+			{removingUserId}
 			disabled={adding || removingUserId !== null}
 		/>
 	{/if}

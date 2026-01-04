@@ -119,12 +119,27 @@
 
 	let searchResult = $state<SearchUsersResult>({
 		idMatch: null,
-		username: { items: [], currPage: 1, pageSize: 20, totalItems: 0, prevCursor: null, nextCursor: null },
-		email: { items: [], currPage: 1, pageSize: 20, totalItems: 0, prevCursor: null, nextCursor: null }
+		username: {
+			items: [],
+			currPage: 1,
+			pageSize: 20,
+			totalItems: 0,
+			prevCursor: null,
+			nextCursor: null
+		},
+		email: {
+			items: [],
+			currPage: 1,
+			pageSize: 20,
+			totalItems: 0,
+			prevCursor: null,
+			nextCursor: null
+		}
 	});
 
 	let searchedOnce = $state(false);
 	let reqSeq = 0;
+	let verifySeq = 0;
 
 	const storageKey = 'algoduck_admin_users_selection_v2';
 	let storageReady = $state(false);
@@ -138,7 +153,8 @@
 
 	const unwrap = <T,>(res: unknown): T | null => {
 		const anyRes = res as { body?: T } | null;
-		if (anyRes && typeof anyRes === 'object' && 'body' in anyRes) return (anyRes as { body?: T }).body ?? null;
+		if (anyRes && typeof anyRes === 'object' && 'body' in anyRes)
+			return (anyRes as { body?: T }).body ?? null;
 		return (res as T) ?? null;
 	};
 
@@ -151,7 +167,8 @@
 		return !isAdmin;
 	};
 
-	const filterRows = (filter: RoleFilter, rows: UserRow[]) => (rows ?? []).filter((u) => passesRoleFilter(filter, u));
+	const filterRows = (filter: RoleFilter, rows: UserRow[]) =>
+		(rows ?? []).filter((u) => passesRoleFilter(filter, u));
 
 	const filteredAllItems = $derived(filterRows(allRoleFilter, allResult.items));
 	const filteredUsernameItems = $derived(filterRows(searchRoleFilter, searchResult.username.items));
@@ -160,24 +177,39 @@
 
 	const selectedUserIds = $derived(selectedUsers.map((u) => u.userId));
 
-	const totalPages = (totalItems: number, pageSize: number) => Math.max(1, Math.ceil(totalItems / pageSize));
+	const totalPages = (totalItems: number, pageSize: number) =>
+		Math.max(1, Math.ceil(totalItems / pageSize));
 	const allTotalPages = $derived(totalPages(allResult.totalItems, allResult.pageSize));
-	const usernameTotalPages = $derived(totalPages(searchResult.username.totalItems, searchResult.username.pageSize));
-	const emailTotalPages = $derived(totalPages(searchResult.email.totalItems, searchResult.email.pageSize));
+	const usernameTotalPages = $derived(
+		totalPages(searchResult.username.totalItems, searchResult.username.pageSize)
+	);
+	const emailTotalPages = $derived(
+		totalPages(searchResult.email.totalItems, searchResult.email.pageSize)
+	);
 
 	const hasAnySearchResults = $derived(
-		Boolean(searchResult.idMatch) || searchResult.username.totalItems > 0 || searchResult.email.totalItems > 0
+		Boolean(searchResult.idMatch) ||
+			searchResult.username.totalItems > 0 ||
+			searchResult.email.totalItems > 0
 	);
 
 	const idMatchHiddenByFilter = $derived(
-		Boolean(searchResult.idMatch) && !passesRoleFilter(searchRoleFilter, searchResult.idMatch as UserRow)
+		Boolean(searchResult.idMatch) &&
+			!passesRoleFilter(searchRoleFilter, searchResult.idMatch as UserRow)
 	);
 
-	const activeUser = $derived(activeUserId ? selectedUsers.find((u) => u.userId === activeUserId) ?? null : null);
+	const activeUser = $derived(
+		activeUserId ? (selectedUsers.find((u) => u.userId === activeUserId) ?? null) : null
+	);
 
 	const isSelected = (userId: string) => selectedUsers.some((u) => u.userId === userId);
 
-	const normalizeRoles = (roles: string[]) => (roles ?? []).slice().map((r) => r.toLowerCase()).sort().join('|');
+	const normalizeRoles = (roles: string[]) =>
+		(roles ?? [])
+			.slice()
+			.map((r) => r.toLowerCase())
+			.sort()
+			.join('|');
 
 	const ensureActive = () => {
 		if (activeUserId && selectedUsers.some((u) => u.userId === activeUserId)) return;
@@ -203,6 +235,16 @@
 		const { [userId]: _d, ...rest } = selectedExpanded;
 		selectedExpanded = rest;
 		if (activeUserId === userId) ensureActive();
+	};
+
+	const removeSelectedMany = (ids: string[]) => {
+		if (ids.length === 0) return;
+		const idSet = new Set(ids);
+		selectedUsers = selectedUsers.filter((u) => !idSet.has(u.userId));
+		const nextExpanded: Record<string, boolean> = {};
+		for (const u of selectedUsers) nextExpanded[u.userId] = Boolean(selectedExpanded[u.userId]);
+		selectedExpanded = nextExpanded;
+		if (activeUserId && idSet.has(activeUserId)) ensureActive();
 	};
 
 	const toggleSelect = (u: UserRow) => {
@@ -251,12 +293,52 @@
 			const newer = map.get(u.userId);
 			if (!newer) return u;
 			const same =
-				newer.email === u.email && newer.username === u.username && normalizeRoles(newer.roles ?? []) === normalizeRoles(u.roles ?? []);
+				newer.email === u.email &&
+				newer.username === u.username &&
+				normalizeRoles(newer.roles ?? []) === normalizeRoles(u.roles ?? []);
 			if (same) return u;
 			changed = true;
 			return newer;
 		});
 		if (changed) selectedUsers = next;
+	};
+
+	const pruneDeletedSelected = async () => {
+		if (selectedUsers.length === 0) return;
+		const my = ++verifySeq;
+
+		const ids = selectedUsers.map((u) => u.userId).filter(Boolean);
+		const toRemove: string[] = [];
+
+		for (const id of ids) {
+			if (my !== verifySeq) return;
+
+			try {
+				const params = new URLSearchParams();
+				params.set('query', id);
+				params.set('usernamePage', '1');
+				params.set('usernamePageSize', '1');
+				params.set('emailPage', '1');
+				params.set('emailPageSize', '1');
+
+				const res = await FetchFromApi<SearchUsersResult>(
+					'admin/users/search',
+					{ method: 'GET' },
+					fetchWithTimeout,
+					params
+				);
+
+				const body = unwrap<SearchUsersResult>(res as StandardResponseDto<SearchUsersResult>);
+				const idMatch = body?.idMatch ?? null;
+
+				if (!idMatch || String((idMatch as any)?.userId ?? '') !== id) {
+					toRemove.push(id);
+				}
+			} catch {}
+		}
+
+		if (my !== verifySeq) return;
+		removeSelectedMany(toRemove);
 	};
 
 	const resetSearchResult = () => {
@@ -270,12 +352,21 @@
 				prevCursor: null,
 				nextCursor: null
 			},
-			email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
+			email: {
+				items: [],
+				currPage: emailPage,
+				pageSize: searchPageSize,
+				totalItems: 0,
+				prevCursor: null,
+				nextCursor: null
+			}
 		};
 	};
 
 	const switchTab = (next: Tab) => {
 		reqSeq += 1;
+		verifySeq += 1;
+
 		loading = false;
 		error = null;
 		createError = null;
@@ -305,7 +396,12 @@
 		params.set('pageSize', String(allPageSize));
 
 		try {
-			const res = await FetchFromApi<PageData<UserRow>>('admin/users', { method: 'GET' }, fetchWithTimeout, params);
+			const res = await FetchFromApi<PageData<UserRow>>(
+				'admin/users',
+				{ method: 'GET' },
+				fetchWithTimeout,
+				params
+			);
 			if (my !== reqSeq) return;
 
 			const body = unwrap<PageData<UserRow>>(res as StandardResponseDto<PageData<UserRow>>);
@@ -323,11 +419,19 @@
 
 			allLoadedOnce = true;
 			refreshSelectedFrom(allResult.items);
+			void pruneDeletedSelected();
 		} catch (e) {
 			if (my !== reqSeq) return;
 			error = e instanceof Error ? e.message : 'Failed to load users.';
 			allLoadedOnce = true;
-			allResult = { items: [], currPage: allPage, pageSize: allPageSize, totalItems: 0, prevCursor: null, nextCursor: null };
+			allResult = {
+				items: [],
+				currPage: allPage,
+				pageSize: allPageSize,
+				totalItems: 0,
+				prevCursor: null,
+				nextCursor: null
+			};
 		} finally {
 			if (my === reqSeq) loading = false;
 		}
@@ -349,16 +453,34 @@
 		params.set('emailPageSize', String(searchPageSize));
 
 		try {
-			const res = await FetchFromApi<SearchUsersResult>('admin/users/search', { method: 'GET' }, fetchWithTimeout, params);
+			const res = await FetchFromApi<SearchUsersResult>(
+				'admin/users/search',
+				{ method: 'GET' },
+				fetchWithTimeout,
+				params
+			);
 			if (my !== reqSeq) return;
 
 			const body = unwrap<SearchUsersResult>(res as StandardResponseDto<SearchUsersResult>);
-			searchResult =
-				body ?? {
-					idMatch: null,
-					username: { items: [], currPage: usernamePage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null },
-					email: { items: [], currPage: emailPage, pageSize: searchPageSize, totalItems: 0, prevCursor: null, nextCursor: null }
-				};
+			searchResult = body ?? {
+				idMatch: null,
+				username: {
+					items: [],
+					currPage: usernamePage,
+					pageSize: searchPageSize,
+					totalItems: 0,
+					prevCursor: null,
+					nextCursor: null
+				},
+				email: {
+					items: [],
+					currPage: emailPage,
+					pageSize: searchPageSize,
+					totalItems: 0,
+					prevCursor: null,
+					nextCursor: null
+				}
+			};
 
 			usernamePage = searchResult.username.currPage;
 			emailPage = searchResult.email.currPage;
@@ -372,6 +494,7 @@
 				...(searchResult.idMatch ? [searchResult.idMatch] : [])
 			];
 			refreshSelectedFrom(merged);
+			void pruneDeletedSelected();
 		} catch (e) {
 			if (my !== reqSeq) return;
 			error = e instanceof Error ? e.message : 'Failed to search users.';
@@ -430,7 +553,13 @@
 		resetSearchResult();
 	};
 
-	const createUser = async (payload: { email: string; password: string; role: CreateRole; emailVerified: boolean; username: string | null }) => {
+	const createUser = async (payload: {
+		email: string;
+		password: string;
+		role: CreateRole;
+		emailVerified: boolean;
+		username: string | null;
+	}) => {
 		if (creating || saving || deleting) return;
 
 		if (payload.role === 'admin') {
@@ -517,7 +646,11 @@
 		try {
 			const res = await FetchFromApi<UpdateUserResult>(
 				`admin/users/${encodeURIComponent(payload.userId)}`,
-				{ method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyPayload) },
+				{
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(bodyPayload)
+				},
 				fetchWithTimeout
 			);
 
@@ -556,7 +689,11 @@
 	};
 
 	const deleteUserNoConfirm = async (userId: string) => {
-		await FetchFromApi(`admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' }, fetchWithTimeout);
+		await FetchFromApi(
+			`admin/users/${encodeURIComponent(userId)}`,
+			{ method: 'DELETE' },
+			fetchWithTimeout
+		);
 		if (isSelected(userId)) removeSelected(userId);
 	};
 
@@ -619,17 +756,22 @@
 					searchRoleFilter = parsed.searchRoleFilter ?? searchRoleFilter;
 
 					selectedUsers = Array.isArray(parsed.selectedUsers) ? parsed.selectedUsers : [];
-					selectedExpanded = parsed.selectedExpanded && typeof parsed.selectedExpanded === 'object' ? parsed.selectedExpanded : {};
+					selectedExpanded =
+						parsed.selectedExpanded && typeof parsed.selectedExpanded === 'object'
+							? parsed.selectedExpanded
+							: {};
 					selectedOpen = typeof parsed.selectedOpen === 'boolean' ? parsed.selectedOpen : true;
 					activeUserId = typeof parsed.activeUserId === 'string' ? parsed.activeUserId : null;
 
 					ensureActive();
 
 					const fixedExpanded: Record<string, boolean> = {};
-					for (const u of selectedUsers) fixedExpanded[u.userId] = Boolean(selectedExpanded[u.userId]);
+					for (const u of selectedUsers)
+						fixedExpanded[u.userId] = Boolean(selectedExpanded[u.userId]);
 					selectedExpanded = fixedExpanded;
 
 					storageReady = true;
+					void pruneDeletedSelected();
 					return;
 				}
 			} catch {
@@ -638,6 +780,7 @@
 		}
 
 		storageReady = true;
+		void pruneDeletedSelected();
 	});
 
 	$effect(() => {
@@ -663,20 +806,20 @@
 	});
 </script>
 
-<main class="w-full min-h-screen bg-[#1e1e1e] text-[#cccccc] font-sans">
-	<div class="max-w-6xl mx-auto p-6 flex flex-col gap-6">
-		<UsersHeaderAny tab={tab} onSwitchTab={switchTab} />
+<main class="min-h-screen w-full bg-admin-bg-primary font-sans text-admin-text-secondary">
+	<div class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
+		<UsersHeaderAny {tab} onSwitchTab={switchTab} />
 
 		{#if selectedUsers.length > 0 && tab !== 'create'}
 			<SelectedUsersPanelAny
 				bind:roleFilter={selectedRoleFilter}
 				disabled={loading || creating || saving || deleting}
-				selectedUsers={selectedUsers}
-				selectedFiltered={selectedFiltered}
-				selectedExpanded={selectedExpanded}
-				selectedOpen={selectedOpen}
-				activeUserId={activeUserId}
-				activeUser={activeUser}
+				{selectedUsers}
+				{selectedFiltered}
+				{selectedExpanded}
+				{selectedOpen}
+				{activeUserId}
+				{activeUser}
 				onToggleOpen={toggleSelectedSection}
 				onExpandAll={expandAllSelected}
 				onCollapseAll={collapseAllSelected}
@@ -690,7 +833,7 @@
 		{#if tab === 'create'}
 			<UserCreateFormAny
 				disabled={loading || saving || deleting}
-				creating={creating}
+				{creating}
 				error={createError}
 				created={createdUser}
 				onCreate={createUser}
@@ -700,7 +843,7 @@
 		{#if tab === 'update'}
 			<UserUpdateFormAny
 				disabled={loading || creating || deleting}
-				saving={saving}
+				{saving}
 				error={updateError}
 				success={updateSuccess}
 				initialUserId={activeUserId ?? ''}
@@ -714,7 +857,7 @@
 					type="button"
 					onclick={deleteAllSelected}
 					disabled={loading || creating || saving || deleting || selectedUsers.length === 0}
-					class="px-3 py-2 bg-[#a1260d] text-white rounded-sm text-xs font-medium hover:bg-[#b83318] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-sm bg-admin-danger-bg px-3 py-2 text-xs font-medium text-white hover:bg-admin-danger-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{#if deleting}
 						<LoadingDots />
@@ -726,7 +869,7 @@
 
 			<UserDeleteFormAny
 				disabled={loading || creating || saving}
-				deleting={deleting}
+				{deleting}
 				error={deleteError}
 				initialUserId={activeUserId ?? ''}
 				onDelete={deleteUser}
@@ -737,12 +880,12 @@
 			<UsersAllPanelAny
 				bind:roleFilter={allRoleFilter}
 				bind:pageSize={allPageSize}
-				loading={loading}
-				error={error}
-				allLoadedOnce={allLoadedOnce}
-				allResult={allResult}
+				{loading}
+				{error}
+				{allLoadedOnce}
+				{allResult}
 				filteredItems={filteredAllItems}
-				selectedUserIds={selectedUserIds}
+				{selectedUserIds}
 				totalPages={allTotalPages}
 				disabled={loading || creating || saving || deleting}
 				onLoad={async () => {
@@ -758,21 +901,21 @@
 		{#if tab === 'search'}
 			<UsersSearchPanelAny
 				bind:roleFilter={searchRoleFilter}
-				bind:searchQuery={searchQuery}
-				bind:searchPageSize={searchPageSize}
-				loading={loading}
-				error={error}
-				searchedOnce={searchedOnce}
-				hasAnySearchResults={hasAnySearchResults}
-				searchResult={searchResult}
-				filteredUsernameItems={filteredUsernameItems}
-				filteredEmailItems={filteredEmailItems}
-				usernameTotalPages={usernameTotalPages}
-				emailTotalPages={emailTotalPages}
-				idMatchHiddenByFilter={idMatchHiddenByFilter}
-				selectedUserIds={selectedUserIds}
+				bind:searchQuery
+				bind:searchPageSize
+				{loading}
+				{error}
+				{searchedOnce}
+				{hasAnySearchResults}
+				{searchResult}
+				{filteredUsernameItems}
+				{filteredEmailItems}
+				{usernameTotalPages}
+				{emailTotalPages}
+				{idMatchHiddenByFilter}
+				{selectedUserIds}
 				disabled={loading || creating || saving || deleting}
-				onSearchFromStart={onSearchFromStart}
+				{onSearchFromStart}
 				onPageSizeChanged={onSearchPageSizeChanged}
 				onUsernamePrev={usernamePrev}
 				onUsernameNext={usernameNext}

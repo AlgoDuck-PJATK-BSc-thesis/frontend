@@ -68,16 +68,20 @@
 	} = $props() as Props;
 </script>
 
-<div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
-	<div class="flex items-center justify-between gap-2.5 px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-		<h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">All users</h3>
+<div class="overflow-hidden rounded border border-admin-border-primary bg-admin-bg-secondary">
+	<div
+		class="flex items-center justify-between gap-2.5 border-b border-admin-border-primary bg-admin-bg-tertiary px-4 py-3"
+	>
+		<h3 class="text-xs font-semibold tracking-wider text-admin-text-primary uppercase">
+			All users
+		</h3>
 
 		<div class="flex items-center gap-3">
-			<label for="users_all_pagesize" class="text-xs text-[#a8a8a8]">Page size</label>
+			<label for="users_all_pagesize" class="text-xs text-admin-text-muted">Page size</label>
 			<select
 				id="users_all_pagesize"
 				bind:value={pageSize}
-				class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-2 py-1 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4]"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-2 py-1 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover"
 			>
 				<option value={10}>10</option>
 				<option value={20}>20</option>
@@ -88,8 +92,8 @@
 			<button
 				type="button"
 				onclick={onLoad}
-				disabled={disabled}
-				class="ml-3 px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+				{disabled}
+				class="ml-3 rounded-sm bg-admin-accent-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{#if loading}
 					<LoadingDots />
@@ -103,16 +107,16 @@
 					type="button"
 					onclick={onPrev}
 					disabled={loading || !allLoadedOnce || !allResult.prevCursor}
-					class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-sm bg-admin-bg-input px-3 py-1.5 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Prev
 				</button>
-				<div class="text-xs text-[#a8a8a8]">Page {allResult.currPage} / {totalPages}</div>
+				<div class="text-xs text-admin-text-muted">Page {allResult.currPage} / {totalPages}</div>
 				<button
 					type="button"
 					onclick={onNext}
 					disabled={loading || !allLoadedOnce || !allResult.nextCursor}
-					class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-sm bg-admin-bg-input px-3 py-1.5 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Next
 				</button>
@@ -121,29 +125,33 @@
 	</div>
 
 	<div class="p-4">
-		{#if error}<div class="text-sm text-[#ffb4b4] mb-3">{error}</div>{/if}
+		{#if error}<div class="mb-3 text-sm text-admin-danger-text">{error}</div>{/if}
 
 		{#if loading}
-			<div class="text-sm text-[#a8a8a8]"><LoadingDots /></div>
+			<div class="text-sm text-admin-text-muted"><LoadingDots /></div>
 		{:else if !allLoadedOnce}
-			<div class="text-sm text-[#a8a8a8]">Click Load to fetch users.</div>
+			<div class="text-sm text-admin-text-muted">Click Load to fetch users.</div>
 		{:else if allResult.items.length === 0}
-			<div class="text-sm text-[#a8a8a8]">No users.</div>
+			<div class="text-sm text-admin-text-muted">No users.</div>
 		{:else}
 			<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-				<div class="text-xs text-[#a8a8a8]">Showing {filteredItems.length} of {allResult.items.length} on this page</div>
-				<RoleFilterButtons bind:value={roleFilter} disabled={disabled} />
+				<div class="text-xs text-admin-text-muted">
+					Showing {filteredItems.length} of {allResult.items.length} on this page
+				</div>
+				<RoleFilterButtons bind:value={roleFilter} {disabled} />
 			</div>
 
 			{#if filteredItems.length === 0}
-				<div class="text-sm text-[#a8a8a8]">No users for selected role filter on this page.</div>
+				<div class="text-sm text-admin-text-muted">
+					No users for selected role filter on this page.
+				</div>
 			{:else}
 				<UsersTableAny
 					users={filteredItems}
-					selectedUserIds={selectedUserIds}
-					disabled={disabled}
+					{selectedUserIds}
+					{disabled}
 					showSelectAll={true}
-					onToggleSelect={onToggleSelect}
+					{onToggleSelect}
 				/>
 			{/if}
 		{/if}

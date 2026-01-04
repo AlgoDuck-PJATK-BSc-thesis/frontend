@@ -20,35 +20,39 @@
 </script>
 
 <div class="overflow-x-auto">
-	<table class="w-full text-sm border-collapse">
+	<table class="w-full border-collapse text-sm">
 		<thead>
-			<tr class="text-left text-[#e7e7e7]">
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">User name</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">Joined at</th>
-				<th class="py-2 pr-0 border-b border-[#3c3c3c]">Actions</th>
+			<tr class="text-left text-admin-text-primary">
+				<th class="border-b border-admin-border-primary py-2 pr-4">User ID</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">User name</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">Email</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">Joined at</th>
+				<th class="border-b border-admin-border-primary py-2 pr-0">Actions</th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each members as m (m.userId)}
-				<tr class="text-[#cccccc]">
-					<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{m.userId}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{m.userName}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{m.email}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{formatJoinedAt(m.joinedAt)}</td>
-					<td class="py-2 pr-0 border-b border-[#2a2a2a]">
+				<tr class="text-admin-text-secondary">
+					<td class="border-b border-admin-border-primary py-2 pr-4 font-mono text-xs"
+						>{m.userId}</td
+					>
+					<td class="border-b border-admin-border-primary py-2 pr-4">{m.userName}</td>
+					<td class="border-b border-admin-border-primary py-2 pr-4">{m.email}</td>
+					<td class="border-b border-admin-border-primary py-2 pr-4"
+						>{formatJoinedAt(m.joinedAt)}</td
+					>
+					<td class="border-b border-admin-border-primary py-2 pr-0">
 						{#if onRemove}
 							<button
 								type="button"
 								onclick={() => onRemove?.(m.userId)}
 								disabled={disabled || removingUserId === m.userId}
-								class="px-3 py-1.5 bg-[#a1260d] text-white rounded-sm text-xs font-medium hover:bg-[#c83b1a] disabled:opacity-50 disabled:cursor-not-allowed"
+								class="rounded-sm bg-admin-danger-bg px-3 py-1.5 text-xs font-medium text-white hover:bg-admin-danger-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								Remove
 							</button>
 						{:else}
-							<span class="text-xs text-[#a8a8a8]">—</span>
+							<span class="text-xs text-admin-text-muted">—</span>
 						{/if}
 					</td>
 				</tr>
