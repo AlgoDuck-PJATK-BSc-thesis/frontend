@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { StandardResponseDto } from '$lib/api/apiCall';
-	import AnimatedPond from '$lib/Components/Misc/Pond/AnimatedPond.svelte';
 	import type { OwnedUsedItems } from './proxy+page';
+	import Pond from './refactor/Pond.svelte';
 
 	let { data }: { data: StandardResponseDto<OwnedUsedItems>} = $props();
 
@@ -18,5 +18,5 @@
 </svelte:head>
 
 <main class="flex h-full w-full items-center justify-center overflow-hidden">
-	<AnimatedPond userItems={{ ducks: data.body.ducks, plants: data.body.plants }} />
+	<Pond userItems={{ ducks: data.body.ducks, plants: data.body.plants }} />
 </main>

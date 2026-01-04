@@ -91,6 +91,7 @@ export const FetchJsonFromApi = async <TResult>(
 		throw new Error('Backend unavailable.');
 	}
 
+	console.log(res);
 	if (!res.ok) {
 		if (res.status === 401 && res.headers.get('X-Token-Expired') === 'true' && !replay) {
 			await FetchJsonFromApi(

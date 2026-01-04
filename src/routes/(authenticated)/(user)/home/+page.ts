@@ -3,11 +3,9 @@ import type { UsedDuckDto, UsedPlantDto } from "$lib/Components/Misc/Pond/duckTy
 import type { PageLoad } from "../delete-account/$types";
 
 export const load: PageLoad = async ({ fetch, params }) => {
-    let res = await FetchFromApi<OwnedUsedItems>("OwnedUsedItems", {
+    return await FetchFromApi<OwnedUsedItems>("OwnedUsedItems", {
         method: "GET"
-    }, fetch)
-    console.log(res.body);
-    return res;
+    }, fetch);
 }
 
 export type OwnedUsedItems = {

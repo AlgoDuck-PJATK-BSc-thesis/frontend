@@ -6,19 +6,23 @@
     import Runner from '$lib/svg/runner.svelte';
     import Upload from '$lib/svg/upload.svelte';
     import LayoutIconSvg from '$lib/svg/LayoutIconSvg.svelte';
-	import { fly } from 'svelte/transition';
 	import LayoutSelector from './LayoutSelector.svelte';
 	import { isIntermediateStatus, isTerminalStatus, type IntermediateStatus, type TerminalStatus } from '$lib/types/domain/modules/problem/solve';
+	import HistoryIconSvg from '$lib/svg/EditorComponentIcons/HistoryIconSvg.svelte';
+	import PreviousSolutionsPanel from './PreviousSolutionsPanel.svelte';
 
     let isLayoutSelectionVisible: boolean = $state(false);
+    let isPreviousAttemptOverlayVisible: boolean = $state(false);
 
     let {
+        problemId,
         executingState,
         executeCallback,
         submitCallback,
         registerAndSelectLayout,
         isSettingsPanelShown = $bindable()
     }: {
+        problemId: string | undefined,
         executingState: IntermediateStatus | TerminalStatus | undefined,
         executeCallback: () => Promise<void>,
         submitCallback: () => Promise<void>,
@@ -70,11 +74,18 @@
     <div class="w-[25%] h-full flex justify-end items-center px-5 gap-7">
         <div class="grow h-full flex flex-row items-center justify-end gap-2 relative">
             {#if isLayoutSelectionVisible}
-            
-                <div class=""></div>
-                <LayoutSelector options={{ registerAndSelectLayout: registerAndSelectLayout}}/>
+                <LayoutSelector bind:isVisible={isLayoutSelectionVisible} {registerAndSelectLayout}/>
+            {/if}
+            {#if isPreviousAttemptOverlayVisible}
+                <PreviousSolutionsPanel {problemId} bind:isVisible={isPreviousAttemptOverlayVisible} restorePreviousSolutionCallback={async () => {}}/>
             {/if}
         
+            <button
+                onclick={()=>{isPreviousAttemptOverlayVisible = !isPreviousAttemptOverlayVisible}}
+                class="h-[55%] aspect-square hover:cursor-pointer flex items-center justify-center transition-transform duration-100 ease-out"
+            >
+                <HistoryIconSvg options={{ class: 'stroke-ide-text-primary stroke-[1.5]' }} />
+            </button>            
             <button
                 onclick={()=>{isLayoutSelectionVisible = !isLayoutSelectionVisible}}
                 class="h-[55%] aspect-square hover:cursor-pointer flex items-center justify-center transition-transform duration-100 ease-out"
@@ -86,7 +97,7 @@
                 class="h-[60%] aspect-square hover:cursor-pointer hover:rotate-30 flex items-center justify-center transition-transform duration-100 ease-out"
             >
                 <SettingsIconSvg options={{ class: 'stroke-ide-text-primary stroke-[1.5]' }} />
-            </button>
+            </button>                    
         </div>
         <button class="h-[75%] aspect-square hover:cursor-pointer" onclick={() => {}}>
             <Account args={{ color: '#d2d1fc' }} />

@@ -3,6 +3,7 @@
 	import { applyContrast } from '$lib/Themes/UserThemes';
 	import { applyThemeAdmin, type AdminTheme } from '$lib/Themes/AdminThemes';
 	import { accessibility } from '$lib/stores/accessibility.svelte';
+	import { applyThemeAdmin, type AdminTheme } from '$lib/Themes/AdminThemes';
 
 	export let toggleRef: ((fn: () => void) => void) | undefined;
 

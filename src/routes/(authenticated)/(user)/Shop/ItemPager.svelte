@@ -136,7 +136,7 @@
 
 </script>
 
-<main class="h-full w-full flex flex-row">
+<main class="h-full w-full flex flex-row-reverse">
     <div bind:clientHeight={viewportHeight} class="w-full relative h-full">
         <div bind:this={conveyorBelt} class="w-full absolute flex flex-col justify-start" class:scroll-transition={isTransitioning} style="height: {100 * totalPages}%; transform: translateY(-{transform}px);">            
             {#each allPages as { pageNum, items }, i}
@@ -144,7 +144,7 @@
             {/each}
         </div>
     </div>
-    <div class="w-8 h-full items-center">
+    <div class="w-8 h-full items-center py-[2%]">
         <div class="w-full flex flex-col">
             <button 
                 onmousedown={() => addTransitionAndScroll('up')}
@@ -163,8 +163,7 @@
 {#snippet singlePage(items: Item[])}
     {@const Comp = options.itemDisplay}
     <div class="w-full h-full relative">
-        <img
-			src="/shop/edited-photo.png"
+        <img src="/shop/edited-photo.png"
 			class="pointer-events-none absolute inset-0 h-full w-full select-none"
 			alt=""
 		/>

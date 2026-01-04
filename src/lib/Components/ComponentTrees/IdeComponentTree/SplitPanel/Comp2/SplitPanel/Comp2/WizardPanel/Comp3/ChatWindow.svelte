@@ -23,18 +23,22 @@
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
     
+
+    let chatId: string | undefined = $derived(options.chatId);
+    
     hljs.registerLanguage('java', java);
 
     let connected: boolean = $state(false);
     let isSending: boolean = $state(false);
 
     let query: string = $state("");
-    type FragmentType = "Code" | "Text" | "Name";
+    type FragmentType = "Code" | "Text" | "Name" | "Id";
 
     type StreamingCompletionPart = {
         type: FragmentType
         message: string
     }
+
     
     const infiniteQuery = createInfiniteQuery({
         queryKey: [ options?.chatName ?? "New Chat" ],
@@ -62,7 +66,13 @@
         }
     });
 
-    // $inspect($infiniteQuery);
+    /* 
+     * don't remove this, we're using the infinite query for infinite fetching,
+     * but pages get accumulated in the layout manager cache
+     * so even if it seems like we're not directly using $infinite query
+     * it's data is side channeled into the thing we pull from. Hence the subscription NEEDS to stay
+     */
+    $infiniteQuery 
 
     let allMessages = $derived(
         options.pages
@@ -76,7 +86,6 @@
             await connection.stop();
         }
     });
-
 
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
@@ -130,13 +139,21 @@
         let inserted: boolean = false;
 
         try {
+            console.log(query);
             connection.stream("GetAssistance", {
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
-                query: btoa(query),
-                chatName: options.chatName
+                query: query,
+                chatId: chatId
             } as AssistantQuery).subscribe({
-                next: (messagePart: StreamingCompletionPart) => {
+                next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
+                    if (messagePart.body.type === "Id"){
+                        options.chatId = messagePart.body.message;
+                        chatId = messagePart.body.message;
+                        console.log(chatId);
+                        return;                    
+                    }
+
                     if (!inserted){
                         options.pages[0].items.unshift({
                             fragments: [] as MessageFragment[],
@@ -149,7 +166,7 @@
                     let message: ChatMessage | undefined = options.pages.at(0)?.items?.at(0)
                     if (!message) return;
 
-                    switch (messagePart.type){
+                    switch (messagePart.body.type){
                         case "Code":
                             if (currentlyReading !== "Code"){
                                 currentlyReading = "Code"
@@ -158,7 +175,9 @@
                                     content: ""
                                 } as MessageFragment)
                             }
-                            message.fragments[0].content += messagePart.message;
+                            message.fragments[0].content += messagePart.body.message;
+                            message.fragments[0].content.replaceAll("&gt;", '<')
+                            message.fragments[0].content.replaceAll("&lt;", '>')
                             break;
                         case "Text":
                             if (currentlyReading !== "Text"){
@@ -168,14 +187,16 @@
                                     content: ""
                                 } as MessageFragment)
                             }
-                            message.fragments[0].content += messagePart.message;
+                            message.fragments[0].content += messagePart.body.message;
+                            message.fragments[0].content.replaceAll("&gt;", '<')
+                            message.fragments[0].content.replaceAll("&lt;", '>')
                             break;
                         case "Name":
                             if (startedWithouChatName){
-                                options.chatName = options.chatName ? options.chatName + messagePart.message : messagePart.message;
+                                options.chatName = options.chatName ? options.chatName + messagePart.body.message : messagePart.body.message;
                             }
                             break;
-                    }
+                      }
                 },
                 complete: () => {
                     connected = false;
@@ -200,6 +221,7 @@
         if (tiptapEditor) {
             tiptapEditor.commands.setContent(prompt);
             query = prompt;
+            console.log(query);
             sendMessage();
         }
     }
@@ -295,7 +317,7 @@
 </main>
 
 {#snippet EmptyState()}
-    <div class="w-full h-full flex flex-col items-center justify-center gap-10 empty-state-fade-in overflow-y-auto">
+    <div class="w-full h-full flex flex-col items-center justify-start gap-10 empty-state-fade-in overflow-y-auto">
             <div class="w-24 aspect-square rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30 shadow-lg shadow-purple-500/10">
                 <MessageIconSvg options={{ class: "w-12 h-12 stroke-[1.5] stroke-ide-text-primary"}}/>
             </div>
@@ -471,7 +493,6 @@
     }
   }
 
-  /* Empty state animations */
   @keyframes fadeInUp {
     from {
       opacity: 0;
