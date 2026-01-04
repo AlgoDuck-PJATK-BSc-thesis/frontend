@@ -12,12 +12,12 @@
 	<button
 		type="button"
 		onclick={() => setValue('all')}
-		disabled={disabled}
+		{disabled}
 		aria-pressed={value === 'all'}
-		class={`px-3 py-1.5 rounded-sm text-xs font-semibold tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${
+		class={`rounded-sm border px-3 py-1.5 text-xs font-semibold tracking-wider disabled:cursor-not-allowed disabled:opacity-50 ${
 			value === 'all'
-				? 'bg-[#0e639c] text-white border-[#0e639c]'
-				: 'bg-[#2d2d2d] text-[#e7e7e7] border-[#3c3c3c] hover:bg-[#3a3a3a]'
+				? 'border-admin-accent-primary bg-admin-accent-primary text-white'
+				: 'border-admin-border-primary bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-hover'
 		}`}
 	>
 		All roles
@@ -26,12 +26,12 @@
 	<button
 		type="button"
 		onclick={() => setValue('users')}
-		disabled={disabled}
+		{disabled}
 		aria-pressed={value === 'users'}
-		class={`px-3 py-1.5 rounded-sm text-xs font-semibold tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${
+		class={`rounded-sm border px-3 py-1.5 text-xs font-semibold tracking-wider disabled:cursor-not-allowed disabled:opacity-50 ${
 			value === 'users'
-				? 'bg-[#0e639c] text-white border-[#0e639c]'
-				: 'bg-[#2d2d2d] text-[#e7e7e7] border-[#3c3c3c] hover:bg-[#3a3a3a]'
+				? 'border-admin-accent-primary bg-admin-accent-primary text-white'
+				: 'border-admin-border-primary bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-hover'
 		}`}
 	>
 		Users
@@ -40,12 +40,12 @@
 	<button
 		type="button"
 		onclick={() => setValue('admins')}
-		disabled={disabled}
+		{disabled}
 		aria-pressed={value === 'admins'}
-		class={`px-3 py-1.5 rounded-sm text-xs font-semibold tracking-wider border disabled:opacity-50 disabled:cursor-not-allowed ${
+		class={`rounded-sm border px-3 py-1.5 text-xs font-semibold tracking-wider disabled:cursor-not-allowed disabled:opacity-50 ${
 			value === 'admins'
-				? 'bg-[#0e639c] text-white border-[#0e639c]'
-				: 'bg-[#2d2d2d] text-[#e7e7e7] border-[#3c3c3c] hover:bg-[#3a3a3a]'
+				? 'border-admin-accent-primary bg-admin-accent-primary text-white'
+				: 'border-admin-border-primary bg-admin-bg-tertiary text-admin-text-primary hover:bg-admin-bg-hover'
 		}`}
 	>
 		Admins

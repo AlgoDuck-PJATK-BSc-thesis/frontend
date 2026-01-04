@@ -24,7 +24,9 @@
 
 	const isSelected = (id: string) => (selectedUserIds ?? []).includes(id);
 
-	const allVisibleSelected = $derived((users ?? []).length > 0 && (users ?? []).every((u) => isSelected(u.userId)));
+	const allVisibleSelected = $derived(
+		(users ?? []).length > 0 && (users ?? []).every((u) => isSelected(u.userId))
+	);
 
 	const toggleAllVisible = () => {
 		const rows = users ?? [];
@@ -44,20 +46,20 @@
 </script>
 
 <div class="overflow-x-auto">
-	<table class="w-full text-sm border-collapse">
+	<table class="w-full border-collapse text-sm">
 		<thead>
-			<tr class="text-left text-[#e7e7e7]">
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">User ID</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">Username</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">Email</th>
-				<th class="py-2 pr-4 border-b border-[#3c3c3c]">Roles</th>
-				<th class="py-2 pr-0 border-b border-[#3c3c3c] text-right">
+			<tr class="text-left text-admin-text-primary">
+				<th class="border-b border-admin-border-primary py-2 pr-4">User ID</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">Username</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">Email</th>
+				<th class="border-b border-admin-border-primary py-2 pr-4">Roles</th>
+				<th class="border-b border-admin-border-primary py-2 pr-0 text-right">
 					{#if showSelectAll}
 						<button
 							type="button"
 							onclick={toggleAllVisible}
 							disabled={disabled || (users?.length ?? 0) === 0}
-							class="px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-semibold tracking-wider hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+							class="rounded-sm bg-admin-bg-input px-3 py-1.5 text-xs font-semibold tracking-wider text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{allVisibleSelected ? 'UNSELECT ALL' : 'SELECT ALL'}
 						</button>
@@ -68,19 +70,27 @@
 		<tbody>
 			{#each users as u (u.userId)}
 				{@const sel = isSelected(u.userId)}
-				<tr class={sel ? 'bg-[#1f2a33] text-[#e7e7e7]' : 'text-[#cccccc]'}>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a] font-mono text-xs">{u.userId}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.username}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{u.email}</td>
-					<td class="py-2 pr-4 border-b border-[#2a2a2a]">{(u.roles ?? []).join(', ')}</td>
-					<td class="py-2 pr-0 border-b border-[#2a2a2a] text-right">
+				<tr
+					class={sel
+						? 'bg-admin-accent-selection text-admin-text-primary'
+						: 'text-admin-text-secondary'}
+				>
+					<td class="border-b border-admin-border-primary py-2 pr-4 font-mono text-xs"
+						>{u.userId}</td
+					>
+					<td class="border-b border-admin-border-primary py-2 pr-4">{u.username}</td>
+					<td class="border-b border-admin-border-primary py-2 pr-4">{u.email}</td>
+					<td class="border-b border-admin-border-primary py-2 pr-4"
+						>{(u.roles ?? []).join(', ')}</td
+					>
+					<td class="border-b border-admin-border-primary py-2 pr-0 text-right">
 						<button
 							type="button"
 							onclick={() => onToggleSelect(u)}
-							disabled={disabled}
+							{disabled}
 							class={sel
-								? 'px-3 py-1.5 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed'
-								: 'px-3 py-1.5 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed'}
+								? 'rounded-sm bg-admin-accent-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50'
+								: 'rounded-sm bg-admin-bg-input px-3 py-1.5 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50'}
 						>
 							{sel ? 'Selected' : 'Select'}
 						</button>

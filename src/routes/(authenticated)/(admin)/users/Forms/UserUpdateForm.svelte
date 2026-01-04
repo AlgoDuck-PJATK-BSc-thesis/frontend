@@ -30,7 +30,14 @@
 		onUpdate: (payload: UpdatePayload) => void;
 	};
 
-	let { disabled = false, saving = false, error = null, success = null, initialUserId = '', onUpdate } = $props() as Props;
+	let {
+		disabled = false,
+		saving = false,
+		error = null,
+		success = null,
+		initialUserId = '',
+		onUpdate
+	} = $props() as Props;
 
 	let userId = $state(initialUserId);
 	let role = $state<UpdateRole>('keep');
@@ -194,40 +201,43 @@
 	};
 </script>
 
-<div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
-	<div class="px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-		<h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Update user</h3>
+<div class="overflow-hidden rounded border border-admin-border-primary bg-admin-bg-secondary">
+	<div class="border-b border-admin-border-primary bg-admin-bg-tertiary px-4 py-3">
+		<h3 class="text-xs font-semibold tracking-wider text-admin-text-primary uppercase">
+			Update user
+		</h3>
 	</div>
 
-	<div class="p-4 flex flex-col gap-4">
+	<div class="flex flex-col gap-4 p-4">
 		{#if error}
-			<div class="text-sm text-[#ffb4b4]">{error}</div>
+			<div class="text-sm text-admin-danger-text">{error}</div>
 		{/if}
 
 		{#if success}
-			<div class="text-sm text-[#b7f7c7]">
-				Saved: <span class="font-mono text-xs">{success.userId}</span> — {success.username} — {success.email} ({(success.roles ?? []).join(', ')})
+			<div class="text-sm text-admin-accent-link">
+				Saved: <span class="font-mono text-xs">{success.userId}</span> — {success.username} — {success.email}
+				({(success.roles ?? []).join(', ')})
 			</div>
 		{/if}
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_update_userid" class="text-xs text-[#a8a8a8]">User ID</label>
+			<label for="admin_update_userid" class="text-xs text-admin-text-muted">User ID</label>
 			<input
 				id="admin_update_userid"
 				type="text"
 				bind:value={userId}
 				disabled={disabled || saving}
-				class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] font-mono outline-none focus:border-[#007fd4] disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 font-mono text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			/>
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_update_role" class="text-xs text-[#a8a8a8]">Role</label>
+			<label for="admin_update_role" class="text-xs text-admin-text-muted">Role</label>
 			<select
 				id="admin_update_role"
 				bind:value={role}
 				disabled={disabled || saving}
-				class="bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			>
 				<option value="keep">keep the same role</option>
 				<option value="user">user</option>
@@ -236,15 +246,17 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_update_email" class="text-xs text-[#a8a8a8]">Email</label>
+			<label for="admin_update_email" class="text-xs text-admin-text-muted">Email</label>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				<div class="flex items-center border border-[#3c3c3c] rounded-sm overflow-hidden">
+			<div class="flex flex-wrap items-center gap-2">
+				<div
+					class="flex items-center overflow-hidden rounded-sm border border-admin-border-primary"
+				>
 					<button
 						type="button"
 						onclick={() => (emailMode = 'none')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${emailMode === 'none' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${emailMode === 'none' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						No change
 					</button>
@@ -252,7 +264,7 @@
 						type="button"
 						onclick={() => (emailMode = 'manual')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${emailMode === 'manual' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${emailMode === 'manual' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Type
 					</button>
@@ -264,21 +276,23 @@
 					bind:value={email}
 					readonly={emailMode !== 'manual'}
 					disabled={disabled || saving || emailMode === 'none'}
-					class="flex-1 min-w-[240px] bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50"
+					class="min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 				/>
 			</div>
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_update_username" class="text-xs text-[#a8a8a8]">Username</label>
+			<label for="admin_update_username" class="text-xs text-admin-text-muted">Username</label>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				<div class="flex items-center border border-[#3c3c3c] rounded-sm overflow-hidden">
+			<div class="flex flex-wrap items-center gap-2">
+				<div
+					class="flex items-center overflow-hidden rounded-sm border border-admin-border-primary"
+				>
 					<button
 						type="button"
 						onclick={() => (usernameMode = 'none')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'none' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'none' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						No change
 					</button>
@@ -286,7 +300,7 @@
 						type="button"
 						onclick={() => (usernameMode = 'manual')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'manual' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'manual' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Type
 					</button>
@@ -294,7 +308,7 @@
 						type="button"
 						onclick={() => (usernameMode = 'generate')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'generate' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${usernameMode === 'generate' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Generate
 					</button>
@@ -306,7 +320,7 @@
 					bind:value={username}
 					readonly={usernameMode !== 'manual'}
 					disabled={disabled || saving || usernameMode === 'none'}
-					class={`flex-1 min-w-[240px] bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50 ${usernameMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${usernameMode === 'generate' ? 'font-mono' : ''}`}
 				/>
 
 				{#if usernameMode === 'generate'}
@@ -314,7 +328,7 @@
 						type="button"
 						onclick={regenerateUsername}
 						disabled={disabled || saving}
-						class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+						class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Regenerate
 					</button>
@@ -323,15 +337,17 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<label for="admin_update_password" class="text-xs text-[#a8a8a8]">Password</label>
+			<label for="admin_update_password" class="text-xs text-admin-text-muted">Password</label>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				<div class="flex items-center border border-[#3c3c3c] rounded-sm overflow-hidden">
+			<div class="flex flex-wrap items-center gap-2">
+				<div
+					class="flex items-center overflow-hidden rounded-sm border border-admin-border-primary"
+				>
 					<button
 						type="button"
 						onclick={() => (passwordMode = 'none')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'none' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'none' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						No change
 					</button>
@@ -339,7 +355,7 @@
 						type="button"
 						onclick={() => (passwordMode = 'manual')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'manual' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'manual' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Type
 					</button>
@@ -347,7 +363,7 @@
 						type="button"
 						onclick={() => (passwordMode = 'generate')}
 						disabled={disabled || saving}
-						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'generate' ? 'bg-[#0e639c] text-white' : 'bg-[#1f1f1f] text-[#e7e7e7] hover:bg-[#2a2a2a]'} disabled:opacity-50 disabled:cursor-not-allowed`}
+						class={`px-3 py-2 text-xs font-medium ${passwordMode === 'generate' ? 'bg-admin-accent-primary text-white' : 'bg-admin-bg-primary text-admin-text-primary hover:bg-admin-bg-hover'} disabled:cursor-not-allowed disabled:opacity-50`}
 					>
 						Generate
 					</button>
@@ -359,14 +375,14 @@
 					bind:value={password}
 					readonly={passwordMode === 'generate'}
 					disabled={disabled || saving || passwordMode === 'none'}
-					class={`flex-1 min-w-[240px] bg-[#1f1f1f] border border-[#3c3c3c] rounded-sm px-3 py-2 text-sm text-[#e7e7e7] outline-none focus:border-[#007fd4] disabled:opacity-50 ${passwordMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${passwordMode === 'generate' ? 'font-mono' : ''}`}
 				/>
 
 				<button
 					type="button"
 					onclick={() => (showPassword = !showPassword)}
 					disabled={disabled || saving || passwordMode === 'none'}
-					class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{showPassword ? 'Hide' : 'Show'}
 				</button>
@@ -376,7 +392,7 @@
 						type="button"
 						onclick={regeneratePassword}
 						disabled={disabled || saving}
-						class="px-3 py-2 bg-[#3c3c3c] text-[#e7e7e7] rounded-sm text-xs font-medium hover:bg-[#4a4a4a] disabled:opacity-50 disabled:cursor-not-allowed"
+						class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Regenerate
 					</button>
@@ -389,7 +405,7 @@
 				type="button"
 				onclick={submit}
 				disabled={disabled || saving || !canSubmit()}
-				class="px-3 py-2 bg-[#0e639c] text-white rounded-sm text-xs font-medium hover:bg-[#1177bb] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="rounded-sm bg-admin-accent-primary px-3 py-2 text-xs font-medium text-white hover:bg-admin-accent-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{#if saving}
 					<LoadingDots />
