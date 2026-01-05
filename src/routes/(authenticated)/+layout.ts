@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { authApi } from '$lib/api/auth';
 import { profileApi } from '$lib/api/profile';
+import { UserData } from '$lib/stores/userData.svelte';
 
 export const ssr = false;
 
@@ -20,6 +21,10 @@ export const load = async ({ fetch, url }: LoadEventLike) => {
 			roles: [],
 			primaryRole: null
 		}));
+
+		if (profileResult.profile){
+			UserData.user = profileResult.profile;
+		}
 
 		const roles = (profileResult.roles ?? []).map((r) => normalizeRole(r)).filter(Boolean);
 		const primaryRole = normalizeRole(profileResult.primaryRole);

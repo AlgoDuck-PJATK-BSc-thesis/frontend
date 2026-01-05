@@ -9,6 +9,8 @@
 	import ShopkeepMessageComp from './ShopkeepMessageComp.svelte';
 	import BinaryInteractionMessageComp from './BinaryInteractionMessageComp.svelte';
 	import { ConversationBuilder, type ConversationExecutor } from './MessageTypes';
+	import { UserData } from '$lib/stores/userData.svelte';
+	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 
 	const hoverAnimationTime = 3000;
 	const driftAmount = 15;
@@ -22,7 +24,6 @@
 	let isFlowerButtonPressed: boolean = $state(false);
 
 	let currentlySelectedItem: Item | undefined = $state();
-	let userCoins: number = $state(500);
 
 	const selectItem = (selected: Item, wasAutomatic: boolean) => {
 		currentlySelectedItem = selected;
@@ -38,13 +39,24 @@
 			});
 	};
 
-	const handlePurchase = (item: Item) => {
+	const handlePurchase = async (item: Item) => {
+		const userCoins: number = UserData.user.coins;
 		conversation()
 			.react('purchase_accepted', { userCoins, item })
 			.end();
+		if (UserData.user.coins >= item.price) {
+
+			FetchFromApi<{ itemId: string }>("PurchaseItem", {
+				method: "POST",
+				body: JSON.stringify({
+					itemId: item.itemId
+				})
+			}).then((value: StandardResponseDto<{ itemId: string }>) => {
+				console.log(value.body.itemId)
+				UserData.user.coins -= item.price;
+				item.isOwned = true;
+			}).catch();
 		
-		if (userCoins >= item.price) {
-			userCoins -= item.price;
 		}
 	};
 
@@ -228,31 +240,24 @@
 	});
 
 	onMount(() => {
-		userCoins = Math.floor(Math.random() * 1100);
-		
 		conversation()
-			.react('entered_shop', { userCurrencyCount: userCoins })
+			.react('entered_shop', { userCurrencyCount: UserData.user.coins })
 			.end();
 	});
 </script>
 
-<main class="relative h-full w-full">
+<main class="relative h-full w-full flex justify-center items-center overflow-none">
 	<img bind:clientWidth={bgImageWidth} bind:clientHeight={bgImageHeight}
-		class="pointer-events-none absolute inset-0 top-0 h-full object-cover select-none"
-		src="/shop/store-bg.gif"
+		class="pointer-events-none absolute h-full object-cover select-none overflow-none"
+		src="/src/lib/images/store/store-bg.gif"
 		alt="shop background gif"
 	/>
-	<img class="pointer-events-none absolute inset-0 top-0 z-500 h-full object-cover select-none"
-		src="/shop/shopkeep.gif"
+	<img class="pointer-events-none absolute inset-0 top-0 z-500 h-full object-cover select-none overflow-none"
+		src="/src/lib/images/store/shopkeep.gif"
 		alt="shopkeep"
 	/>
 
-	<div class="absolute top-4 right-4 z-800 flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-lg">
-		<img class="h-6 w-6" src="/src/lib/images/store/coin.png" alt="coin" />
-		<span class="text-amber-100 font-bold">{userCoins}</span>
-	</div>
-
-	<div class="w-[20%] max-h-[45%] absolute z-750 left-[22%] bottom-[27%] flex flex-col-reverse justify-end">
+<div class="w-[20%] max-h-[45%] absolute z-750 left-[22%] bottom-[27%] flex flex-col-reverse justify-end">
 		{#each chatWindowContents as chatMessage (chatMessage.messageId)}
 			{#if chatMessage.type === 'shopkeep'}
 				<ShopkeepMessageComp options={chatMessage.options}/>
@@ -262,16 +267,15 @@
 		{/each}
 	</div>
 
-	<div
-		class="absolute top-0 z-150 flex flex-row"
+	<div class="absolute top-0 z-150 flex flex-row"
 		style="width: {bgImageWidth ?? 1920}px; height: {bgImageHeight ?? 1080}px;">
 		<div class="relative h-full w-3/4">
-			<div bind:contentRect class="absolute top-[4%] right-[1%] h-[65%] w-[91%] overflow-y-hidden">
+			<div bind:contentRect class="absolute top-[9%] right-[1%] h-[57%] w-[88%] overflow-y-hidden">
 				{#key selectedTab}
 					<CurrentTabComp options={CurrentTabOptions}/>
 				{/key}
 			</div>
-			<div class="absolute h-[6%] top-[69%] z-999 right-[5%] bg-red-500 flex flex-row gap-1 py-[0.1%] px-[1%]">
+			<div class="absolute h-[6%] top-[3%] z-999 left-[15%] flex flex-row gap-1 py-[0.1%] px-[1%]">
 				<button onmousedown={() => {
 					isDuckButtonPressed = true;
 				}}
@@ -288,28 +292,6 @@
 				onmouseup={() => {
 					isFlowerButtonPressed = false;
 					selectedTab = 'Plant';
-				}}
-				class="h-full">
-					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
-				</button>
-			</div>
-			<div class="absolute h-[6%] top-[69%] z-999 right-[5%] bg-red-500 flex flex-row gap-1 py-[0.1%] px-[1%]">
-				<button onmousedown={() => {
-					isDuckButtonPressed = true;
-				}}
-				onmouseup={() => {
-					isDuckButtonPressed = false;
-					activeTab = 'ducks';
-				}}
-				class="h-full">
-					<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
-				</button>
-				<button onmousedown={() => {
-					isFlowerButtonPressed = true;
-				}}
-				onmouseup={() => {
-					isFlowerButtonPressed = false;
-					activeTab = 'plants';
 				}}
 				class="h-full">
 					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">

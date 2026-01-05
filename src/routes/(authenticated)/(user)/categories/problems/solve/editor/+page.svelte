@@ -94,8 +94,8 @@
   ])
 
 </script>
-<main class="w-full flex justify-center items-center h-full bg-red-400">
-  <div class="w-[60%] h-[80%] bg-blue-700">
+<main class="w-full flex justify-center items-center h-full">
+  <div class="w-[60%] h-[80%]">
     <Editor {registeredComponents}/>
   </div>
 </main>

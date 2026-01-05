@@ -2,6 +2,7 @@
 	import { FetchFromApi } from '$lib/api/apiCall';
 	import type { CodeEditorComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
+	import { onDestroy } from 'svelte';
 
 	let { options = $bindable() }: { options: CodeEditorComponentArgs } = $props();
 
@@ -37,7 +38,11 @@
 				savingState = "saved";
 			}
 		}, autoSaveStallTimeMillis);
+
+		return () => clearTimeout(lastTimeout);
 	});
+
+	onDestroy(() => clearTimeout(lastTimeout));
 </script>
 
 <main class="w-full h-full relative border border-ide-accent/10">

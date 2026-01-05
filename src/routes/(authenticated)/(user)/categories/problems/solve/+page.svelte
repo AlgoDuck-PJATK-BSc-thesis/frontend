@@ -26,13 +26,14 @@
 
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
-		loadedData = await data.problemLoadResponse;
-		loadedChatData = await data.chatList;
 		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
-			loadedAutoSave = value
+			loadedAutoSave = value;
+			console.log(value);
 		}).catch((reason: any) => {
 			console.log(reason);
 		})
+		loadedData = await data.problemLoadResponse;
+		loadedChatData = await data.chatList;
 
 		console.log(loadedAutoSave.body);
 
@@ -121,7 +122,6 @@
 					} as ComponentConfig<MyTopLevelComponentArg<any>>)
 				},
 				remove: async (compId: string): Promise<boolean> => {
-					/* TODO: Do server call here */
 					let removedWindow: ChatWindowComponentArgs | undefined = (config['assistant-wizard'] as WizardComponentArg).components
 					.filter(comp => comp.options.component.component === "ChatWindow")
 					.map(comp => comp.options.component.options as ChatWindowComponentArgs)
@@ -133,11 +133,16 @@
 						return true;						
 					}
 
-					let res: StandardResponseDto<{messagesDeleted: number}> = await FetchFromApi<{messagesDeleted: number}>("DeleteChat", {
+					let didDelete = false
+					FetchFromApi<{messagesDeleted: number}>("DeleteChat", {
 						method: "DELETE",
-					}, fetch, new URLSearchParams({ chatId: removedWindow.chatId }))
+					}, fetch, new URLSearchParams({ chatId: removedWindow.chatId })).then(() => {
+						didDelete = true;
+					}).catch(() => {
+						didDelete = false;
+					})
 
-					return true;
+					return didDelete;
 				},
 				rename: async (compId: string, newName: string): Promise<void> => {
 					let comp: ComponentConfig<MyTopLevelComponentArg<any>> | undefined = (config['assistant-wizard'] as WizardComponentArg).components.find(comp => comp.options.component.compId === compId);

@@ -9,6 +9,7 @@
     let { options = $bindable() }: { options: ControlPanelArgs } = $props();
 
     const handleSelect = (selected: string) => {
+        console.log('selecting: ', selected)
         if (options.controlCallbacks?.select){
             options.controlCallbacks!.select(selected);
         }else{
