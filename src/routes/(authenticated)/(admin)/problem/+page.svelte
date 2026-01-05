@@ -19,6 +19,9 @@
     import * as signalR from '@microsoft/signalr';
 	import type { CategoryDto, DifficultyDto, ProblemCreatePageArgs } from "./problemAddTypes";
 	import ToolTip from "./ToolTip.svelte";
+	import DropDownSelect2 from "$lib/Components/GenericComponents/dropDownMenu/DropDownSelect2.svelte";
+	import DifficultySelectCard from "./SuggestionCards/DifficultySelectCard.svelte";
+	import type { KeyValuePair } from "$lib/Components/GenericComponents/dropDownMenu/DropDownSelectOptions";
 
     let { data }: { data: ProblemCreatePageArgs } = $props();
 
@@ -29,10 +32,12 @@
         testCases: [] as TestCaseCreateDto[],
         tags: [] as TagCreateDto[],
         difficultyId: '',
-        categoryId: 'd018bd6e-2cb0-412c-939f-27b3cf654e58',
+        categoryId: '',
         problemTitle: '',
         problemDescription: ''
     } as problemCreationDto)
+
+    $inspect(creationDto);
 
     let connection: signalR.HubConnection | undefined;
 	let connected: boolean = $state(false);
@@ -48,10 +53,15 @@
         if (!creationDto.problemTitle?.trim()) errors.push("Problem title is required");
         if (!creationDto.problemDescription?.trim()) errors.push("Problem description is required");
         if (!creationDto.difficultyId) errors.push("Please select a difficulty");
-        // if (!creationDto.categoryId) errors.push("Please select a category");
+        if (!creationDto.categoryId) errors.push("Please select a category");
         if (creationDto.testCases.length === 0) errors.push("At least one test case is required");
         
         const incompleteTestCases = creationDto.testCases.filter((tc, i) => !tc.callMethod || !tc.expected);
+        creationDto.testCases
+            .map((tc, i) => ({testCase: tc, testCaseIndex: i}))
+            .filter((tc) => tc.testCase.callMethod && (tc.testCase.callMethod.functionParams ?? []).length !== (tc.testCase.callArgs ?? 0).length)
+            .forEach((tc) => errors.push(`test case: ${tc.testCaseIndex}. Missing call function arguments.`));
+
         if (incompleteTestCases.length > 0) {
             errors.push(`${incompleteTestCases.length} test case(s) are incomplete`);
         }
@@ -190,7 +200,7 @@
                     <h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Difficulty</h3>
                     <span class="text-[#f14c4c] text-xs">*</span>
                 </div>
-                <div class="p-4">
+                <div class="p-4 items-center">
                     <div class="flex flex-row items-center gap-1 bg-admin-border-primary rounded-full p-1">
                         {#each data.difficulties as difficulty}
                             <button onclick={() => {
@@ -207,20 +217,21 @@
                 </div>
             </div>
 
-            <div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden">
+            <div class="bg-[#252526] border border-[#3c3c3c] rounded">
                 <div class="flex items-center gap-2.5 px-4 py-3 bg-[#2d2d2d] border-b border-[#3c3c3c]">
                     <h3 class="text-xs font-semibold text-[#e7e7e7] uppercase tracking-wider">Category</h3>
                     <span class="text-[#f14c4c] text-xs">*</span>
                 </div>
-                <div class="p-4">
-                    <select bind:value={creationDto.categoryId}
-                        class="w-full h-10 px-3 bg-[#3c3c3c] border border-[#3c3c3c] rounded-sm text-[#cccccc] text-sm outline-none cursor-pointer transition-colors focus:border-[#007fd4] hover:bg-[#454545]">
-                        {#each data.categories as category}
-                            <option value={category.id}>{category.categoryName}</option>
-                        {:else}
-                            <option disabled>no categories found</option>
-                        {/each}
-                    </select>
+                <div class="p-4 w-full flex justify-center">
+                    <DropDownSelect2 options={{
+                        options: data.categories.map(c => ({key: c, value: c.categoryId} as KeyValuePair<CategoryDto, string>)),
+                        onSelectCallback: (selected: string) => {
+                            console.log('running selection callback')
+                            creationDto.categoryId = selected
+                        },
+                        displayComp: DifficultySelectCard,
+                        groupId: 'somegroup'
+                    }}/>
                 </div>
             </div>
         </div>
@@ -300,14 +311,16 @@
                     {/if}
                 </div>
                 <button onclick={createProblem} 
-                    disabled={currentValidationStatus === "Pending" || currentValidationStatus === "Queued"}
+                   
                     class="flex items-center justify-center gap-2 px-6 py-3 bg-[#0e639c] text-white border-none rounded-sm text-sm font-medium cursor-pointer transition-colors hover:bg-[#1177bb] focus:outline-[#007fd4] focus:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0e639c]">
-                    {#if currentValidationStatus === "Pending" || currentValidationStatus === "Queued"}
+
+                    <!--  disabled={currentValidationStatus === "Pending" || currentValidationStatus === "Queued"} -->
+                    <!-- {#if currentValidationStatus === "Pending" || currentValidationStatus === "Queued"}
                         <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>{currentValidationStatus}</span>
-                    {:else}
+                    {:else} -->
                         <span>Create Problem</span>
-                    {/if}
+                    <!-- {/if} -->
                 </button>
             </div>
         </div>

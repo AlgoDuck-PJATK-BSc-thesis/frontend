@@ -29,7 +29,9 @@ export type FunctionParam = {
 export type SuggestedInputArgs<T extends Record<string, any>> = {
     onSelect: (selected: T) => void,
     getCurrentRecommendationsForQuery: (prefix: string) => T[] | undefined;
-    DisplayComp: Component<{ options: RecommendationDisplayCompArgs<T> }>
+    DisplayComp: Component<{ options: RecommendationDisplayCompArgs<T> }>;
+    onDeselect?: (() => void)
+    SelectedDisplayComp?: Component<{ options: RecommendationDisplayCompArgs<T> }>;
 }
 
 export type RecommendationDisplayCompArgs<T extends Record<string, any> = {}> = {

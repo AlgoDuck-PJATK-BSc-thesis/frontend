@@ -3,6 +3,7 @@
 	import { hideGroupElem, registerGroupElem, showGroupElem, type DropDownData } from "./DropDownSelectGroups.svelte";
 	import type { DisplayCompArgs, DropDownMenuOptions2, KeyValuePair } from "./DropDownSelectOptions";
 	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+	import { clickOutside } from "$lib/actions/clickOutside";
 
 	let { options }: { options: DropDownMenuOptions2<K, V> } = $props();
 
@@ -34,10 +35,10 @@
 
 </script>
 
-<main class="relative" {@attach () => {
+<main use:clickOutside={() => hideGroupElem(dropDownData!.groupId!)} class="relative" {@attach () => {
 		    dropDownData = registerGroupElem(dropDownData)
         }}>
-        <button class="relative flex items-center rounded-t-md" onclick={toggleDropDown}>
+        <button class="relative flex items-center rounded-t-md {!dropDownData.isVisible ? "rounded-md": ""} overflow-hidden" onclick={toggleDropDown}>
             <DisplayComp options={{isSelected: false,  content: label }}/>            
             <div class="h-full aspect-sqaure pointer-events-none absolute right-0 {dropDownData.isVisible ? "rotate-90" : ""}">
                 <div class="w-full h-full p-[30%]">

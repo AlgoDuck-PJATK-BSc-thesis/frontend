@@ -2,17 +2,19 @@
     import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
     import Monaco from "$lib/Components/GenericComponents/monaco/monaco.svelte";
     import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
-	import { Editor } from "@tiptap/core";
+    import { Editor } from "@tiptap/core";
     import type { AnalysisResultDto, FunctionParam, MethodRecommendation, SuggestedInputArgs, TestCaseCreateDto, ValidationResponseStatus, VariableRecommendation } from "./TestCase";
     import { Trie } from "./Trie";
-	import StarterKit from "@tiptap/starter-kit";
-	import Placeholder from "@tiptap/extension-placeholder";
-	import ToolTip from "./ToolTip.svelte";
-	import SuggestedInput from "./SuggestedInput.svelte";
-	import MethodRecommendationComp from "./SuggestionCards/MethodRecommendationComp.svelte";
-	import VariableRecommendationComp from "./SuggestionCards/VariableRecommendationComp.svelte";
-	import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
-	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+    import StarterKit from "@tiptap/starter-kit";
+    import Placeholder from "@tiptap/extension-placeholder";
+    import SuggestedInput from "./SuggestedInput.svelte";
+    import MethodRecommendationComp from "./SuggestionCards/MethodRecommendationComp.svelte";
+    import VariableRecommendationComp from "./SuggestionCards/VariableRecommendationComp.svelte";
+    import VariableRecommendationSelectedComp from "./SuggestionCards/VariableRecommendationSelectedComp.svelte";
+    import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
+    import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+    import ToolTip from "./ToolTip.svelte";
+	import MethodRecommentaionSelectedComp from "./SuggestionCards/MethodRecommentaionSelectedComp.svelte";
 
     let { 
         templateContents,
@@ -33,6 +35,9 @@
 
     let analysisStatus: ValidationResponseStatus | undefined = $state();
     let analysisError: string | undefined = $state();
+
+    // Track selected values for each parameter input
+    let selectedCallArgs: (FunctionParam | undefined)[] = $state([]);
 
     $effect(() => { 
         const templateContentsInner = templateContents;
@@ -75,15 +80,24 @@
     });
 
     let methodSuggestionOptions: SuggestedInputArgs<MethodRecommendation> = $state({
-        onSelect: (selected: MethodRecommendation) => testCase.callMethod = selected,
+        onSelect: (selected: MethodRecommendation) => {
+            testCase.callMethod = selected;
+            selectedCallArgs = new Array(selected.functionParams.length).fill(undefined);
+            testCase.callArgs = [];
+        },
         getCurrentRecommendationsForQuery: (prefix: string) => methodRecommendationTrie?.getAllSubtreeValues(prefix),
-        DisplayComp: MethodRecommendationComp
+        DisplayComp: MethodRecommendationComp,
+        SelectedDisplayComp: MethodRecommentaionSelectedComp,
+        selectedValue: testCase.callMethod
     });
+
 
     let targetSuggestionOptions: SuggestedInputArgs<VariableRecommendation> = $state({
         onSelect: (selected: VariableRecommendation) => testCase.expected = selected as FunctionParam,
         getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
-        DisplayComp: VariableRecommendationComp
+        DisplayComp: VariableRecommendationComp,
+        SelectedDisplayComp: VariableRecommendationSelectedComp,
+        selectedValue: testCase.expected
     });
 
     testCase.arrangeB64 = testCase.arrangeB64 || "public class TestCase{\n\tpublic static void main(String[] args){\n\t\t//your arrange goes here\n\t}\n}"; 
@@ -96,6 +110,7 @@
         if (testCase.callMethod && testCase.expected) return { color: "bg-[#89d185]", label: "Ready", icon: "check" };
         return { color: "bg-[#cca700]", label: "Pending", icon: "pending" };
     });
+
 </script>
 
 <div class="bg-[#252526] border border-[#3c3c3c] rounded overflow-hidden transition-colors hover:border-[#454545]">
@@ -138,20 +153,14 @@
         <div class="bg-[#252526] p-4 border-b border-[#3c3c3c]">
             <div class="flex items-center gap-6">
                 <label class="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                        type="checkbox" 
-                        bind:checked={testCase.isPublic}
-                        class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"
-                    />
+                    <input type="checkbox" bind:checked={testCase.isPublic}
+                        class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Public</span>
                     <ToolTip options={{ tip: "Public test cases are visible to users before submission" }}/>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                        type="checkbox" 
-                        bind:checked={testCase.orderMatters}
-                        class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"
-                    />
+                    <input type="checkbox" bind:checked={testCase.orderMatters}
+                        class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Order Matters</span>
                     <ToolTip options={{ tip: "If unchecked, array/list outputs will be compared regardless of element order" }}/>
                 </label>
@@ -220,9 +229,18 @@
                                 <span class="font-mono text-xs text-[#4ec9b0] bg-[#4ec9b0]/10 px-1.5 py-0.5 rounded whitespace-nowrap">{param.type}</span>
                                 <span class="font-mono text-xs text-[#9cdcfe] min-w-[80px]">{param.name}</span>
                                 <SuggestedInput options={{
-                                    onSelect: (selected: VariableRecommendation) => (testCase.callArgs ??= [])[i] = selected as FunctionParam,
+                                    onSelect: (selected: VariableRecommendation) => {
+                                        (testCase.callArgs ??= [])[i] = selected as FunctionParam;
+                                        selectedCallArgs[i] = selected as FunctionParam;
+                                    },
                                     getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
-                                    DisplayComp: VariableRecommendationComp
+                                    DisplayComp: VariableRecommendationComp,
+                                    SelectedDisplayComp: VariableRecommendationSelectedComp,
+                                    onDeselect: () => {
+                                        (testCase.callArgs ??= []).splice(i)
+                                        selectedCallArgs[i] = undefined;
+                                        
+                                    }
                                 }}/>
                             </div>
                         {/each}

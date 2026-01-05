@@ -4,7 +4,7 @@ export type DifficultyDto = {
 }
 
 export type CategoryDto = {
-    id: string,
+    categoryId: string,
     categoryName: string
 }
 
