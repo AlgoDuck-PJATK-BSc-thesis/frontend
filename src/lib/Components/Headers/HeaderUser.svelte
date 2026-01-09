@@ -116,7 +116,7 @@
 					onclick={goShop}
 					onkeydown={(e) => onKey(e, goShop)}
 				>
-					<span class="mr-1">{coins.toLocaleString()}</span>
+					<span class="mr-1">{coins}</span>
 					<img
 						src={coinSrc}
 						alt="coin"
@@ -194,15 +194,7 @@
 					Shop
 				</a>
 			</li>
-			<li>
-				<a
-					href="/user/me"
-					aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
-					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Profile
-				</a>
-			</li>
+
 			<li>
 				<a
 					href="/settings"
