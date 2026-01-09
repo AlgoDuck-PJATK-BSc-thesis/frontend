@@ -22,7 +22,7 @@
     };
 
     const deleteSingleItem = async (itemId: string) => {
-        return await FetchFromApi<{ itemId: string }>("DeleteItemById", {
+        return await FetchFromApi<{ itemId: string }>("admin/item", {
             method: "DELETE"
         }, fetch, new URLSearchParams({ itemId: itemId }));
     };
@@ -33,7 +33,7 @@
         isDeleting = true;
         try {
             for (const item of selectedItems) {
-                await deleteSingleItem(item.id);
+                await deleteSingleItem(item.itemId);
             }
             closeModal();
         } finally {
@@ -72,7 +72,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                                 <a 
-                                    href={`items/item-details?itemId=${item.id}`}
+                                    href={`items/item-details?itemId=${item.itemId}`}
                                     class="text-sm text-[#4fc1ff] hover:underline truncate"
                                 >
                                     {item.itemName}

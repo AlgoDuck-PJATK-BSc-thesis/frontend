@@ -30,7 +30,7 @@ export const getDucksPaged = async (fetchFn: typeof fetch, page: number, pageSiz
 	sp.set('currentPage', String(page + 1));
 	sp.set('pageSize', String(pageSize));
 
-	const res = await FetchFromApi<PageData<DuckItemDto>>('AllDucks', { method: 'GET' }, fetchFn, sp);
+	const res = await FetchFromApi<PageData<DuckItemDto>>('item/duck', { method: 'GET' }, fetchFn, sp);
 	const data = res.body;
 
 	const ducks: DuckDto[] = data.items.map((i) => ({

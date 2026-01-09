@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { applyContrast } from '$lib/Themes/UserThemes';
 	import { accessibility } from '$lib/stores/accessibility.svelte';
-	import { applyThemeAdmin, type AdminTheme } from '$lib/Themes/AdminThemes';
 
 	export let toggleRef: ((fn: () => void) => void) | undefined;
 

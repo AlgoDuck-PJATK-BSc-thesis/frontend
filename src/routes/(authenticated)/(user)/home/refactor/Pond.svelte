@@ -7,11 +7,13 @@
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import { createInfiniteQuery, useQueryClient } from '@tanstack/svelte-query';
 	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
-	import { loadImageToCanvas } from './gridUtils';
+	import { drawGrid, loadImageToCanvas } from './gridUtils';
 	import type { ItemType, OwnedDuck, OwnedPlantDto, UsedDuckDto, UsedPlantDto } from '$lib/Components/Misc/Pond/duckTypes';
 	import DuckSelectionTile from '$lib/Components/Misc/Pond/DuckSelectionTile.svelte';
-	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
 	import SpinnerIconSvg from '$lib/svg/EditorComponentIcons/SpinnerIconSvg.svelte';
+	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
+	import TickIconSvg from '$lib/svg/EditorComponentIcons/TickIconSvg.svelte';
 
 	let { userItems }: { userItems: { ducks: UsedDuckDto[]; plants: UsedPlantDto[] } } = $props();
 
@@ -42,11 +44,11 @@
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
 	const duckQuery = createInfiniteQuery({
-		queryKey: ['OwnedDucks'],
+		queryKey: ['user/item/duck'],
 		initialPageParam: 1,
 		queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
 			return await FetchFromApi<CustomPageData<OwnedDuck>>(
-				'OwnedDucks',
+				'user/item/duck',
 				{ method: 'GET' },
 				fetch,
 				new URLSearchParams({ page: `${pageParam}`, pageSize: '12' })
@@ -60,12 +62,13 @@
 	});
 
 	const plantQuery = createInfiniteQuery({
-		queryKey: ['OwnedPlants'],
+		queryKey: ['user/item/plant'],
 		initialPageParam: 1,
 		queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
 			return await FetchFromApi<CustomPageData<OwnedPlantDto>>(
-				'OwnedPlants',
-				{ method: 'GET' },
+				'user/item/plant', { 
+					method: 'GET'
+				},
 				fetch,
 				new URLSearchParams({ page: `${pageParam}`, pageSize: '12' })
 			);
@@ -151,7 +154,7 @@
 			pondDucksRef?.removeDuck(duck.itemId);
 		}
 
-		queryClient.setQueryData(['OwnedDucks'], (oldData: any) => {
+		queryClient.setQueryData(['user/item/duck'], (oldData: any) => {
 			if (!oldData) return oldData;
 			return {
 				...oldData,
@@ -238,7 +241,7 @@
 				Owned Ducks
 			</h4>
 		</div>
-		<div class="grid min-h-0 w-full flex-1 grid-cols-4 gap-3 overflow-y-auto p-4">
+		<div class="grid min-h-0 w-full grow grid-cols-4 gap-3 overflow-y-auto p-4">
 			{#if $duckQuery.isLoading}
 				{#each Array(8) as _}
 					<div class="aspect-square w-full animate-pulse rounded-xl bg-slate-200"></div>
@@ -277,10 +280,17 @@
 
 {#snippet PlantTab()}
 	<div class="flex h-full flex-col">
-		<div class="h-12 w-full flex-shrink-0 px-4">
+		<div class="h-12 w-full flex-shrink-0 px-4 flex justify-between">
 			<h4 class="border-b-2 border-b-slate-300 py-2 text-lg font-semibold text-slate-800">
 				Owned Plants
 			</h4>
+			<button onclick={(e: MouseEvent) => {
+				if (!pondPlantsRef) return;
+				isSelectionMenuVisible = false;
+				pondPlantsRef.ToggleDeleteMode();
+			}} class="h-10">
+				<img class="h-full" src="/src/lib/images/ponds/shovel.png" alt="shovel"/>
+			</button>
 		</div>
 		<div class="grid min-h-0 w-full flex-1 grid-cols-4 gap-3 overflow-y-auto p-4">
 			{#if $plantQuery.isLoading}
@@ -298,16 +308,10 @@
 					>
 						{#if placed}
 							<div class="absolute inset-0 flex items-center justify-center rounded-xl bg-black/20">
-								<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-								</svg>
+								<TickIconSvg options={{ class: 'w-6 h-6 stroke-white stroke-[2]' }}/>
 							</div>
 						{/if}
-						<button
-							class="h-full w-full"
-							disabled={placed}
-							onmousedown={(e) => handlePlantDragStart(e, plant)}
-						>
+						<button class="h-full w-full" disabled={placed} onmousedown={(e) => handlePlantDragStart(e, plant)}>
 							<img
 								class="pointer-events-none h-full w-full select-none object-contain"
 								src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${plant.itemId}.png`}
@@ -359,10 +363,9 @@
 					class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-red-100"
 					aria-label="Close menu"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-600 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
+					<CrossIconSvg options={{ class: 'w-5 h-5 stroke-[3] stroke-slate-600 hover:text-red-500'}}/>
+
+			</button>
 			</div>
 
 			<div class="flex gap-2 border-b border-slate-200 px-4 py-2">
@@ -375,9 +378,6 @@
 						? 'bg-amber-500 text-white shadow-md'
 						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-						<path d="M8.5 5A5.5 5.5 0 0 0 3 10.5c0 2.18 1.26 4.06 3.09 4.96L4 20h16l-2.09-4.54A5.49 5.49 0 0 0 21 10.5 5.5 5.5 0 0 0 15.5 5h-7zm1.5 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-					</svg>
 					Ducks
 				</button>
 				<button
@@ -389,9 +389,6 @@
 						? 'bg-emerald-500 text-white shadow-md'
 						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-						<path d="M12 22c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9s9 4.03 9 9c0 4.97-4.03 9-9 9zm0-16c-3.87 0-7 3.13-7 7 0 3.87 3.13 7 7 7 3.87 0 7-3.13 7-7 0-3.87-3.13-7-7-7zm-1 3l3 3-3 3v-2H8v-2h3V9z"/>
-					</svg>
 					Plants
 				</button>
 			</div>

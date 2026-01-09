@@ -76,7 +76,6 @@
 		}
 	});
 
-	$inspect($customLayoutQuery.data?.body)
 </script>
 
 <main use:clickOutside={() => isVisible = false} transition:fly={{y: -30, duration: 200}} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent rounded-lg flex flex-col">
@@ -108,7 +107,12 @@
 					</div>
 				</div>
 			</div>
-			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Default</span>
+			<div class="relative w-full">
+				<span class=" block whitespace-nowrap overflow-hiddenpx-3 justify-center text-xs font-mono text-ide-text-primary">
+					Default
+				</span>
+				<div class="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-ide-bg pointer-events-none"></div>
+			</div>
 		</button>
 
 		<div class="w-full h-28 flex flex-col">
@@ -131,7 +135,12 @@
 				</div>
 				<div class="h-full grow bg-ide-card border border-ide-accent/50 rounded-xs"></div>
 			</button>
-			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Tab enjoyer</span>
+			<div class="relative w-full">
+				<span class="block text-center whitespace-nowrap overflow-hiddenpx-3 justify-center text-xs font-mono text-ide-text-primary">
+					Tab-Enjoyer
+				</span>
+				<div class="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-ide-bg pointer-events-none"></div>
+			</div>
 		</div>
 
 		<button
@@ -144,14 +153,11 @@
 		>
 			<div class="w-full h-full">
 				<div class="w-full h-full bg-ide-card flex flex-row p-0.5 gap-0.5">
-					<div
-						bind:this={splitLeftEditor}
-						class="w-1/2 transition-all ease-out duration-200 delay-100 h-full flex flex-col gap-0.5 rounded-xs"
-					>
+					<div bind:this={splitLeftEditor}
+						class="w-1/2 transition-all ease-out duration-200 delay-100 h-full flex flex-col gap-0.5 rounded-xs">
 						<div
 							bind:this={splitRightEditorBottom}
-							class="w-full h-2/5 transition-all ease-out duration-200 delay-300 rounded-xs bg-ide-card border border-ide-accent/50"
-						></div>
+							class="w-full h-2/5 transition-all ease-out duration-200 delay-300 rounded-xs bg-ide-card border border-ide-accent/50"></div>
 						<div class="w-full grow flex flex-row justify-end rounded-xs bg-ide-card border border-ide-accent/50"></div>
 					</div>
 					<div class="grow flex flex-col gap-0.5 h-full rounded-xs">
@@ -163,7 +169,12 @@
 					</div>
 				</div>
 			</div>
-			<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Ide demon</span>
+			<div class="relative w-full">
+				<span class=" block whitespace-nowrap overflow-hiddenpx-3 justify-center text-xs font-mono text-ide-text-primary">
+					I use waylaynd btw
+				</span>
+				<div class="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-ide-bg pointer-events-none"></div>
+			</div>
 		</button>
 
 		{#each $customLayoutQuery.data?.body ?? [] as layout}
@@ -171,7 +182,12 @@
 				await registerAndSelectLayout(layout.layoutId);
 			}} class="w-full h-28 flex flex-col justify-end gap-0.5 p-0.5">
 				<div class="w-full h-full hover:cursor-pointer bg-ide-card border border-ide-accent/50 focus:outline-none focus:ring-2 focus:ring-ide-accent rounded flex flex-row gap-0.5"></div>
-				<span class="px-3 justify-center text-xs font-mono flex flex-col text-ide-text-primary">{layout.layoutName}</span>
+				<div class="relative w-full">
+					<span class=" block whitespace-nowrap overflow-hiddenpx-3 justify-center text-xs font-mono text-ide-text-primary">
+						{layout.layoutName}
+					</span>
+					<div class="absolute right-0 top-0 h-full w-8 bg-gradient-to-r from-transparent to-ide-bg pointer-events-none"></div>
+				</div>
 			</button>
 		{/each}
 		<div class="w-full h-28 flex flex-col justify-center items-center">

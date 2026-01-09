@@ -1,16 +1,10 @@
 <script lang="ts">
     import type { TerminalComponentArgs } from "$lib/Components/ComponentTrees/IdeComponentTree/component-args";
 	import TerminalIconSvg from "$lib/svg/EditorComponentIcons/TerminalIconSvg.svelte";
-	import { isIntermediateStatus, isTerminalStatus } from "$lib/types/domain/modules/problem/solve";
     let { options = $bindable() }: { options: TerminalComponentArgs } = $props();
-
-    // $inspect(isTerminalStatus(options.status));
-    // $inspect(isIntermediateStatus(options.status));
 
     let isError: boolean = $derived(options.status === "CompilationFailure" || options.status === "RuntimeError"  || options.status === "Timeout")
 
-$inspect(options);
-$inspect(options);
 </script>
 
 <main class="w-full h-full border border-ide-accent/10 flex flex-col bg-ide-card rounded-lg overflow-hidden">

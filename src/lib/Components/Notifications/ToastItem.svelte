@@ -6,6 +6,7 @@
 	import SuccessIconSvg from '$lib/svg/Toast/SuccessIconSvg.svelte';
 	import ErrorIconSvg from '$lib/svg/Toast/ErrorIconSvg.svelte';
 	import WarningIconSvg from '$lib/svg/Toast/WarningIconSvg.svelte';
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
 
 	
 	interface ComponentConfigStatic<TData extends Record<string, any>> {
@@ -67,6 +68,6 @@
 		class="text-xl hover:opacity-70 transition-opacity"
 		aria-label="Close notification"
 	>
-		×
+		<CrossIconSvg options={{class: 'w-4 h-4'}}/>
 	</button>
 </div>

@@ -140,19 +140,25 @@
 	};
 </script>
 
-<div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
+<div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden gap-4">
 	<div class="flex items-center gap-2.5 px-4 py-3 bg-admin-bg-tertiary border-b border-admin-border-primary">
 		<h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Plant Data</h3>
 	</div>
-	<div class="p-4">
-		<div onmousedown={handleMouseDown} bind:this={container} class="w-full">
-			<canvas
-				bind:this={canvas}
-				width={containerWidth}
-				height={containerHeight}
-				style:height="{containerHeight}px"
-				class="w-full"
-			></canvas>
+
+    <div class="w-full flex flex-col py-2">
+		<h3 class="text-xs font-semibold text-admin-text-primary tracking-wide px-4">
+			Plant dimensions
+		</h3>
+		<div class="p-4">
+			<div onmousedown={handleMouseDown} bind:this={container} class="w-full">
+				<canvas
+					bind:this={canvas}
+					width={containerWidth}
+					height={containerHeight}
+					style:height="{containerHeight}px"
+					class="w-full"
+				></canvas>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
 	import PixelFrameCoins from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameCoins.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
-	import { authApi } from '$lib/api/auth';
 	import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { UserData } from '$lib/stores/userData.svelte';
 
 	let coins = $state<number>(0);
@@ -17,6 +16,8 @@
 
 	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 	const coinSrc = '/headers/coin.png';
+
+	const COINS_STORAGE_KEY = 'algoduck:coins';
 
 	const normalizeToCloudfrontKey = (value: string): string => {
 		const v = (value ?? '').toString().trim();
@@ -33,11 +34,46 @@
 		return v;
 	};
 
+	const coerceNumber = (value: unknown): number | null => {
+		if (typeof value === 'number' && Number.isFinite(value)) return value;
+		if (typeof value === 'string') {
+			const s = value.trim();
+			if (!s) return null;
+			const n = Number(s);
+			if (Number.isFinite(n)) return n;
+		}
+		return null;
+	};
+
+	const loadCachedCoins = () => {
+		if (typeof window === 'undefined') return;
+		try {
+			const raw = window.localStorage.getItem(COINS_STORAGE_KEY);
+			const n = coerceNumber(raw);
+			if (n !== null) coins = n;
+		} catch {}
+	};
+
+	const persistCoins = () => {
+		if (typeof window === 'undefined') return;
+		try {
+			UserData.user.coins = coins;
+			window.localStorage.setItem(COINS_STORAGE_KEY, String(coins));
+		} catch {}
+	};
+
+	const setCoins = (value: unknown) => {
+		const n = coerceNumber(value);
+		if (n === null) return;
+		if (coins !== n) coins = n;
+		persistCoins();
+	};
+
 	const refreshHeaderStats = async () => {
 		try {
 			const s = await userApi.getMyStatistics(fetch);
-			if (typeof s.coins === 'number') coins = s.coins;
-			else coins = UserData.user.coins;
+			const maybeCoins = (s as unknown as { coins?: unknown })?.coins;
+			setCoins(maybeCoins);
 		} catch {}
 	};
 
@@ -55,12 +91,19 @@
 		try {
 			const me = await userApi.getMe(fetch);
 
-			myUserId = (me.userId ?? '').toString().trim();
+			myUserId = ((me as unknown as { userId?: unknown })?.userId ?? '').toString().trim();
 
-			const s3 = (me.s3AvatarUrl ?? '').toString().trim();
-			const u = (me.userAvatarUrl ?? '').toString().trim();
+			const s3 = ((me as unknown as { s3AvatarUrl?: unknown })?.s3AvatarUrl ?? '')
+				.toString()
+				.trim();
+			const u = ((me as unknown as { userAvatarUrl?: unknown })?.userAvatarUrl ?? '')
+				.toString()
+				.trim();
 
 			myAvatarUrl = s3 || u || '';
+
+			const meCoins = (me as unknown as { coins?: unknown })?.coins;
+			if (meCoins !== undefined) setCoins(meCoins);
 
 			if (!myAvatarUrl) {
 				avatarOverride = '';
@@ -73,12 +116,8 @@
 		}
 	};
 
-	const logout = async () => {
-		try {
-			await authApi.logout(fetch);
-		} finally {
-			await goto('/login');
-		}
+	const refreshAll = async () => {
+		await Promise.all([refreshHeaderStats(), refreshMe()]);
 	};
 
 	const goShop = async () => {
@@ -92,8 +131,67 @@
 		}
 	};
 
-	onMount(async () => {
-		await Promise.all([refreshHeaderStats(), refreshMe()]);
+	let pollId: ReturnType<typeof setInterval> | undefined;
+
+	const onFocus = () => {
+		void refreshHeaderStats();
+	};
+
+	const onVisibility = () => {
+		if (document.visibilityState === 'visible') void refreshHeaderStats();
+	};
+
+	const onCoinsEvent = (e: Event) => {
+		const ce = e as CustomEvent;
+		setCoins(ce.detail);
+	};
+
+	onMount(() => {
+		loadCachedCoins();
+		void refreshAll();
+
+		afterNavigate(() => {
+			void refreshHeaderStats();
+			void refreshMe();
+		});
+
+		if (typeof window !== 'undefined') {
+			window.addEventListener('focus', onFocus);
+			window.addEventListener('algoduck:coins', onCoinsEvent as EventListener);
+		}
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', onVisibility);
+		}
+
+		pollId = setInterval(() => {
+			void refreshHeaderStats();
+		}, 15000);
+
+		return () => {
+			if (pollId) clearInterval(pollId);
+			pollId = undefined;
+
+			if (typeof window !== 'undefined') {
+				window.removeEventListener('focus', onFocus);
+				window.removeEventListener('algoduck:coins', onCoinsEvent as EventListener);
+			}
+			if (typeof document !== 'undefined') {
+				document.removeEventListener('visibilitychange', onVisibility);
+			}
+		};
+	});
+
+	onDestroy(() => {
+		if (pollId) clearInterval(pollId);
+		pollId = undefined;
+
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('focus', onFocus);
+			window.removeEventListener('algoduck:coins', onCoinsEvent as EventListener);
+		}
+		if (typeof document !== 'undefined') {
+			document.removeEventListener('visibilitychange', onVisibility);
+		}
 	});
 </script>
 

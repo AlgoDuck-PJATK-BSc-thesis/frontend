@@ -2,6 +2,7 @@
 	import type { TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import type { TestCase } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
+	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
 	import LockIconSvg from '$lib/svg/EditorComponentIcons/LockIconSvg.svelte';
 	import ErrorIconSvg from '$lib/svg/Toast/ErrorIconSvg.svelte';
 	import SuccessIconSvg from '$lib/svg/Toast/SuccessIconSvg.svelte';
@@ -13,8 +14,7 @@
 	let publicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => tc.isPublic));
 	let nonPublicTestCases: TestCase[] = $derived(options.testCases.filter((tc) => !tc.isPublic));
 
-	// svelte-ignore state_referenced_locally
-		let previewedTestCase: TestCase = $state(publicTestCases[0]);
+	let previewedTestCase: TestCase = $derived(publicTestCases[0]);
 
 	let root: FileTreeRootType = $derived.by(() => {
 		return {
@@ -52,12 +52,26 @@
 	});
 </script>
 
-<main class="w-full h-full bg-ide-card flex justify-start min-w-7xl overflow-hidden text-ide-text-primary rounded-lg border border-ide-accent/10">
-	<div class="h-full bg-ide-dcard flex flex-col justify-start w-[25%] py-2 border-r border-ide-accent/10">
-		<TestCaseFileTreeRoot {root} />
+<main class="w-full h-full bg-ide-card flex flex-col lg:flex-row justify-start min-w-7xl overflow-hidden text-ide-text-primary rounded-lg border border-ide-accent/10">
+	<div class="bg-ide-dcard flex flex-col justify-start border-b lg:border-b-0 lg:border-r border-ide-accent/10 relative transition-all duration-300 ease-in-out overflow-x-visible
+			{options.isFileTreeOpen ? 'h-48 lg:h-full lg:w-[25%] py-2' : 'h-10 lg:h-full lg:w-10'}">
+
+
+		<button onclick={() => options.isFileTreeOpen = !options.isFileTreeOpen}
+			class="h-12 w-12 -right-6 hoveer:cursor-pointer hover:bg-ide-bg transition-all duration-300 ease-out {options.isFileTreeOpen ? "rotate-180" : ""} flex items-center justify-center top-10 border border-ide-accent/20 rounded-full absolute bg-ide-dcard z-999"
+			aria-label={options.isFileTreeOpen ? 'Collapse file tree' : 'Expand file tree'}
+		>
+			<ChevronIconSvgNew options={{ class: 'w-6 h-6 stroke-ide-text-primary stroke-2'}}/>
+		</button>
+		
+		{#if options.isFileTreeOpen}
+			<div class="h-full overflow-y-auto">
+				<TestCaseFileTreeRoot {root} />
+			</div>
+		{/if}
 	</div>
 
-	<div class="h-full w-[75%] flex flex-col justify-start">
+	<div class="flex-1 h-full flex flex-col justify-start overflow-hidden">
 		<div class="w-full h-12 bg-ide-dcard flex justify-between items-center px-6 border-b border-ide-accent/10">
 			<div class="flex items-center gap-3">
 				<span class="text-sm font-medium text-ide-text-secondary">Test Results</span>
@@ -67,7 +81,7 @@
 					<span class="text-xs px-2 py-1 rounded-md bg-ide-accent/10 text-ide-accent border border-ide-accent/20">
 						{previewedTestCase.isPublic ? 'Public' : 'Hidden'}
 					</span>
-					<span class="text-xs font-mono text-ide-text-secondary/60">
+					<span class="text-xs font-mono text-ide-text-secondary/60 hidden sm:inline">
 						ID: {previewedTestCase.testCaseId.substring(0, 8)}
 					</span>
 				</div>
@@ -75,8 +89,8 @@
 		</div>
 
 		{#if previewedTestCase?.isPublic}
-			<div class="h-[calc(100%-3rem)] w-full flex overflow-hidden">
-				<div class="h-full w-[50%] bg-ide-bg flex flex-col border-r border-ide-accent/10">
+			<div class="h-[calc(100%-3rem)] w-full flex flex-col lg:flex-row overflow-hidden">
+				<div class="h-[40%] lg:h-full w-full lg:w-[50%] bg-ide-bg flex flex-col border-b lg:border-b-0 lg:border-r border-ide-accent/10">
 					<div class="w-full h-10 items-center px-4 flex justify-end">
 						<span class="text-xs text-ide-text-secondary select-none font-medium">Code Preview</span>
 					</div>
@@ -91,7 +105,7 @@
 					</div>
 				</div>
 
-				<div class="h-full w-[50%] flex flex-col justify-between p-4">
+				<div class="flex-1 lg:h-full w-full lg:w-[50%] flex flex-col justify-between p-4 overflow-hidden">
 					<div class="flex-1 overflow-y-auto space-y-3">
 						{@render TestCaseCard('Test Input', previewedTestCase.display)}
 						{@render TestCaseCard('Expected Output', previewedTestCase.displayRes)}
@@ -119,7 +133,8 @@
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 								</svg>
-								Insert Test Case
+								<span class="hidden sm:inline">Insert Test Case</span>
+								<span class="sm:hidden">Insert</span>
 							</span>
 						</button>
 					</div>

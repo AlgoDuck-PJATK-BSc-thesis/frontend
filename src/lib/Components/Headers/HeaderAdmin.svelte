@@ -36,7 +36,18 @@
 					aria-current={page.url.pathname.startsWith('/problem') ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
 				>
-					Add problem
+					Problems
+				</a>
+			</li>
+
+
+			<li>
+				<a
+					href="/items"
+					aria-current={page.url.pathname.startsWith('/problem') ? 'page' : undefined}
+					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Items
 				</a>
 			</li>
 

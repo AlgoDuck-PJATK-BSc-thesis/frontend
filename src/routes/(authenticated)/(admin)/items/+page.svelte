@@ -1,30 +1,126 @@
 <script lang='ts'>
 	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
-	import { createInfiniteQuery } from "@tanstack/svelte-query";
+	import { createInfiniteQuery, useQueryClient } from "@tanstack/svelte-query";
 	import DeletionModal from "./DeletionModal.svelte";
-	import type { ItemDto } from "./types";
+	import { QueryableColumns, type ItemDto, type QueryableColumn } from "./types";
 	import { goto } from "$app/navigation";
 	import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
 	import SettingsIconSvg from "$lib/svg/SettingsIconSvg.svelte";
-	import Spinner from "$lib/svg/spinner.svelte";
 	import SpinnerIconSvg from "$lib/svg/EditorComponentIcons/SpinnerIconSvg.svelte";
+	import ColumnSelectDialog from "./ColumnSelectDialog.svelte";
+	import RegularColumn from "./column-preview-comps/RegularColumn.svelte";
+	import LinkColumn from "./column-preview-comps/LinkColumn.svelte";
+	import { createColumnConfig } from "$lib/types/ComponentConfig";
+    import type { ComponentConfigStatic } from "$lib/Components/GenericComponents/AutoCompleteInput/ComponentConfigStatic";
+	import PopOverPreviewColumn from "./column-preview-comps/PopOverPreviewColumn.svelte";
+	import TriangleIconSvg from "$lib/svg/EditorComponentIcons/TriangleIconSvg.svelte";
+	import CreatedByCard from "./CreatedByCard.svelte";
 
-    const itemQuery = createInfiniteQuery({
-        queryKey: ["all items"],
+
+    let totalItems: number = $state(0);
+    const queryClient = useQueryClient();
+
+    let columnPicker: Record<QueryableColumn, boolean> = $state({
+        ...Object.fromEntries(QueryableColumns.map((q) => [q, true])) as Record<QueryableColumn, boolean>,
+        "itemName": false,
+        "createdBy": false
+    });
+    let orderBy: string | null = $state(null)
+
+
+    // f*cking crazy...
+    // f*cking crazy cool
+    const fetchAndUpdateCache = async (colsNeeded: QueryableColumn[], orderByCapture: string | null, pageParam: number) => {
+        const params: URLSearchParams = new URLSearchParams({ columns: colsNeeded.join(), pageSize: "12", currentPage: pageParam.toString() });
+        if (orderByCapture) params.set("orderBy", orderByCapture);
+
+        let res = await FetchFromApi<CustomPageData<ItemDto>>("item", {
+            method: "GET"
+        }, fetch, params);
+        queryClient.setQueryData(["column", "PageData", pageParam, orderByCapture], {
+            currPage: res.body.currPage,
+            pageSize: res.body.pageSize,
+            totalItems: res.body.totalItems,
+            nextCursor: res.body.nextCursor,
+            prevCursor: res.body.prevCursor,
+        });
+
+        colsNeeded.forEach((col) => {
+            const colValues: Record<string, Partial<ItemDto>> = Object.fromEntries(res.body.items.map(i => [i.itemId, { [col]: i[col] }]))
+            queryClient.setQueryData(["column", col, pageParam, orderByCapture], colValues)
+        })
+
+
+        totalItems = res.body.totalItems;
+        return res;
+    }
+
+    const itemQuery = $derived(createInfiniteQuery({
+        queryKey: ["all", "columns", orderBy],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
-            return await FetchFromApi<CustomPageData<ItemDto>>("AllItemsPaged", {
-                method: "GET"
-            }, fetch, new URLSearchParams({ pageSize: "12", currentPage: pageParam.toString() }))
+            const orderByCapture: string = orderBy ?? "None";
+            const columnPickerCapture: Record<QueryableColumn, boolean> = columnPicker;
+
+            const selectedCols: QueryableColumn[] = Object.entries(columnPickerCapture).filter(([k, v]) => v).map(([k, v]) => k as QueryableColumn);
+            const cachedCols: QueryableColumn[] = selectedCols.filter(c => queryClient.getQueryData(["column", c, pageParam, orderByCapture]))
+            const colsNeeded: QueryableColumn[] = selectedCols.filter(col => !cachedCols.includes(col))
+
+            if (cachedCols.length === 0){
+                return await fetchAndUpdateCache(colsNeeded, orderByCapture, pageParam);
+            }
+
+            if (colsNeeded.length === 0){
+                let itemData: Record<string, Partial<ItemDto>> | undefined;
+
+                selectedCols.forEach(col => {
+                    const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ItemDto>>;
+                    if (!itemData){
+                        itemData = { ...currentRow };
+                        return;
+                    }
+                    Object.entries(currentRow).forEach(([k, v]) => {
+                        itemData![k] = {
+                            ...itemData![k],
+                            ...v
+                        }
+                    })
+                });
+                return {
+                    message: "Success",
+                    body:{
+                        ...queryClient.getQueryData(["column", "PageData", pageParam, orderByCapture]) as Partial<CustomPageData<ItemDto>>,
+                        items: Object.values(itemData!)
+                    }
+                } as StandardResponseDto<CustomPageData<ItemDto>>
+            }
+
+            
+            let res = await fetchAndUpdateCache(colsNeeded, orderByCapture, pageParam);
+            
+            cachedCols.forEach((col) => {
+                const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ItemDto>>;
+                Object.entries(currentRow).forEach(([k, v]) => {
+                    const item: number = res.body.items.findIndex(i => i.itemId === k)
+                    if (item === -1) return;
+                    res.body.items[item] = {
+                        ...res.body.items[item],
+                        ...v
+                    }
+                });
+            });
+
+            return res;
         },
         getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ItemDto>>) => firstPage.body.prevCursor ?? undefined,
         getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<ItemDto>>) => lastPage.body.nextCursor ?? undefined,
         select: (data: any) => data.pages.map((p: StandardResponseDto<CustomPageData<ItemDto>>) => p.body.items).flat() as ItemDto[],
-    });
-
-    $inspect($itemQuery.data);
+        get enabled(){
+            return Object.values(columnPicker ?? {}).filter(v => v).length > 0;
+        }
+    }));
 
     let selectedItems: ItemDto[] = $state([]);
     let selectAll: boolean = $state(false);
@@ -39,15 +135,23 @@
         selectAll = !selectAll;
     };
 
-    const isSelected = (item: ItemDto) => selectedItems.some(i => i.id === item.id);
+    const isSelected = (item: ItemDto) => selectedItems.some(i => i.itemId === item.itemId);
 
     const toggleItem = (item: ItemDto) => {
         if (isSelected(item)) {
-            selectedItems = selectedItems.filter(i => i.id !== item.id);
+            selectedItems = selectedItems.filter(i => i.itemId !== item.itemId);
         } else {
             selectedItems = [...selectedItems, item];
         }
     };
+
+    let isPreferencesShown: boolean = $state(false);
+
+    const updateColumnSelection = (newCols: Record<QueryableColumn, boolean>) => {
+        columnPicker = newCols;
+        $itemQuery.refetch();
+    }
+
 </script>
 
 <DeletionModal bind:isVisible={isDeletionModalShown} {selectedItems}/>
@@ -58,7 +162,7 @@
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Item Management</h2>
         </div>
 
-        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
+        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded">
             <div class="flex items-center justify-end gap-3 px-4 py-3">
                 <div class="flex items-center gap-3">
                     {#if selectedItems.length > 0}
@@ -85,7 +189,7 @@
             </div>
         </div>
 
-        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
+        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded ">
             <div class="flex items-center px-4 py-2.5 bg-admin-bg-tertiary border-b border-admin-border-primary text-xs font-semibold text-admin-text-muted uppercase tracking-wider">
                 <div class="w-10 flex justify-center items-center">
                     <input type="checkbox" 
@@ -96,21 +200,38 @@
                 </div>
                 <div class="w-full flex flex-row divide-solid-white divide-x-1 px-3">
                     <div class="w-0"></div>
-                    <div class="w-full flex justify-center">Name</div>
-                    <div class="w-full flex justify-center">Created at</div>
-                    <div class="w-full flex justify-center">Created by</div>
-                    <div class="w-full flex justify-center">Item id</div>
+                    {#each Object.entries(columnPicker).filter(([k, v]) => v) as column}
+                        {@const columnName = column[0] as keyof ItemDto}
+                        {@const isOrderedBy = orderBy === columnName}
+                        <button onclick={() => {
+                            if (!isOrderedBy){
+                                orderBy = columnName
+                            }else{
+                                orderBy = null
+                            }
+                        }} class="w-full relative flex justify-center items-center">
+                            <span>{columnName}</span>
+                            <div class="absolute right-3 w-3 h-3 {isOrderedBy ? "rotate-180" : ""}">
+                                <TriangleIconSvg options={{ class: 'w-full h-full stroke-[2] stroke-admin-text-muted' }}/>
+                            </div>
+                        </button>
+                    {/each}
                     <div class="w-0"></div>
                 </div>
-                <button class="w-9 h-5 flex justify-center item-center">
+                <button onclick={() => isPreferencesShown = !isPreferencesShown} class="w-9 h-5 flex justify-center item-center relative">
                     <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    {#if isPreferencesShown}                        
+                        <div class="absolute top-7 z-999 -right-2">
+                            <ColumnSelectDialog columnPicker={$state.snapshot(columnPicker)} bind:isVisible={isPreferencesShown} {updateColumnSelection}/>
+                        </div>
+                    {/if}
                 </button>
             </div>
 
             <div class="max-h-[60vh] overflow-y-auto">
                 {#if $itemQuery.isLoading}
-                    <div class="flex items-center justify-center py-12 text-admin-text-muted">
-                        <SpinnerIconSvg/>
+                    <div class="flex items-center justify-center py-12 text-admin-text-muted gap-3">
+                        <div class="w-4 h-4 rounded-full border-2 border-admin-text-muted border-t-admin-text-primary animate-spin"></div>
                         <span>Loading...</span>
                     </div>
                 {:else if $itemQuery.data?.length === 0}
@@ -125,17 +246,28 @@
                                 class="w-4 h-4 rounded border-admin-border-primary bg-admin-border-primary accent-admin-accent-primary cursor-pointer"/>
                         </div>
                         <div class="w-full flex flex-row px-3">
-                            <div class="w-full flex justify-start px-4 items-center">
-                                <a href={`items/item-details?itemId=${item.id}`}
-                                class="text-sm text-admin-accent-link hover:underline">
-                                    {item.itemName}
-                                </a>
-                            </div>
-                            <div class="w-full text-sm text-admin-text-muted flex justify-start px-4 items-center">{item.createdAt}</div>
-                            <div class="w-full text-sm text-admin-text-muted flex justify-start px-4 items-center">Created by</div>
-                            <div class="w-full text-sm text-admin-text-muted flex justify-start line-clamp-1 overflow-x-hidden px-4 items-center">{item.id}</div>
+                            {#each Object.entries(columnPicker).filter(([k, v]) => v) as column}
+                                {@const ColumnName = column[0] as keyof ItemDto}
+                                {@const value = item[ColumnName]}
+
+                                <!-- Looks scary but is just a match expression with a bunch of type assertions thrown in for clarity  -->
+                                {@const ColumnValueFormatted = ({
+                                    'createdBy': (value: string) => createColumnConfig(PopOverPreviewColumn, { label: value, displayComponent: CreatedByCard, getPreviewData: async () => {
+                                        return {}
+                                    }}),
+                                    'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: value.toString() }),
+                                    'itemId': (value: string) => createColumnConfig(LinkColumn, { label: value, href: `items/item-details?itemId=${value}` }),
+                                    'itemName': (value: string) => createColumnConfig(RegularColumn, { label: value }),
+                                    'ownedCount': (value: number) => createColumnConfig(RegularColumn, { label: value.toString() }),
+                                    'type': (value: string) => createColumnConfig(RegularColumn, { label: value })
+                                } as Record<keyof ItemDto, (<P extends Record<string, any>>(value: any) => ComponentConfigStatic<P>)>)[ColumnName](value)}
+                                
+                                {@const Comp = ColumnValueFormatted.component}
+                                <Comp options={ColumnValueFormatted.options}/>
+
+                            {/each}
                         </div>
-                        <div class="w-5 h-5 flex justify-center item-center">
+                        <div class="w-9 h-5 flex justify-center item-center">
                         </div>
                     </div>
                 {/each}
@@ -167,7 +299,7 @@
 
         {#if $itemQuery.data}
             <div class="text-xs text-admin-text-muted px-1">
-                Showing {$itemQuery.data.length} items
+                Showing {$itemQuery.data.length} - {totalItems} items
             </div>
         {/if}
     </div>

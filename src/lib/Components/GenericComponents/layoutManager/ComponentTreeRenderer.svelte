@@ -43,7 +43,7 @@
     if (innerComponentType === 'SplitPanel') {
       (innerComponentConfig as ComponentConfig<ResizeableComponentArg<MyTopLevelComponentArg<any>, MyTopLevelComponentArg<any>>>).options.comp1 = hydrateLayout(innerComponentConfig.options.comp1, componentConfigurations);
       (innerComponentConfig as ComponentConfig<ResizeableComponentArg<MyTopLevelComponentArg<any>, MyTopLevelComponentArg<any>>>).options.comp2 = hydrateLayout(innerComponentConfig.options.comp2, componentConfigurations);
-    } else if (innerComponentType === 'WizardPanel') {
+    } else if (innerComponentType === 'WizardPanel' || innerComponentType === 'TerminalWizardPanel') {
       if ((contextInjectors ?? {})[(innerComponentConfig.options as WizardComponentArg).control.component]){
         contextInjectors![(innerComponentConfig.options as WizardComponentArg).control.component]((innerComponentConfig.options as WizardComponentArg).control.options)
       }

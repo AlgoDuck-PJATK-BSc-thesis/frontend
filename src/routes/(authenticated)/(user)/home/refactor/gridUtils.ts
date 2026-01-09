@@ -206,8 +206,8 @@ export const getPlantSubgrid = (mouseGridCoords: Coords, plantDims: ObjectDims2d
 	return coords;
 };
 
-export const linearizeGridIndex = (x: number, y: number): number => {
-	return y * GRID_COLUMNS + x;
+export const linearizeGridIndex = (coords: Coords): number => {
+	return coords.y * GRID_COLUMNS + coords.x;
 };
 
 export const isValidGridCoord = (x: number, y: number): boolean => {

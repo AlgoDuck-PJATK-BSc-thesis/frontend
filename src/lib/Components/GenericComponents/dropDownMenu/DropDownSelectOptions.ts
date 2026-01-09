@@ -13,6 +13,7 @@ export interface DropDownMenuOptions2<K extends Record<string, any>, V> {
     onSelectCallback: (selected: V) => void,
     displayComp: Component<{ options: DisplayCompArgs<K> }>,
     groupId?: string,
+    defaultSelected?: KeyValuePair<K, V>,
 }
 
 export type DisplayCompArgs<K> = {
