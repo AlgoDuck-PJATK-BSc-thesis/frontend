@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { applyContrast } from '$lib/Themes/UserThemes';
-	import { applyThemeAdmin, type AdminTheme } from '$lib/Themes/AdminThemes';
 	import { accessibility } from '$lib/stores/accessibility.svelte';
 
 	export let toggleRef: ((fn: () => void) => void) | undefined;
@@ -27,10 +26,12 @@
 		document.documentElement.dataset.reduceMotion = accessibility.reduceMotion ? 'true' : 'false';
 
 		applyContrast(accessibility.contrast === 1 ? '1' : accessibility.contrast === 2 ? '2' : '0');
-		applyThemeAdmin(({
-			'1': 'contrast1' as AdminTheme,
-			'2': 'contrast2' as AdminTheme,
-		})[accessibility.contrast] ?? 'default')
+		applyThemeAdmin(
+			{
+				'1': 'contrast1' as AdminTheme,
+				'2': 'contrast2' as AdminTheme
+			}[accessibility.contrast] ?? 'default'
+		);
 	}
 </script>
 

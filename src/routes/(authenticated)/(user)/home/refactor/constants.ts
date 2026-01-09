@@ -1,6 +1,6 @@
-import type { ObjectDims2d, Rgba, Vec2 } from "./PondTypes";
+import type { ObjectDims2d, Rgba, Vec2 } from './PondTypes';
 
-export const DUCK_HEIGHT = 100;
+export const DUCK_HEIGHT = 65;
 export const DUCK_WIDTH = DUCK_HEIGHT * 1.07;
 export const DUCK_COLLISION_RADIUS = 60;
 export const MIN_DUCK_DISTANCE = DUCK_COLLISION_RADIUS * 2;
@@ -23,16 +23,16 @@ export const gridElements = gridColumns * gridRows;
 export const MOVEMENT_SAFETY_BUFFER: number = 10;
 
 export const LandColor: Rgba = {
-    r: 0,
-    g: 0,
-    b: 0,
-    a: 255
-}
+	r: 0,
+	g: 0,
+	b: 0,
+	a: 255
+};
 
 export const DUCK_DIMENSIONS: ObjectDims2d = {
-    width: DUCK_WIDTH,
-    height: DUCK_HEIGHT
-}
+	width: DUCK_WIDTH,
+	height: DUCK_HEIGHT
+};
 
 export const DIRECTION_VECTORS: Array<Vec2> = [
     { x: 0, y: -1 },
