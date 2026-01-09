@@ -29,7 +29,7 @@
 	let isDuckSupposedToSpeak: boolean = $state(false);
 
 	onMount(() => {
-		let interval: number;
+		let interval: NodeJS.Timeout;
 
 		if (mode === 'home') {
 			const updateCategory = () => {

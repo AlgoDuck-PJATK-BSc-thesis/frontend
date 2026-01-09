@@ -1,5 +1,5 @@
 <script>
-	import LandingPage from '$lib/Components/LandingPage.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 </script>

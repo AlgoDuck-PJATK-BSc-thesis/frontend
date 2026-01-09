@@ -59,7 +59,6 @@
         {#if isFocused}
             <div class="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto rounded-lg shadow-lg overflow-hidden z-50 bg-bg-alt border-2 border-card">
                 {#each recommendations as recommendation}
-                {console.log(recommendation)}
                     <button
                         type="button"
                         onmousedown={() => {

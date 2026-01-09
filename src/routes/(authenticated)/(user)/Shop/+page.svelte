@@ -1,219 +1,333 @@
 <script lang="ts">
-	import type { Duck, DuckShopPage } from './Dtos';
+	import type { Item, ShopPageArgs, ShopkeepPrompt, BinaryUserInteractionArgs } from './Dtos';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
-	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import ItemPager from './ItemPager.svelte';
+	import DuckDisplay from './DuckDisplay.svelte';
+	import type { ItemType } from '$lib/Components/Misc/Pond/duckTypes';
+	import { onMount, type Component } from 'svelte';
+	import PlantDisplay from './PlantDisplay.svelte';
+	import ShopkeepMessageComp from './ShopkeepMessageComp.svelte';
+	import BinaryInteractionMessageComp from './BinaryInteractionMessageComp.svelte';
+	import { ConversationBuilder, type ConversationExecutor } from './MessageTypes';
+	import { UserData } from '$lib/stores/userData.svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
-	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 
-  let { data } : { data: StandardResponseDto<CustomPageData<Duck>> } = $props();
-  
-  let currentPage: number = $state(data.body.currPage);
-  let pageSize: number = $state(data.body.pageSize);
-  
-  const queryClient = useQueryClient();
+	const hoverAnimationTime = 3000;
+	const driftAmount = 15;
 
-  let query = $derived(createQuery({
-    queryKey: ['ducks', currentPage, pageSize],
-    queryFn: async () => {
-      return await FetchFromApi<CustomPageData<Duck>>("Item", {
-        method: "GET"
-      }, fetch, new URLSearchParams({ currentPage: currentPage.toString(), pageSize: pageSize.toString()}))
-    },
-    initialData: data,
-  }));
+	let bgImageWidth: number | undefined = $state();
+	let bgImageHeight: number | undefined = $state();
 
+	let contentRect: DOMRect | undefined = $state();
 
-  let duckShopPage: DuckShopPage = $derived({
-      hasPrev: currentPage > 1,
-      hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
-      totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
-      ducksPaged: $query.data.body.items
-  } as DuckShopPage);
+	let isDuckButtonPressed: boolean = $state(false);
+	let isFlowerButtonPressed: boolean = $state(false);
 
-  $effect(() => {
-    if (duckShopPage.hasNext) {
-      queryClient.prefetchQuery({
-        queryKey: ['ducks', currentPage + 1, pageSize],
-        queryFn: async () => {
-          return await FetchFromApi<CustomPageData<Duck>>("Item", {
-            method: "GET"
-          }, fetch, new URLSearchParams({ currentPage: (currentPage + 1).toString(), pageSize: pageSize.toString()}))
-        }
-      });
-    }
-    
-    if (duckShopPage.hasPrev) {
-      queryClient.prefetchQuery({
-        queryKey: ['ducks', currentPage - 1, pageSize],
-        queryFn: async () => {
-          return await FetchFromApi<CustomPageData<Duck>>("Item", {
-            method: "GET"
-          }, fetch, new URLSearchParams({ currentPage: (currentPage - 1).toString(), pageSize: pageSize.toString()}))
-        }
-      });
-    }
-  });
+	let currentlySelectedItem: Item | undefined = $state();
 
-  let duckNextPage: DuckShopPage | null = $state(null);
-  
-  let currDucks: Array<Duck> = $derived(duckShopPage.ducksPaged);
-  let nextDucks: Array<Duck> | null = $derived.by(()=>{
-    return duckNextPage ? duckNextPage.ducksPaged : null;
-  });
-  
-  let currentPreviewedDuck: Duck | undefined = $derived(currDucks.at(0))
+	const selectItem = (selected: Item, wasAutomatic: boolean) => {
+		currentlySelectedItem = selected;
+		if (wasAutomatic) return;
+		
+		conversation()
+			.clear()
+			.react('item_selected', { selected: selectedTab })
+			.prompt({
+				messageContents: `Buy ${selected.name} for ${selected.price}?`,
+				onAccept: () => handlePurchase(selected),
+				onReject: () => handleReject()
+			});
+	};
 
-  let isAnimating: boolean = $state(false);
-  let rowType: 'flex-col' | 'flex-col-reverse' = $state("flex-col");
+	const handlePurchase = async (item: Item) => {
+		const userCoins: number = UserData.user.coins;
+		conversation()
+			.react('purchase_accepted', { userCoins, item })
+			.end();
+		if (UserData.user.coins >= item.price) {
 
-  let shift: number = $derived.by(()=>{
-    return rowType === "flex-col" ? -100 : 100;
-  });
+			FetchFromApi<{ itemId: string }>("PurchaseItem", {
+				method: "POST",
+				body: JSON.stringify({
+					itemId: item.itemId
+				})
+			}).then((value: StandardResponseDto<{ itemId: string }>) => {
+				console.log(value.body.itemId)
+				UserData.user.coins -= item.price;
+				item.isOwned = true;
+			}).catch();
+		
+		}
+	};
 
-  const pageContainers: Array<HTMLElement> = [];
-    
-  const hoverAnimationTime: number = 3000;
-  const driftAmount = 15;
+	const handleReject = () => {
+		conversation()
+			.react('purchase_rejected', {})
+			.end();
+	};
 
-  const waitForTransition = (element: HTMLElement): Promise<void> => {
-    return new Promise((resolve) => {
-      const handleTransitionEnd = (e: TransitionEvent) => {
-        if (e.target === element && e.propertyName === 'transform') {
-          element.removeEventListener('transitionend', handleTransitionEnd);
-          resolve();
-        }
-      };
-      element.addEventListener('transitionend', handleTransitionEnd);
-    });
-  };
+	let selectedTab: ItemType = $state("Duck");
+	let tabs: Record<ItemType, { component: Component<{options: ShopPageArgs}>, options: ShopPageArgs }> = $state({
+		"Duck": {
+			component: ItemPager,
+			options: {
+				itemType: "Duck",
+				endpoint: "item/duck",
+				itemDisplay: DuckDisplay,
+				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
+			}
+		},
+		"Plant": {
+			component: ItemPager,
+			options: {
+				itemType: "Plant",
+				endpoint: "item/plant",
+				itemDisplay: PlantDisplay,
+				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
+			}
+		}
+	});
 
-  const getNextPage = async (): Promise<void> => {
-    if (!duckShopPage.hasNext || isAnimating) return;
-    
-    currentPage++;
-    duckNextPage = {
-        hasPrev: currentPage > 1,
-        hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
-        totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
-        ducksPaged: $query.data.body.items
-    } as DuckShopPage;
-    
-    await scrollPage();
-  };
+	let CurrentTabComp: Component<{ options: ShopPageArgs }> = $derived(tabs[selectedTab].component ?? tabs["Duck"].component);
+	let CurrentTabOptions: ShopPageArgs = $derived(tabs[selectedTab].options ?? tabs["Duck"].options);
 
-  const getPrevPage = async (): Promise<void> => {
-    if (!duckShopPage.hasPrev || isAnimating) return;
-    
-    currentPage--;
-    duckNextPage = {
-        hasPrev: currentPage > 1,
-        hasNext: Math.ceil($query.data.body.totalItems / $query.data.body.pageSize) > currentPage,
-        totalPages: $query.data.body.totalItems / $query.data.body.pageSize,
-        ducksPaged: $query.data.body.items
-    } as DuckShopPage;
-    rowType = "flex-col-reverse";
-    
-    await scrollPage();
-  };
+	let chatWindowContents: ChatMessageEntry[] = $state([]);
 
-  const scrollPage = async (): Promise<void> => {
-    isAnimating = true;
-        
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
-    const runningTransitions: Promise<void>[] = [];
-    
-    pageContainers.forEach(container => {
-      if (container) {
-        container.style.transform = `translateY(${shift}%)`;
-        runningTransitions.push(waitForTransition(container));
-      }
-    });
-    
-    await Promise.all(runningTransitions);
-    
-    duckShopPage = duckNextPage!;
-    
-    pageContainers.forEach(container => {
-      if (container) {
-        container.style.transition = 'none';
-        container.style.transform = 'translateY(0)';
-      }
-    });
-        
-    await new Promise(resolve => setTimeout(resolve, 20));
-    
-    pageContainers.forEach(container => {
-      if (container) {
-        container.style.transition = '';
-      }
-    });
-    
-    duckNextPage = null;
-    pageContainers.length = 0; 
-    isAnimating = false;
-    
-    rowType = "flex-col";
-  }
+	type ChatMessageEntry = 
+		| { type: 'shopkeep'; messageId: string; options: ShopkeepPrompt }
+		| { type: 'binary'; messageId: string; options: BinaryUserInteractionArgs };
+	
+	type QueuedMessage = 
+		| { type: 'shopkeep'; messageContents: string }
+		| { type: 'binary'; messageContents: string; onAccept: () => void; onReject?: () => void };
+	
+	let messageQueue: QueuedMessage[] = $state([]);
+	let isProcessingQueue: boolean = $state(false);
+	let conversationTimeoutIds: number[] = $state([]);
+	
+	const baseDisappearTime = 10000;
+	const typingSpeedMs = 30; 
+
+	const getTypingDuration = (text: string): number => {
+		return text.length * typingSpeedMs + 100; 
+	};
+
+	const clearConversationTimeouts = () => {
+		conversationTimeoutIds.forEach(id => clearTimeout(id));
+		conversationTimeoutIds = [];
+	};
+
+	const dismissAllMessages = () => {
+		chatWindowContents = [];
+		clearConversationTimeouts();
+		messageQueue = [];
+		isProcessingQueue = false;
+	};
+
+	const resetConversationChainTimer = () => {
+		clearConversationTimeouts();
+		
+		const timeoutId = window.setTimeout(() => {
+			dismissAllMessages();
+		}, baseDisappearTime);
+		
+		conversationTimeoutIds.push(timeoutId);
+	};
+
+	const processQueue = async () => {
+		if (isProcessingQueue || messageQueue.length === 0) return;
+		
+		isProcessingQueue = true;
+		
+		while (messageQueue.length > 0) {
+			const nextMessage = messageQueue.shift()!;
+			
+			const lastMessage = chatWindowContents[0];
+			if (lastMessage && !lastMessage.options.wasTypedFully) {
+				await new Promise<void>(resolve => {
+					const checkTyping = setInterval(() => {
+						if (chatWindowContents[0]?.options.wasTypedFully !== false) {
+							clearInterval(checkTyping);
+							resolve();
+						}
+					}, 50);
+				});
+			}
+			
+			if (nextMessage.type === 'shopkeep') {
+				addShopkeepMessageImmediate(nextMessage.messageContents);
+				await new Promise(resolve => setTimeout(resolve, getTypingDuration(nextMessage.messageContents)));
+			} else {
+				addBinaryPromptImmediate(nextMessage);
+			}
+			
+			resetConversationChainTimer();
+		}
+		
+		isProcessingQueue = false;
+	};
+
+	const addShopkeepMessageImmediate = (messageContents: string) => {
+		const messageId = `message-${Date.now()}-${Math.random()}`;
+		
+		chatWindowContents.unshift({
+			type: 'shopkeep',
+			messageId,
+			options: {
+				dismissCallback: () => dismissMessage(messageId),
+				messageContents,
+				wasTypedFully: false,
+			}
+		});
+	};
+
+	const addBinaryPromptImmediate = (msg: Extract<QueuedMessage, { type: 'binary' }>) => {
+		const messageId = `message-${Date.now()}-${Math.random()}`;
+		
+		chatWindowContents = chatWindowContents.filter(m => m.type !== 'binary');
+		
+		chatWindowContents.unshift({
+			type: 'binary',
+			messageId,
+			options: {
+				messageContents: msg.messageContents,
+				dismissCallback: () => dismissMessage(messageId),
+				onAccept: () => {
+					msg.onAccept();
+				},
+				onReject: () => {
+					msg.onReject?.();
+				},
+				wasTypedFully: true,
+			}
+		});
+	};
+
+	const createShopkeepMessage = (messageContents: string) => {
+		messageQueue.push({ type: 'shopkeep', messageContents });
+		processQueue();
+	};
+
+	const createBinaryUserPrompt = (args: { messageContents: string; onAccept: () => void; onReject?: () => void; }) => {
+		const hasPendingBinary = messageQueue.some(m => m.type === 'binary');
+		const hasDisplayedBinary = chatWindowContents.some(m => m.type === 'binary');
+		
+		if (hasPendingBinary || hasDisplayedBinary) {
+			return;
+		}
+		
+		messageQueue.push({
+			type: 'binary',
+			messageContents: args.messageContents,
+			onAccept: args.onAccept,
+			onReject: args.onReject,
+		});
+		processQueue();
+	};
+
+	const dismissMessage = (messageId: string) => {
+		const index = chatWindowContents.findIndex(m => m.messageId === messageId);
+		if (index !== -1) {
+			chatWindowContents.splice(index, 1);
+		}
+	};
+
+	const conversation = () => new ConversationBuilder({
+		queueShopkeepMessage: createShopkeepMessage,
+		queueBinaryPrompt: createBinaryUserPrompt,
+		clearMessages: dismissAllMessages,
+		delay: (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+	});
+
+	onMount(() => {
+		conversation()
+			.react('entered_shop', { userCurrencyCount: UserData.user.coins })
+			.end();
+	});
 </script>
 
-<main class="w-full h-full relative">
-  <div class="fixed w-10 h-20 left-5 top-5 flex flex-col z-999">             
-    <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasPrev} onclick="{getPrevPage}">↑</button>
-    <button class="w-full h-[50%] m-1 bg-gray-400 opacity-150 disabled:opacity-50 hover:cursor-pointer" disabled={isAnimating || !duckShopPage.hasNext} onclick="{getNextPage}">↓</button>
-  </div>
-  <img class="absolute inset-0 pointer-events-none select-none top-0 w-full h-full object-cover" src="/shop/store-bg.gif" alt="shop background gif">
-  <img class="absolute inset-0 pointer-events-none select-none top-0 w-full h-full z-500 object-cover" src="/shop/shopkeep.gif" alt="shopkeep">
-    <div class="w-full h-full flex flex-row absolute top-0 z-150">
-      <div class="w-3/4 h-full relative">
-        <div class="absolute right-[1%] top-[4%] w-[91%] h-[65%]">
-          <div class="w-full h-full relative overflow-hidden">
-            <div class="w-full h-full flex {rowType} justify-start">
-              {@render ShopPage(currDucks)}
-              {#if nextDucks}      
-                {@render ShopPage(nextDucks)}
-              {/if}
-            </div>
-          </div>
-        </div>
-      </div>
-    <div class="w-1/4 h-full relative flex flex-col items-center">
-      {#if currentPreviewedDuck}
-        <div class="w-[50%] aspect-square absolute top-[40%]" {@attach node => {
-          let localAnimationStartTime: number | undefined;
-          let localRaf: number;
-          const animateDuckHover = (currentTime: number) => {
-            if (!localAnimationStartTime) {
-              localAnimationStartTime = currentTime;
-            }
-            const elapsed = currentTime - localAnimationStartTime;
-            const progress = (elapsed % hoverAnimationTime) / hoverAnimationTime;
-            node.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
-            localRaf = requestAnimationFrame(animateDuckHover);
-          };
-          localRaf = requestAnimationFrame(animateDuckHover);
-          return () => {
-            if (localRaf) {
-              cancelAnimationFrame(localRaf);
-            }
-          }
-          }}>
-          <CloudfrontImage path={`Ducks/Outfits/duck-${currentPreviewedDuck.itemId}.png`} cls={""}/>
-        </div>
-      {/if}
-    </div>
-  </div>
-</main>
+<main class="relative h-full w-full flex justify-center items-center overflow-none">
+	<img bind:clientWidth={bgImageWidth} bind:clientHeight={bgImageHeight}
+		class="pointer-events-none absolute h-full object-cover select-none overflow-none"
+		src="/src/lib/images/store/store-bg.gif"
+		alt="shop background gif"
+	/>
+	<img class="pointer-events-none absolute inset-0 top-0 z-500 h-full object-cover select-none overflow-none"
+		src="/src/lib/images/store/shopkeep.gif"
+		alt="shopkeep"
+	/>
 
-{#snippet ShopPage(ducksToBeRendered: Array<Duck>)}
-  <div bind:this={pageContainers[pageContainers.length]} class="w-full h-full relative flex-shrink-0 transition-transform duration-1000 ease-out">
-    <img src="/shop/edited-photo.png" class="w-full h-full pointer-events-none select-none absolute inset-0" alt=""/>
-    <div class="w-full h-full grid grid-cols-4 gap-x-[1.5%] gap-y-[4%] py-[2%] px-[1.5%] grid-rows-3 relative">
-      {#each ducksToBeRendered as duck, i}
-        <button class="w-full h-full flex justify-center items-center hover:cursor-pointer" onclick="{()=>{currentPreviewedDuck=duck}}">
-          <CloudfrontImage path={`Ducks/Outfits/duck-${duck.itemId}.png`} cls="h-full aspect-square" alt={duck.itemId}/>
-        </button>
-      {/each}
-    </div>
-  </div>
-{/snippet}
+<div class="w-[20%] max-h-[45%] absolute z-750 left-[28%] bottom-[30%] flex flex-col-reverse justify-end">
+		{#each chatWindowContents as chatMessage (chatMessage.messageId)}
+			{#if chatMessage.type === 'shopkeep'}
+				<ShopkeepMessageComp options={chatMessage.options}/>
+			{:else if chatMessage.type === 'binary'}
+				<BinaryInteractionMessageComp options={chatMessage.options}/>
+			{/if}
+		{/each}
+	</div>
+
+	<div class="absolute top-0 z-150 flex flex-row"
+		style="width: {bgImageWidth ?? 1920}px; height: {bgImageHeight ?? 1080}px;">
+		<div class="relative h-full w-3/4">
+			<div bind:contentRect class="absolute top-[9%] right-[1%] h-[57%] w-[88%] overflow-y-hidden">
+				{#key selectedTab}
+					<CurrentTabComp options={CurrentTabOptions}/>
+				{/key}
+			</div>
+			<div class="absolute h-[6%] top-[3%] z-999 left-[15%] flex flex-row gap-1 py-[0.1%] px-[1%]">
+				<button onmousedown={() => {
+					isDuckButtonPressed = true;
+				}}
+				onmouseup={() => {
+					isDuckButtonPressed = false;
+					selectedTab = 'Duck';
+				}}
+				class="h-full">
+					<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
+				</button>
+				<button onmousedown={() => {
+					isFlowerButtonPressed = true;
+				}}
+				onmouseup={() => {
+					isFlowerButtonPressed = false;
+					selectedTab = 'Plant';
+				}}
+				class="h-full">
+					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
+				</button>
+			</div>
+		</div>
+
+		<div class="relative flex h-full w-1/4 flex-col items-center">
+			<div class="absolute text-text top-[15%] flex h-[12.5%] left-[12%] w-[47%] flex-col items-center justify-center [font-family:var(--font-ariw9500)]">
+				{#if currentlySelectedItem}
+					<h3 class="text-2xl font-bold flex items-center">
+						{`${currentlySelectedItem?.name.at(0)?.toUpperCase()}${currentlySelectedItem?.name.substring(1)}`}
+					</h3>
+				{/if}
+			</div>
+
+			{#if currentlySelectedItem}
+				<div
+					class="absolute top-[40%] aspect-square w-[47%] left-[12%] flex justify-center item-center"
+					{@attach (node) => {
+						let startTime: number | undefined;
+						let raf: number;
+
+						const animate = (time: number) => {
+							if (!startTime) startTime = time;
+							const progress = ((time - startTime) % hoverAnimationTime) / hoverAnimationTime;
+							node.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
+							raf = requestAnimationFrame(animate);
+						};
+
+						raf = requestAnimationFrame(animate);
+						return () => cancelAnimationFrame(raf);
+					}}>
+					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}/Sprite.png`} cls="max-h-full" />
+				</div>
+			{/if}
+		</div>
+	</div>
+</main>

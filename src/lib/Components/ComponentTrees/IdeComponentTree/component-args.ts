@@ -35,6 +35,7 @@ export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentA
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs {
+  isFileTreeOpen: boolean,
   testCases: TestCase[],
   InsertTestCase: (testCaseId: string) => Promise<void>
 }
@@ -42,11 +43,11 @@ export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArg
 
 export interface ChatWindowComponentArgs extends DefaultLayoutTerminalComponentArgs {
   chatName?: string,
-  chatId?: string,
+  chatId: string,
   pages: CustomPageData<ChatMessage>[],
   problemId: string,
   getUserCode: () => string,
-  // getFullAssistanceData: (chatname: string, query: string) => AssistantQuery
+  changeLabel: (id: string, newLabel: string) => void
 }
 
 export interface AssistantComponentArgs extends DefaultLayoutTerminalComponentArgs {

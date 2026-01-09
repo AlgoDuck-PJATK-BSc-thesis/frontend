@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentConfig } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
+	import type { ComponentConfig, ControlPanelArgs, tabSide, WizardComponentArg } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
 	import Editor from "./Editor.svelte";
 
   let registeredComponents: ComponentConfig<any>[] = $state([
@@ -66,12 +66,36 @@
           }
         }
       }
-    }
+    },
+    {
+			compId: 'assistant-wizard',
+			component: 'TerminalWizardPanel',
+			options: {
+				components: [],
+				side: 3 as tabSide,
+				control: {
+					compId: 'wizard-control-panel',
+					component: 'AssistantWizardControlPanel',
+					options: {} as ControlPanelArgs
+				}
+			} as WizardComponentArg,
+			meta: {
+				label: {
+					commonName: 'Assistant',
+					labelFor: 'assistant-wizard',
+					icon: {
+						compId: 'assistant-icon',
+						component: 'AssistantIconSvg',
+						options: {}
+					}
+				}
+			}
+		}
   ])
 
 </script>
-<main class="w-full flex justify-center items-center h-full bg-red-400">
-  <div class="w-[60%] h-[80%] bg-blue-700">
+<main class="w-full flex justify-center items-center h-full">
+  <div class="w-[60%] h-[80%]">
     <Editor {registeredComponents}/>
   </div>
 </main>

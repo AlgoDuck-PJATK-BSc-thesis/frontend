@@ -16,24 +16,31 @@
 	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
 	import { createInfiniteQuery } from "@tanstack/svelte-query";
 	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
+	import MessageIconSvg from "$lib/svg/EditorComponentIcons/MessageIconSvg.svelte";
+	import BugIconSvg from "$lib/svg/EditorComponentIcons/BugIconSvg.svelte";
+	import ReviewIconSvg from "$lib/svg/EditorComponentIcons/ReviewIconSvg.svelte";
+	import SuggestionComponent, { type SuggestionCardArgs } from "./SuggestionComponent.svelte";
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
+    
+    let chatId: string = $derived(options.chatId);
     
     hljs.registerLanguage('java', java);
 
     let connected: boolean = $state(false);
     let isSending: boolean = $state(false);
 
-    let query: string = $state("");
-    type FragmentType = "Code" | "Text" | "Name";
+    let userQuery: string = $state("");
+    type FragmentType = "Code" | "Text" | "Name" | "Id";
 
     type StreamingCompletionPart = {
         type: FragmentType
         message: string
     }
+
     
     const infiniteQuery = createInfiniteQuery({
-        queryKey: [ options?.chatName ?? "New Chat" ],
+        queryKey: [ options.chatId ],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
             const existingPage: CustomPageData<ChatMessage> | undefined = options.pages.find(p => p.currPage === pageParam);
@@ -48,7 +55,6 @@
             if (!existingPage) {
                 options.pages.push(data.body);
             }
-            console.log(data);
             return data;
         },
         getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ChatMessage>>) => firstPage.body.prevCursor ?? undefined,
@@ -59,7 +65,13 @@
         }
     });
 
-    $inspect($infiniteQuery);
+    /* 
+     * don't remove this, we're using the infinite query for infinite fetching,
+     * but pages get accumulated in the layout manager cache
+     * so even if it seems like we're not directly using $infinite query
+     * it's data is side channeled into the thing we pull from. Hence the subscription NEEDS to stay
+     */
+    $infiniteQuery 
 
     let allMessages = $derived(
         options.pages
@@ -74,12 +86,12 @@
         }
     });
 
-
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
 
-    async function sendMessage() {
-        if (!query.trim() || isSending) return;
+    const sendMessage = async () => {
+        console.log('huh');
+        if (!userQuery.trim() || isSending) return;
 
         isSending = true;
         let startedWithouChatName: boolean = options.chatName === undefined;
@@ -95,15 +107,14 @@
 
         options.pages[0].items.unshift({
             fragments: [{
-                content: query,
+                content: userQuery,
                 type: "Text"
             } as MessageFragment],
             messageAuthor: "User"
         } as ChatMessage)
         
-        if (tiptapEditor) {
-            tiptapEditor.commands.clearContent();
-        }
+
+
         
         connection = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/assistant`, {
@@ -116,6 +127,7 @@
         try {
             await connection.start()
             connected = true;
+            console.log("connected")
         }catch (err){
             connected = false;
             console.error("failed", err)
@@ -128,12 +140,20 @@
 
         try {
             connection.stream("GetAssistance", {
+                chatId: chatId,
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
-                query: btoa(query),
-                chatName: options.chatName
+                query: btoa(userQuery),
             } as AssistantQuery).subscribe({
-                next: (messagePart: StreamingCompletionPart) => {
+                next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
+                    console.log(messagePart);
+                    if (messagePart.body.type === "Id"){
+                        options.chatId = messagePart.body.message;
+                        chatId = messagePart.body.message;
+                        console.log(chatId);
+                        return;                    
+                    }
+
                     if (!inserted){
                         options.pages[0].items.unshift({
                             fragments: [] as MessageFragment[],
@@ -146,7 +166,7 @@
                     let message: ChatMessage | undefined = options.pages.at(0)?.items?.at(0)
                     if (!message) return;
 
-                    switch (messagePart.type){
+                    switch (messagePart.body.type){
                         case "Code":
                             if (currentlyReading !== "Code"){
                                 currentlyReading = "Code"
@@ -155,7 +175,9 @@
                                     content: ""
                                 } as MessageFragment)
                             }
-                            message.fragments[0].content += messagePart.message;
+                            message.fragments[0].content += messagePart.body.message;
+                            message.fragments[0].content.replaceAll("&gt;", '<')
+                            message.fragments[0].content.replaceAll("&lt;", '>')
                             break;
                         case "Text":
                             if (currentlyReading !== "Text"){
@@ -165,26 +187,56 @@
                                     content: ""
                                 } as MessageFragment)
                             }
-                            message.fragments[0].content += messagePart.message;
+                            message.fragments[0].content += messagePart.body.message;
+                            message.fragments[0].content.replaceAll("&gt;", '<')
+                            message.fragments[0].content.replaceAll("&lt;", '>')
                             break;
                         case "Name":
-                            if (startedWithouChatName){
-                                options.chatName = options.chatName ? options.chatName + messagePart.message : messagePart.message;
+                            if (startedWithouChatName){                                
+                                options.chatName = options.chatName ? options.chatName + messagePart.body.message : messagePart.body.message;
+                                options.changeLabel(options.chatId, options.chatName);
                             }
                             break;
-                    }
+                      }
                 },
                 complete: () => {
+                    console.log('completed');
+                    connection?.stop()
                     connected = false;
                     isSending = false;
                 },
                 error: (err) => {
+                    console.log('error inner');
+                    console.log(`error: ${err}`);
+                    connection?.stop()
                     connected = false;
                     isSending = false;
                 }
             })
         }catch(err){
+            console.log('error outer');
+            console.log(`error: ${err}`);
+
             isSending = false;
+        }finally{
+            console.log('finally outer');
+        if (tiptapEditor) {
+                tiptapEditor.commands.clearContent();
+            }
+        }
+    }
+
+    const suggestionPrompts: SuggestionCardArgs[] = [
+        { icon: BugIconSvg, prompt: "Help me debug this code" },
+        { icon: ReviewIconSvg, prompt: "Review my solution" }
+    ];
+
+    const useSuggestion = (prompt: string) => {
+        if (tiptapEditor) {
+            tiptapEditor.commands.setContent(prompt);
+            userQuery = prompt;
+            console.log(userQuery);
+            sendMessage();
         }
     }
 </script>
@@ -203,7 +255,6 @@
             if (!htmlDivs[0]) return;
             const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
                 if (entries[0].isIntersecting){
-                    console.log("fetch next")
                     $infiniteQuery.fetchNextPage();
                 }
             },{
@@ -214,13 +265,17 @@
             observer.observe(htmlDivs[htmlDivs.length - 1]);
             return () => observer.disconnect();
         }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
-            {#each allMessages as message, i}
-                {#if message.messageAuthor === "Assistant"}
-                    {@render AssistantMessage(message, i)}
-                {:else}
-                    {@render UserMessage(message, i)}
-                {/if}
-            {/each}
+            {#if allMessages.length === 0}
+                {@render EmptyState()}
+            {:else}
+                {#each allMessages as message, i}
+                    {#if message.messageAuthor === "Assistant"}
+                        {@render AssistantMessage(message, i)}
+                    {:else}
+                        {@render UserMessage(message, i)}
+                    {/if}
+                {/each}
+            {/if}
         </div>
 
     
@@ -240,7 +295,7 @@
                             tiptapEditor = tiptapEditor;
                         },
                         onUpdate: ({ editor }) => {
-                            query = editor.getText()
+                            userQuery = editor.getText()
                         },
                         editorProps: {
                             handleKeyDown: (view, event) => {
@@ -260,7 +315,7 @@
             </div>
             <button 
                 onclick={sendMessage} class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-lg transition-all duration-300 ease-out
-                       {isSending || !query.trim() 
+                       {isSending || !userQuery.trim() 
                            ? 'bg-ide-dcard/50 cursor-not-allowed opacity-50' 
                            : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 active:scale-95'}"
             >
@@ -273,6 +328,41 @@
         </div>
     </div>
 </main>
+
+{#snippet EmptyState()}
+    <div class="w-full h-full flex flex-col items-center justify-start gap-10 empty-state-fade-in overflow-y-auto">
+            <div class="w-24 aspect-square rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30 shadow-lg shadow-purple-500/10">
+                <MessageIconSvg options={{ class: "w-12 h-12 stroke-[1.5] stroke-ide-text-primary"}}/>
+            </div>
+
+        <div class="text-center space-y-2">
+            <h3 class="text-xl font-semibold text-ide-text-primary">Start a Conversation</h3>
+            <p class="text-sm text-ide-text-secondary max-w-sm">
+                Ask me anything about your code. I can help you debug, explain concepts, or optimize your solution.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 max-w-md">
+            {#each suggestionPrompts as suggestion}
+                <SuggestionComponent options={{ 
+                    ...suggestion,
+                    onclick: () => useSuggestion(suggestion.prompt ?? "")
+                    }}/>
+            {/each}
+        </div>
+
+        <div class="flex items-center gap-8 text-xs text-ide-text-secondary/60">
+            <div class="flex flex-row gap-2 c">
+                <kbd class="px-2 py-1 rounded bg-ide-dcard/50 border border-ide-bg/30 font-mono">Enter</kbd>
+                <span class="flex items-center">to send</span>
+            </div>
+            <div class="flex flex-row gap-2 items-center">
+                <kbd class="px-2 py-1 rounded bg-ide-dcard/50 border border-ide-bg/30 font-mono">Shift + Enter</kbd>
+                <span class="flex items-center">for new line</span>
+            </div>
+        </div>
+    </div>
+{/snippet}
 
 {#snippet UserMessage(message: ChatMessage, index: number)}
     <div 
@@ -391,8 +481,6 @@
     background: var(--color-ide-bg);
   }
 
-
-
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -417,4 +505,58 @@
       opacity: 0.5;
     }
   }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .empty-state-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  @keyframes float1 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(5px, -8px);
+    }
+  }
+
+  @keyframes float2 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-6px, -5px);
+    }
+  }
+
+  @keyframes float3 {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(4px, 6px);
+    }
+  }
+
+  @keyframes suggestionSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
 </style>

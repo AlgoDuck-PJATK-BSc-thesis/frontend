@@ -1,14 +1,10 @@
-import { FetchFromApi } from '$lib/api/apiCall';
+import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params, url, fetch }) : Promise<{categories: CategoryDto[]}> => {    
-    let resp = await FetchFromApi<CategoryDto[]>("ProblemCategories", {
+export const load: PageLoad = async ({ params, url, fetch }) : Promise<StandardResponseDto<CategoryDto[]>> => {    
+    return await FetchFromApi<CategoryDto[]>("ProblemCategories", {
         method: "GET"
     }, fetch);
-
-    return {
-        categories: resp.body
-    };
 }
 
 export type CategoryDto = {

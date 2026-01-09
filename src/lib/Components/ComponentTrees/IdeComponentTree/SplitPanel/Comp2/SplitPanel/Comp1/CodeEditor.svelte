@@ -2,6 +2,7 @@
 	import { FetchFromApi } from '$lib/api/apiCall';
 	import type { CodeEditorComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import Monaco from '$lib/Components/GenericComponents/monaco/monaco.svelte';
+	import { onDestroy } from 'svelte';
 
 	let { options = $bindable() }: { options: CodeEditorComponentArgs } = $props();
 
@@ -19,14 +20,12 @@
 		const currentCodeState: string = options.userCode;
 		options.userCode = currentCodeState;
 		if (!options || !options?.problemId || !options?.userCode) return;
-		else console.log('saving');
 		const templateContents: string = options.userCode;
 		savingState = "unsaved";
 		if (lastTimeout){
 			clearTimeout(lastTimeout);
 		}
 		lastTimeout = setTimeout(async () => {
-			console.log("posting");
 			savingState = "saving";
 			const res = await FetchFromApi("AutoSave", {
 				method: 'POST',
@@ -39,10 +38,14 @@
 				savingState = "saved";
 			}
 		}, autoSaveStallTimeMillis);
+
+		return () => clearTimeout(lastTimeout);
 	});
+
+	onDestroy(() => clearTimeout(lastTimeout));
 </script>
 
-<main class="w-full h-full relative">
+<main class="w-full h-full relative border border-ide-accent/10">
 	<Monaco bind:editorContents={options.userCode} />
 	<span class="absolute z-50 bottom-[1%] left-[1%] text-ide-text-secondary backdrop-blur-xs">{savingState}</span>
 </main>

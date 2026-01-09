@@ -75,24 +75,23 @@ export const FetchJsonFromApi = async <TResult>(
 	let res: Response;
 	try {
 		const body = fetchOptions.body;
+		const merged = new Headers(fetchOptions.headers ?? {});
 
-		const headers: Record<string, string> = {
-			...(shouldSetJsonContentType(body) ? { 'Content-Type': 'application/json' } : {}),
-			...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
-		};
+		if (!merged.has('Accept')) merged.set('Accept', 'application/json');
+		if (shouldSetJsonContentType(body) && !merged.has('Content-Type'))
+			merged.set('Content-Type', 'application/json');
+		if (csrfToken && !merged.has('X-CSRF-Token')) merged.set('X-CSRF-Token', csrfToken);
 
 		res = await usedFetcher(url.toString(), {
-			credentials: 'include',
-			headers: {
-				...headers,
-				...(fetchOptions.headers || {})
-			},
-			...fetchOptions
+			...fetchOptions,
+			credentials: fetchOptions.credentials ?? 'include',
+			headers: merged
 		});
 	} catch {
 		throw new Error('Backend unavailable.');
 	}
 
+	console.log(res);
 	if (!res.ok) {
 		if (res.status === 401 && res.headers.get('X-Token-Expired') === 'true' && !replay) {
 			await FetchJsonFromApi(
@@ -164,7 +163,6 @@ export const FetchJsonFromApi = async <TResult>(
 		return undefined as unknown as TResult;
 	}
 
-	console.log(res);
 	return (await res.json()) as TResult;
 };
 

@@ -19,6 +19,7 @@ import TestCasesPlaceholder from "$lib/Components/ComponentTrees/IdeComponentTre
 import AssistantIconSvg from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/AssistantIconSvg.svelte";
 import AssistantWizardControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/AssistantWizardControlPanel.svelte";
 import ChatWindow from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/ChatWindow.svelte";
+import ChatWindowPlaceholder from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/Comp3/ChatWindowPlaceholder.svelte";
 import SolutionAreaControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaControlPanel.svelte";
 import SolutionAreaHorizontalControlPanel from "$lib/Components/ComponentTrees/IdeComponentTree/SplitPanel/Comp2/SplitPanel/Comp2/WizardPanel/SolutionAreaHorizontalControlPanel.svelte";
 import EditorSettings from "$lib/Components/ComponentTrees/IdeSettingsComponentTree/WizardPanel/Comp1/EditorSettings.svelte";
@@ -79,6 +80,7 @@ export const InitializeRegistryDefault = (): void => {
     loading.set('EditorSettings', EditorSettings);
     loading.set('SettingsControlPanel', SettingsControlPanel)
 
+    loading.set('ChatWindow', ChatWindowPlaceholder);
     loading.set('AssistantIconSvg', AssistantIconSvg);
 
     
@@ -100,6 +102,9 @@ export const InitializeRegistryDefault = (): void => {
     
     builder.set('Editor', EditorBuilder);
     builder.set('EditorIconSvg', CodeEditorIconSvg);
+    
+    builder.set('AssistantIconSvg', AssistantIconSvg);
+
 
     builder.set("PlaceholderPanelIconSvg", CodeEditorIconSvg);
     

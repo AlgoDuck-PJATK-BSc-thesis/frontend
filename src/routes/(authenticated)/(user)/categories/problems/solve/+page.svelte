@@ -26,9 +26,14 @@
 
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
+		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
+			loadedAutoSave = value;
+			console.log(value);
+		}).catch((reason: any) => {
+			console.log(reason);
+		})
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
-		loadedAutoSave = await data.autoSave;
 
 		console.log(loadedAutoSave.body);
 
@@ -38,9 +43,14 @@
 				problemId: loadedData.body.problemId,
 				templateContents: loadedData.body.templateContents
 			 } as CodeEditorComponentArgs,
-			'terminal-comp':  { stdOut: '', stdErr: '' } as TerminalComponentArgs,
+			'terminal-comp':  { 
+				stdOut: '',
+				stdErr: '',
+				status: undefined
+			} as TerminalComponentArgs,
 			'problem-info':  (await data.problemLoadResponse).body as InfoPanelComponentArgs,
 			'test-cases-comp':  { 
+				isFileTreeOpen: true,
 				testCases: loadedData.body.testCases,
 				InsertTestCase: insertTestCase
 			} as TestCaseComponentArgs,
@@ -51,7 +61,7 @@
 						component: "TopLevelComponent",
 						options: {
 							component: {
-								compId: `${c.chatName}-comp`,
+								compId: `${c.chatId}`,
 								component: "ChatWindow",
 								options: {
 									chatName: c.chatName,
@@ -62,7 +72,7 @@
 								meta: {
 									label: {
 										commonName: c.chatName,
-										labelFor: `${c.chatName}-comp`
+										labelFor: `${c.chatId}`
 									}
 								}
 							}
@@ -74,21 +84,25 @@
 		activeProfile.profile = "default";
 	});
 
-	// $inspect(config);
-
-
-
 	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
 		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
 			(target as ChatWindowComponentArgs).problemId = (config['problem-info'] as InfoPanelComponentArgs).problemId;
 			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs).templateContents;
+			(target as ChatWindowComponentArgs).changeLabel = (id: string, newLabel: string) => {
+				const components = (config['assistant-wizard'] as WizardComponentArg).components;
+				const comp = components.find(c => c.options.component.compId === id);
+				
+				if (comp?.options?.component?.meta?.label) {
+					comp.options.component.meta.label.commonName = newLabel;
+				}
+			}
 		},
 		"AssistantWizardControlPanel" : ( target: DefaultLayoutTerminalComponentArgs ) => {
 			(target as ControlPanelArgs).controlCallbacks = {
 				...(target as ControlPanelArgs).controlCallbacks,	
-				addInsertedComponentToRoot: (compId: string) => {
+				addInsertedComponentToRoot: (compId: string, compOptions: Record<string, any>) => {
 					if (config[compId] === undefined){
-						config[compId] = {}
+						config[compId] = compOptions;
 					}
 				},
 				checkIfHasNewComponent: (): boolean => {
@@ -108,8 +122,8 @@
 							options: InsertData.compArgs ?? {},
 							meta: {
 								label: {
-								labelFor: InsertData.compId,
-								commonName: InsertData.compCommonName
+									labelFor: InsertData.compId,
+									commonName: InsertData.compCommonName
 								}
 							}
 							}
@@ -117,23 +131,20 @@
 					} as ComponentConfig<MyTopLevelComponentArg<any>>)
 				},
 				remove: async (compId: string): Promise<boolean> => {
-					/* TODO: Do server call here */
-					let removedWindow: ChatWindowComponentArgs | undefined = (config['assistant-wizard'] as WizardComponentArg).components
-					.filter(comp => comp.options.component.component === "ChatWindow")
-					.map(comp => comp.options.component.options as ChatWindowComponentArgs)
-					.at(0);
 
+					console.log('deleting: ', compId);
 					(config['assistant-wizard'] as WizardComponentArg).components = (config['assistant-wizard'] as WizardComponentArg).components.filter(comp => comp.options.component.compId !== compId);
 
-					if (!removedWindow || !removedWindow?.chatId || removedWindow.pages.length === 0){
-						return true;						
-					}
-
-					let res: StandardResponseDto<{messagesDeleted: number}> = await FetchFromApi<{messagesDeleted: number}>("DeleteChat", {
+					let didDelete = false
+					FetchFromApi<{ messagesDeleted: number }>("DeleteChat", {
 						method: "DELETE",
-					}, fetch, new URLSearchParams({ chatId: removedWindow.chatId }))
+					}, fetch, new URLSearchParams({ chatId: compId })).then(() => {
+						didDelete = true;
+					}).catch(() => {
+						didDelete = false;
+					})
 
-					return true;
+					return didDelete;
 				},
 				rename: async (compId: string, newName: string): Promise<void> => {
 					let comp: ComponentConfig<MyTopLevelComponentArg<any>> | undefined = (config['assistant-wizard'] as WizardComponentArg).components.find(comp => comp.options.component.compId === compId);
@@ -154,6 +165,9 @@
 						console.log(res);
 					}
 					(comp.options.component.options as ChatWindowComponentArgs).chatName = newName;
+				},
+				getProblemId: () => {
+					return loadedData.body.problemId
 				}
 			};
 		}

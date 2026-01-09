@@ -6,6 +6,7 @@
 	import SuccessIconSvg from '$lib/svg/Toast/SuccessIconSvg.svelte';
 	import ErrorIconSvg from '$lib/svg/Toast/ErrorIconSvg.svelte';
 	import WarningIconSvg from '$lib/svg/Toast/WarningIconSvg.svelte';
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
 
 	
 	interface ComponentConfigStatic<TData extends Record<string, any>> {
@@ -58,7 +59,7 @@
 <div
 	in:fly={{ x: 300, duration: 300 }}
 	out:fade={{ duration: 200 }}
-	class="pointer-events-auto flex fixed top-[20%] right-[1%] items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-bg border-card border-2"
+	class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-white text-black border-2"
 >
     <Comp options={compOptions}/>
 	<p class="flex-1 text-sm font-medium">{toast.message}</p>
@@ -67,6 +68,6 @@
 		class="text-xl hover:opacity-70 transition-opacity"
 		aria-label="Close notification"
 	>
-		×
+		<CrossIconSvg options={{class: 'w-4 h-4'}}/>
 	</button>
 </div>
