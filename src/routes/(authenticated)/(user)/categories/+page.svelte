@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Island from '$lib/images/Categories/Wysepka2.png';
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import type { CategoryDto } from './proxy+page';
-	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
-
-	let { data }: { data: { categories: CategoryDto[] } } = $props();
+	import type { StandardResponseDto } from '$lib/api/apiCall';
+	
+	let { data }: { data: StandardResponseDto<CategoryDto[]> } = $props();
 
 	let scrollableFrame: HTMLElement;
 
@@ -207,7 +207,7 @@
 	$effect(() => {
     if (initialized) return;
     if (!main) return;
-    if (categoryDivs.length !== data.categories.length) return;
+    if (categoryDivs.length !== data.body.length) return;
     if (categoryDivs.some(div => !div)) return;
 
     tick().then(() => {
@@ -237,7 +237,7 @@
 		onmouseup={handleMouseUp}
 	>
 		<div class="relative h-full w-full">
-			{#each data.categories as loadedCategory, i}
+			{#each data.body as loadedCategory, i}
 				<button
 					bind:this={categoryDivs[i]}
 					class="z-50 absolute flex items-center justify-center rounded-full bg-transparent select-none hover:cursor-pointer"

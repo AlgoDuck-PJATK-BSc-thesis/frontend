@@ -158,13 +158,13 @@
 			{@attach (node) => {
 				tiptapEditor = new Editor({
 					element: node,
+					content: editorContents,
 					extensions: [
 						StarterKit.configure({
 							heading: {
 								levels: [1, 2, 3, 4, 5, 6]
 							}
 						}),
-						Underline,
 						Placeholder.configure({
 							placeholder: 'Example: True (cycle detected)'
 						})

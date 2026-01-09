@@ -5,7 +5,6 @@
     let { options }: { options: RecommendationDisplayCompArgs<MethodRecommendation> } = $props()
 </script>
 
-<!-- Compact selected display variant - no hover effects, streamlined layout -->
 <div class="w-full flex items-center justify-between px-3 py-1.5 gap-3">
     <div class="flex flex-row gap-3 items-center min-w-0">
         <CodeObjectIconSvg options={{ class: "w-4 h-4 stroke-[#b180d7] stroke-[1] shrink-0"}}/>

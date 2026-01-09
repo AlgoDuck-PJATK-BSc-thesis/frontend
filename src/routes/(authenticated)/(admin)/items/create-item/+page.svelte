@@ -90,7 +90,7 @@
             }));
         })
 
-        FetchFromApi<ItemCreateResponseDto>("CreateItem", {
+        FetchFromApi<ItemCreateResponseDto>("admin/item", {
             method: "POST",
             body: formData
         }).then((value: StandardResponseDto<ItemCreateResponseDto>) => {

@@ -32,6 +32,7 @@ export type SuggestedInputArgs<T extends Record<string, any>> = {
     DisplayComp: Component<{ options: RecommendationDisplayCompArgs<T> }>;
     onDeselect?: (() => void)
     SelectedDisplayComp?: Component<{ options: RecommendationDisplayCompArgs<T> }>;
+    defaultSelected?: T
 }
 
 export type RecommendationDisplayCompArgs<T extends Record<string, any> = {}> = {
@@ -44,6 +45,7 @@ export type HeaderOptions = {
 }
 
 export type problemCreationDto = {
+    testCaseId: string,
     templateB64: string,
     problemTitle: string,
     problemDescription: string,
@@ -67,16 +69,34 @@ export type VariableRecommendation = {
     name: string
 }
 
-export type ValidationResponseStatus = "Queued" | "Pending" | "Succeeded" | "Failed";
+export const IntermediateValidationStatus = ["Queued", "Pending"] as const;
+export const TerminalValidationStatuses = ["Succeeded", "Failed"] as const;
+
+export type IntermediateValidationStatus = (typeof IntermediateValidationStatus)[number];
+export type TerminalValidationStatus = (typeof TerminalValidationStatuses)[number];
+
+export type ValidationResponseStatus = IntermediateValidationStatus | TerminalValidationStatus;
+
+export const isIntermediateValidationStatus = (status?: ValidationResponseStatus) => {
+    return status === "Pending" || status === "Queued"
+}
+
+
+export const isTerminalValidationStatus = (status?: ValidationResponseStatus) => {
+    return status === "Succeeded" || status === "Failed"
+}
+
+
 
 export type ValidationResponse = {
-    status: ValidationResponseStatus
+    status: ValidationResponseStatus,
+    message: string
 }
 
 export type JobData = {
     problemId: string,
     commissioningUserId: string,
-    response: ValidationResponse
+    cachedResponses: ValidationResponse[]
 }
 
 export type CreateUnverifiedProblemDto = {

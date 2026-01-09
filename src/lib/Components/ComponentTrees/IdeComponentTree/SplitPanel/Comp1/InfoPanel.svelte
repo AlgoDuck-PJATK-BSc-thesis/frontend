@@ -21,7 +21,7 @@
     <div class="px-8 py-6 flex-1 editor-wrapper">
         {#if options.description}
             {@html options.description}
-            <!-- <MarkdownRenderer options={{ markdown: options.description, class: "prose prose-invert max-w-none text-ide-text-secondary"}} /> -->
+			<!-- <MarkdownRenderer options={{markdown: options.description}}/> -->
         {/if}
     </div>
 </main>

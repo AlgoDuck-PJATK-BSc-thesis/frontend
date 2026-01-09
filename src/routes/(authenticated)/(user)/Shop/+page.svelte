@@ -72,7 +72,7 @@
 			component: ItemPager,
 			options: {
 				itemType: "Duck",
-				endpoint: "AllDucks",
+				endpoint: "item/duck",
 				itemDisplay: DuckDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
@@ -81,7 +81,7 @@
 			component: ItemPager,
 			options: {
 				itemType: "Plant",
-				endpoint: "AllPlants",
+				endpoint: "item/plant",
 				itemDisplay: PlantDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
@@ -325,7 +325,7 @@
 						raf = requestAnimationFrame(animate);
 						return () => cancelAnimationFrame(raf);
 					}}>
-					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}.png`} cls="max-h-full" />
+					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}/Sprite.png`} cls="max-h-full" />
 				</div>
 			{/if}
 		</div>

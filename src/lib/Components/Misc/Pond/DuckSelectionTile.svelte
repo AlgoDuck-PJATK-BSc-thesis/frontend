@@ -8,7 +8,6 @@
 	let contextMenuRef: HTMLDivElement | null = $state(null);
 	let toggleButtonRef: HTMLButtonElement | null = $state(null);
 
-	// $inspect(options);
 	$effect(() => {
 		if (!isContextMenuVisible) return;
 

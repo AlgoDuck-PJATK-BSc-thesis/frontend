@@ -7,7 +7,7 @@
 	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
 	import SettingsPanel from './Settings/SettingsPanel.svelte';
 	import type { CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
-	import { API_URL, FetchFromApi } from '$lib/api/apiCall';
+	import { API_URL, FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 	import * as signalR from '@microsoft/signalr';
 	import { isTerminalStatus, type IntermediateStatus, type SubmissionResult, type TerminalStatus } from '$lib/types/domain/modules/problem/solve';
@@ -92,12 +92,17 @@
 			.withAutomaticReconnect()
 			.build();
 		
-		connection.on("ExecutionStatusUpdated", (executionResponse: SubmissionResult) => {
-			(components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.status;
-			executingState = executionResponse.status;
+		connection.on("ExecutionStatusUpdated", (executionResponse: StandardResponseDto<SubmissionResult>) => {
+			console.log(executionResponse);
+			// (components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.body.status;
+			console.log(`status: ${executionResponse.body.status}`);
+			console.log(components['terminal-comp']);
+			console.log("got through terminal comp set");
+
+			executingState = executionResponse.body.status;
 			
-			if (isTerminalStatus(executionResponse.status)) {
-				handleTerminalStatus(executionResponse, onTerminalStatus);
+			if (isTerminalStatus(executionResponse.body.status)) {
+				handleTerminalStatus(executionResponse.body, onTerminalStatus);
 				executingState = undefined;
 			}
 		});
@@ -105,7 +110,12 @@
 		try {
 			await connection.start();
 			connected = true;
-			await connection.invoke("SubscribeToJob", { jobId: jobId });
+			const jobResponse = await connection.invoke<StandardResponseDto<{ problemId: string, commisioningUserId: string, achedResponses: SubmissionResult[] }> | null>(
+				"SubscribeToJob", {
+					jobId: jobId
+				}
+			);
+
 		} catch (err) {
 			connected = false;
 		}
@@ -114,11 +124,11 @@
 	const executeCallback = (): Promise<void> => executeCode("DryRun");
 
 	const submitCallback = (): Promise<void> => executeCode("Submit", (executionResponse) => {
-		(components['test-cases-comp'] as TestCaseComponentArgs).testCases = 
-			(components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => ({
-				isPassed: executionResponse.testResults.find(ti => ti.testId == t.testCaseId)?.isTestPassed,
-				...t
-			}));
+	(components['test-cases-comp'] as TestCaseComponentArgs).testCases = 
+		(components['test-cases-comp'] as TestCaseComponentArgs).testCases.map(t => ({
+			...t, 
+			isPassed: executionResponse.testResults.find(ti => ti.testId === t.testCaseId)?.isTestPassed
+		}));
 
 		if (executionResponse.status === "Completed" && executionResponse.testResults.length > 0) {
 			const failedCount = executionResponse.testResults.filter(t => !t.isTestPassed).length;
@@ -140,7 +150,6 @@
 				method: "GET"
 			}, fetch, new URLSearchParams({ layoutId: layoutId }))
 
-			console.log(res.body.layoutContents);
 			layouts[layoutId] = res.body.layoutContents;
 		}
 		if (layouts[layoutId])

@@ -23,8 +23,7 @@
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
     
-
-    let chatId: string | undefined = $derived(options.chatId);
+    let chatId: string = $derived(options.chatId);
     
     hljs.registerLanguage('java', java);
 
@@ -41,7 +40,7 @@
 
     
     const infiniteQuery = createInfiniteQuery({
-        queryKey: [ options?.chatName ?? "New Chat" ],
+        queryKey: [ options.chatId ],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
             const existingPage: CustomPageData<ChatMessage> | undefined = options.pages.find(p => p.currPage === pageParam);
@@ -91,6 +90,7 @@
     let tiptapEditor: Editor | undefined;
 
     const sendMessage = async () => {
+        console.log('huh');
         if (!userQuery.trim() || isSending) return;
 
         isSending = true;
@@ -113,9 +113,8 @@
             messageAuthor: "User"
         } as ChatMessage)
         
-        if (tiptapEditor) {
-            tiptapEditor.commands.clearContent();
-        }
+
+
         
         connection = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/assistant`, {
@@ -128,6 +127,7 @@
         try {
             await connection.start()
             connected = true;
+            console.log("connected")
         }catch (err){
             connected = false;
             console.error("failed", err)
@@ -139,14 +139,14 @@
         let inserted: boolean = false;
 
         try {
-            console.log(userQuery);
             connection.stream("GetAssistance", {
+                chatId: chatId,
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
-                'query': userQuery,
-                chatId: chatId
+                query: btoa(userQuery),
             } as AssistantQuery).subscribe({
                 next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
+                    console.log(messagePart);
                     if (messagePart.body.type === "Id"){
                         options.chatId = messagePart.body.message;
                         chatId = messagePart.body.message;
@@ -192,23 +192,37 @@
                             message.fragments[0].content.replaceAll("&lt;", '>')
                             break;
                         case "Name":
-                            if (startedWithouChatName){
+                            if (startedWithouChatName){                                
                                 options.chatName = options.chatName ? options.chatName + messagePart.body.message : messagePart.body.message;
+                                options.changeLabel(options.chatId, options.chatName);
                             }
                             break;
                       }
                 },
                 complete: () => {
+                    console.log('completed');
+                    connection?.stop()
                     connected = false;
                     isSending = false;
                 },
                 error: (err) => {
+                    console.log('error inner');
+                    console.log(`error: ${err}`);
+                    connection?.stop()
                     connected = false;
                     isSending = false;
                 }
             })
         }catch(err){
+            console.log('error outer');
+            console.log(`error: ${err}`);
+
             isSending = false;
+        }finally{
+            console.log('finally outer');
+        if (tiptapEditor) {
+                tiptapEditor.commands.clearContent();
+            }
         }
     }
 
@@ -225,7 +239,6 @@
             sendMessage();
         }
     }
-
 </script>
 
 <main class="w-full h-full bg-gradient-to-br from-ide-card to-ide-bg flex flex-col relative">

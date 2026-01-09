@@ -26,7 +26,7 @@
         ></div>
         
         <img 
-            src={`https://d3018wbyyxg1xc.cloudfront.net/Ducks/${options.itemId}.png`} 
+            src={`https://d3018wbyyxg1xc.cloudfront.net/Ducks/${options.itemId}/Sprite.png`} 
             alt={options.description}
             class="relative z-10 max-h-full max-w-full object-contain drop-shadow-lg transition-all duration-300"
             class:drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]={isHovered}

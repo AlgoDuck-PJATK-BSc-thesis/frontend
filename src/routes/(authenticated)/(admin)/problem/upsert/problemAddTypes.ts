@@ -1,3 +1,5 @@
+import type { problemCreationDto, TestCaseCreateDto } from "./TestCase"
+
 export type DifficultyDto = {
     id: string,
     name: string
@@ -10,5 +12,8 @@ export type CategoryDto = {
 
 export type ProblemCreatePageArgs = {
     difficulties: DifficultyDto[],
-    categories: CategoryDto[]
+    categories: CategoryDto[],
+    isEditMode: boolean
+    loadedCreateDto?: problemCreationDto,
+    problemId: string
 }

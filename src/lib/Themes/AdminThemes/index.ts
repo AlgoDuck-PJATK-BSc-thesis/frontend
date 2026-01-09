@@ -1,4 +1,5 @@
 import { contrast1, contrast2 } from "./contrast";
+import { CurrentAdminTheme } from "./currentAdminTheme.svelte";
 import { defaultTheme } from "./default";
 
 export const adminThemes = {
@@ -10,6 +11,7 @@ export const adminThemes = {
 export type AdminTheme = keyof typeof adminThemes;
 
 export const applyThemeAdmin = (themeName: AdminTheme) => {
+  CurrentAdminTheme.theme = themeName;
   Object.entries(adminThemes[themeName]).forEach(([property, value]) => {
     document.documentElement.style.setProperty(property, value);
   });

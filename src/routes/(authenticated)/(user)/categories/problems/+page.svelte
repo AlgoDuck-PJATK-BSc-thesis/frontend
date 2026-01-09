@@ -2,9 +2,9 @@
 	import type { StandardResponseDto } from '$lib/api/apiCall';
 	import { goto } from '$app/navigation';
 	import SearchIconSvg from '$lib/svg/EditorComponentIcons/SearchIconSvg.svelte';
-	import { Trie } from '../../../(admin)/problem/Trie';
 	import type { KeyValuePair } from '$lib/Components/GenericComponents/dropDownMenu/DropDownSelectOptions';
 	import { Difficulties, type Difficulty, type ProblemDisplayDto } from './solve/types';
+	import { Trie } from '../../../(admin)/problem/upsert/Trie';
 
 	let { data }: { data: Promise<StandardResponseDto<ProblemDisplayDto[]>> } = $props();
 

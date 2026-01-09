@@ -4,7 +4,7 @@
 	import type { UsedDuckDto } from '$lib/Components/Misc/Pond/duckTypes';
 	import { DUCK_HEIGHT, DUCK_WIDTH } from './constants';
 	import type { Coords, DuckAnimationContext, DuckPositionalData, ObjectDims2d } from './PondTypes';
-	import { calculateSpawnPosition, createDuckPositionalData, IDLE_GIF_PATH, scaleDuckPositions, updateDuckAnimation } from './duckLogic';
+	import { calculateSpawnPosition, createDuckPositionalData, scaleDuckPositions, updateDuckAnimation } from './duckLogic';
 
 	interface Props {
 		ducks: UsedDuckDto[];
@@ -169,5 +169,5 @@
 <canvas bind:this={workCanvas} class="absolute z-0 hidden"></canvas>
 
 {#each ducks as duck}
-	<img src={IDLE_GIF_PATH} alt={duck.itemId} class="rounded-100 absolute z-20 overflow-hidden" style="height: {DUCK_HEIGHT}px;" bind:this={duckElementsKeyed[duck.itemId]}/>
+	<img src={`https://d3018wbyyxg1xc.cloudfront.net/Ducks/${duck.itemId}/Idle.gif`} alt={duck.itemId} class="rounded-100 absolute z-20 overflow-hidden" style="height: {DUCK_HEIGHT}px;" bind:this={duckElementsKeyed[duck.itemId]}/>
 {/each}

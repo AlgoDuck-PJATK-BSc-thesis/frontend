@@ -76,7 +76,6 @@
 		}
 	});
 
-	$inspect($customLayoutQuery.data?.body)
 </script>
 
 <main use:clickOutside={() => isVisible = false} transition:fly={{y: -30, duration: 200}} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent rounded-lg flex flex-col">

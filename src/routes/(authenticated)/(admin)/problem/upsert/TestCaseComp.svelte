@@ -1,7 +1,6 @@
 <script lang="ts">
     import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
     import Monaco from "$lib/Components/GenericComponents/monaco/monaco.svelte";
-    import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
     import { Editor } from "@tiptap/core";
     import type { AnalysisResultDto, FunctionParam, MethodRecommendation, SuggestedInputArgs, TestCaseCreateDto, ValidationResponseStatus, VariableRecommendation } from "./TestCase";
     import { Trie } from "./Trie";
@@ -16,19 +15,21 @@
     import ToolTip from "./ToolTip.svelte";
 	import MethodRecommentaionSelectedComp from "./SuggestionCards/MethodRecommentaionSelectedComp.svelte";
 
-    let { 
+    let {
+        mountExpanded, 
         templateContents,
         testCaseNum,
         testCase = $bindable(),
         onRemove
     }: { 
+        mountExpanded: boolean,
         templateContents: string,
         testCaseNum: number,
         testCase: TestCaseCreateDto,
         onRemove?: () => void
     } = $props();
 
-    let isExpanded: boolean = $state(true);
+    let isExpanded: boolean = $state(mountExpanded);
 
     let methodRecommendationTrie: Trie<MethodRecommendation> | undefined = $state();
     let variableRecommendationTrie: Trie<VariableRecommendation> | undefined = $state();
@@ -36,7 +37,6 @@
     let analysisStatus: ValidationResponseStatus | undefined = $state();
     let analysisError: string | undefined = $state();
 
-    // Track selected values for each parameter input
     let selectedCallArgs: (FunctionParam | undefined)[] = $state([]);
 
     $effect(() => { 
@@ -72,7 +72,7 @@
                 methodRecommendationTrie = undefined;
                 variableRecommendationTrie = undefined;
                 analysisStatus = "Failed";   
-                analysisError = "Syntax error.";
+                analysisError = "Parse error.";
             }
         }, 2000);
 
@@ -88,7 +88,8 @@
         getCurrentRecommendationsForQuery: (prefix: string) => methodRecommendationTrie?.getAllSubtreeValues(prefix),
         DisplayComp: MethodRecommendationComp,
         SelectedDisplayComp: MethodRecommentaionSelectedComp,
-        selectedValue: testCase.callMethod
+        selectedValue: testCase.callMethod,
+        defaultSelected: testCase.callMethod
     });
 
 
@@ -97,7 +98,8 @@
         getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
         DisplayComp: VariableRecommendationComp,
         SelectedDisplayComp: VariableRecommendationSelectedComp,
-        selectedValue: testCase.expected
+        selectedValue: testCase.expected,
+        defaultSelected: testCase.expected
     });
 
     testCase.arrangeB64 = testCase.arrangeB64 || "public class TestCase{\n\tpublic static void main(String[] args){\n\t\t//your arrange goes here\n\t}\n}"; 
@@ -225,6 +227,7 @@
                     </div>
                     <div class="flex flex-col gap-2.5">
                         {#each testCase.callMethod.functionParams as param, i}
+                        {console.log("here: ", $state.snapshot(testCase.callArgs[i]))}
                             <div class="flex items-center gap-3 p-2 px-3 bg-[#2d2d2d] rounded border border-[#3c3c3c]">
                                 <span class="font-mono text-xs text-[#4ec9b0] bg-[#4ec9b0]/10 px-1.5 py-0.5 rounded whitespace-nowrap">{param.type}</span>
                                 <span class="font-mono text-xs text-[#9cdcfe] min-w-[80px]">{param.name}</span>
@@ -239,8 +242,8 @@
                                     onDeselect: () => {
                                         (testCase.callArgs ??= []).splice(i)
                                         selectedCallArgs[i] = undefined;
-                                        
-                                    }
+                                    },
+                                    defaultSelected: testCase.callArgs[i]
                                 }}/>
                             </div>
                         {/each}
@@ -271,6 +274,7 @@
                     let tiptapEditor: Editor;
                     tiptapEditor = new Editor({
                         element: node,
+                        content: testCase.display,
                         extensions: [
                             StarterKit,
                             Placeholder.configure({
@@ -307,6 +311,7 @@
                     let tiptapEditor: Editor;
                     tiptapEditor = new Editor({
                         element: node,
+                        content: testCase.displayRes,
                         extensions: [
                             StarterKit,
                             Placeholder.configure({

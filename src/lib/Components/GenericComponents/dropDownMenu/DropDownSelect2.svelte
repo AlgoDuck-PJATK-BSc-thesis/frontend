@@ -7,7 +7,7 @@
 
 	let { options }: { options: DropDownMenuOptions2<K, V> } = $props();
 
-	let label: K = $state(options.options[0]?.key);
+	let label: K = $state(options.defaultSelected ? options.defaultSelected.key : options.options[0]?.key);
 
     let dropDownData: DropDownData = $state({
         groupId: options.groupId,
@@ -39,7 +39,7 @@
 		    dropDownData = registerGroupElem(dropDownData)
         }}>
         <button class="relative flex items-center rounded-t-md {!dropDownData.isVisible ? "rounded-md": ""} overflow-hidden" onclick={toggleDropDown}>
-            <DisplayComp options={{isSelected: false,  content: label }}/>            
+            <DisplayComp options={{isSelected: options.defaultSelected ? true : false,  content: label }}/>            
             <div class="h-full aspect-sqaure pointer-events-none absolute right-0 {dropDownData.isVisible ? "rotate-90" : ""}">
                 <div class="w-full h-full p-[30%]">
                     <ChevronIconSvgNew options={{class: "w-full h-full stroke-white"}}/>

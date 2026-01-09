@@ -1,5 +1,5 @@
 <script lang='ts' generics='T extends Record<string, any>'>
-    import type { Component } from "svelte";
+    import { onMount, type Component } from "svelte";
     import type { RecommendationDisplayCompArgs, SuggestedInputArgs } from "./TestCase";
     import { fly, slide } from "svelte/transition";
     import SearchIconSvg from "$lib/svg/EditorComponentIcons/SearchIconSvg.svelte";
@@ -33,11 +33,15 @@
         if (options.onDeselect) options.onDeselect()
     } 
     
+    onMount(() => {
+        if (options.defaultSelected){
+            selectedCapture = options.defaultSelected;
+        }
+    });
 </script>
 
 <div class="relative flex-1 min-w-[200px]">
     {#if selectedCapture}
-        <!-- Selected value display -->
         <div class="relative flex items-center">
             <div class="w-full bg-[#2d2d2d] border border-[#007fd4] rounded-sm overflow-hidden">
                 <div class="flex items-center">
@@ -93,16 +97,3 @@
         {/if}
     {/if}
 </div>
-
-<style>
-    @keyframes dropdownSlide {
-        from {
-            opacity: 0;
-            transform: translateY(-4px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
