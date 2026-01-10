@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href={`/items/edit?itemId=${item.itemId}`}
+                    <a href={`/items/create-item?itemId=${item.itemId}&edit=true`}
                         class="flex items-center gap-2 px-4 py-2 text-sm text-admin-text-secondary border border-admin-border-primary rounded hover:bg-admin-border-primary transition-colors">
                         <PenIconSvg options={{ class: 'w-4 h-4 stroke-[2] stroke-admin-text-secondary' }} />
                         <span>Edit</span>

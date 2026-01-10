@@ -1,6 +1,6 @@
 import type { ObjectDims2d, Rgba, Vec2 } from './PondTypes';
 
-export const DUCK_HEIGHT = 65;
+export const DUCK_HEIGHT = 100;
 export const DUCK_WIDTH = DUCK_HEIGHT * 1.07;
 export const DUCK_COLLISION_RADIUS = 60;
 export const MIN_DUCK_DISTANCE = DUCK_COLLISION_RADIUS * 2;

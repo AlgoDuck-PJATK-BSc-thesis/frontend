@@ -7,10 +7,14 @@
 	import type { ChatList, ChatMessage } from '$lib/types/domain/modules/problem/assistant';
 	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 	import type { SolvePageLoadArgs } from '$lib/types/ui/modules/problem/solvePageLoadArgs';
+	import DefaultLayout from '$lib/Components/ComponentTrees/IdeComponentTree/default-layout.json'
+
 	import Ide from './Ide.svelte';
 	import { onMount } from 'svelte';
+	import type { EditorConfigData } from './types';
+	import { userEditorPreferences } from '$lib/stores/theme.svelte';
+	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
 
-	
 	let { data = $bindable() }: { data: SolvePageLoadArgs } = $props();
 	
 	let config = $state<Record<string, DefaultLayoutTerminalComponentArgs>>({});
@@ -23,7 +27,6 @@
 	let loadedChatData: StandardResponseDto<ChatList> = $state({} as StandardResponseDto<ChatList>)
 	let loadedAutoSave: StandardResponseDto<AutoSaveDto | undefined> = $state({} as StandardResponseDto<AutoSaveDto | undefined>);
 
-
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
 		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
@@ -34,8 +37,15 @@
 		})
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
+		
+		data.configData.then((data: StandardResponseDto<EditorConfigData>) => {
+			userEditorPreferences.layout = data.body.layout;
+			userEditorPreferences.fontSize = data.body.fontSize;
+			userEditorPreferences.theme = data.body.themeName;
+		}).catch((err) => {
+			toast.warning('failed loading editor config. Falling back to default');
+		})
 
-		console.log(loadedAutoSave.body);
 
 		config = {
 			'code-editor': { 

@@ -3,6 +3,7 @@ import type { AutoSaveDto, ProblemDetailsDto } from "$lib/Components/ComponentTr
 import type { ChatList } from "$lib/types/domain/modules/problem/assistant";
 import type { SolvePageLoadArgs } from "$lib/types/ui/modules/problem/solvePageLoadArgs";
 import type { PageLoad } from "../$types";
+import type { EditorConfigData } from "./types";
 
 export const load: PageLoad = async ({ params, fetch, url }) : Promise<SolvePageLoadArgs> => {
   const problemId = url.searchParams.get('problem');
@@ -17,7 +18,10 @@ export const load: PageLoad = async ({ params, fetch, url }) : Promise<SolvePage
     }, fetch, new URLSearchParams({problemId: problemId ?? ""})),
     autoSave: FetchFromApi<AutoSaveDto>("LoadAutoSave", {
       method: "GET"
-    }, fetch, new URLSearchParams({problemId: problemId ?? ""}))
+    }, fetch, new URLSearchParams({problemId: problemId ?? ""})),
+    configData: FetchFromApi<EditorConfigData>("user/preferences/editor", {
+      method: "GET"
+    }, fetch) 
   };
 }
 

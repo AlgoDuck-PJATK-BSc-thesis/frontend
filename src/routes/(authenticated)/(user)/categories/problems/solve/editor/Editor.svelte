@@ -6,8 +6,9 @@
 	import ComponentTreeRenderer from "$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte";
 	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import CreationModal from "./CreationModal.svelte";
-	import { FetchFromApi } from "$lib/api/apiCall";
-	import ToolTip from "../../../../../(admin)/problem/ToolTip.svelte";
+	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
+	import ToolTip from "../../../../../(admin)/problem/upsert/ToolTip.svelte";
+	import type { LayoutCreationResultDto } from "./EditorEditorTypes";
 
 	type Coords = { x: number; y: number };
 
@@ -570,19 +571,18 @@
 		component: ComponentConfig<any>,
 		isPlaced?: boolean 
 	}
-	let creationModalArgs = $state({ isVisible: true, onclick: async (layoutName: string) => {
+	let creationModalArgs = $state({ 
+		isVisible: false,
+		onclick: async (layoutName: string): Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> => {
 		let treeSerialized: string | undefined = serializeTree();
 		if (!treeSerialized) return;
-		let res = await FetchFromApi("CreateLayout",{
+		return await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
 			method: "POST",
 			body: JSON.stringify({
 				layoutContent: treeSerialized,
 				layoutName: layoutName
 			})
 		});
-
-		console.log(res.status);
-		console.log(res.body);
 	}})
 </script>
 
@@ -694,8 +694,13 @@
 			{/if}
 			<button
 				class="w-full py-2 px-4 bg-ide-accent/20 text-ide-accent border border-ide-accent/40 rounded-lg text-sm font-medium hover:bg-ide-accent/30 hover:border-ide-accent/60 transition-all duration-200 active:scale-[0.98]"
-				onclick={() => creationModalArgs.isVisible = true}
-			>
+				onclick={() => {
+					if (orphanPlaceholders.length){
+							flashOrphanPlaceholders();
+							return;
+						}
+					creationModalArgs.isVisible = true
+				}}>
 				Save Layout
 			</button>
 			<button

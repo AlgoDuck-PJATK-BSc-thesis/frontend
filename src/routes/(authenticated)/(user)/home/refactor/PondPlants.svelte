@@ -229,7 +229,7 @@
 				method: "DELETE"
 			}, fetch, new URLSearchParams({ plantId: occupyingPlant.itemId }))
 			if (result.status === "Success"){
-				placedPlants.splice(placedPlants.findIndex(plant => plant.itemId == occupyingPlant.itemId))
+				placedPlants.splice(placedPlants.findIndex(plant => plant.itemId == occupyingPlant.itemId), 1)
 				getPlantRemoveSubgrid(occupyingPlant).map(se => linearizeGridIndex(se)).forEach(index => {
 					if (isPointOnGridOccupied?.at(index)){
 						isPointOnGridOccupied[index] = false;

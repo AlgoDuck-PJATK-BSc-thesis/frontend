@@ -52,7 +52,7 @@
             queryClient.setQueryData(["column", col, pageParam, orderByCapture], colValues)
         })
 
-
+        
         totalItems = res.body.totalItems;
         return res;
     }
@@ -255,7 +255,7 @@
                                     'createdBy': (value: string) => createColumnConfig(PopOverPreviewColumn, { label: value, displayComponent: CreatedByCard, getPreviewData: async () => {
                                         return {}
                                     }}),
-                                    'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: value.toString() }),
+                                    'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: value?.toString() }),
                                     'itemId': (value: string) => createColumnConfig(LinkColumn, { label: value, href: `items/item-details?itemId=${value}` }),
                                     'itemName': (value: string) => createColumnConfig(RegularColumn, { label: value }),
                                     'ownedCount': (value: number) => createColumnConfig(RegularColumn, { label: value.toString() }),

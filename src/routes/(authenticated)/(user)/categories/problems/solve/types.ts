@@ -1,3 +1,5 @@
+import type { EditorThemeName } from "$lib/Themes";
+
 export const Difficulties = ["EASY", "MEDIUM", "HARD"] as const; 
 export type Difficulty = (typeof Difficulties)[number];
 
@@ -10,9 +12,10 @@ export type ProblemListPageLoadArg = {
 export type ProblemDisplayDto = {
     problemId: string, 
     title: string,
-    
     difficulty: DifficultyDto,
-    tags: TagDto[]
+    tags: TagDto[],
+    attemptedAt?: Date;
+    solvedAt?: Date;
 }
 
 type TagDto = {
@@ -21,4 +24,16 @@ type TagDto = {
 
 type DifficultyDto = {
     name: Difficulty
+}
+
+export type EditorConfigData = {
+    fontSize: number,
+    themeName: EditorThemeName,
+    layout: LayoutDto /* Record<string, any> would probably suffice but... */
+}
+
+export type LayoutDto = {
+    layoutName: string,
+    layoutId: string,
+    layoutContent: any,
 }

@@ -1,15 +1,19 @@
 <script lang="ts">
     import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
-    import { ItemTypes, type DuckData, type ItemCreateDto, type ItemCreateResponseDto, type ItemType, type PlantData, type RarityDto, type SpriteSlot } from "./ItemCreationTypes";
+    import { ItemTypes, type DuckData, type ItemCreateDto, type ItemCreateResponseDto, type ItemCreationPageArgs, type ItemType, type PlantData, type RarityDto, type SpriteSlot } from "./ItemCreationTypes";
     import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
     import SpriteUploader from "./SpriteUploader.svelte";
 	import PlantCreationForm from "./type-specific-creation-components/PlantCreationForm.svelte";
 	import ItemCreationResult from "./ItemCreationResult.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
+	import { onMount } from "svelte";
+	import { useQueryClient } from "@tanstack/svelte-query";
+	import { Tooltip } from "chart.js";
+	import ToolTip from "../../problem/upsert/ToolTip.svelte";
 
-    let { data }: { data: StandardResponseDto<RarityDto[]> } = $props(); 
+    let { data }: { data: ItemCreationPageArgs } = $props(); 
 
-    let formContents: ItemCreateDto = $state({
+    let formContents: ItemCreateDto = $state(data.itemData ?? {
         itemData: {
             "$type": "duck",
         } as DuckData
@@ -18,23 +22,24 @@
     let isSubmitting: boolean = $state(false);
     let submitError: string | undefined = $state();
     let submitResult: ItemCreateResponseDto | undefined = $state();
+    let isEditMode: boolean = $derived(data.isEditMode && data.itemData !== undefined)
 
     const spriteSlotConfigs: Record<ItemType, SpriteSlot[]> = {
         duck: [
             { 
-                key: "sprite",
+                key: "Sprite",
                 label: "Sprite",
                 description: "Default appearance. Format: .png", 
                 accept: "image/png" 
             },
             { 
-                key: "idle", 
+                key: "Idle", 
                 label: "Idle", 
                 description: "Floating. Format: .gif", 
                 accept: "image/gif"
             },
             { 
-                key: "swimming", 
+                key: "Swimming", 
                 label: "Swimming", 
                 description: "Moving. Format: .gif", 
                 accept: "image/gif" 
@@ -42,13 +47,13 @@
         ],
         plant: [
             { 
-                key: "day", 
+                key: "Day", 
                 label: "Day", 
                 description: "Daytime appearance. Format: .png", 
                 accept: "image/png" 
             },
             { 
-                key: "night", 
+                key: "Night", 
                 label: "Night", 
                 description: "NightTime appearance. Format: .png", 
                 accept: "image/png" 
@@ -57,12 +62,56 @@
     };
 
     let spriteSlots: SpriteSlot[] = $state(
-        spriteSlotConfigs.duck.map(s => ({ ...s }))
+        spriteSlotConfigs.duck
     );
+
+    const queryClient = useQueryClient();
+
+    onMount(async () => {
+        if (!isEditMode || !data.itemData || !data.itemId) return;
+        const itemType: ItemType = data.itemData.itemData.$type;
+
+        const loadedSlots = await Promise.all(
+            spriteSlotConfigs[itemType].map(async (slot) => {
+                const acceptParts: string[] = slot.accept.split('/');
+                const extension: string = acceptParts[Math.max(acceptParts.length - 1, 0)];
+
+                const cachedFile: File | undefined = queryClient.getQueryData([data.itemId, slot.key, extension ])
+                 if (cachedFile) {
+                    return { ...slot, file: cachedFile };
+                }
+
+                const cloudfrontFilePath: string = `https://d3018wbyyxg1xc.cloudfront.net/${itemType[0].toUpperCase()}${itemType.slice(1)}s/${data.itemId}/${slot.key}.${extension}`;
+                const file = await urlToFile(cloudfrontFilePath, slot.key);
+                if (!file) return slot;
+
+                queryClient.setQueryData([ data.itemId, slot.key, extension ], file)
+                return { ...slot, file };
+            })
+        );
+
+        spriteSlots = loadedSlots;
+    });
 
     $effect(() => {
         spriteSlots = spriteSlotConfigs[formContents.itemData.$type].map(s => ({ ...s, file: undefined }));
     });
+
+
+    $inspect(spriteSlots);
+
+    const urlToFile = async (url: string, filename: string): Promise<File | undefined> => {
+        try{
+
+            const response = await fetch(url);
+            const blob = await response.blob();
+            return new File([blob], filename, { type: blob.type });
+        }catch(err){
+            console.log(err);
+        }
+    }
+
+    let primarySprite: File | undefined = $derived(spriteSlots.at(0)?.file);
 
     let allSpritesUploaded = $derived(spriteSlots.every(s => s.file));
 
@@ -89,9 +138,12 @@
                 type: file.type 
             }));
         })
-
+        if (isEditMode && data.itemId){
+            formData.append("itemId", data.itemId);
+        }
+        console.log(data.itemId)
         FetchFromApi<ItemCreateResponseDto>("admin/item", {
-            method: "POST",
+            method: isEditMode ? "PUT" : "POST",
             body: formData
         }).then((value: StandardResponseDto<ItemCreateResponseDto>) => {
             submitResult = value.body;
@@ -108,6 +160,7 @@
         submitResult = undefined;
         submitError = undefined;
     };
+
 </script>
 
 <main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary font-sans">
@@ -136,16 +189,20 @@
             <div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
                 <div class="flex items-center gap-2.5 px-4 py-3 bg-admin-bg-tertiary justify-between border-b border-admin-border-primary">
                     <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Basic Information</h3>
-                        <div class="flex flex-row items-center gap-1 bg-admin-border-primary rounded-full p-1">
-
-                        {#each ItemTypes as itemType}
-                            <button onclick={() => {
-                                formContents.itemData.$type = itemType
-                            }} class="px-3 py-1 rounded-full text-xs transition-all
-                                {formContents.itemData.$type === itemType ? 'bg-admin-accent-primary text-white font-medium' : 'text-admin-text-muted hover:text-admin-text-secondary'}">
-                                <span>{itemType}</span>
-                            </button>
-                        {/each}
+                        <div class="flex flex-row gap-3 justify-end grow">
+                            {#if isEditMode}
+                                <ToolTip options={{tip: 'cannot change item type \ntry recreating the item from scratch'}}/>
+                            {/if}
+                            <div class="flex flex-row items-center gap-1 bg-admin-border-primary rounded-full p-1">
+                                {#each ItemTypes as itemType}
+                                    <button disabled={isEditMode} onclick={() => {
+                                        formContents.itemData.$type = itemType
+                                    }} class="px-3 py-1 rounded-full disabled:cursor-not-allowed text-xs transition-all disabled:text-admin-text-muted
+                                        {formContents.itemData.$type === itemType ? 'bg-admin-accent-primary text-admin-text-secondary font-medium' : 'font-medium text-admin-text-muted hover:text-admin-text-secondary'}">
+                                        <span>{itemType}</span>
+                                    </button>
+                                {/each}
+                            </div>
                         </div>
                 </div>
                 <div class="p-4 flex flex-col gap-4">
@@ -183,7 +240,7 @@
                             </span>
                             <select bind:value={formContents.rarityId}
                                 class="w-full px-3 py-2 bg-admin-border-primary border border-admin-border-primary rounded text-sm text-admin-text-secondary outline-none transition-colors focus:border-[#007fd4] cursor-pointer">
-                                {#each data.body as rarity}
+                                {#each data.rarities as rarity}
                                     <option value={rarity.rarityId}>{rarity.name}</option>
                                 {/each}
                             </select>
@@ -193,7 +250,7 @@
             </div>
 
             {#if formContents.itemData.$type === "plant"}
-                <PlantCreationForm bind:itemData={ formContents.itemData as PlantData }/>
+                <PlantCreationForm bind:itemData={ formContents.itemData as PlantData } sprite={primarySprite}/>
             {/if}
 
             <SpriteUploader bind:slots={spriteSlots} />
@@ -212,8 +269,8 @@
                         <div class="w-5 h-5 border-2 border-gray-500 border-t-0 rounded-full animate-spin"></div>
                         <span>Creating...</span>
                     {:else}
-                        <CrossIconSvg options={{ class: 'w-4 h-4 stroke-[2] text-admin-text-secondary' }}/>
-                        <span>Create Item</span>
+                        <CrossIconSvg options={{ class: 'w-4 h-4 stroke-[2] rotate-45 stroke-admin-text-secondary' }}/>
+                        <span>{isEditMode ? "Update Item" : "Create Item"}</span>
                     {/if}
                 </button>
             </div>

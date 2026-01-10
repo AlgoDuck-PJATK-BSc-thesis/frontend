@@ -1,5 +1,8 @@
 <script lang="ts">
-    let { options = $bindable() }: { options: { isVisible: boolean, onclick: (name: string) => Promise<void> } } = $props()
+	import type { StandardResponseDto } from "$lib/api/apiCall";
+	import type { LayoutCreationResultDto } from "./EditorEditorTypes";
+
+    let { options = $bindable() }: { options: { isVisible: boolean, onclick: (name: string) => Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> } } = $props()
 
     let layoutName: string = $state("");
 </script>
@@ -19,8 +22,15 @@
                 Cancel
             </button>
             <button onclick={async () => {
-                await options.onclick(layoutName);
-            }} class="px-18 py-3 bg-ide-dcard/50 hover:bg-ide-dcard rounded-md border border-ide-accent/5">
+                try{
+                    let res = await options.onclick(layoutName);
+                    if (!res) return;
+                    console.log(res);
+                    console.log(res.body);
+                }catch(err){
+                    console.log(err);
+                }
+            }} disabled={layoutName.length < 3} class="px-18 py-3 bg-ide-dcard/50 hover:bg-ide-dcard rounded-md border border-ide-accent/5">
                 Save
             </button>
         </div>

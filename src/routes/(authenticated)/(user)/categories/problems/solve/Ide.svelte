@@ -150,10 +150,10 @@
 				method: "GET"
 			}, fetch, new URLSearchParams({ layoutId: layoutId }))
 
-			layouts[layoutId] = res.body.layoutContents;
+			// layouts[layoutId] = res.body.layoutContents;
 		}
-		if (layouts[layoutId])
-			userEditorPreferences.layout = layoutId;
+		// if (layouts[layoutId])
+		// 	userEditorPreferences.layout = layoutId;
 	} 
 </script>
 
@@ -173,7 +173,7 @@
 	</div>
 	<div class="w-full h-[95%] flex p-[0.5%]">
 		<ComponentTreeRenderer
-		componentTree={layouts[userEditorPreferences.layout]} 
+		componentTree={userEditorPreferences.layout.layoutContent} 
 		{contextInjectors}
 		bind:componentOpts={components}
 		/>

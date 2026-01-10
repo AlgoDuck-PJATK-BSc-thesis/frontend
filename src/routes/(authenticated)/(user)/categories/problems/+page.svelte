@@ -1,19 +1,30 @@
 <script lang="ts">
-	import type { StandardResponseDto } from '$lib/api/apiCall';
+	import { createQuery } from '@tanstack/svelte-query';
 	import { goto } from '$app/navigation';
 	import SearchIconSvg from '$lib/svg/EditorComponentIcons/SearchIconSvg.svelte';
 	import type { KeyValuePair } from '$lib/Components/GenericComponents/dropDownMenu/DropDownSelectOptions';
 	import { Difficulties, type Difficulty, type ProblemDisplayDto } from './solve/types';
 	import { Trie } from '../../../(admin)/problem/upsert/Trie';
+	import { FetchFromApi } from '$lib/api/apiCall';
 
-	let { data }: { data: Promise<StandardResponseDto<ProblemDisplayDto[]>> } = $props();
+	let { data }: { data: { categoryId: string | null } } = $props();
+
+	const query = createQuery({
+		queryKey: ['problems', data.categoryId],
+		queryFn: async () => {
+			const params = data.categoryId ? new URLSearchParams({ categoryId: data.categoryId }) : undefined;
+			return await FetchFromApi<ProblemDisplayDto[]>("problem/all", {
+				method: "GET"
+			}, fetch, params);;
+		},
+		select: (response) => response.body
+	});
 
 	let colors: Record<string, string> = {
 		EASY: 'bg-green-200/20 border-green-500',
 		MEDIUM: 'bg-amber-200/20 border-amber-500',
 		HARD: 'bg-red-200/20 border-red-500'
 	};
-
 
 	let difficultyFilters: Difficulty[] = $state(Difficulties.map(d => d as Difficulty));
 	let searchQuery: string = $state('');
@@ -73,6 +84,12 @@
 	const setDifficultyFilter = (difficulties: Difficulty[]) => {
 		difficultyFilters = difficulties;
 	};
+
+	// Derived state for filtered problems
+	let searchIndex = $derived($query.data ? buildSearchIndex($query.data) : null);
+	let filteredProblems = $derived(
+		$query.data && searchIndex ? filterProblems($query.data, searchIndex) : []
+	);
 </script>
 
 <svelte:head>
@@ -106,23 +123,22 @@
 						All
 					</button>
 
-          {#each Difficulties as difficulty}
-            <button
-              onclick={() => setDifficultyFilter([difficulty])}
-              class="rounded-full px-5 py-1 transition-colors {difficultyFilters.length === 1 &&
-              difficultyFilters[0] === difficulty
-                ? 'bg-ide-bg'
-                : 'bg-ide-card hover:bg-ide-bg/20'}"
-            >
-              {`${difficulty.at(0)}${difficulty.toLowerCase().substring(1)}`}
-            </button>
-          {/each}
+					{#each Difficulties as difficulty}
+						<button
+							onclick={() => setDifficultyFilter([difficulty])}
+							class="rounded-full px-5 py-1 transition-colors {difficultyFilters.length === 1 &&
+							difficultyFilters[0] === difficulty
+								? 'bg-ide-bg'
+								: 'bg-ide-card hover:bg-ide-bg/20'}"
+						>
+							{`${difficulty.at(0)}${difficulty.toLowerCase().substring(1)}`}
+						</button>
+					{/each}
 				</div>
 			</div>
 		</div>
 
-		{#await data}
-
+		{#if $query.isLoading}
 			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
 				{#each Array(6) as _}
 					<div
@@ -139,18 +155,23 @@
 					</div>
 				{/each}
 			</div>
-			{:then resolvedData}
-			{console.log(resolvedData)}
-
-		{@const allProblems = resolvedData.body}
-		{@const searchIndex = buildSearchIndex(allProblems)}
-		{@const problems = filterProblems(allProblems, searchIndex)}
-		
-		<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-			{#each problems as problem}
+		{:else if $query.isError}
+			<div class="text-center py-12 text-red-400">
+				<p>Failed to load problems. Please try again.</p>
+				<p class="text-sm mt-2">{$query.error?.message}</p>
+				<button 
+					onclick={() => $query.refetch()}
+					class="mt-4 px-4 py-2 bg-ide-card rounded-md hover:bg-ide-card/50 transition-colors"
+				>
+					Retry
+				</button>
+			</div>
+		{:else if $query.isSuccess}
+			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+				{#each filteredProblems as problem}
 					<button
 						onclick={() => goto(`problems/solve/?problem=${problem.problemId}`)}
-						class="flex border-ide-accent/10 border-1 w-full flex-col items-start justify-center gap-2 rounded-xl bg-ide-card px-6 py-7 pb-10 transition-colors hover:cursor-pointer hover:bg-ide-card/50"
+						class="flex border-ide-accent/10 relative border-1 w-full flex-col items-start justify-center gap-2 rounded-xl bg-ide-card px-6 py-7 pb-10 transition-colors hover:cursor-pointer hover:bg-ide-card/50"
 					>
 						<div
 							class="rounded-full border px-3 py-1 text-sm font-semibold {colors[
@@ -166,24 +187,22 @@
 						{#if problem.tags.length > 0}
 							<div class="mt-2 flex flex-wrap gap-1">
 								{#each problem.tags as tag}
-									<span class="rounded-full bg-[#3c3c3c] px-2 py-0.5 text-xs text-gray-300"
-										>{tag.name}</span
-									>
+									<span class="rounded-full bg-[#3c3c3c] px-2 py-0.5 text-xs text-gray-300">{tag.name}</span>
 								{/each}
 							</div>
 						{/if}
+						{#if problem.solvedAt}
+							<span class="font-mono text-xs absolute bottom-1 right-1">Solved at {problem.solvedAt}</span>
+						{:else if problem.attemptedAt}
+							<span class="font-mono text-xs absolute bottom-1 right-1">Attempted at {problem.attemptedAt}</span>
+						{/if}
 					</button>
 				{:else}
-					<div class="text-center py-12 text-gray-400">
+					<div class="col-span-full text-center py-12 text-gray-400">
 						<p>No problems found matching your search.</p>
 					</div>
 				{/each}
 			</div>
-		{:catch error}
-			<div class="text-center py-12 text-red-400">
-				<p>Failed to load problems. Please try again.</p>
-				<p class="text-sm mt-2">{error.message}</p>
-			</div>
-		{/await}
+		{/if}
 	</div>
 </main>
