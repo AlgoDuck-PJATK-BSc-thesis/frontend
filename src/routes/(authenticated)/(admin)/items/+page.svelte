@@ -219,7 +219,9 @@
                     <div class="w-0"></div>
                 </div>
                 <button onclick={() => isPreferencesShown = !isPreferencesShown} class="w-9 h-5 flex justify-center item-center relative">
-                    <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    <div class="w-full h-full hover:cursor-pointer">
+                        <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    </div>
                     {#if isPreferencesShown}                        
                         <div class="absolute top-7 z-999 -right-2">
                             <ColumnSelectDialog columnPicker={$state.snapshot(columnPicker)} bind:isVisible={isPreferencesShown} {updateColumnSelection}/>

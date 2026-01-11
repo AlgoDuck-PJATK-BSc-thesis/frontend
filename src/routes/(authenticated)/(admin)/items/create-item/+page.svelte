@@ -10,6 +10,7 @@
 	import { useQueryClient } from "@tanstack/svelte-query";
 	import { Tooltip } from "chart.js";
 	import ToolTip from "../../problem/upsert/ToolTip.svelte";
+	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
 
     let { data }: { data: ItemCreationPageArgs } = $props(); 
 
@@ -81,7 +82,7 @@
                     return { ...slot, file: cachedFile };
                 }
 
-                const cloudfrontFilePath: string = `https://d3018wbyyxg1xc.cloudfront.net/${itemType[0].toUpperCase()}${itemType.slice(1)}s/${data.itemId}/${slot.key}.${extension}`;
+                const cloudfrontFilePath: string = `https://d3018wbyyxg1xc.cloudfront.net/${itemType}/${data.itemId}/${slot.key}.${extension}`;
                 const file = await urlToFile(cloudfrontFilePath, slot.key);
                 if (!file) return slot;
 
@@ -168,7 +169,7 @@
         <div class="py-4 border-b border-admin-border-primary">
             <div class="flex items-center gap-3">
                 <a href="/items" class="p-1.5 rounded hover:bg-admin-border-primary transition-colors text-admin-text-muted hover:text-admin-text-secondary">
-                    <ChevronIconSvg options={{ class: "w-5 h-5 stroke-[2] rotate-180 stroke-white" }}/>
+                    <ChevronIconSvgNew options={{ class: "w-5 h-5 stroke-[2] rotate-180 stroke-admin-text-muted" }}/>
                 </a>
                 <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Create Item</h2>
             </div>
@@ -211,7 +212,7 @@
                             Name <span class="text-admin-danger-text">*</span>
                         </span>
                         <input type="text" bind:value={formContents.itemName} maxlength={128} placeholder="Enter item name"
-                            class="w-full px-3 py-2 bg-admin-border-primary border border-admin-border-primary rounded text-sm text-admin-text-secondary placeholder-admin-text-muted outline-none transition-colors focus:border-[#007fd4]"/>
+                            class="w-full justify-end px-3 py-2 bg-admin-border-primary border border-admin-border-primary rounded text-sm text-admin-text-secondary placeholder-admin-text-muted outline-none transition-colors focus:border-[#007fd4]"/>
                         <span class="text-xs text-admin-text-muted text-right">{formContents.itemName?.length ?? 0}/128</span>
                     </div>
 

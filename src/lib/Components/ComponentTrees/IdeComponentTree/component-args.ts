@@ -32,6 +32,8 @@ export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentA
   templateContents: string,
   userCode?: string,
   problemId: string,
+  isDetachedHeadMode: boolean,
+  upstreamChanged?: boolean
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs {

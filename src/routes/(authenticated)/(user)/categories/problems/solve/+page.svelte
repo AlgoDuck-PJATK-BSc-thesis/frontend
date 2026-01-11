@@ -14,6 +14,7 @@
 	import type { EditorConfigData } from './types';
 	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
+	import { applyThemeEditor, type EditorThemeName } from '$lib/Themes';
 
 	let { data = $bindable() }: { data: SolvePageLoadArgs } = $props();
 	
@@ -41,7 +42,8 @@
 		data.configData.then((data: StandardResponseDto<EditorConfigData>) => {
 			userEditorPreferences.layout = data.body.layout;
 			userEditorPreferences.fontSize = data.body.fontSize;
-			userEditorPreferences.theme = data.body.themeName;
+			userEditorPreferences.theme = data.body.theme;
+			applyThemeEditor(userEditorPreferences.theme.themeName as EditorThemeName)
 		}).catch((err) => {
 			toast.warning('failed loading editor config. Falling back to default');
 		})
@@ -51,7 +53,8 @@
 			'code-editor': { 
 				userCode: loadedAutoSave?.body?.userCodeB64 !== undefined && atob(loadedAutoSave.body.userCodeB64).trim() !== "" ? atob(loadedAutoSave!.body!.userCodeB64) : loadedData.body.templateContents,
 				problemId: loadedData.body.problemId,
-				templateContents: loadedData.body.templateContents
+				templateContents: loadedData.body.templateContents,
+				isDetachedHeadMode: false
 			 } as CodeEditorComponentArgs,
 			'terminal-comp':  { 
 				stdOut: '',

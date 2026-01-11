@@ -37,32 +37,32 @@ export const shopkeepMessageRegistry: {
     ],
     "item_selected": [
         {
-            predicate: (args) => args.selected === "Duck",
+            predicate: (args) => args.selected === "duck",
             messageRarity: "common",
             messageContent: "Ah, a fine specimen you've got your eye on!"
         },
         {
-            predicate: (args) => args.selected === "Duck",
+            predicate: (args) => args.selected === "duck",
             messageRarity: "common",
             messageContent: "That one's got personality, I can tell."
         },
         {
-            predicate: (args) => args.selected === "Duck",
+            predicate: (args) => args.selected === "duck",
             messageRarity: "common",
             messageContent: "Excellent taste in waterfowl!"
         },
         {
-            predicate: (args) => args.selected === "Plant",
+            predicate: (args) => args.selected === "plant",
             messageRarity: "common",
             messageContent: "A green thumb, eh?"
         },
         {
-            predicate: (args) => args.selected === "Plant",
+            predicate: (args) => args.selected === "plant",
             messageRarity: "common",
             messageContent: "That one practically waters itself. Almost."
         },
         {
-            predicate: (args) => args.selected === "Plant",
+            predicate: (args) => args.selected === "plant",
             messageRarity: "common",
             messageContent: "Lovely choice. Very photosynthetic."
         }

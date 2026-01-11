@@ -20,16 +20,22 @@
         executeCallback,
         submitCallback,
         registerAndSelectLayout,
-        isSettingsPanelShown = $bindable()
+        isSettingsPanelShown = $bindable(),
+        restorePreviousSolutionCallback,
+        unloadPreviousSolutionCallback
     }: {
         problemId: string | undefined,
         executingState: IntermediateStatus | TerminalStatus | undefined,
         executeCallback: () => Promise<void>,
         submitCallback: () => Promise<void>,
         registerAndSelectLayout: (layoutId: string) => Promise<void>,
+        restorePreviousSolutionCallback: (solutionId: string) => Promise<void>
         isSettingsPanelShown: boolean;
+        unloadPreviousSolutionCallback: (() => void)
     } = $props();
 
+
+    let currentlyLoadedSolution: string | undefined = $state();
 
     const toggleSettingsPanel = (): void => {
         isSettingsPanelShown = true;
@@ -77,7 +83,7 @@
                 <LayoutSelector bind:isVisible={isLayoutSelectionVisible} {registerAndSelectLayout}/>
             {/if}
             {#if isPreviousAttemptOverlayVisible}
-                <PreviousSolutionsPanel {problemId} bind:isVisible={isPreviousAttemptOverlayVisible} restorePreviousSolutionCallback={async () => {}}/>
+                <PreviousSolutionsPanel {problemId} bind:isVisible={isPreviousAttemptOverlayVisible} bind:currentlyLoadedSolution {restorePreviousSolutionCallback} {unloadPreviousSolutionCallback}/>
             {/if}
         
             <button

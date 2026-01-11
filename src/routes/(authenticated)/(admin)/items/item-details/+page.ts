@@ -6,5 +6,5 @@ export const load: PageLoad = async ({ url, fetch }): Promise<StandardResponseDt
     const itemId: string = url.searchParams.get('itemId') ?? "";
     return await FetchFromApi<FullItemDetailsDto>("admin/item/detail", {
         method: "GET"
-    }, fetch, new URLSearchParams({ itemId: itemId }));
+    }, fetch, new URLSearchParams({ itemId: itemId }));;
 };

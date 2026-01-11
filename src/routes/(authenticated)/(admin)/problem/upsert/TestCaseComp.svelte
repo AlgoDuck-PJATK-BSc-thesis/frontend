@@ -160,7 +160,7 @@
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Public</span>
                     <ToolTip options={{ tip: "Public test cases are visible to users before submission" }}/>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer group">
+                <label class="flex items-center gap-2 cursor-pointer grow justify-start group">
                     <input type="checkbox" bind:checked={testCase.orderMatters}
                         class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Order Matters</span>

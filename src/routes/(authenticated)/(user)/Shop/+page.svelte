@@ -20,6 +20,11 @@
 
 	let contentRect: DOMRect | undefined = $state();
 
+	let primarySpriteName: Record<ItemType, string> = {
+		"duck": "Sprite.png",
+		"plant": "Day.png"
+	}
+
 	let isDuckButtonPressed: boolean = $state(false);
 	let isFlowerButtonPressed: boolean = $state(false);
 
@@ -66,21 +71,21 @@
 			.end();
 	};
 
-	let selectedTab: ItemType = $state("Duck");
+	let selectedTab: ItemType = $state("duck");
 	let tabs: Record<ItemType, { component: Component<{options: ShopPageArgs}>, options: ShopPageArgs }> = $state({
-		"Duck": {
+		"duck": {
 			component: ItemPager,
 			options: {
-				itemType: "Duck",
+				itemType: "duck",
 				endpoint: "item/duck",
 				itemDisplay: DuckDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
 		},
-		"Plant": {
+		"plant": {
 			component: ItemPager,
 			options: {
-				itemType: "Plant",
+				itemType: "plant",
 				endpoint: "item/plant",
 				itemDisplay: PlantDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
@@ -88,8 +93,8 @@
 		}
 	});
 
-	let CurrentTabComp: Component<{ options: ShopPageArgs }> = $derived(tabs[selectedTab].component ?? tabs["Duck"].component);
-	let CurrentTabOptions: ShopPageArgs = $derived(tabs[selectedTab].options ?? tabs["Duck"].options);
+	let CurrentTabComp: Component<{ options: ShopPageArgs }> = $derived(tabs[selectedTab].component ?? tabs["duck"].component);
+	let CurrentTabOptions: ShopPageArgs = $derived(tabs[selectedTab].options ?? tabs["duck"].options);
 
 	let chatWindowContents: ChatMessageEntry[] = $state([]);
 
@@ -281,7 +286,7 @@
 				}}
 				onmouseup={() => {
 					isDuckButtonPressed = false;
-					selectedTab = 'Duck';
+					selectedTab = 'duck';
 				}}
 				class="h-full">
 					<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
@@ -291,7 +296,7 @@
 				}}
 				onmouseup={() => {
 					isFlowerButtonPressed = false;
-					selectedTab = 'Plant';
+					selectedTab = 'plant';
 				}}
 				class="h-full">
 					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
@@ -325,7 +330,7 @@
 						raf = requestAnimationFrame(animate);
 						return () => cancelAnimationFrame(raf);
 					}}>
-					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}/Sprite.png`} cls="max-h-full" />
+					<CloudfrontImage path={`${selectedTab}/${currentlySelectedItem.itemId}/${primarySpriteName[selectedTab]}`} cls="max-h-full" />
 				</div>
 			{/if}
 		</div>

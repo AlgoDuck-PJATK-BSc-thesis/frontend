@@ -72,19 +72,19 @@ export const getGridDimensions = (containerDims: ObjectDims2d): GridDimensions =
 	};
 };
 
-export const drawGrid = (canvas: HTMLCanvasElement, strokeStyle: string = 'rgba(55, 65, 81, 0.5)', lineWidth: number = 1): void => {
+export const drawGrid = (canvas: HTMLCanvasElement, strokeStyle: string = 'rgba(55, 65, 81, 0.5)', lineWidth: number = 1, gridDimensions: ObjectDims2d = { width: GRID_COLUMNS, height: GRID_ROWS}): void => {
 	const ctx = canvas.getContext('2d');
 	if (!ctx) return;
 
 	const { width, height } = canvas;
-	const cellWidth = width / GRID_COLUMNS;
-	const cellHeight = height / GRID_ROWS;
+	const cellWidth = width / gridDimensions.width;
+	const cellHeight = height / gridDimensions.height;
 
 	ctx.clearRect(0, 0, width, height);
 	ctx.strokeStyle = strokeStyle;
 	ctx.lineWidth = lineWidth;
 
-	for (let i = 0; i <= GRID_COLUMNS; i++) {
+	for (let i = 0; i <= gridDimensions.width; i++) {
 		const x = Math.floor(i * cellWidth) + 0.5;
 		ctx.beginPath();
 		ctx.moveTo(x, 0);
@@ -92,7 +92,7 @@ export const drawGrid = (canvas: HTMLCanvasElement, strokeStyle: string = 'rgba(
 		ctx.stroke();
 	}
 
-	for (let i = 0; i <= GRID_ROWS; i++) {
+	for (let i = 0; i <= gridDimensions.height; i++) {
 		const y = Math.floor(i * cellHeight) + 0.5;
 		ctx.beginPath();
 		ctx.moveTo(0, y);

@@ -1,90 +1,52 @@
 <script lang="ts">
-	import { GRID_COLUMNS, GRID_ROWS } from "../../../(user)/home/refactor/constants";
-	import type { PlantData } from "./ItemDetailsTypes";
+    import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
+    import type { PlantData } from "./ItemDetailsTypes";
 
-    let { itemData }: { itemData: PlantData } = $props();
-
-    let canvas: HTMLCanvasElement | undefined = $state();
-    let container: HTMLDivElement | undefined = $state();
-    let containerWidth = $state(0);
-
-    let cellWidth = $derived(containerWidth / GRID_COLUMNS);
-    let containerHeight = $derived(cellWidth * GRID_ROWS);
-
-    $effect(() => {
-        if (!container) return;
-
-        const observer = new ResizeObserver((entries) => {
-            containerWidth = entries[0].contentRect.width;
-        });
-
-        observer.observe(container);
-        return () => observer.disconnect();
-    });
-
-    $effect(() => {
-        if (!canvas || !containerWidth) return;
-        drawGrid(canvas);
-    });
-
-    const drawGrid = (canvas: HTMLCanvasElement) => {
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.beginPath();
-        ctx.strokeStyle = '#ff0000';
-        ctx.lineWidth = 1;
-
-        for (let col = 0; col <= GRID_COLUMNS; col++) {
-            const x = col * cellWidth;
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, containerHeight);
-        }
-
-        for (let row = 0; row <= GRID_ROWS; row++) {
-            const y = row * cellWidth;
-            ctx.moveTo(0, y);
-            ctx.lineTo(containerWidth, y);
-        }
-
-        ctx.stroke();
-
-        if (itemData.width && itemData.height) {
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-            for (let col = 0; col < itemData.width && col < GRID_COLUMNS; col++) {
-                for (let row = 0; row < itemData.height && row < GRID_ROWS; row++) {
-                    ctx.fillRect(col * cellWidth, row * cellWidth, cellWidth, cellWidth);
-                }
-            }
-        }
-    };
+    let { itemData, compact = false }: { itemData: PlantData; compact?: boolean } = $props();
 </script>
 
-<div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
-    <div class="flex items-center gap-2.5 px-4 py-3 bg-admin-bg-tertiary border-b border-admin-border-primary">
-        <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Plant Data</h3>
-    </div>
-    <div class="p-4 flex flex-col gap-4">
-        <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col gap-1">
-                <span class="text-xs text-admin-text-muted uppercase tracking-wider">Width</span>
-                <span class="text-lg font-medium text-admin-text-primary">{itemData.width} cells</span>
+{#if compact}
+    <div class="bg-admin-bg-secondary border border-admin-border-primary rounded-xl p-4">
+        <div class="text-[10px] uppercase tracking-wider text-admin-text-muted mb-3">Plant Properties</div>
+        <div class="flex items-center gap-3">
+            <div class="flex-1 p-3 bg-admin-bg-primary rounded-lg border border-admin-border-primary text-center">
+                <div class="text-lg font-semibold text-[#89d185] tabular-nums">{itemData.width}</div>
+                <div class="text-[10px] text-admin-text-muted uppercase tracking-wider mt-0.5">Width</div>
             </div>
-            <div class="flex flex-col gap-1">
-                <span class="text-xs text-admin-text-muted uppercase tracking-wider">Height</span>
-                <span class="text-lg font-medium text-admin-text-primary">{itemData.height} cells</span>
+            <CrossIconSvg options={{ class: 'w-5 h-5 stroke-[2] stroke-admin-text-muted' }}/>
+            <div class="flex-1 p-3 bg-admin-bg-primary rounded-lg border border-admin-border-primary text-center">
+                <div class="text-lg font-semibold text-[#89d185] tabular-nums">{itemData.height}</div>
+                <div class="text-[10px] text-admin-text-muted uppercase tracking-wider mt-0.5">Height</div>
             </div>
         </div>
-        <div bind:this={container} class="w-full">
-            <canvas
-                bind:this={canvas}
-                width={containerWidth}
-                height={containerHeight}
-                style:height="{containerHeight}px"
-                class="w-full rounded"
-            ></canvas>
+        <div class="mt-3 p-2 bg-admin-bg-primary rounded-lg border border-admin-border-primary">
+            <div 
+                class="grid gap-0.5 mx-auto"
+                style="grid-template-columns: repeat({itemData.width}, 1fr); max-width: {Math.min(itemData.width * 20, 100)}px;"
+            >
+                {#each Array(itemData.width * itemData.height) as _, i}
+                    <div class="aspect-square bg-[#89d185]/20 rounded-sm border border-[#89d185]/30"></div>
+                {/each}
+            </div>
+            <div class="text-[9px] text-admin-text-muted text-center mt-2">Grid footprint</div>
         </div>
     </div>
-</div>
+{:else}
+    <div class="bg-admin-bg-secondary border border-admin-border-primary rounded-xl overflow-hidden">
+        <div class="flex items-center gap-2.5 px-4 py-3 bg-admin-bg-tertiary border-b border-admin-border-primary">
+            <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Plant Properties</h3>
+        </div>
+        <div class="p-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1 p-3 bg-admin-bg-primary rounded-lg border border-admin-border-primary">
+                    <span class="text-xs text-admin-text-muted uppercase tracking-wider">Width</span>
+                    <span class="text-xl font-semibold text-[#89d185]">{itemData.width} tiles</span>
+                </div>
+                <div class="flex flex-col gap-1 p-3 bg-admin-bg-primary rounded-lg border border-admin-border-primary">
+                    <span class="text-xs text-admin-text-muted uppercase tracking-wider">Height</span>
+                    <span class="text-xl font-semibold text-[#89d185]">{itemData.height} tiles</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}

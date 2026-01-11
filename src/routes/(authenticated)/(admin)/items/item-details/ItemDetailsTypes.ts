@@ -2,19 +2,37 @@ export interface IItemTypeSpecificData {
     $type: ItemType;
 }
 
-export type ItemType = "duck" | "plant";
+export type ItemType = "Duck" | "Plant";
 
 export interface DuckData extends IItemTypeSpecificData {
-    $type: "duck";
+    $type: "Duck";
 }
 
 export interface PlantData extends IItemTypeSpecificData {
-    $type: "plant";
+    $type: "Plant";
     width: number;
     height: number;
 }
 
-export type FullItemDetailsDto = {
+export interface ItemSpecificStatistics{
+    $type: ItemType,
+    ownedCount: number,
+    ownedByPercentageOfPopulation: number,
+    usedByCount: number,
+    usedByPercentageOfPopulation: number,
+}
+export interface DuckOwnershipStatistics extends ItemSpecificStatistics {
+    usedAsAvatar: number,
+    usedAsAvatarPercentageOfPopulation: number,
+    usedForPond: number
+    usedForPondPercentageOfPopulation: number
+}
+export interface PlantOwnershipStatistics extends ItemSpecificStatistics {
+    usedForPond: number
+    usedForPondPercentageOfPopulation: number
+}
+
+export type ItemDetailsCore = {
     itemId: string;
     itemName: string;
     itemDescription?: string;
@@ -23,44 +41,31 @@ export type FullItemDetailsDto = {
     purchases: number;
     price: number;
     itemType: ItemType;
+}
+
+export type TimeSeriesGranularity = "month" | "day"
+
+export type ItemPurchaseTimeseriesData = {
+    granularity: TimeSeriesGranularity,
+    startDate: Date,
+    buckets: TimeseriesBucket[]
+}
+
+export type TimeseriesBucket = {
+    label: string,
+    value: number
+}
+
+export type FullItemDetailsDto = {
+    itemDetailsCore: ItemDetailsCore,
+    spriteList: string[];
     itemTypeSpecificData: IItemTypeSpecificData;
+    itemSpecificStatistics: ItemSpecificStatistics,
+    timeseriesData: ItemPurchaseTimeseriesData
 };
 
 export type SpriteInfo = {
     key: string;
     label: string;
     url: string;
-};
-
-export const getSpriteConfigForType = (itemType: ItemType): { key: string; label: string }[] => {
-    switch (itemType) {
-        case "duck":
-            return [
-                { 
-                    key: "sprite",
-                    label: "Sprite" 
-                },
-                { 
-                    key: "idle", 
-                    label: "Idle" 
-                },
-                { 
-                    key: "swimming", 
-                    label: "Swimming" 
-                }
-            ];
-        case "plant":
-            return [
-                { 
-                    key: "day", 
-                    label: "Day" 
-                },
-                { 
-                    key: "night", 
-                    label: "Night" 
-                }
-            ];
-        default:
-            return [];
-    }
 };

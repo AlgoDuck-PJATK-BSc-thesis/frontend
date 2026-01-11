@@ -24,7 +24,7 @@
             </div>
         {/if}
         
-        <img src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${options.itemId}.png`} alt={options.description}
+        <img src={`https://d3018wbyyxg1xc.cloudfront.net/plant/${options.itemId}/Day.png`} alt={options.description}
             class="relative z-10 max-h-[60%] max-w-full object-contain drop-shadow-lg transition-all duration-300">        
         <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 h-[15%] max-h-[20%] min-h-[10%] min-w-[20%] to-yellow-500 rounded-full shadow-lg transition-all duration-300 flex items-center gap-[10%] px-[4%] py-[1%] {isHovered ? "opacity-100" : "opacity-0 translate-y-2"}">
             <span class="text-white text-sm font-bold drop-shadow">{options.price}</span> 

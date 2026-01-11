@@ -49,7 +49,7 @@
 	class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-white text-black border-2"
 >
     <Comp options={compOptions}/>
-	<p class="flex-1 text-sm font-medium">{toast.message}</p>
+	<p class="flex-1 text-sm font-medium whitespace-pre">{toast.message}</p>
 	<button
 		onclick={() => onRemove(toast.id)}
 		class="text-xl hover:bg-black/10 transition-colors ease-out duration-250 p-2 rounded-[25%]"

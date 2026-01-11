@@ -39,7 +39,7 @@
         let res = await FetchFromApi<CustomPageData<ProblemDto>>("ProblemDetailsAdmin", {
             method: "GET"
         }, fetch, params);
-        queryClient.setQueryData(["column", "PageData", pageParam, orderByCapture], {
+        queryClient.setQueryData(["column", "problem", "PageData", pageParam, orderByCapture], {
             currPage: res.body.currPage,
             pageSize: res.body.pageSize,
             totalItems: res.body.totalItems,
@@ -49,7 +49,7 @@
 
         colsNeeded.forEach((col) => {
             const colValues: Record<string, Partial<ProblemDto>> = Object.fromEntries(res.body.items.map(i => [i.problemId, { [col]: i[col] }]))
-            queryClient.setQueryData(["column", col, pageParam, orderByCapture], colValues)
+            queryClient.setQueryData(["column", "problem", col, pageParam, orderByCapture], colValues)
         })
 
 
@@ -58,14 +58,14 @@
     }
 
     const itemQuery = $derived(createInfiniteQuery({
-        queryKey: ["all", "columns", orderBy],
+        queryKey: ["all", "problem", "columns", orderBy],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
             const orderByCapture: string = orderBy ?? "None";
             const columnPickerCapture: Record<QueryableColumn, boolean> = columnPicker;
 
             const selectedCols: QueryableColumn[] = Object.entries(columnPickerCapture).filter(([k, v]) => v).map(([k, v]) => k as QueryableColumn);
-            const cachedCols: QueryableColumn[] = selectedCols.filter(c => queryClient.getQueryData(["column", c, pageParam, orderByCapture]))
+            const cachedCols: QueryableColumn[] = selectedCols.filter(c => queryClient.getQueryData(["column", "problem", c, pageParam, orderByCapture]))
             const colsNeeded: QueryableColumn[] = selectedCols.filter(col => !cachedCols.includes(col))
 
             if (cachedCols.length === 0){
@@ -76,7 +76,7 @@
                 let itemData: Record<string, Partial<ProblemDto>> | undefined;
 
                 selectedCols.forEach(col => {
-                    const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
+                    const currentRow = queryClient.getQueryData(["column", "problem", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
                     if (!itemData){
                         itemData = { ...currentRow };
                         return;
@@ -91,7 +91,7 @@
                 return {
                     message: "Success",
                     body:{
-                        ...queryClient.getQueryData(["column", "PageData", pageParam, orderByCapture]) as Partial<CustomPageData<ProblemDto>>,
+                        ...queryClient.getQueryData(["column", "problem", "PageData", pageParam, orderByCapture]) as Partial<CustomPageData<ProblemDto>>,
                         items: Object.values(itemData!)
                     }
                 } as StandardResponseDto<CustomPageData<ProblemDto>>
@@ -101,7 +101,7 @@
             let res = await fetchAndUpdateCache(colsNeeded, orderByCapture, pageParam);
             
             cachedCols.forEach((col) => {
-                const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
+                const currentRow = queryClient.getQueryData(["column", "problem", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
                 Object.entries(currentRow).forEach(([k, v]) => {
                     const item: number = res.body.items.findIndex(i => i.problemId === k)
                     if (item === -1) return;
@@ -219,7 +219,9 @@
                     <div class="w-0"></div>
                 </div>
                 <button onclick={() => isPreferencesShown = !isPreferencesShown} class="w-9 h-5 flex justify-center item-center relative">
-                    <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    <div class="w-full h-full hover:cursor-pointer">
+                        <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    </div>
                     {#if isPreferencesShown}                        
                         <div class="absolute top-7 -right-2">
                             <ColumnSelectDialog columnPicker={$state.snapshot(columnPicker)} bind:isVisible={isPreferencesShown} {updateColumnSelection}/>

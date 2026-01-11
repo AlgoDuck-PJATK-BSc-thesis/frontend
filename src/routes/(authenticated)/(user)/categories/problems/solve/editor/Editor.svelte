@@ -6,9 +6,12 @@
 	import ComponentTreeRenderer from "$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte";
 	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import CreationModal from "./CreationModal.svelte";
-	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
+	import { ApiError, FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
 	import ToolTip from "../../../../../(admin)/problem/upsert/ToolTip.svelte";
 	import type { LayoutCreationResultDto } from "./EditorEditorTypes";
+	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
+	import { useQueryClient } from "@tanstack/svelte-query";
 
 	type Coords = { x: number; y: number };
 
@@ -571,18 +574,34 @@
 		component: ComponentConfig<any>,
 		isPlaced?: boolean 
 	}
+
+
+	const queryClient = useQueryClient();
+
 	let creationModalArgs = $state({ 
 		isVisible: false,
 		onclick: async (layoutName: string): Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> => {
 		let treeSerialized: string | undefined = serializeTree();
 		if (!treeSerialized) return;
-		return await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
-			method: "POST",
-			body: JSON.stringify({
-				layoutContent: treeSerialized,
-				layoutName: layoutName
-			})
-		});
+
+		try{
+			let res = await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
+				method: "POST",
+				body: JSON.stringify({
+					layoutContent: treeSerialized,
+					layoutName: layoutName
+				})
+			});
+
+			queryClient.invalidateQueries({queryKey: [ "custom-layout" ]})
+			creationModalArgs.isVisible = false;
+			history.back();
+			return res;
+		}catch(err){
+			if (err instanceof ApiError){
+				toast.error(err.response.body ?? "could not create layout");
+			}
+		}
 	}})
 </script>
 
@@ -606,12 +625,12 @@
 				<button 
 					onclick={() => isLayoutHarmonicaExpanded = !isLayoutHarmonicaExpanded} 
 					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
-					<div class="flex flex-row gap-3">
+					<div class="flex flex-row grow gap-3">
 						<span class="text-sm font-medium text-ide-text-secondary">Layout</span>
-						<ToolTip options={{ tip: "These components contain hold the useful stuff in an arranged way"}}/>	
+						<ToolTip options={{ tip: "These components \nhold the useful stuff \nin an arranged way \nclick to rotate \ndrop to emplace"}}/>	
 					</div>
 					<div class="h-3 w-3 transition-transform duration-150 ease-out {isLayoutHarmonicaExpanded ? 'rotate-90' : ''}">
-						<ChevronIconSvg options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
+						<ChevronIconSvgNew options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
 					</div>
 				</button>
 				
@@ -652,12 +671,12 @@
 			<div class="border-b border-ide-accent/10">
 				<button onclick={() => isContentHarmonicaExpanded = !isContentHarmonicaExpanded} 
 					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
-					<div class="flex flex-row gap-3">
+					<div class="flex flex-row gap-3 grow">
 						<span class="text-sm font-medium text-ide-text-secondary">Content</span>
-						<ToolTip options={{ tip: "These components contain the useful stuff" }}/>	
+						<ToolTip options={{ tip: "These components \ncontain the useful \nstuff. Drop inside \nthe layout components" }}/>	
 					</div>
 					<div class="h-3 w-3 transition-transform duration-150 ease-out {isContentHarmonicaExpanded ? 'rotate-90' : ''}">
-						<ChevronIconSvg options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
+						<ChevronIconSvgNew options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
 					</div>
 				</button>
 				

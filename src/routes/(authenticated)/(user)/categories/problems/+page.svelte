@@ -182,7 +182,7 @@
 						</div>
 						<h3 class="text-xl font-semibold text-ide-text-primary">{problem.title}</h3>
 						<p class="line-clamp-2 overflow-hidden text-start text-ide-text-secondary">
-							Lorem ipsum dolor sit amet consectetur adipisicing elit.
+							{@html problem.description}
 						</p>
 						{#if problem.tags.length > 0}
 							<div class="mt-2 flex flex-wrap gap-1">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { clickOutside } from "$lib/actions/clickOutside";
-	import { FetchFromApi } from "$lib/api/apiCall";
+	import { ApiError, FetchFromApi } from "$lib/api/apiCall";
 	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
 	import { userEditorPreferences } from "$lib/stores/theme.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
@@ -21,6 +21,7 @@
 	let tabbedSlider: HTMLDivElement;
 	let tabbedTimeout: NodeJS.Timeout | undefined;
 	
+
 	const setLayout = async (layoutId: string) => {
 		try{
 			let res = await FetchFromApi<LayoutDto>(`user/layout/details?layoutId=${layoutId}`, {
@@ -28,9 +29,13 @@
 			});
 			userEditorPreferences.layout = res.body; 
 		}catch(err){
-			toast.error("Could not load layout");
+			if (err instanceof ApiError) {
+				console.log(err.status);          
+				toast.error("Could not find layout template");
+			} else {
+				toast.error("Could not load layout");
+			}	
 		}
-		// userEditorPreferences.layout = layout;
 	}
 
 	const animateDefaultIn = () => {
@@ -119,7 +124,7 @@
 					{@render TabEnjoyer(layout)}
 				{:else}
 					<button onclick={async () => {
-						await registerAndSelectLayout(layout.layoutId);
+						await setLayout(layout.layoutId);
 					}} class="w-full hover:bg-ide-text/10 duration-300 ease-out transition-colors h-28 flex flex-col justify-end gap-0.5 p-0.5">
 						<div class="w-full h-full hover:cursor-pointer bg-ide-card border border-ide-accent/50 focus:outline-none focus:ring-2 focus:ring-ide-accent rounded flex flex-row gap-0.5"></div>
 						<div class="relative w-full">

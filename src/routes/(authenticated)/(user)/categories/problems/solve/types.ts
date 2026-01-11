@@ -12,6 +12,7 @@ export type ProblemListPageLoadArg = {
 export type ProblemDisplayDto = {
     problemId: string, 
     title: string,
+    description: string,
     difficulty: DifficultyDto,
     tags: TagDto[],
     attemptedAt?: Date;
@@ -28,8 +29,13 @@ type DifficultyDto = {
 
 export type EditorConfigData = {
     fontSize: number,
-    themeName: EditorThemeName,
+    theme: EditorThemeDto,
     layout: LayoutDto /* Record<string, any> would probably suffice but... */
+}
+
+export type EditorThemeDto = {
+    themeId: string,
+    themeName: string
 }
 
 export type LayoutDto = {
