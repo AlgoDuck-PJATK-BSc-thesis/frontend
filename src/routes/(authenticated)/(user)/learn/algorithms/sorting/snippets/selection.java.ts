@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Selection Sort',
-	what: 'Selects the minimum remaining element and swaps it into position.',
+	what: 'Selects the smallest remaining element and swaps it into the next position. It always does O(n^2) comparisons, but makes only O(n) swaps.',
 	when: ['Small arrays', 'When swaps are expensive and comparisons are cheap'],
 	avoid: ['Large datasets'],
 	time: { best: 'O(n^2)', avg: 'O(n^2)', worst: 'O(n^2)' },

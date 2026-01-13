@@ -16,8 +16,10 @@
 
 <div class="space-y-4">
 	<div class="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-		<div class="text-lg font-bold text-white">{meta.title}</div>
-		<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">{meta.what}</p>
+		<!-- <div class="text-lg font-bold text-white">{meta.title}</div> -->
+		<p class="text mt-2 font-semibold text-[color:var(--color-landingpage-subtitle)]">
+			{meta.what}
+		</p>
 
 		<div class="mt-4 grid gap-4 md:grid-cols-2">
 			<div class="space-y-2">
@@ -61,9 +63,11 @@
 		</div>
 	</div>
 
-	<div class="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+	<div class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
 		<div class="mb-3 text-sm font-semibold text-white">Java Implementation</div>
-		<div class="overflow-x-auto text-sm text-slate-200">
+		<div
+			class="overflow-x-auto text-sm text-slate-200 [&_pre]:m-0 [&_pre]:w-max [&_pre]:min-w-full [&_pre]:rounded-xl [&_pre]:bg-slate-900/60 [&_pre]:p-5"
+		>
 			{@html highlightJava(java)}
 		</div>
 	</div>

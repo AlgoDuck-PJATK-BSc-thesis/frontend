@@ -10,12 +10,12 @@
 	import HeapSort from './algorithms/HeapSort.svelte';
 
 	const tabs = [
-		{ id: 'bubble', label: 'Bubble' },
-		{ id: 'selection', label: 'Selection' },
-		{ id: 'insertion', label: 'Insertion' },
-		{ id: 'merge', label: 'Merge' },
-		{ id: 'quick', label: 'Quick' },
-		{ id: 'heap', label: 'Heap' }
+		{ id: 'bubble', label: 'Bubble Sort' },
+		{ id: 'selection', label: 'Selection Sort' },
+		{ id: 'insertion', label: 'Insertion Sort' },
+		{ id: 'merge', label: 'Merge Sort' },
+		{ id: 'quick', label: 'Quick Sort' },
+		{ id: 'heap', label: 'Heap Sort' }
 	];
 
 	let active = $state('bubble');
@@ -24,10 +24,7 @@
 <div class="min-h-screen px-4 py-10 md:px-8">
 	<div class="mx-auto max-w-6xl space-y-10">
 		<section class="space-y-8 rounded-3xl px-6 py-8 md:px-10 md:py-10">
-			<Title
-				title="SORTING"
-				subtitle="Visualize how arrays are rearranged and compare time/space tradeoffs."
-			/>
+			<Title title="SORTING ALGORITHMS" subtitle="" />
 			<Tabs {tabs} {active} onChange={(id) => (active = id)} />
 		</section>
 

@@ -1,9 +1,9 @@
 export const meta = {
 	title: 'Max Heap',
-	what: 'A complete binary tree where every parent is >= its children. Great for priority queues and fast max extraction.',
-	when: ['Need repeated max extraction', 'Implement priority queue', 'Heap sort / scheduling'],
+	what: 'A max heap is a complete binary tree stored in an array where every parent is greater than or equal to its children. Insert appends at the end and bubbles up. Extract-max removes the root by moving the last element to the top and pushing it down until the heap property is restored.',
+	when: ['Need repeated max extraction', 'Implement priority queue', 'Scheduling / heap sort'],
 	avoid: ['Need ordered iteration', 'Need fast lookup of arbitrary values'],
-	time: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)' },
+	time: { best: 'peek O(1)', avg: 'insert/extract O(log n)', worst: 'insert/extract O(log n)' },
 	space: 'O(n)',
 	flags: { root: 'max' }
 };
@@ -12,9 +12,33 @@ export const java = `public class MaxHeap {
     private int[] heap;
     private int size;
 
-    public MaxHeap(int capacity) {
-        heap = new int[capacity];
+    public MaxHeap() {
+        reset();
+    }
+
+    public void reset() {
+        heap = new int[8];
         size = 0;
+        insert(100);
+        insert(70);
+        insert(90);
+        insert(40);
+        insert(30);
+        insert(60);
+        insert(80);
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private void ensureCapacity(int needed) {
+        if (needed <= heap.length) return;
+        int newCap = heap.length * 2;
+        while (newCap < needed) newCap *= 2;
+        int[] next = new int[newCap];
+        System.arraycopy(heap, 0, next, 0, size);
+        heap = next;
     }
 
     private int parent(int i) { return (i - 1) / 2; }
@@ -28,7 +52,7 @@ export const java = `public class MaxHeap {
     }
 
     public void insert(int value) {
-        if (size == heap.length) throw new RuntimeException("Heap full");
+        ensureCapacity(size + 1);
         heap[size] = value;
         int i = size;
         size++;
@@ -39,21 +63,25 @@ export const java = `public class MaxHeap {
         }
     }
 
-    public int peek() {
-        if (size == 0) throw new RuntimeException("Heap empty");
+    public Integer peek() {
+        if (size == 0) return null;
         return heap[0];
     }
 
-    public int extractMax() {
-        if (size == 0) throw new RuntimeException("Heap empty");
+    public Integer extractMax() {
+        if (size == 0) return null;
+        if (size == 1) {
+            size = 0;
+            return heap[0];
+        }
         int max = heap[0];
         heap[0] = heap[size - 1];
         size--;
-        heapify(0);
+        heapifyDown(0);
         return max;
     }
 
-    private void heapify(int i) {
+    private void heapifyDown(int i) {
         while (true) {
             int l = left(i);
             int r = right(i);

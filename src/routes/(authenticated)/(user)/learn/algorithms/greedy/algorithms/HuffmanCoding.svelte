@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PixelFrameSimple from './../../../../../../../lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import { onDestroy } from 'svelte';
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
@@ -68,7 +69,7 @@
 			return nodes
 				.map((n) => ({
 					id: n.id,
-					label: n.ch ? `${n.ch}` : '•',
+					label: n.ch ? `${n.ch}` : 'Merge',
 					freq: n.freq
 				}))
 				.sort((a, b) => a.freq - b.freq);
@@ -97,7 +98,7 @@
 				pool: poolSnap,
 				pickA: a.id,
 				pickB: b.id,
-				result: { id: parent.id, label: '•', freq: parent.freq },
+				result: { id: parent.id, label: 'Merge', freq: parent.freq },
 				done: false
 			});
 		}
@@ -161,79 +162,88 @@
 	}
 </script>
 
-<div class="grid gap-6 md:grid-cols-2">
-	<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-		<div class="text-lg font-bold text-white">Huffman Coding</div>
-		<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
-			Build an optimal prefix-free code by repeatedly combining the two lowest-frequency nodes.
-		</div>
-
-		<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-			<div class="flex flex-wrap items-center justify-center gap-3">
-				<button
-					type="button"
-					onclick={run}
-					disabled={running}
-					class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
-				>
-					<Icons name="play" />
-					<span>Run</span>
-				</button>
-
-				<button
-					type="button"
-					onclick={reset}
-					class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
-				>
-					<Icons name="reset" />
-					<span>Reset</span>
-				</button>
+<PixelFrameSimple
+	className="w-full px-4 pr-8 py-8 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+>
+	<div class="grid gap-6 md:grid-cols-2">
+		<div class="rounded-3xl p-6">
+			<div class="text-lg font-bold text-white">Huffman Coding</div>
+			<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
+				Build an optimal prefix-free code by repeatedly combining the two lowest-frequency nodes.
 			</div>
 
-			<div class="mt-6">
-				<div class="text-center text-xs font-semibold tracking-wider text-white/70 uppercase">
-					Priority Queue
+			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+				<div class="flex flex-wrap items-center justify-center gap-3">
+					<button
+						type="button"
+						onclick={run}
+						disabled={running}
+						class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
+					>
+						<Icons name="play" />
+						<span>Run</span>
+					</button>
+
+					<button
+						type="button"
+						onclick={reset}
+						class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="reset" />
+						<span>Reset</span>
+					</button>
 				</div>
 
-				<div class="mt-3 flex flex-wrap justify-center gap-2">
-					{#each poolView.length > 0 ? poolView : input
-								.map((x, i) => ({ id: `seed${i}`, label: x.ch, freq: x.freq }))
-								.sort((a, b) => a.freq - b.freq) as p}
-						<div
-							class={['rounded-xl border px-3 py-2 text-sm text-slate-200', chipClass(p.id)].join(
-								' '
-							)}
-						>
-							<span class="font-semibold text-white">{p.label}</span>
-							<span class="ml-2 text-slate-300">{p.freq}</span>
-						</div>
-					{/each}
-				</div>
-
-				{#if pickA && pickB}
-					<div class="mt-5 text-center text-sm text-slate-200">Combine two smallest nodes</div>
-				{/if}
-
-				{#if Object.keys(codes).length > 0}
-					<div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-						<div class="text-center text-xs font-semibold tracking-wider text-white/70 uppercase">
-							Codes
-						</div>
-						<div class="mt-3 grid gap-2 sm:grid-cols-2">
-							{#each Object.entries(codes).sort((a, b) => a[0].localeCompare(b[0])) as [ch, code]}
-								<div class="rounded-xl border border-white/10 bg-slate-900/40 px-3 py-2">
-									<div class="flex items-center justify-between">
-										<div class="font-semibold text-white">{ch}</div>
-										<div class="font-mono text-sm text-purple-200">{code}</div>
-									</div>
-								</div>
-							{/each}
-						</div>
+				<div class="mt-6">
+					<div class="text-center text-xs font-semibold tracking-wider text-white/70 uppercase">
+						Priority Queue
 					</div>
-				{/if}
+
+					<div class="mt-2 text-center text-xs text-slate-300">
+						"Merge X" means an internal (combined) node with total frequency X. The number X is the
+						sum of its two children’s frequencies (the two nodes that were merged).
+					</div>
+
+					<div class="mt-3 flex flex-wrap justify-center gap-2">
+						{#each poolView.length > 0 ? poolView : input
+									.map((x, i) => ({ id: `seed${i}`, label: x.ch, freq: x.freq }))
+									.sort((a, b) => a.freq - b.freq) as p}
+							<div
+								class={['rounded-xl border px-3 py-2 text-sm text-slate-200', chipClass(p.id)].join(
+									' '
+								)}
+							>
+								<span class="font-semibold text-white">{p.label}</span>
+								<span class="ml-2 text-slate-300">{p.freq}</span>
+							</div>
+						{/each}
+					</div>
+
+					{#if pickA && pickB}
+						<div class="mt-5 text-center text-sm text-slate-200">Combine two smallest nodes</div>
+					{/if}
+
+					{#if Object.keys(codes).length > 0}
+						<div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+							<div class="text-center text-xs font-semibold tracking-wider text-white/70 uppercase">
+								Codes
+							</div>
+							<div class="mt-3 grid gap-2 sm:grid-cols-2">
+								{#each Object.entries(codes).sort((a, b) => a[0].localeCompare(b[0])) as [ch, code]}
+									<div class="rounded-xl border border-white/10 bg-slate-900/40 px-3 py-2">
+										<div class="flex items-center justify-between">
+											<div class="font-semibold text-white">{ch}</div>
+											<div class="font-mono text-sm text-purple-200">{code}</div>
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<CodePanel {meta} {java} />
-</div>
+		<CodePanel {meta} {java} />
+	</div>
+</PixelFrameSimple>

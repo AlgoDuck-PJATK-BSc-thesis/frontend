@@ -10,22 +10,27 @@ export const meta = {
 
 export const java = `public class JumpSearch {
     public static int search(int[] arr, int target) {
-        int n = arr.length;
-        int step = (int) Math.floor(Math.sqrt(n));
-        int prev = 0;
+        if (arr == null || arr.length == 0) return -1;
 
-        while (arr[Math.min(step, n) - 1] < target) {
-            prev = step;
-            step += (int) Math.floor(Math.sqrt(n));
+        int n = arr.length;
+        int step = (int)Math.floor(Math.sqrt(n));
+        if (step < 1) step = 1;
+
+        int prev = 0;
+        int next = step;
+
+        while (prev < n && arr[Math.min(next, n) - 1] < target) {
+            prev = next;
+            next += step;
             if (prev >= n) return -1;
         }
 
-        while (arr[prev] < target) {
+        int end = Math.min(next, n);
+        while (prev < end && arr[prev] < target) {
             prev++;
-            if (prev == Math.min(step, n)) return -1;
         }
 
-        if (arr[prev] == target) return prev;
+        if (prev < n && arr[prev] == target) return prev;
         return -1;
     }
 }`;

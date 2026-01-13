@@ -1,64 +1,67 @@
 export const meta = {
 	title: 'Activity Selection',
-	what: 'Select the maximum number of non-overlapping activities by always choosing the next activity that finishes earliest.',
+	what: 'You have activities with a start time and an end time, and you want to attend as many as possible without overlaps. Sort activities by end time, then scan from earliest finish to latest. Keep an activity if its start time is at least the end time of the last one you kept. This greedy choice works because finishing earlier leaves the most room for future activities.',
 	when: [
-		'You need the maximum count of compatible intervals',
-		'You can sort by finish time',
-		'Classic scheduling problems'
+		'You want the maximum number of non-overlapping intervals',
+		'Activities do not have values/weights (count is what matters)',
+		'Scheduling problems where each activity blocks its whole interval'
 	],
 	avoid: [
-		'You need maximum total value (weighted intervals)',
-		'Intervals have weights and you must optimize weight sum'
+		'Activities have profits/weights and you must maximize total profit (use weighted interval scheduling DP)'
 	],
-	time: { avg: 'O(n log n)', worst: 'O(n log n)' },
-	space: 'O(1)'
+	time: { avg: 'O(n^2) (simple sort) / O(n log n) (with fast sort)', worst: 'O(n^2)' },
+	space: 'O(n)'
 };
 
-export const java = `import java.util.*;
+export const java = `public class ActivitySelection {
+    public static int[] selectByEndTime(int[] id, int[] start, int[] end) {
+        int n = end.length;
+        if (n == 0) return new int[0];
 
-public class ActivitySelection {
-    static class Activity {
-        int start;
-        int end;
+        int[] ids = new int[n];
+        int[] s = new int[n];
+        int[] e = new int[n];
 
-        Activity(int start, int end) {
-            this.start = start;
-            this.end = end;
+        for (int i = 0; i < n; i++) {
+            ids[i] = id[i];
+            s[i] = start[i];
+            e[i] = end[i];
         }
-    }
 
-    public static List<Activity> selectActivities(Activity[] activities) {
-        Arrays.sort(activities, (a, b) -> a.end - b.end);
+        for (int i = 1; i < n; i++) {
+            int tid = ids[i];
+            int ts = s[i];
+            int te = e[i];
+            int j = i - 1;
 
-        List<Activity> selected = new ArrayList<>();
-        selected.add(activities[0]);
+            while (j >= 0 && e[j] > te) {
+                ids[j + 1] = ids[j];
+                s[j + 1] = s[j];
+                e[j + 1] = e[j];
+                j--;
+            }
 
-        int lastEnd = activities[0].end;
+            ids[j + 1] = tid;
+            s[j + 1] = ts;
+            e[j + 1] = te;
+        }
 
-        for (int i = 1; i < activities.length; i++) {
-            if (activities[i].start >= lastEnd) {
-                selected.add(activities[i]);
-                lastEnd = activities[i].end;
+        int[] out = new int[n];
+        int outSize = 0;
+
+        int lastEnd = -2147483648;
+
+        for (int i = 0; i < n; i++) {
+            if (s[i] >= lastEnd) {
+                out[outSize] = ids[i];
+                outSize++;
+                lastEnd = e[i];
             }
         }
 
-        return selected;
+        int[] res = new int[outSize];
+        for (int i = 0; i < outSize; i++) res[i] = out[i];
+        return res;
     }
-
-    public static void main(String[] args) {
-        Activity[] activities = {
-            new Activity(1, 3),
-            new Activity(2, 5),
-            new Activity(4, 7),
-            new Activity(1, 8),
-            new Activity(5, 9),
-            new Activity(8, 10)
-        };
-
-        List<Activity> selected = selectActivities(activities);
-
-        for (Activity a : selected) {
-            System.out.println(a.start + " " + a.end);
-        }
-    }
-}`;
+}
+`;

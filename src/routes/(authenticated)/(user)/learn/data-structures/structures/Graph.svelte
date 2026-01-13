@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import Icons from '../../_components/Icons.svelte';
 	import CodePanel from '../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/graph.java';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 
 	const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -22,8 +22,8 @@
 		B: ['A', 'C', 'E'],
 		C: ['B', 'F'],
 		D: ['A', 'E', 'G'],
-		E: ['B', 'D', 'H'],
-		F: ['C', 'H'],
+		E: ['B', 'D', 'F', 'H'],
+		F: ['C', 'E', 'H'],
 		G: ['D', 'H'],
 		H: ['E', 'F', 'G']
 	};
@@ -117,130 +117,138 @@
 		run(dfsOrder(start));
 	}
 
-	onDestroy(() => {
-		if (intervalId) clearInterval(intervalId);
+	$effect(() => {
+		return () => {
+			if (intervalId) clearInterval(intervalId);
+		};
 	});
 </script>
 
-<div class="grid gap-6 md:grid-cols-2">
-	<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-		<div class="text-xl font-black tracking-wide text-white">Graph</div>
-		<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
-			Run BFS/DFS and watch nodes get visited.
-		</p>
+<PixelFrameSimple
+	className="w-full px-10 pr-10 py-10 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+>
+	<div class="grid gap-6 md:grid-cols-2">
+		<div class="rounded-3xl p-6">
+			<div class="text-xl font-black tracking-wide text-white">Graph</div>
+			<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
+				Run Breadth-First Search (BFS) or Depth-First Search (DFS) and watch which nodes get
+				visited, in order.
+			</p>
 
-		<div class="mt-6 space-y-4 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-			<div class="flex items-end justify-between gap-3">
-				<div class="space-y-1">
-					<label
-						class="text-xs font-semibold tracking-wider text-white/70 uppercase"
-						for="graphStart"
-					>
-						Start node
-					</label>
-					<select
-						id="graphStart"
-						bind:value={start}
-						class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white"
-					>
-						{#each nodes as n}
-							<option value={n}>{n}</option>
-						{/each}
-					</select>
+			<div class="mt-6 space-y-4 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+				<div class="flex items-end justify-between gap-3">
+					<div class="space-y-1">
+						<label
+							class="text-xs font-semibold tracking-wider text-white/70 uppercase"
+							for="graphStart"
+						>
+							Start node
+						</label>
+						<select
+							id="graphStart"
+							bind:value={start}
+							disabled={running}
+							class="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white disabled:bg-gray-700"
+						>
+							{#each nodes as n (n)}
+								<option value={n}>{n}</option>
+							{/each}
+						</select>
+					</div>
+
+					<div class="flex flex-wrap items-center justify-end gap-2">
+						<button
+							type="button"
+							onclick={runBfs}
+							disabled={running}
+							class="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
+						>
+							<Icons name="play" />
+							<span>BFS</span>
+						</button>
+
+						<button
+							type="button"
+							onclick={runDfs}
+							disabled={running}
+							class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
+						>
+							<Icons name="play" />
+							<span>DFS</span>
+						</button>
+
+						<button
+							type="button"
+							onclick={reset}
+							class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
+						>
+							<Icons name="reset" />
+							<span>Reset</span>
+						</button>
+					</div>
 				</div>
 
-				<div class="flex flex-wrap items-center justify-end gap-2">
-					<button
-						type="button"
-						onclick={runBfs}
-						disabled={running}
-						class="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
-					>
-						<Icons name="play" />
-						<span>BFS</span>
-					</button>
-
-					<button
-						type="button"
-						onclick={runDfs}
-						disabled={running}
-						class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
-					>
-						<Icons name="play" />
-						<span>DFS</span>
-					</button>
-
-					<button
-						type="button"
-						onclick={reset}
-						class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
-					>
-						<Icons name="reset" />
-						<span>Reset</span>
-					</button>
-				</div>
-			</div>
-
-			<div class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4">
-				<svg width="620" height="420" viewBox="0 0 620 420" class="mx-auto">
-					{#each edges as [a, b]}
-						<line
-							x1={pos[a].x}
-							y1={pos[a].y}
-							x2={pos[b].x}
-							y2={pos[b].y}
-							stroke="currentColor"
-							stroke-opacity="0.35"
-							stroke-width="2"
-						/>
-					{/each}
-
-					{#each nodes as n}
-						<g>
-							<circle
-								cx={pos[n].x}
-								cy={pos[n].y}
-								r="28"
-								fill={visited.includes(n) ? 'rgba(34,211,238,0.85)' : 'rgba(8,145,178,0.55)'}
-								stroke="rgba(255,255,255,0.15)"
+				<div class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-4">
+					<svg width="620" height="420" viewBox="0 0 620 420" class="mx-auto">
+						{#each edges as [a, b] (a + '-' + b)}
+							<line
+								x1={pos[a].x}
+								y1={pos[a].y}
+								x2={pos[b].x}
+								y2={pos[b].y}
+								stroke="currentColor"
+								stroke-opacity="0.35"
 								stroke-width="2"
 							/>
-							<text
-								x={pos[n].x}
-								y={pos[n].y + 7}
-								text-anchor="middle"
-								fill="white"
-								font-size="18"
-								font-weight="900"
-							>
-								{n}
-							</text>
-						</g>
-					{/each}
-				</svg>
-			</div>
+						{/each}
 
-			<div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-				<div class="text-xs font-semibold tracking-wider text-white/70 uppercase">
-					Visited order
+						{#each nodes as n (n)}
+							<g>
+								<circle
+									cx={pos[n].x}
+									cy={pos[n].y}
+									r="28"
+									fill={visited.includes(n) ? 'rgba(34,211,238,0.85)' : 'rgba(8,145,178,0.55)'}
+									stroke="rgba(255,255,255,0.15)"
+									stroke-width="2"
+								/>
+								<text
+									x={pos[n].x}
+									y={pos[n].y + 7}
+									text-anchor="middle"
+									fill="white"
+									font-size="18"
+									font-weight="900"
+								>
+									{n}
+								</text>
+							</g>
+						{/each}
+					</svg>
 				</div>
-				<div class="mt-2 text-sm text-slate-200">
-					{visited.length ? visited.join(' → ') : 'Run BFS/DFS to see the visit order.'}
-				</div>
-			</div>
 
-			<div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-				<div class="text-xs font-semibold tracking-wider text-white/70 uppercase">
-					Adjacency list
+				<div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+					<div class="text-xs font-semibold tracking-wider text-white/70 uppercase">
+						Visited order
+					</div>
+					<div class="mt-2 text-sm text-slate-200">
+						{visited.length ? visited.join(' → ') : 'Run BFS/DFS to see the visit order.'}
+					</div>
 				</div>
-				<div class="mt-2 space-y-1 text-sm text-slate-200">
-					{#each Object.entries(adj) as [k, v]}
-						<div>{k} → [{v.join(', ')}]</div>
-					{/each}
+
+				<div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+					<div class="text-xs font-semibold tracking-wider text-white/70 uppercase">
+						Adjacency list
+					</div>
+					<div class="mt-2 space-y-1 text-sm text-slate-200">
+						{#each Object.entries(adj) as [k, v] (k)}
+							<div>{k} → [{v.join(', ')}]</div>
+						{/each}
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<CodePanel {meta} {java} />
-</div>
+		<CodePanel {meta} {java} />
+	</div>
+</PixelFrameSimple>

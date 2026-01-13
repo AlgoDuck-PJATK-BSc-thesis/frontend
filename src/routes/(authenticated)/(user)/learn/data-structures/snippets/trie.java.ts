@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Trie (Prefix Tree)',
-	what: 'Stores strings by shared prefixes. Fast search and prefix queries (autocomplete).',
+	what: 'A trie stores words by sharing common prefixes. Each node represents a prefix, and children represent the next character. This makes prefix checks fast: to test a prefix, you follow its characters down the tree. Autocomplete is “go to the prefix node, then list all words below it”.',
 	when: ['Autocomplete/search-as-you-type', 'Prefix filtering', 'Dictionary word lookups'],
 	avoid: ['Memory is tight (tries can be large)', 'You only need exact lookup with small sets'],
 	time: { best: 'O(L)', avg: 'O(L)', worst: 'O(L)' },
@@ -8,60 +8,130 @@ export const meta = {
 	flags: { L: 'word length', supportsPrefix: true }
 };
 
-export const java = `import java.util.*;
+export const java = `public class Trie {
+    static class Node {
+        Node[] next;
+        boolean end;
 
-class TrieNode {
-    Map<Character, TrieNode> next = new HashMap<>();
-    boolean end = false;
-}
+        Node() {
+            next = new Node[26];
+            end = false;
+        }
+    }
 
-public class Trie {
-    private final TrieNode root = new TrieNode();
+    private Node root;
+
+    public Trie() {
+        reset();
+    }
+
+    public void reset() {
+        root = new Node();
+        insert("cat");
+        insert("car");
+        insert("card");
+        insert("care");
+        insert("dog");
+        insert("dodge");
+    }
+
+    private int toIdx(char c) {
+        int x = c - 'a';
+        if (x < 0 || x >= 26) return -1;
+        return x;
+    }
 
     public void insert(String word) {
-        TrieNode cur = root;
-        for (char c : word.toCharArray()) {
-            cur.next.putIfAbsent(c, new TrieNode());
-            cur = cur.next.get(c);
+        if (word == null) return;
+        String w = word.trim().toLowerCase();
+        if (w.length() == 0) return;
+
+        Node cur = root;
+        for (int i = 0; i < w.length(); i++) {
+            int id = toIdx(w.charAt(i));
+            if (id == -1) return;
+            if (cur.next[id] == null) cur.next[id] = new Node();
+            cur = cur.next[id];
         }
         cur.end = true;
     }
 
     public boolean search(String word) {
-        TrieNode cur = root;
-        for (char c : word.toCharArray()) {
-            cur = cur.next.get(c);
-            if (cur == null) return false;
-        }
-        return cur.end;
+        Node cur = walk(word);
+        return cur != null && cur.end;
     }
 
     public boolean startsWith(String prefix) {
-        TrieNode cur = root;
-        for (char c : prefix.toCharArray()) {
-            cur = cur.next.get(c);
-            if (cur == null) return false;
-        }
-        return true;
+        return walk(prefix) != null;
     }
 
-    public List<String> autocomplete(String prefix) {
-        TrieNode cur = root;
-        for (char c : prefix.toCharArray()) {
-            cur = cur.next.get(c);
-            if (cur == null) return Collections.emptyList();
+    private Node walk(String s) {
+        if (s == null) return null;
+        String w = s.trim().toLowerCase();
+        if (w.length() == 0) return root;
+
+        Node cur = root;
+        for (int i = 0; i < w.length(); i++) {
+            int id = toIdx(w.charAt(i));
+            if (id == -1) return null;
+            cur = cur.next[id];
+            if (cur == null) return null;
         }
-        List<String> out = new ArrayList<>();
-        dfs(cur, new StringBuilder(prefix), out);
-        return out;
+        return cur;
     }
 
-    private void dfs(TrieNode node, StringBuilder sb, List<String> out) {
+    static class StringList {
+        private String[] a;
+        private int size;
+
+        StringList() {
+            a = new String[8];
+            size = 0;
+        }
+
+        void add(String s) {
+            if (size == a.length) {
+                String[] next = new String[a.length * 2];
+                System.arraycopy(a, 0, next, 0, size);
+                a = next;
+            }
+            a[size] = s;
+            size++;
+        }
+
+        String[] toArray() {
+            String[] out = new String[size];
+            System.arraycopy(a, 0, out, 0, size);
+            return out;
+        }
+    }
+
+    public String[] autocomplete(String prefix) {
+        if (prefix == null) return new String[0];
+        String p = prefix.trim().toLowerCase();
+
+        Node cur = root;
+        for (int i = 0; i < p.length(); i++) {
+            int id = toIdx(p.charAt(i));
+            if (id == -1) return new String[0];
+            cur = cur.next[id];
+            if (cur == null) return new String[0];
+        }
+
+        StringList out = new StringList();
+        StringBuilder sb = new StringBuilder(p);
+        dfs(cur, sb, out);
+        return out.toArray();
+    }
+
+    private void dfs(Node node, StringBuilder sb, StringList out) {
         if (node.end) out.add(sb.toString());
-        for (Map.Entry<Character, TrieNode> e : node.next.entrySet()) {
-            sb.append(e.getKey());
-            dfs(e.getValue(), sb, out);
-            sb.deleteCharAt(sb.length() - 1);
+        for (int i = 0; i < 26; i++) {
+            if (node.next[i] != null) {
+                sb.append((char)('a' + i));
+                dfs(node.next[i], sb, out);
+                sb.deleteCharAt(sb.length() - 1);
+            }
         }
     }
 }`;

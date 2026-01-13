@@ -1,29 +1,32 @@
 export const meta = {
 	title: '0/1 Knapsack',
-	what: 'Max value with capacity constraint where each item is used at most once.',
-	when: ['Pick items under a limit', 'Budget or weight-constrained selection'],
-	avoid: ['Fractions allowed (use fractional knapsack greedy)'],
-	time: { avg: 'O(nW)' },
-	space: 'O(nW)',
-	flags: { constraint: '0/1' }
+	what: 'Uses a grid where dp[i][w] is the best value using the first i items with capacity w. For each item, DP compares skipping it vs taking it (if it fits) and keeps the better value.',
+	when: ['Choose items under a capacity', 'Each item can be used once'],
+	avoid: ['Fractions allowed (different problem)'],
+	time: { worst: 'O(n * W)' },
+	space: 'O(n * W)',
+	flags: { constraint: '0/1', table: '2D DP' }
 };
 
 export const java = `public class Knapsack01 {
-    static class Item {
-        int w;
-        int v;
-        Item(int w, int v) { this.w = w; this.v = v; }
-    }
+    public static int solve(int[] weight, int[] value, int cap) {
+        if (cap < 0) return 0;
+        int n = weight.length;
+        if (value.length != n) return 0;
 
-    public static int solve(Item[] items, int cap) {
-        int n = items.length;
         int[][] dp = new int[n + 1][cap + 1];
 
         for (int i = 1; i <= n; i++) {
-            for (int c = 1; c <= cap; c++) {
-                Item it = items[i - 1];
-                if (it.w <= c) dp[i][c] = Math.max(it.v + dp[i - 1][c - it.w], dp[i - 1][c]);
-                else dp[i][c] = dp[i - 1][c];
+            int wi = weight[i - 1];
+            int vi = value[i - 1];
+            for (int w = 0; w <= cap; w++) {
+                int skip = dp[i - 1][w];
+                int take = skip;
+                if (wi <= w) {
+                    int cand = vi + dp[i - 1][w - wi];
+                    if (cand > take) take = cand;
+                }
+                dp[i][w] = take;
             }
         }
 

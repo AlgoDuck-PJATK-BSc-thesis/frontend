@@ -8,32 +8,32 @@
 	import JobSequencing from './algorithms/JobSequencing.svelte';
 
 	const tabs = [
-		{ id: 'activity', label: 'Activity Selection' },
-		{ id: 'fractional', label: 'Fractional Knapsack' },
-		{ id: 'huffman', label: 'Huffman Coding' },
-		{ id: 'jobs', label: 'Job Sequencing' }
+		{ id: 'activity-selection', label: 'Activity Selection' },
+		{ id: 'fractional-knapsack', label: 'Fractional Knapsack' },
+		{ id: 'huffman-coding', label: 'Huffman Coding' },
+		{ id: 'job-sequencing', label: 'Job Sequencing' }
 	];
 
-	let active = $state('activity');
+	let active = $state('activity-selection');
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 p-8">
+<div class="min-h-screen px-4 py-10 md:px-8">
 	<div class="mx-auto max-w-6xl space-y-10">
-		<Title
-			title="Greedy Algorithms"
-			subtitle="Make locally optimal choices that (sometimes) lead to globally optimal solutions. Great when the problem has a provable greedy-choice property."
-		/>
+		<section class="space-y-8 rounded-3xl px-6 py-8 md:px-10 md:py-10">
+			<Title title="GREEDY" subtitle="" />
+			<Tabs {tabs} {active} onChange={(id) => (active = id)} />
+		</section>
 
-		<Tabs {tabs} {active} onChange={(id) => (active = id)} />
-
-		{#if active === 'activity'}
-			<ActivitySelection />
-		{:else if active === 'fractional'}
-			<FractionalKnapsack />
-		{:else if active === 'huffman'}
-			<HuffmanCoding />
-		{:else}
-			<JobSequencing />
-		{/if}
+		<section class="rounded-3xl px-2 pb-10 md:px-0">
+			{#if active === 'activity-selection'}
+				<ActivitySelection />
+			{:else if active === 'fractional-knapsack'}
+				<FractionalKnapsack />
+			{:else if active === 'huffman-coding'}
+				<HuffmanCoding />
+			{:else}
+				<JobSequencing />
+			{/if}
+		</section>
 	</div>
 </div>

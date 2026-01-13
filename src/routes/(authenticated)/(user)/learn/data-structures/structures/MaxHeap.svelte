@@ -2,6 +2,7 @@
 	import Icons from '../../_components/Icons.svelte';
 	import CodePanel from '../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/max-heap.java';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 
 	type PositionedNode = { x: number; y: number; value: number; key: string };
 	type Edge = { fromX: number; fromY: number; toX: number; toY: number };
@@ -109,107 +110,111 @@
 	}
 </script>
 
-<div class="grid gap-6 md:grid-cols-2">
-	<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-		<div class="text-xl font-black tracking-wide text-white">Max Heap</div>
-		<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
-			Largest element at the root. Insert bubbles up, extract fixes down.
-		</p>
+<PixelFrameSimple
+	className="w-full px-4 pr-8 py-7 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+>
+	<div class="grid gap-6 md:grid-cols-2">
+		<div class="rounded-3xl p-6">
+			<div class="text-xl font-black tracking-wide text-white">Max Heap</div>
+			<p class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
+				Largest element at the root. Insert bubbles up, extract fixes down.
+			</p>
 
-		<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-			<div class="overflow-x-auto">
-				<svg
-					viewBox="0 0 920 520"
-					class="mx-auto h-[22rem] w-full min-w-[42rem]"
-					preserveAspectRatio="xMidYMin meet"
-				>
-					{#each edges as e}
-						<line
-							x1={e.fromX}
-							y1={e.fromY}
-							x2={e.toX}
-							y2={e.toY}
-							stroke="currentColor"
-							stroke-opacity="0.35"
-							stroke-width="2"
-						/>
-					{/each}
-
-					{#each nodes as n}
-						<g>
-							<circle
-								cx={n.x}
-								cy={n.y}
-								r="22"
-								fill="rgba(14,165,233,0.75)"
-								stroke="rgba(255,255,255,0.15)"
+			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+				<div class="overflow-x-auto">
+					<svg
+						viewBox="0 0 920 520"
+						class="mx-auto h-[22rem] w-full min-w-[42rem]"
+						preserveAspectRatio="xMidYMin meet"
+					>
+						{#each edges as e}
+							<line
+								x1={e.fromX}
+								y1={e.fromY}
+								x2={e.toX}
+								y2={e.toY}
+								stroke="currentColor"
+								stroke-opacity="0.35"
 								stroke-width="2"
 							/>
-							<text
-								x={n.x}
-								y={n.y + 6}
-								text-anchor="middle"
-								fill="white"
-								font-size="14"
-								font-weight="800"
-							>
-								{n.value}
-							</text>
-						</g>
-					{/each}
-				</svg>
-			</div>
+						{/each}
 
-			<div class="mt-3 text-center text-xs text-[color:var(--color-landingpage-subtitle)]">
-				Array: [{heap.join(', ')}]
-			</div>
-
-			<div class="mt-5 grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
-				<div class="space-y-1">
-					<label
-						class="text-xs font-semibold tracking-wider text-white/70 uppercase"
-						for="maxHeapValue"
-					>
-						Value
-					</label>
-					<input
-						id="maxHeapValue"
-						type="number"
-						bind:value={input}
-						class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white"
-						placeholder="e.g. 120"
-					/>
+						{#each nodes as n}
+							<g>
+								<circle
+									cx={n.x}
+									cy={n.y}
+									r="22"
+									fill="rgba(14,165,233,0.75)"
+									stroke="rgba(255,255,255,0.15)"
+									stroke-width="2"
+								/>
+								<text
+									x={n.x}
+									y={n.y + 6}
+									text-anchor="middle"
+									fill="white"
+									font-size="14"
+									font-weight="800"
+								>
+									{n.value}
+								</text>
+							</g>
+						{/each}
+					</svg>
 				</div>
 
-				<button
-					type="button"
-					onclick={insert}
-					class="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-5 py-2 font-semibold text-white"
-				>
-					<Icons name="plus" />
-					<span>Insert</span>
-				</button>
+				<div class="mt-3 text-center text-xs text-[color:var(--color-landingpage-subtitle)]">
+					Array: [{heap.join(', ')}]
+				</div>
 
-				<button
-					type="button"
-					onclick={extractMax}
-					class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2 font-semibold text-white"
-				>
-					<Icons name="minus" />
-					<span>Extract</span>
-				</button>
+				<div class="mt-5 grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
+					<div class="space-y-1">
+						<label
+							class="text-xs font-semibold tracking-wider text-white/70 uppercase"
+							for="maxHeapValue"
+						>
+							Value
+						</label>
+						<input
+							id="maxHeapValue"
+							type="number"
+							bind:value={input}
+							class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white"
+							placeholder="e.g. 120"
+						/>
+					</div>
 
-				<button
-					type="button"
-					onclick={reset}
-					class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
-				>
-					<Icons name="reset" />
-					<span>Reset</span>
-				</button>
+					<button
+						type="button"
+						onclick={insert}
+						class="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="plus" />
+						<span>Insert</span>
+					</button>
+
+					<button
+						type="button"
+						onclick={extractMax}
+						class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="minus" />
+						<span>Extract</span>
+					</button>
+
+					<button
+						type="button"
+						onclick={reset}
+						class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="reset" />
+						<span>Reset</span>
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<CodePanel {meta} {java} />
-</div>
+		<CodePanel {meta} {java} />
+	</div>
+</PixelFrameSimple>

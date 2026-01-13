@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Insertion Sort',
-	what: 'Builds a sorted prefix, inserting each new element into its correct place.',
+	what: 'Builds a sorted prefix, inserting each new element into its correct place by shifting larger elements right. It’s fast on nearly sorted data and works well for small arrays.',
 	when: ['Small arrays', 'Nearly sorted data', 'Online/incremental sorting'],
 	avoid: ['Large random datasets'],
 	time: { best: 'O(n)', avg: 'O(n^2)', worst: 'O(n^2)' },

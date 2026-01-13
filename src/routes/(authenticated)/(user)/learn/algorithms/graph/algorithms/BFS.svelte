@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PixelFrameSimple from './../../../../../../../lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import { onDestroy } from 'svelte';
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
@@ -110,80 +111,84 @@
 	});
 </script>
 
-<div class="grid gap-6 md:grid-cols-2">
-	<div class="rounded-3xl border border-white/10 bg-white/5 p-6">
-		<div class="text-lg font-bold text-white">Breadth-First Search (BFS)</div>
-		<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
-			Explores level by level using a queue. Great for shortest paths in unweighted graphs.
-		</div>
+<PixelFrameSimple
+	className="w-full px-4 pr-8 py-8 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+>
+	<div class="grid gap-6 md:grid-cols-2">
+		<div class="rounded-3xl p-6">
+			<div class="text-lg font-bold text-white">Breadth-First Search (BFS)</div>
+			<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
+				Explores level by level using a queue. Great for shortest paths in unweighted graphs.
+			</div>
 
-		<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-			<svg width="500" height="300" class="mx-auto">
-				{#each edges as e (e.a + e.b)}
-					<line
-						x1={positions[e.a].x}
-						y1={positions[e.a].y}
-						x2={positions[e.b].x}
-						y2={positions[e.b].y}
-						stroke="#4b5563"
-						stroke-width="2"
-					/>
-				{/each}
-
-				{#each Object.keys(positions) as n (n)}
-					<g>
-						<circle
-							cx={positions[n].x}
-							cy={positions[n].y}
-							r="22"
-							fill={visited.includes(n) ? '#10b981' : queue.includes(n) ? '#fbbf24' : '#3b82f6'}
-							stroke="#60a5fa"
+			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+				<svg width="500" height="300" class="mx-auto">
+					{#each edges as e (e.a + e.b)}
+						<line
+							x1={positions[e.a].x}
+							y1={positions[e.a].y}
+							x2={positions[e.b].x}
+							y2={positions[e.b].y}
+							stroke="#4b5563"
 							stroke-width="2"
 						/>
-						<text
-							x={positions[n].x}
-							y={positions[n].y + 6}
-							text-anchor="middle"
-							fill="white"
-							font-size="16"
-							font-weight="700"
-						>
-							{n}
-						</text>
-					</g>
-				{/each}
-			</svg>
+					{/each}
 
-			<div class="mt-4 text-center text-sm text-[color:var(--color-landingpage-subtitle)]">
-				{#if visited.length}
-					<div class="font-semibold text-white">Order: {visited.join(' → ')}</div>
-				{:else}
-					Run BFS to see traversal order.
-				{/if}
-			</div>
+					{#each Object.keys(positions) as n (n)}
+						<g>
+							<circle
+								cx={positions[n].x}
+								cy={positions[n].y}
+								r="22"
+								fill={visited.includes(n) ? '#10b981' : queue.includes(n) ? '#fbbf24' : '#3b82f6'}
+								stroke="#60a5fa"
+								stroke-width="2"
+							/>
+							<text
+								x={positions[n].x}
+								y={positions[n].y + 6}
+								text-anchor="middle"
+								fill="white"
+								font-size="16"
+								font-weight="700"
+							>
+								{n}
+							</text>
+						</g>
+					{/each}
+				</svg>
 
-			<div class="mt-5 flex flex-wrap items-center justify-center gap-3">
-				<button
-					type="button"
-					onclick={run}
-					disabled={running}
-					class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
-				>
-					<Icons name="play" />
-					<span>Run</span>
-				</button>
+				<div class="mt-4 text-center text-sm text-[color:var(--color-landingpage-subtitle)]">
+					{#if visited.length}
+						<div class="font-semibold text-white">Order: {visited.join(' → ')}</div>
+					{:else}
+						Run BFS to see traversal order.
+					{/if}
+				</div>
 
-				<button
-					type="button"
-					onclick={reset}
-					class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
-				>
-					<Icons name="reset" />
-					<span>Reset</span>
-				</button>
+				<div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+					<button
+						type="button"
+						onclick={run}
+						disabled={running}
+						class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
+					>
+						<Icons name="play" />
+						<span>Run</span>
+					</button>
+
+					<button
+						type="button"
+						onclick={reset}
+						class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="reset" />
+						<span>Reset</span>
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<CodePanel {meta} {java} />
-</div>
+		<CodePanel {meta} {java} />
+	</div>
+</PixelFrameSimple>
