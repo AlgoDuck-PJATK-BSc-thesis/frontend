@@ -48,7 +48,7 @@
 
 		{#if created}
 			<div class="text-sm text-admin-accent-link">
-				Created: <span class="font-mono text-xs">{created.userId}</span> — {created.username} ({created.role})
+				Created: <span class="font-mono text-xs">{created.userId}</span> - {created.username} ({created.role})
 			</div>
 		{/if}
 

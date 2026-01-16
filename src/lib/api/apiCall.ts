@@ -91,25 +91,26 @@ export const FetchJsonFromApi = async <TResult>(
 		throw new Error('Backend unavailable.');
 	}
 
-	console.log(res);
 	if (!res.ok) {
-		if (res.status === 401 && res.headers.get('X-Token-Expired') === 'true' && !replay) {
-			await FetchJsonFromApi(
-				'auth/refresh',
-				{ method: 'POST' },
-				fetcher,
-				undefined,
-				true,
-				csrfReplay
-			);
-			return await FetchJsonFromApi<TResult>(
-				endpoint,
-				fetchOptions,
-				fetcher,
-				searchParams,
-				true,
-				csrfReplay
-			);
+		if (res.status === 401 && !replay) {
+			try {
+				await FetchJsonFromApi(
+					'auth/refresh',
+					{ method: 'POST' },
+					fetcher,
+					undefined,
+					true,
+					csrfReplay
+				);
+				return await FetchJsonFromApi<TResult>(
+					endpoint,
+					fetchOptions,
+					fetcher,
+					searchParams,
+					true,
+					csrfReplay
+				);
+			} catch {}
 		}
 
 		const ct = res.headers.get('content-type') ?? '';

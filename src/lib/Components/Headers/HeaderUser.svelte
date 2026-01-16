@@ -6,9 +6,7 @@
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 	import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
 	import { onDestroy, onMount } from 'svelte';
-	import { UserData } from '$lib/stores/userData.svelte';
-
-	let coins = $state<number>(0);
+	import { coins, initCoinsSync, setCoins } from '$lib/stores/coins';
 
 	let myUserId = $state<string>('');
 	let myAvatarUrl = $state<string>('');
@@ -16,8 +14,6 @@
 
 	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 	const coinSrc = '/headers/coin.png';
-
-	const COINS_STORAGE_KEY = 'algoduck:coins';
 
 	const normalizeToCloudfrontKey = (value: string): string => {
 		const v = (value ?? '').toString().trim();
@@ -32,41 +28,6 @@
 			}
 		}
 		return v;
-	};
-
-	const coerceNumber = (value: unknown): number | null => {
-		if (typeof value === 'number' && Number.isFinite(value)) return value;
-		if (typeof value === 'string') {
-			const s = value.trim();
-			if (!s) return null;
-			const n = Number(s);
-			if (Number.isFinite(n)) return n;
-		}
-		return null;
-	};
-
-	const loadCachedCoins = () => {
-		if (typeof window === 'undefined') return;
-		try {
-			const raw = window.localStorage.getItem(COINS_STORAGE_KEY);
-			const n = coerceNumber(raw);
-			if (n !== null) coins = n;
-		} catch {}
-	};
-
-	const persistCoins = () => {
-		if (typeof window === 'undefined') return;
-		try {
-			UserData.user.coins = coins;
-			window.localStorage.setItem(COINS_STORAGE_KEY, String(coins));
-		} catch {}
-	};
-
-	const setCoins = (value: unknown) => {
-		const n = coerceNumber(value);
-		if (n === null) return;
-		if (coins !== n) coins = n;
-		persistCoins();
 	};
 
 	const refreshHeaderStats = async () => {
@@ -141,13 +102,16 @@
 		if (document.visibilityState === 'visible') void refreshHeaderStats();
 	};
 
-	const onCoinsEvent = (e: Event) => {
+	const onAvatar = (e: Event) => {
 		const ce = e as CustomEvent;
-		setCoins(ce.detail);
+		const v = (ce?.detail ?? '').toString().trim();
+		if (!v) return;
+		avatarOverride = '';
+		myAvatarUrl = v;
 	};
 
 	onMount(() => {
-		loadCachedCoins();
+		initCoinsSync();
 		void refreshAll();
 
 		afterNavigate(() => {
@@ -157,7 +121,7 @@
 
 		if (typeof window !== 'undefined') {
 			window.addEventListener('focus', onFocus);
-			window.addEventListener('algoduck:coins', onCoinsEvent as EventListener);
+			window.addEventListener('algoduck:avatar', onAvatar as EventListener);
 		}
 		if (typeof document !== 'undefined') {
 			document.addEventListener('visibilitychange', onVisibility);
@@ -173,7 +137,7 @@
 
 			if (typeof window !== 'undefined') {
 				window.removeEventListener('focus', onFocus);
-				window.removeEventListener('algoduck:coins', onCoinsEvent as EventListener);
+				window.removeEventListener('algoduck:avatar', onAvatar as EventListener);
 			}
 			if (typeof document !== 'undefined') {
 				document.removeEventListener('visibilitychange', onVisibility);
@@ -187,7 +151,7 @@
 
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('focus', onFocus);
-			window.removeEventListener('algoduck:coins', onCoinsEvent as EventListener);
+			window.removeEventListener('algoduck:avatar', onAvatar as EventListener);
 		}
 		if (typeof document !== 'undefined') {
 			document.removeEventListener('visibilitychange', onVisibility);
@@ -199,30 +163,9 @@
 	class="font-body sticky top-0 z-50 flex h-16 items-center justify-between border-b-4 border-[color:var(--color-bg-header-border)] bg-[color:var(--color-header-user)] px-8 py-4 text-[color:var(--color-landingpage-subtitle)]"
 >
 	<div class="flex items-center gap-6 whitespace-nowrap">
-		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline"
-			>AlgoDuck</a
-		>
-		<div>
-			<PixelFrameCoins
-				className="bg-[color:var(--color-background-coins-header)] relative inline-flex min-w-[9rem] items-center px-1 text-[1rem] tracking-widest"
-			>
-				<div
-					class="relative z-10 inline-flex items-center justify-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
-					role="button"
-					tabindex="0"
-					aria-label="Open shop"
-					onclick={goShop}
-					onkeydown={(e) => onKey(e, goShop)}
-				>
-					<span class="mr-1">{coins}</span>
-					<img
-						src={coinSrc}
-						alt="coin"
-						class="mr-1 inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
-					/>
-				</div>
-			</PixelFrameCoins>
-		</div>
+		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline">
+			AlgoDuck
+		</a>
 	</div>
 
 	<nav class="mr-6 ml-6 overflow-y-auto">
@@ -267,15 +210,6 @@
 			</li>
 			<li>
 				<a
-					href="/contest"
-					aria-current={page.url.pathname === '/contest' ? 'page' : undefined}
-					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Contest
-				</a>
-			</li>
-			<li>
-				<a
 					href="/leaderboard"
 					aria-current={page.url.pathname === '/leaderboard' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
@@ -304,26 +238,6 @@
 			</li>
 
 			<li>
-				<a
-					href="/user/me"
-					aria-label="Profile"
-					aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
-					class="no-underline"
-				>
-					<div
-						class="h-10 w-10 overflow-hidden rounded-full border-3 border-white bg-[color:var(--color-primary)] shadow"
-					>
-						<CloudfrontImage
-							path={normalizeToCloudfrontKey(
-								(avatarOverride || myAvatarUrl || defaultAvatar).toString()
-							) || defaultAvatar}
-							cls="h-full w-full -translate-x-[-20%] -translate-y-[-15%] scale-[200%] object-cover object-[left_top]"
-						/>
-					</div>
-				</a>
-			</li>
-
-			<li>
 				<div class="relative w-16">
 					<ThemeToggle />
 				</div>
@@ -331,6 +245,45 @@
 		</ul>
 	</nav>
 
-	<div class="flex h-full flex-row items-center justify-center gap-2"></div>
-	<div class="flex h-full flex-row items-center justify-center gap-2"></div>
+	<div class="-ml-[6rem] flex h-full flex-row items-center justify-center gap-5">
+		<div>
+			<PixelFrameCoins
+				className="bg-[color:var(--color-background-coins-header)] relative inline-flex min-w-[9rem] -ml-2 -mr-5 items-center px-1 text-[1rem] tracking-widest"
+			>
+				<div
+					class="relative z-10 inline-flex items-center justify-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
+					role="button"
+					tabindex="0"
+					aria-label="Open shop"
+					onclick={goShop}
+					onkeydown={(e) => onKey(e, goShop)}
+				>
+					<span class="mr-1">{$coins}</span>
+					<img
+						src={coinSrc}
+						alt="coin"
+						class="mr-1 inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
+					/>
+				</div>
+			</PixelFrameCoins>
+		</div>
+
+		<a
+			href="/user/me"
+			aria-label="Profile"
+			aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
+			class="no-underline"
+		>
+			<div
+				class="-mr-2 ml-4 h-11 w-11 overflow-hidden rounded-full border-3 border-white bg-[color:var(--color-primary)] shadow"
+			>
+				<CloudfrontImage
+					path={normalizeToCloudfrontKey(
+						(avatarOverride || myAvatarUrl || defaultAvatar).toString()
+					) || defaultAvatar}
+					cls="h-full w-full -translate-x-[-20%] -translate-y-[-15%] scale-[200%] object-cover object-[left_top]"
+				/>
+			</div>
+		</a>
+	</div>
 </header>

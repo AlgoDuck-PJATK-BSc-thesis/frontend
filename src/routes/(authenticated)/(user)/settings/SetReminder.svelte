@@ -1,7 +1,7 @@
 <script lang="ts">
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
-	import WeeklyPicker from '$lib/Components/Pickers/WeeklyPicker.svelte';
+	import WeeklyPicker from '$lib/Components/DurationPickers/WeeklyPicker.svelte';
 	import type { WeeklyReminderConfig } from '$lib/types/StudyTimerTypes';
 
 	export let weeklyReminders: WeeklyReminderConfig = [];
@@ -17,7 +17,7 @@
 </script>
 
 <PixelFrameSimple
-	className="relative w-full bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] p-8"
+	className="relative w-full border-2 border-[color:var(--color-accent-4)] bg-[color:var(--color-accent-3)] p-8"
 >
 	<div class="flex items-center gap-3">
 		<h2 class="mb-2 text-2xl font-bold text-[color:var(--color-landingpage-subtitle)]">

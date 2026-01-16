@@ -198,8 +198,8 @@
 
 		{#if created}
 			<div class="text-sm text-admin-accent-link">
-				Created: <span class="font-mono text-xs">{created.userId}</span> — {created.username} ({created.role})
-				— verified: {created.emailVerified ? 'yes' : 'no'}
+				Created: <span class="font-mono text-xs">{created.userId}</span> - {created.username} ({created.role})
+				- verified: {created.emailVerified ? 'yes' : 'no'}
 			</div>
 		{/if}
 

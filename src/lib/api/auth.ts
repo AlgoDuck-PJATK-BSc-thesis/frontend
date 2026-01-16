@@ -147,8 +147,23 @@ export type ValidateTokenResponse = {
 	expiresAt: string | null;
 };
 
-export type ChangeEmailStartRequest = Record<string, unknown>;
-export type ChangeEmailConfirmRequest = Record<string, unknown>;
+export type ChangeEmailStartRequest = {
+	newEmail: string;
+};
+
+export type ChangeEmailStartResponse = {
+	message: string;
+};
+
+export type ChangeEmailConfirmRequest = {
+	userId: string;
+	newEmail: string;
+	token: string;
+};
+
+export type ChangeEmailConfirmResponse = {
+	message: string;
+};
 
 export type ExternalLoginRequest = {
 	provider: string;

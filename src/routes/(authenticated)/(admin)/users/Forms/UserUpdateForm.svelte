@@ -215,7 +215,7 @@
 
 		{#if success}
 			<div class="text-sm text-admin-accent-link">
-				Saved: <span class="font-mono text-xs">{success.userId}</span> — {success.username} — {success.email}
+				Saved: <span class="font-mono text-xs">{success.userId}</span> - {success.username} - {success.email}
 				({(success.roles ?? []).join(', ')})
 			</div>
 		{/if}

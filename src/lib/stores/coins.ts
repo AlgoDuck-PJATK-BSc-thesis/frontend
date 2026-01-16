@@ -1,115 +1,119 @@
 import { browser } from '$app/environment';
-import { writable, get } from 'svelte/store';
-import { userApi } from '$lib/api/user';
+import { get, writable } from 'svelte/store';
+import { UserData } from '$lib/stores/userData.svelte';
 
-const STORAGE_KEY = 'algoduck:coins';
+export const COINS_STORAGE_KEY = 'algoduck:coins';
 
-const toNumber = (value: unknown): number | null => {
+export const coins = writable<number>(0);
+
+const coerceNumber = (value: unknown): number | null => {
 	if (typeof value === 'number' && Number.isFinite(value)) return value;
 	if (typeof value === 'string') {
-		const n = Number(value.trim());
+		const s = value.trim();
+		if (!s) return null;
+		const n = Number(s);
 		if (Number.isFinite(n)) return n;
 	}
 	return null;
 };
 
-const extractCoins = (value: unknown): number | null => {
-	const v: any = value as any;
-	return (
-		toNumber(v?.coins) ??
-		toNumber(v?.body?.coins) ??
-		toNumber(v?.profile?.coins) ??
-		toNumber(v?.body?.profile?.coins) ??
-		toNumber(v?.data?.coins) ??
-		toNumber(v?.data?.profile?.coins) ??
-		null
-	);
-};
-
-const readStored = (): number | null => {
-	if (!browser) return null;
+const setUserDataCoins = (n: number) => {
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
-		return toNumber(raw);
-	} catch {
-		return null;
-	}
-};
-
-const writeStored = (n: number) => {
-	if (!browser) return;
-	try {
-		localStorage.setItem(STORAGE_KEY, String(n));
+		UserData.user.coins = n;
 	} catch {}
 };
 
-export const coins = writable<number | null>(readStored());
+const applyCoins = (n: number, persist: boolean, broadcast: boolean) => {
+	if (!Number.isFinite(n)) return;
+	const next = Math.max(0, Math.trunc(n));
+	if (get(coins) !== next) coins.set(next);
+
+	if (persist && browser) {
+		try {
+			window.localStorage.setItem(COINS_STORAGE_KEY, String(next));
+		} catch {}
+	}
+
+	setUserDataCoins(next);
+
+	if (broadcast && browser) {
+		try {
+			window.dispatchEvent(new CustomEvent('algoduck:coins', { detail: next }));
+		} catch {}
+	}
+};
 
 export const setCoins = (value: unknown) => {
-	const n = toNumber(value);
+	const n = coerceNumber(value);
 	if (n === null) return;
-	coins.set(n);
-	writeStored(n);
+	applyCoins(n, true, true);
 };
 
-export const applyCoinsDelta = (delta: number) => {
-	const current = get(coins) ?? 0;
-	const next = current + delta;
-	coins.set(next);
-	writeStored(next);
+export const addCoins = (delta: unknown) => {
+	const n = coerceNumber(delta);
+	if (n === null) return;
+	applyCoins(get(coins) + n, true, true);
 };
 
-let inFlight: Promise<void> | null = null;
-let seq = 0;
+export const spendCoins = (amount: unknown) => {
+	const n = coerceNumber(amount);
+	if (n === null) return;
+	applyCoins(get(coins) - n, true, true);
+};
 
-export const refreshCoins = (fetcher?: typeof fetch) => {
-	if (inFlight) return inFlight;
-	const mySeq = ++seq;
+let inited = false;
 
-	inFlight = (async () => {
-		try {
-			const stats = await userApi.getMyStatistics(fetcher);
-			const c1 = extractCoins(stats);
-			if (c1 !== null && mySeq === seq) {
-				setCoins(c1);
-				return;
-			}
-		} catch {}
+export const initCoinsSync = () => {
+	if (!browser) return;
+	if (inited) return;
+	inited = true;
 
-		try {
-			const me = await userApi.getMe(fetcher);
-			const c2 = extractCoins(me);
-			if (c2 !== null && mySeq === seq) setCoins(c2);
-		} catch {}
-	})().finally(() => {
-		inFlight = null;
+	try {
+		const fromUserData = coerceNumber(
+			(UserData as unknown as { user?: { coins?: unknown } })?.user?.coins
+		);
+		if (fromUserData !== null) applyCoins(fromUserData, false, false);
+	} catch {}
+
+	try {
+		const raw = window.localStorage.getItem(COINS_STORAGE_KEY);
+		const n = coerceNumber(raw);
+		if (n !== null) applyCoins(n, false, false);
+	} catch {}
+
+	window.addEventListener('storage', (e: StorageEvent) => {
+		if (e.key !== COINS_STORAGE_KEY) return;
+		const n = coerceNumber(e.newValue);
+		if (n === null) return;
+		applyCoins(n, false, false);
 	});
 
-	return inFlight;
+	window.addEventListener('algoduck:coins', (e: Event) => {
+		const ce = e as CustomEvent;
+		const n = coerceNumber(ce.detail);
+		if (n === null) return;
+		applyCoins(n, true, false);
+	});
 };
 
-export const startCoinsSync = (fetcher?: typeof fetch, options?: { intervalMs?: number }) => {
-	if (!browser) return () => {};
+export const withOptimisticSpend = async <T>(amount: number, fn: () => Promise<T>) => {
+	const before = get(coins);
+	applyCoins(before - amount, true, true);
+	try {
+		return await fn();
+	} catch (err) {
+		applyCoins(before, true, true);
+		throw err;
+	}
+};
 
-	const intervalMs = options?.intervalMs ?? 15000;
-
-	void refreshCoins(fetcher);
-
-	const onFocus = () => void refreshCoins(fetcher);
-	const onVisibility = () => {
-		if (document.visibilityState === 'visible') void refreshCoins(fetcher);
-	};
-
-	window.addEventListener('focus', onFocus);
-	document.addEventListener('visibilitychange', onVisibility);
-
-	const id = window.setInterval(() => {
-		void refreshCoins(fetcher);
-	}, intervalMs);
-
-	return () => {
-		window.removeEventListener('focus', onFocus);
-		document.removeEventListener('visibilitychange', onVisibility);
-		window.clearInterval(id);
-	};
+export const withOptimisticEarn = async <T>(amount: number, fn: () => Promise<T>) => {
+	const before = get(coins);
+	applyCoins(before + amount, true, true);
+	try {
+		return await fn();
+	} catch (err) {
+		applyCoins(before, true, true);
+		throw err;
+	}
 };

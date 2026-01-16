@@ -1,90 +1,152 @@
-import { dev } from '$app/environment';
+import { PUBLIC_API_URL } from '$env/static/public';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-type DisplayLanguage = 'en' | 'pl';
-
-type SettingsState = {
-	profile: { username: string; email: string };
-	security: { twoFactor: boolean };
-	notifications: { email: boolean; push: boolean };
-	preferences: { displayLanguage: DisplayLanguage };
+type Reminder = {
+	day: string;
+	enabled: boolean;
+	hour: number;
+	minute: number;
 };
 
-const COOKIE_NAME = 'algoduck_settings_v1';
-
-const defaultSettings: SettingsState = {
-	profile: { username: '', email: '' },
-	security: { twoFactor: false },
-	notifications: { email: true, push: false },
-	preferences: { displayLanguage: 'en' }
+type UserConfigDto = {
+	isDarkMode: boolean;
+	isHighContrast: boolean;
+	emailNotificationsEnabled: boolean;
+	username: string;
+	email: string;
+	weeklyReminders: Reminder[];
+	s3AvatarUrl: string;
 };
 
-const isObj = (v: unknown): v is Record<string, unknown> =>
-	typeof v === 'object' && v !== null && !Array.isArray(v);
+type UpdatePreferencesDto = {
+	isDarkMode: boolean;
+	isHighContrast: boolean;
+	emailNotificationsEnabled: boolean;
+	weeklyReminders: Reminder[] | null;
+};
 
-const merge = <T>(base: T, patch: unknown): T => {
-	if (!isObj(base) || !isObj(patch)) return base;
-	const out: Record<string, unknown> = { ...(base as Record<string, unknown>) };
-	for (const [k, v] of Object.entries(patch)) {
-		const prev = out[k];
-		if (isObj(prev) && isObj(v)) out[k] = merge(prev, v);
-		else out[k] = v;
+const normalizeApiOrigin = (v: string) => {
+	const s = (v ?? '').trim().replace(/\/+$/, '');
+	return s.endsWith('/api') ? s.slice(0, -4) : s;
+};
+
+const apiOrigin = normalizeApiOrigin(PUBLIC_API_URL ?? '');
+
+const getCookie = (cookieHeader: string, name: string) => {
+	const parts = `; ${cookieHeader}`.split(`; ${name}=`);
+	if (parts.length < 2) return null;
+	const raw = parts.pop()?.split(';')[0] ?? null;
+	return raw ? decodeURIComponent(raw) : null;
+};
+
+const unwrapBody = (v: unknown) => {
+	if (!v || typeof v !== 'object') return v;
+	const o = v as Record<string, unknown>;
+	if ('body' in o) return o.body;
+	return v;
+};
+
+const backendFetch = async (
+	event: Parameters<RequestHandler>[0],
+	path: string,
+	init: RequestInit
+) => {
+	if (!apiOrigin) {
+		return new Response('Missing PUBLIC_API_URL.', { status: 500 });
 	}
-	return out as T;
+
+	const url = new URL(`${apiOrigin}/api/${path.replace(/^\/+/, '')}`);
+
+	const incomingCookie = event.request.headers.get('cookie') ?? '';
+	const csrf = getCookie(incomingCookie, 'csrf_token');
+
+	const headers = new Headers(init.headers ?? {});
+	if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+	if (incomingCookie && !headers.has('Cookie')) headers.set('Cookie', incomingCookie);
+	if (csrf && !headers.has('X-CSRF-Token')) headers.set('X-CSRF-Token', csrf);
+
+	return await fetch(url.toString(), { ...init, headers });
 };
 
-const clampSettings = (s: unknown): SettingsState => {
-	const merged = merge(structuredClone(defaultSettings), s);
-	const lang = merged.preferences.displayLanguage;
-	merged.preferences.displayLanguage = lang === 'pl' ? 'pl' : 'en';
-	merged.security.twoFactor = !!merged.security.twoFactor;
-	merged.notifications.email = !!merged.notifications.email;
-	merged.notifications.push = !!merged.notifications.push;
-	merged.profile.username = String(merged.profile.username ?? '');
-	merged.profile.email = String(merged.profile.email ?? '');
-	return merged;
-};
+const getCurrentConfig = async (event: Parameters<RequestHandler>[0]) => {
+	const res = await backendFetch(event, 'user/config', { method: 'GET' });
 
-const readCookie = (cookieVal: string | undefined): SettingsState => {
-	if (!cookieVal) return structuredClone(defaultSettings);
-	try {
-		return clampSettings(JSON.parse(cookieVal));
-	} catch {
-		return structuredClone(defaultSettings);
+	const parsed = await res.json().catch(() => null);
+
+	if (!res.ok) {
+		return { ok: false as const, status: res.status, payload: parsed };
 	}
+
+	const body = unwrapBody(parsed) as UserConfigDto;
+	return { ok: true as const, status: 200, payload: body };
 };
 
-const writeCookie = (cookies: Parameters<RequestHandler>[0]['cookies'], value: SettingsState) => {
-	cookies.set(COOKIE_NAME, JSON.stringify(value), {
-		path: '/',
-		httpOnly: true,
-		sameSite: 'lax',
-		secure: !dev,
-		maxAge: 60 * 60 * 24 * 365
+const toUpdatePreferencesDto = (current: UserConfigDto, patch: Partial<UserConfigDto>) => {
+	const dto: UpdatePreferencesDto = {
+		isDarkMode: typeof patch.isDarkMode === 'boolean' ? patch.isDarkMode : !!current.isDarkMode,
+		isHighContrast:
+			typeof patch.isHighContrast === 'boolean' ? patch.isHighContrast : !!current.isHighContrast,
+		emailNotificationsEnabled:
+			typeof patch.emailNotificationsEnabled === 'boolean'
+				? patch.emailNotificationsEnabled
+				: !!current.emailNotificationsEnabled,
+		weeklyReminders:
+			'weeklyReminders' in patch
+				? (patch.weeklyReminders ?? null)
+				: (current.weeklyReminders ?? null)
+	};
+
+	return dto;
+};
+
+export const GET: RequestHandler = async (event) => {
+	const curr = await getCurrentConfig(event);
+	if (!curr.ok) return json(curr.payload ?? null, { status: curr.status });
+	return json(curr.payload);
+};
+
+export const PATCH: RequestHandler = async (event) => {
+	const curr = await getCurrentConfig(event);
+	if (!curr.ok) return json(curr.payload ?? null, { status: curr.status });
+
+	const patch = (await event.request.json().catch(() => ({}))) as Partial<UserConfigDto>;
+	const dto = toUpdatePreferencesDto(curr.payload, patch);
+
+	const save = await backendFetch(event, 'user/preferences', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(dto)
 	});
+
+	if (!save.ok) {
+		const err = await save.json().catch(() => null);
+		return json(err ?? null, { status: save.status });
+	}
+
+	const next = await getCurrentConfig(event);
+	if (!next.ok) return json(next.payload ?? null, { status: next.status });
+	return json(next.payload);
 };
 
-export const GET: RequestHandler = async ({ cookies }) => {
-	const current = readCookie(cookies.get(COOKIE_NAME));
-	return json(current);
-};
+export const PUT: RequestHandler = async (event) => {
+	const curr = await getCurrentConfig(event);
+	if (!curr.ok) return json(curr.payload ?? null, { status: curr.status });
 
-export const PATCH: RequestHandler = async ({ cookies, request }) => {
-	const current = readCookie(cookies.get(COOKIE_NAME));
-	const patch = await request.json().catch(() => ({}));
-	const next = clampSettings(merge(current, patch));
-	writeCookie(cookies, next);
-	return json(next);
-};
+	const body = (await event.request.json().catch(() => ({}))) as Partial<UserConfigDto>;
+	const dto = toUpdatePreferencesDto(curr.payload, body);
 
-export const PUT: RequestHandler = async ({ cookies, request }) => {
-	const body = await request.json().catch(() => ({}));
-	const next = clampSettings(body);
-	writeCookie(cookies, next);
-	return json(next);
-};
+	const save = await backendFetch(event, 'user/preferences', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(dto)
+	});
 
-export const DELETE: RequestHandler = async ({ cookies }) => {
-	cookies.delete(COOKIE_NAME, { path: '/' });
-	return json(structuredClone(defaultSettings));
+	if (!save.ok) {
+		const err = await save.json().catch(() => null);
+		return json(err ?? null, { status: save.status });
+	}
+
+	const next = await getCurrentConfig(event);
+	if (!next.ok) return json(next.payload ?? null, { status: next.status });
+	return json(next.payload);
 };
