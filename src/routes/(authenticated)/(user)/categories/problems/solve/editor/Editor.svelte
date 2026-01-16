@@ -130,6 +130,8 @@
 
 			toBeExplored = frontier;
 		}
+
+		console.log(JSON.stringify(componentTree, null, 2));
 		return JSON.stringify(componentTree, null, 2);
 	};
 

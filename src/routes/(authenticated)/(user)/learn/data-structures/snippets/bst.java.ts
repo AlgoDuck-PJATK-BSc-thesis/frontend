@@ -1,16 +1,16 @@
 export const meta = {
 	title: 'Binary Search Tree (BST)',
-	what: 'A binary tree where left subtree values are smaller and right subtree values are larger. Enables fast ordered operations.',
+	what: 'A binary tree where left subtree values are smaller and right subtree values are larger. Search/insert/delete follow one root-to-leaf path, so the cost depends on the tree height. Without balancing, a BST can become a linked list.',
 	when: [
-		'Need sorted data with dynamic inserts/deletes',
-		'Range queries or in-order traversal',
-		'Building blocks for maps/sets'
+		'Need ordered data with inserts/deletes',
+		'Need in-order traversal (sorted output)',
+		'Range queries (values between A and B)'
 	],
 	avoid: [
-		'Data is already almost sorted (can become unbalanced)',
-		'You need guaranteed O(log n) without balancing'
+		'Need guaranteed O(log n) without balancing',
+		'Input is often sorted or nearly sorted (can skew the tree)'
 	],
-	time: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(n)' },
+	time: { best: 'O(1)', avg: 'O(log n) expected', worst: 'O(n)' },
 	space: 'O(n)',
 	flags: { ordered: true, balanced: false }
 };
@@ -27,6 +27,18 @@ export const java = `class TreeNode {
 
 public class BinarySearchTree {
     private TreeNode root;
+
+    public BinarySearchTree() {
+        reset();
+    }
+
+    public void reset() {
+        root = null;
+        int[] initial = {50, 30, 70, 20, 40, 60, 80};
+        for (int i = 0; i < initial.length; i++) {
+            root = insert(root, initial[i]);
+        }
+    }
 
     public void insert(int key) {
         root = insert(root, key);
@@ -77,14 +89,15 @@ public class BinarySearchTree {
         return node;
     }
 
-    public void inorder() {
-        inorder(root);
+    public void inorderPrint() {
+        inorderPrint(root);
+        System.out.println();
     }
 
-    private void inorder(TreeNode node) {
+    private void inorderPrint(TreeNode node) {
         if (node == null) return;
-        inorder(node.left);
+        inorderPrint(node.left);
         System.out.print(node.key + " ");
-        inorder(node.right);
+        inorderPrint(node.right);
     }
 }`;

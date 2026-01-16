@@ -2,13 +2,6 @@ import { DIRECTION_VECTORS, DUCK_DIMENSIONS, DUCK_HEIGHT, DUCK_WIDTH, FORWARD_BI
 import { isPixelBlack, samplePixel } from './gridUtils';
 import type { BoundingBox2d, BoundingBox2dCollisionData, Coords, DuckAnimationContext, DuckPositionalData, ObjectDims2d, Vec2 } from './PondTypes';
 
-
-
-export const IDLE_GIF_PATH = '/Idle.gif';
-export const SWIMMING_GIF_PATH = '/Swimming.gif';
-
-
-
 export const easeOutQuad = (t: number): number => {
 	return 1 - (1 - t) * (1 - t);
 };
@@ -56,7 +49,7 @@ export const wouldCollideWithDucks = (
 		const otherBoundingBox: BoundingBox2d = getBoundingBoxForCoordinates(otherDuckCoords, DUCK_DIMENSIONS);
 		const collisionData: BoundingBox2dCollisionData = checkBoundingBoxCollisions(mainBoundingBox, otherBoundingBox);
 
-		if (Object.keys(collisionData).some(k => k)) {
+		if (Object.values(collisionData).some(v => v)) {
 			return true;
 		}
 	}
@@ -96,7 +89,7 @@ const getBoundingBoxForCoordinates = (position: Coords, dimensions: ObjectDims2d
 */
 const checkBoundingBoxCollisions = (box1: BoundingBox2d, box2: BoundingBox2d): BoundingBox2dCollisionData => {
     const overlapsX = box1.topLeft.x < box2.topRight.x && box1.topRight.x > box2.topLeft.x;
-    const overlapsY = box1.bottomLeft.y < box2.topLeft.y && box1.topLeft.y > box2.bottomLeft.y;
+    const overlapsY = box1.topLeft.y < box2.bottomLeft.y && box1.bottomLeft.y > box2.topLeft.y; 
     
     if (!overlapsX || !overlapsY) {
         return { top: false, bottom: false, left: false, right: false };
@@ -305,7 +298,7 @@ export const updateDuckAnimation = (
 		if (!duck.isSwimming) {
 			duck.isSwimming = true;
 			gifChanged = true;
-			newGifPath = `${SWIMMING_GIF_PATH}?t=${Date.now()}`;
+			newGifPath = `${`https://d3018wbyyxg1xc.cloudfront.net/Ducks/${duckId}/Swimming.gif`}`;
 		}
 
 		duck.moveProgress += 1 / MOVE_DURATION;
@@ -318,7 +311,7 @@ export const updateDuckAnimation = (
 
 			duck.isSwimming = false;
 			gifChanged = true;
-			newGifPath = `${IDLE_GIF_PATH}?t=${Date.now()}`;
+			newGifPath = `https://d3018wbyyxg1xc.cloudfront.net/Ducks/${duckId}/Idle.gif`;
 		}
 
 
@@ -331,7 +324,7 @@ export const updateDuckAnimation = (
 		}
 	}
 
-	const flipX = duck.directionIndex <= 3;
+	const flipX = duck.directionIndex <= Math.floor(DIRECTION_VECTORS.length / 2);
 
 	return { gifChanged, newGifPath, visualCoords, flipX };
 };

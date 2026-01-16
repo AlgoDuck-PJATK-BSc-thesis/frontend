@@ -53,7 +53,7 @@
 
 		{#if success}
 			<div class="text-sm text-admin-accent-link">
-				Saved: <span class="font-mono text-xs">{success.cohortId}</span> — {success.name}
+				Saved: <span class="font-mono text-xs">{success.cohortId}</span> - {success.name}
 			</div>
 		{/if}
 

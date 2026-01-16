@@ -5,7 +5,6 @@
     import SpriteUploader from "./SpriteUploader.svelte";
 	import PlantCreationForm from "./type-specific-creation-components/PlantCreationForm.svelte";
 	import ItemCreationResult from "./ItemCreationResult.svelte";
-	import SpinnerIconSvg from "$lib/svg/EditorComponentIcons/SpinnerIconSvg.svelte";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
 
     let { data }: { data: StandardResponseDto<RarityDto[]> } = $props(); 
@@ -91,7 +90,7 @@
             }));
         })
 
-        FetchFromApi<ItemCreateResponseDto>("CreateItem", {
+        FetchFromApi<ItemCreateResponseDto>("admin/item", {
             method: "POST",
             body: formData
         }).then((value: StandardResponseDto<ItemCreateResponseDto>) => {
@@ -147,7 +146,7 @@
                                 <span>{itemType}</span>
                             </button>
                         {/each}
-                    </div>
+                        </div>
                 </div>
                 <div class="p-4 flex flex-col gap-4">
                     <div class="flex flex-col gap-2">
@@ -210,7 +209,7 @@
                                ? 'bg-admin-accent-primary text-white hover:bg-admin-accent-primary-hover cursor-pointer'
                                : 'bg-admin-border-primary text-admin-text-muted cursor-not-allowed'}">
                     {#if isSubmitting}
-                        <SpinnerIconSvg/>
+                        <div class="w-5 h-5 border-2 border-gray-500 border-t-0 rounded-full animate-spin"></div>
                         <span>Creating...</span>
                     {:else}
                         <CrossIconSvg options={{ class: 'w-4 h-4 stroke-[2] text-admin-text-secondary' }}/>

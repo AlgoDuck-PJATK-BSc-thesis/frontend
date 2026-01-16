@@ -1,46 +1,103 @@
 export const meta = {
 	title: 'Prim',
-	what: 'Grows an MST by repeatedly choosing the cheapest edge leaving the visited set.',
-	when: ['Dense graphs', 'Adjacency list available', 'MST required'],
-	avoid: ['If you need shortest paths (not MST)'],
-	time: { worst: 'O((V+E) log V)' },
+	what: 'Builds a Minimum Spanning Tree (MST): V-1 edges that connect all nodes with minimum total weight. It starts from A and repeatedly takes the cheapest edge that connects the visited set to a new node.',
+	when: ['Minimum Spanning Tree (MST)', 'Dense graphs', 'Adjacency list available'],
+	avoid: ['You need shortest paths (not MST)'],
+	time: { worst: 'O(E log V)' },
 	space: 'O(V)',
-	flags: { growsFromStart: true }
+	flags: { minimumSpanningTree: true, growsFromStart: true, result: 'V-1 edges' }
 };
 
-export const java = `import java.util.*;
+export const java = `public class Prim {
+    public static final long INF = Long.MAX_VALUE / 4;
 
-public class Prim {
-    static class Edge {
-        String to;
-        int w;
-        Edge(String to, int w) { this.to = to; this.w = w; }
-    }
+    public static int[][] mst(int vertexCount, int[] a, int[] b, int[] w, int start, boolean undirected) {
+        if (vertexCount <= 0 || start < 0 || start >= vertexCount) return new int[0][3];
 
-    static class Node implements Comparable<Node> {
-        String v;
-        int w;
-        Node(String v, int w) { this.v = v; this.w = w; }
-        public int compareTo(Node o) { return Integer.compare(w, o.w); }
-    }
+        int m = w.length;
+        int edgeCount = undirected ? 2 * m : m;
 
-    public static List<String> mst(Map<String, List<Edge>> g, String start) {
-        Set<String> seen = new HashSet<>();
-        PriorityQueue<Node> pq = new PriorityQueue<>();
-        List<String> order = new ArrayList<>();
+        int[] head = new int[vertexCount];
+        for (int i = 0; i < vertexCount; i++) head[i] = -1;
 
-        pq.add(new Node(start, 0));
+        int[] to = new int[edgeCount];
+        int[] wt = new int[edgeCount];
+        int[] next = new int[edgeCount];
 
-        while (!pq.isEmpty()) {
-            Node cur = pq.poll();
-            if (seen.contains(cur.v)) continue;
-            seen.add(cur.v);
-            order.add(cur.v);
+        int ei = 0;
+        for (int i = 0; i < m; i++) {
+            int u = a[i];
+            int v = b[i];
+            if (u < 0 || u >= vertexCount || v < 0 || v >= vertexCount) continue;
 
-            for (Edge e : g.get(cur.v)) {
-                if (!seen.contains(e.to)) pq.add(new Node(e.to, e.w));
+            to[ei] = v;
+            wt[ei] = w[i];
+            next[ei] = head[u];
+            head[u] = ei;
+            ei++;
+
+            if (undirected) {
+                to[ei] = u;
+                wt[ei] = w[i];
+                next[ei] = head[v];
+                head[v] = ei;
+                ei++;
             }
         }
-        return order;
+
+        boolean[] in = new boolean[vertexCount];
+        long[] bestW = new long[vertexCount];
+        int[] bestFrom = new int[vertexCount];
+
+        for (int i = 0; i < vertexCount; i++) {
+            bestW[i] = INF;
+            bestFrom[i] = -1;
+        }
+
+        bestW[start] = 0;
+
+        int[][] out = new int[Math.max(0, vertexCount - 1)][3];
+        int outSize = 0;
+
+        for (int it = 0; it < vertexCount; it++) {
+            int v = -1;
+            long best = INF;
+
+            for (int i = 0; i < vertexCount; i++) {
+                if (!in[i] && bestW[i] < best) {
+                    best = bestW[i];
+                    v = i;
+                }
+            }
+
+            if (v == -1) break;
+            in[v] = true;
+
+            if (v != start && bestFrom[v] != -1) {
+                out[outSize][0] = bestFrom[v];
+                out[outSize][1] = v;
+                out[outSize][2] = (int) bestW[v];
+                outSize++;
+            }
+
+            int e = head[v];
+            while (e != -1) {
+                int u = to[e];
+                if (!in[u] && wt[e] < bestW[u]) {
+                    bestW[u] = wt[e];
+                    bestFrom[u] = v;
+                }
+                e = next[e];
+            }
+        }
+
+        int[][] res = new int[outSize][3];
+        for (int i = 0; i < outSize; i++) {
+            res[i][0] = out[i][0];
+            res[i][1] = out[i][1];
+            res[i][2] = out[i][2];
+        }
+        return res;
     }
-}`;
+}
+`;

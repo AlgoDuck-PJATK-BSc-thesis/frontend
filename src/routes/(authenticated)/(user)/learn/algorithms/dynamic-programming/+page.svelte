@@ -9,35 +9,35 @@
 	import LIS from './algorithms/LIS.svelte';
 
 	const tabs = [
-		{ id: 'fib', label: 'Fibonacci' },
-		{ id: 'lcs', label: 'LCS' },
-		{ id: 'knapsack', label: '0/1 Knapsack' },
-		{ id: 'coin', label: 'Coin Change' },
-		{ id: 'lis', label: 'LIS' }
-	] as const;
+		{ id: 'fibonacci', label: 'Fibonacci' },
+		{ id: 'coin-change', label: 'Coin Change' },
+		{ id: 'lcs', label: 'Longest Common Subsequence' },
+		{ id: 'lis', label: 'Longest Increasing Subsequence' },
+		{ id: 'knapsack-01', label: '0/1 Knapsack' }
+	];
 
-	let active = $state<(typeof tabs)[number]['id']>('fib');
+	let active = $state('fibonacci');
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-8">
+<div class="min-h-screen px-4 py-10 md:px-8">
 	<div class="mx-auto max-w-6xl space-y-10">
-		<Title
-			title="Dynamic Programming"
-			subtitle="Break a problem into overlapping subproblems and reuse computed answers."
-		/>
+		<section class="space-y-8 rounded-3xl px-6 py-8 md:px-10 md:py-10">
+			<Title title="DYNAMIC PROGRAMMING" subtitle="" />
+			<Tabs {tabs} {active} onChange={(id) => (active = id)} />
+		</section>
 
-		<Tabs tabs={tabs as any} {active} onChange={(id) => (active = id as any)} />
-
-		{#if active === 'fib'}
-			<FibonacciDP />
-		{:else if active === 'lcs'}
-			<LCS />
-		{:else if active === 'knapsack'}
-			<Knapsack01 />
-		{:else if active === 'coin'}
-			<CoinChange />
-		{:else}
-			<LIS />
-		{/if}
+		<section class="rounded-3xl px-2 pb-10 md:px-0">
+			{#if active === 'fibonacci'}
+				<FibonacciDP />
+			{:else if active === 'lcs'}
+				<LCS />
+			{:else if active === 'knapsack-01'}
+				<Knapsack01 />
+			{:else if active === 'coin-change'}
+				<CoinChange />
+			{:else}
+				<LIS />
+			{/if}
+		</section>
 	</div>
 </div>

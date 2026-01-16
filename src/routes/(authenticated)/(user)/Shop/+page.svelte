@@ -72,7 +72,7 @@
 			component: ItemPager,
 			options: {
 				itemType: "Duck",
-				endpoint: "AllDucks",
+				endpoint: "item/duck",
 				itemDisplay: DuckDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
@@ -81,7 +81,7 @@
 			component: ItemPager,
 			options: {
 				itemType: "Plant",
-				endpoint: "AllPlants",
+				endpoint: "item/plant",
 				itemDisplay: PlantDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
@@ -257,7 +257,7 @@
 		alt="shopkeep"
 	/>
 
-<div class="w-[20%] max-h-[45%] absolute z-750 left-[22%] bottom-[27%] flex flex-col-reverse justify-end">
+<div class="w-[20%] max-h-[45%] absolute z-750 left-[28%] bottom-[30%] flex flex-col-reverse justify-end">
 		{#each chatWindowContents as chatMessage (chatMessage.messageId)}
 			{#if chatMessage.type === 'shopkeep'}
 				<ShopkeepMessageComp options={chatMessage.options}/>
@@ -300,7 +300,7 @@
 		</div>
 
 		<div class="relative flex h-full w-1/4 flex-col items-center">
-			<div class="absolute text-text top-[15%] flex h-[12.5%] w-[50%] flex-col items-center justify-center [font-family:var(--font-ariw9500)]">
+			<div class="absolute text-text top-[15%] flex h-[12.5%] left-[12%] w-[47%] flex-col items-center justify-center [font-family:var(--font-ariw9500)]">
 				{#if currentlySelectedItem}
 					<h3 class="text-2xl font-bold flex items-center">
 						{`${currentlySelectedItem?.name.at(0)?.toUpperCase()}${currentlySelectedItem?.name.substring(1)}`}
@@ -310,7 +310,7 @@
 
 			{#if currentlySelectedItem}
 				<div
-					class="absolute top-[40%] aspect-square w-[50%] flex justify-center item-center"
+					class="absolute top-[40%] aspect-square w-[47%] left-[12%] flex justify-center item-center"
 					{@attach (node) => {
 						let startTime: number | undefined;
 						let raf: number;
@@ -325,7 +325,7 @@
 						raf = requestAnimationFrame(animate);
 						return () => cancelAnimationFrame(raf);
 					}}>
-					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}.png`} cls="max-h-full" />
+					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}/Sprite.png`} cls="max-h-full" />
 				</div>
 			{/if}
 		</div>

@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Bubble Sort',
-	what: 'Repeatedly compares adjacent elements and swaps when out of order.',
+	what: 'Repeatedly compares adjacent elements and swaps when out of order. After each pass, the largest remaining value ends up at the end. With an early-exit check, it finishes fast on nearly sorted input.',
 	when: ['Tiny arrays', 'Teaching/visualization', 'Nearly sorted data (early exit)'],
 	avoid: ['Large datasets'],
 	time: { best: 'O(n)', avg: 'O(n^2)', worst: 'O(n^2)' },

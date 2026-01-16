@@ -35,14 +35,25 @@ export const DUCK_DIMENSIONS: ObjectDims2d = {
 };
 
 export const DIRECTION_VECTORS: Array<Vec2> = [
-	{ x: 0, y: -1 },
-	{ x: 0.5, y: -0.5 },
-	{ x: 1, y: 0 },
-	{ x: 0.5, y: 0.5 },
-	{ x: 0, y: 1 },
-	{ x: -0.5, y: 0.5 },
-	{ x: -1, y: 0 },
-	{ x: -0.5, y: -0.5 }
+    { x: 0, y: -1 },
+    { x: 0.5, y: -0.5 },
+    { x: 1, y: 0 },
+    { x: 0.5, y: 0.5 },
+/* 
+    { x: 0.75, y: -0.75 },
+    { x: 0.75, y: 0.75 },
+    { x: 0.25, y: -0.25 },
+    { x: 0.25, y: 0.25 },
+    
+    { x: -0.75, y: -0.75 },
+    { x: -0.75, y: 0.75 },
+    { x: -0.25, y: 0.25 },
+    { x: -0.25, y: -0.25 },
+     */
+    { x: 0, y: 1 },
+    { x: -0.5, y: 0.5 },
+    { x: -1, y: 0 },
+    { x: -0.5, y: -0.5 }  
 ] as const;
 
 export const NUM_DIRECTIONS = DIRECTION_VECTORS.length;

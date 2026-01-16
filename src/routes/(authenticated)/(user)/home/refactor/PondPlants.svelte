@@ -9,10 +9,12 @@
 		getPlantSubgrid,
 		linearizeGridIndex as lineraizeGridIndex,
 		initializeGridOccupancy,
+		linearizeGridIndex,
 	} from './gridUtils';
 	import type { Coords, OwnedPlantDto, UsedPlantDto } from '$lib/Components/Misc/Pond/duckTypes';
 	import { GRID_COLUMNS, GRID_ROWS } from './constants';
 	import type { ObjectDims2d } from './PondTypes';
+	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
 
 	interface Props {
 		placedPlants: UsedPlantDto[];
@@ -72,18 +74,18 @@
 		isPointOnGridOccupied = initializeGridOccupancy(workCtx, containerDims);
 
 		placedPlants.forEach((plant) => {
-			markPlantOccupied(plant);
+			togglePlantOccupied(plant);
 		});
 	};
 
-	const markPlantOccupied = (plant: UsedPlantDto) => {
+	const togglePlantOccupied = (plant: UsedPlantDto) => {
 		if (!isPointOnGridOccupied) return;
 
 		for (let row = plant.gridY; row < plant.gridY + plant.height; ++row) {
 			for (let col = plant.gridX; col < plant.gridX + plant.width; ++col) {
 				if (row >= 0 && row < GRID_ROWS && col >= 0 && col < GRID_COLUMNS) {
-					const gridIndex = lineraizeGridIndex(col, row);
-					isPointOnGridOccupied[gridIndex] = true;
+					const gridIndex = lineraizeGridIndex({x: col, y: row});
+					isPointOnGridOccupied[gridIndex] = !isPointOnGridOccupied[gridIndex];
 				}
 			}
 		}
@@ -91,7 +93,7 @@
 
 	const isOccupied = (coord: Coords): boolean => {
 		if (!isPointOnGridOccupied) return true;
-		return isPointOnGridOccupied[lineraizeGridIndex(coord.x, coord.y)] ?? true;
+		return isPointOnGridOccupied[lineraizeGridIndex(coord)] ?? true;
 	};
 
 	const updateGridHighlight = (coords: Coords[]) => {
@@ -115,6 +117,8 @@
 		document.addEventListener('mousemove', handlePlantDrag);
 		document.addEventListener('mouseup', endPlantDrag);
 	};
+
+	let isRemoveMode: boolean = $state(false);
 
 	const handlePlantDrag = (e: MouseEvent) => {
 		if (!draggedPlantDims || !mainElement) return;
@@ -147,7 +151,7 @@
 
 		if (isPointOnGridOccupied) {
 			plantSubgrid.forEach((c) => {
-				const index = lineraizeGridIndex(c.x, c.y);
+				const index = lineraizeGridIndex(c);
 				isPointOnGridOccupied![index] = true;
 			});
 		}
@@ -192,6 +196,83 @@
 	export const getDragPosition = () => dragPosition;
 	export const getIsGridVisible = () => isGridVisible;
 
+	export const ToggleDeleteMode = () => {
+		isRemoveMode = !isRemoveMode;
+		isGridVisible = !isGridVisible;
+		document.addEventListener('mousemove', handleDeleteMouseMove);
+		document.addEventListener('mousedown', handleDeleteModeMouseClick);
+		document.addEventListener('mouseup', cleanupPlantRemove);
+	}
+
+	const cleanupPlantRemove = () => {
+		document.removeEventListener('mousemove', handleDeleteMouseMove);
+		document.removeEventListener('mousedown', handleDeleteModeMouseClick);
+		document.removeEventListener('mouseup', cleanupPlantRemove);
+	}
+
+	const handleDeleteMouseMove = (e: MouseEvent) => {
+		if (!mainElement || !gridCanvas) return;
+		drawGrid(gridCanvas);
+		const occupyingPlant = getPlantPlacedHoveredOver(e);
+		if (!occupyingPlant) return;
+		const plantSubgrid = getPlantRemoveSubgrid(occupyingPlant);
+		highlightCells(gridCanvas, ...[plantSubgrid], () => true);
+	}
+
+	const handleDeleteModeMouseClick = async (e: MouseEvent) => {
+		if (!mainElement || !gridCanvas) return;
+		drawGrid(gridCanvas);		
+		try{
+			const occupyingPlant = getPlantPlacedHoveredOver(e);
+			if (!occupyingPlant) return;
+			const result = await FetchFromApi("RemovePlant", {
+				method: "DELETE"
+			}, fetch, new URLSearchParams({ plantId: occupyingPlant.itemId }))
+			if (result.status === "Success"){
+				placedPlants.splice(placedPlants.findIndex(plant => plant.itemId == occupyingPlant.itemId))
+				getPlantRemoveSubgrid(occupyingPlant).map(se => linearizeGridIndex(se)).forEach(index => {
+					if (isPointOnGridOccupied?.at(index)){
+						isPointOnGridOccupied[index] = false;
+					}
+				});
+			}else if(result.message){
+				toast.error(result.message);
+			}
+		}catch (err){
+			toast.error(err?.toString() ?? "");
+		}finally{
+			isGridVisible = false;
+			isRemoveMode = false;
+		}
+	}
+
+	const getPlantPlacedHoveredOver = (e: MouseEvent) : UsedPlantDto | undefined => {
+		if (!mainElement || !gridCanvas) return;
+		const relCoords = getRelativeCoordinates(e, mainElement);
+		const gridCoords = pixelToGridCoords(relCoords, cellDims);
+
+		let occupyingPlant: UsedPlantDto | undefined;
+		if (isOccupied(gridCoords)){
+			occupyingPlant = placedPlants.find((pp) => 
+				gridCoords.x >= pp.gridX && 
+				gridCoords.x < pp.gridX + pp.width && 
+				gridCoords.y >= pp.gridY && 
+				gridCoords.y < pp.gridY + pp.height
+			)		
+		}
+		return occupyingPlant;
+	}
+
+	const getPlantRemoveSubgrid = (plant: UsedPlantDto) : Coords[] => {
+		const coords: Coords[] = [];
+		for (let col = 0; col < plant.width; ++col){
+			for (let row = 0; row < plant.height; ++row){
+				coords.push({x: plant.gridX + col, y: plant.gridY + row})
+			}
+		}
+		return coords;
+	}
+
 	export const hideGrid = () => {
 		isGridVisible = false;
 	};
@@ -217,7 +298,7 @@
 	});
 </script>
 
-<canvas bind:this={workCanvas} class="absolute z-0 hidden"></canvas>
+<canvas width="{containerDims.width}" height="{containerDims.height}" bind:this={workCanvas} class="absolute z-0 hidden"></canvas>
 
 {#each placedPlants as placedPlant}
 	<div
@@ -235,7 +316,7 @@
 {/each}
 
 {#if isGridVisible}
-	<canvas bind:this={gridCanvas} class="absolute z-901" use:drawGrid></canvas>
+	<canvas width="{containerDims.width}" height="{containerDims.height}" bind:this={gridCanvas} class="absolute z-901 {isRemoveMode ? "cursor-[url('/shovel.png'),_auto]" : "cursor-default"}" use:drawGrid></canvas>
 {/if}
 
 {#if draggedPlant && draggedPlantDims}

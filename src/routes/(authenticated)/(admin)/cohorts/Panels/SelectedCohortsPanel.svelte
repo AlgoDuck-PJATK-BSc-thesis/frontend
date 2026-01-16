@@ -71,7 +71,7 @@
 	};
 
 	const formatDateTime = (iso: string | null) => {
-		if (!iso) return '—';
+		if (!iso) return '-';
 		const d = new Date(iso);
 		if (Number.isNaN(d.getTime())) return iso;
 		return d.toLocaleString();
@@ -79,9 +79,9 @@
 
 	const membersText = (cohortId: string) => {
 		const st = membersByCohort?.[cohortId];
-		if (!st) return '—';
+		if (!st) return '-';
 		if (st.loading) return 'loading…';
-		if (!st.loaded) return '—';
+		if (!st.loaded) return '-';
 		return String(st.totalMembers ?? 0);
 	};
 </script>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Title from '../_components/Title.svelte';
 	import Tabs from '../_components/Tabs.svelte';
+	import { page } from '$app/stores';
 
 	import Stack from './structures/Stack.svelte';
 	import Queue from './structures/Queue.svelte';
@@ -13,9 +14,7 @@
 	import MaxHeap from './structures/MaxHeap.svelte';
 	import Graph from './structures/Graph.svelte';
 
-	type Tab = { id: string; label: string };
-
-	const tabs: Tab[] = [
+	const tabs = [
 		{ id: 'stack', label: 'Stack' },
 		{ id: 'queue', label: 'Queue' },
 		{ id: 'linked-list', label: 'Linked List' },
@@ -28,16 +27,19 @@
 		{ id: 'graph', label: 'Graph' }
 	];
 
-	let active = $state<string>('stack');
+	let active = $state('stack');
+
+	$effect(() => {
+		const fromUrl = $page.url.searchParams.get('tab');
+		if (!fromUrl) return;
+		if (tabs.some((t) => t.id === fromUrl)) active = fromUrl;
+	});
 </script>
 
 <div class="min-h-screen px-4 py-10 md:px-8">
 	<div class="mx-auto max-w-6xl space-y-10">
 		<section class="space-y-8 rounded-3xl px-6 py-8 md:px-10 md:py-10">
-			<Title
-				title="DATA STRUCTURES"
-				subtitle="Interactive visualizations with Java implementations, in a consistent format."
-			/>
+			<Title title="DATA STRUCTURES" subtitle="" />
 			<Tabs {tabs} {active} onChange={(id) => (active = id)} />
 		</section>
 
@@ -60,10 +62,8 @@
 				<MinHeap />
 			{:else if active === 'max-heap'}
 				<MaxHeap />
-			{:else if active === 'graph'}
-				<Graph />
 			{:else}
-				<Stack />
+				<Graph />
 			{/if}
 		</section>
 	</div>

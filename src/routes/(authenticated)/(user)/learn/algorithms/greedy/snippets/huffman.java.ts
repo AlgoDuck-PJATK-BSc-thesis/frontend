@@ -1,76 +1,105 @@
 export const meta = {
 	title: 'Huffman Coding',
-	what: 'Build optimal prefix-free binary codes by combining the two least frequent symbols repeatedly.',
-	when: ['You want optimal prefix codes', 'You have symbol frequencies', 'Compression is the goal'],
-	avoid: ['You need a fixed-length code', 'You need to preserve lexicographic ordering of codes'],
-	time: { avg: 'O(n log n)', worst: 'O(n log n)' },
+	what: 'You start with symbols and their frequencies. Repeatedly combine the two smallest frequencies into a new parent node whose frequency is the sum. This builds a binary tree. Reading left as 0 and right as 1 gives a prefix-free code (no code is the prefix of another). More frequent symbols end up with shorter codes, which reduces the total encoded length.',
+	when: [
+		'You have symbol frequencies',
+		'You want optimal prefix-free binary codes',
+		'Compression is the goal'
+	],
+	avoid: ['You need fixed-length codes', 'You must preserve a specific ordering of codes'],
+	time: { avg: 'O(n^2) (simple two-min selection)', worst: 'O(n^2)' },
 	space: 'O(n)'
 };
 
-export const java = `import java.util.*;
+export const java = `public class HuffmanCoding {
+    public static String[] buildCodes(char[] chars, int[] freqs) {
+        int n = chars.length;
+        if (n == 0) return new String[0];
 
-public class HuffmanCoding {
-    static class Node implements Comparable<Node> {
-        char ch;
-        int freq;
-        Node left;
-        Node right;
+        int maxNodes = 2 * n - 1;
+        int[] left = new int[maxNodes];
+        int[] right = new int[maxNodes];
+        int[] freq = new int[maxNodes];
+        char[] ch = new char[maxNodes];
+        boolean[] alive = new boolean[maxNodes];
 
-        Node(char ch, int freq) {
-            this.ch = ch;
-            this.freq = freq;
+        for (int i = 0; i < maxNodes; i++) {
+            left[i] = -1;
+            right[i] = -1;
+            freq[i] = 0;
+            ch[i] = 0;
+            alive[i] = false;
         }
 
-        Node(int freq, Node left, Node right) {
-            this.ch = '\\0';
-            this.freq = freq;
-            this.left = left;
-            this.right = right;
+        for (int i = 0; i < n; i++) {
+            freq[i] = freqs[i];
+            ch[i] = chars[i];
+            alive[i] = true;
         }
 
-        public int compareTo(Node other) {
-            return this.freq - other.freq;
+        int size = n;
+
+        while (countAlive(alive, size) > 1) {
+            int a = pickMin(alive, freq, size, -1);
+            int b = pickMin(alive, freq, size, a);
+
+            alive[a] = false;
+            alive[b] = false;
+
+            freq[size] = freq[a] + freq[b];
+            left[size] = a;
+            right[size] = b;
+            alive[size] = true;
+
+            size++;
         }
+
+        int root = -1;
+        for (int i = 0; i < size; i++) if (alive[i]) root = i;
+
+        String[] out = new String[n];
+        if (n == 1) {
+            out[0] = "0";
+            return out;
+        }
+
+        dfs(root, "", left, right, ch, chars, out);
+        return out;
     }
 
-    public static Node build(char[] chars, int[] freqs) {
-        PriorityQueue<Node> pq = new PriorityQueue<>();
+    private static void dfs(int node, String prefix, int[] left, int[] right, char[] ch, char[] chars, String[] out) {
+        if (node < 0) return;
 
-        for (int i = 0; i < chars.length; i++) {
-            pq.offer(new Node(chars[i], freqs[i]));
-        }
-
-        while (pq.size() > 1) {
-            Node a = pq.poll();
-            Node b = pq.poll();
-            pq.offer(new Node(a.freq + b.freq, a, b));
-        }
-
-        return pq.poll();
-    }
-
-    public static void codes(Node root, String prefix, Map<Character, String> out) {
-        if (root == null) return;
-
-        if (root.left == null && root.right == null) {
-            out.put(root.ch, prefix.length() == 0 ? "0" : prefix);
+        if (left[node] == -1 && right[node] == -1) {
+            char c = ch[node];
+            int idx = indexOf(chars, c);
+            if (idx >= 0) out[idx] = prefix.length() == 0 ? "0" : prefix;
             return;
         }
 
-        codes(root.left, prefix + "0", out);
-        codes(root.right, prefix + "1", out);
+        dfs(left[node], prefix + "0", left, right, ch, chars, out);
+        dfs(right[node], prefix + "1", left, right, ch, chars, out);
     }
 
-    public static void main(String[] args) {
-        char[] chars = {'a','b','c','d','e','f'};
-        int[] freqs = {5,9,12,13,16,45};
+    private static int indexOf(char[] a, char x) {
+        for (int i = 0; i < a.length; i++) if (a[i] == x) return i;
+        return -1;
+    }
 
-        Node root = build(chars, freqs);
-        Map<Character, String> out = new HashMap<>();
-        codes(root, "", out);
+    private static int countAlive(boolean[] alive, int size) {
+        int c = 0;
+        for (int i = 0; i < size; i++) if (alive[i]) c++;
+        return c;
+    }
 
-        for (Map.Entry<Character, String> e : out.entrySet()) {
-            System.out.println(e.getKey() + " " + e.getValue());
+    private static int pickMin(boolean[] alive, int[] freq, int size, int skip) {
+        int best = -1;
+        for (int i = 0; i < size; i++) {
+            if (!alive[i]) continue;
+            if (i == skip) continue;
+            if (best == -1 || freq[i] < freq[best]) best = i;
         }
+        return best;
     }
-}`;
+}
+`;

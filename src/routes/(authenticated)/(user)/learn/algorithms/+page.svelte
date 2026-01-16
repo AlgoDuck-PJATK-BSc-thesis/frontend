@@ -1,6 +1,34 @@
 <script lang="ts">
 	import Title from '../_components/Title.svelte';
 	import LearnCard from '../_components/LearnCard.svelte';
+
+	const cards = [
+		{
+			href: '/learn/algorithms/sorting',
+			title: 'Sorting',
+			description: 'Bubble, Selection, Insertion, Merge, Quick, Heap.'
+		},
+		{
+			href: '/learn/algorithms/searching',
+			title: 'Searching',
+			description: 'Linear, Binary, Jump, Interpolation.'
+		},
+		{
+			href: '/learn/algorithms/graph',
+			title: 'Graph',
+			description: 'BFS, DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Kruskal, Prim.'
+		},
+		{
+			href: '/learn/algorithms/dynamic-programming',
+			title: 'Dynamic Programming',
+			description: 'Fibonacci, LCS, Knapsack, Coin Change, LIS.'
+		},
+		{
+			href: '/learn/algorithms/greedy',
+			title: 'Greedy',
+			description: 'Activity Selection, Fractional Knapsack, Huffman Coding, Job Sequencing.'
+		}
+	];
 </script>
 
 <div class="min-h-screen px-4 py-10 md:px-8">
@@ -12,31 +40,9 @@
 			/>
 
 			<div class="grid gap-6 md:grid-cols-2">
-				<LearnCard
-					href="/learn/algorithms/sorting"
-					title="Sorting"
-					description="Bubble, Selection, Insertion, Merge, Quick, Heap."
-				/>
-				<LearnCard
-					href="/learn/algorithms/searching"
-					title="Searching"
-					description="Linear, Binary, Jump, Interpolation."
-				/>
-				<LearnCard
-					href="/learn/algorithms/graph"
-					title="Graph"
-					description="BFS, DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Kruskal, Prim."
-				/>
-				<LearnCard
-					href="/learn/algorithms/dynamic-programming"
-					title="Dynamic Programming"
-					description="Fibonacci, LCS, Knapsack, Coin Change, LIS."
-				/>
-				<LearnCard
-					href="/learn/algorithms/greedy"
-					title="Greedy"
-					description="Activity Selection, Fractional Knapsack, Huffman Coding, Job Sequencing."
-				/>
+				{#each cards as c}
+					<LearnCard href={c.href} title={c.title} description={c.description} />
+				{/each}
 			</div>
 		</section>
 	</div>

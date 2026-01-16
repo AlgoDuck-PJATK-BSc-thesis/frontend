@@ -28,7 +28,6 @@
             return !!problemId;
         }
     });
-    $inspect($previousAttemptsQuery.data);
 
 </script>
 

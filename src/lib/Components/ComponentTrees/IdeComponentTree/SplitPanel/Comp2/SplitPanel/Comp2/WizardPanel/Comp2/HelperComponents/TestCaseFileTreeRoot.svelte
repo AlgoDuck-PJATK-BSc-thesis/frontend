@@ -17,7 +17,7 @@
 
 <main class="h-full px-2">
 	<button
-	class="m-1 text-text-secondary overflow-hidden w-full gap-3 h-8 flex justify-start items-center text-center px-4 rounded-sm hover:cursor-pointer active:bg-ide-card active:border-ide-accent active:shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
+	class="mx-1 text-text-secondary overflow-hidden w-full gap-3 h-8 flex justify-start items-center text-center px-4 rounded-sm hover:cursor-pointer active:bg-ide-card active:border-ide-accent active:shadow-[0_0_2px_1px_rgba(255,19,240,0.4),0_0_5px_3px_rgba(255,19,240,0.2)]"
 		style={`padding-left: ${16 + 8 * root.depth}px;`}
 		onclick={toggleContentContainer}
 	>

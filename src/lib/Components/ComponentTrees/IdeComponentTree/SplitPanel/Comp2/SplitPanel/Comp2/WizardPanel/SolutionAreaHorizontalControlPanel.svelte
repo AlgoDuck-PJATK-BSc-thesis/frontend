@@ -12,7 +12,6 @@
         }
     }
 
-    // $inspect(options);
 </script>
 
 <main class="h-14 py-2 w-full">

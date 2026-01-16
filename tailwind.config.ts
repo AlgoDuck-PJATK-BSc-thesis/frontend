@@ -43,6 +43,8 @@ export default {
             'bg-hover': 'rgb(var(--color-admin-danger-bg-hover) / <alpha-value>)',
             text: 'rgb(var(--color-admin-danger-text) / <alpha-value>)',
           },
+          warning: 'rgb(var(--color-admin-warning) / <alpha-value>)',
+          success: 'rgb(var(--color-admin-success) / <alpha-value>)'
         },
       }
     }

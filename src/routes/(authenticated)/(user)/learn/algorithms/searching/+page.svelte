@@ -8,10 +8,10 @@
 	import InterpolationSearch from './algorithms/InterpolationSearch.svelte';
 
 	const tabs = [
-		{ id: 'linear', label: 'Linear' },
-		{ id: 'binary', label: 'Binary' },
-		{ id: 'jump', label: 'Jump' },
-		{ id: 'interpolation', label: 'Interpolation' }
+		{ id: 'linear', label: 'Linear Search' },
+		{ id: 'binary', label: 'Binary Search' },
+		{ id: 'jump', label: 'Jump Search' },
+		{ id: 'interpolation', label: 'Interpolation Search' }
 	];
 
 	let active = $state('linear');
@@ -20,10 +20,7 @@
 <div class="min-h-screen px-4 py-10 md:px-8">
 	<div class="mx-auto max-w-6xl space-y-10">
 		<section class="space-y-8 rounded-3xl px-6 py-8 md:px-10 md:py-10">
-			<Title
-				title="SEARCHING"
-				subtitle="Find elements efficiently. Learn constraints like sorted inputs and distribution assumptions."
-			/>
+			<Title title="SEARCHING ALGORITHMS" subtitle="" />
 			<Tabs {tabs} {active} onChange={(id) => (active = id)} />
 		</section>
 

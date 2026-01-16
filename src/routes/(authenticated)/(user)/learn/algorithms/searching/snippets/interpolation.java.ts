@@ -10,15 +10,21 @@ export const meta = {
 
 export const java = `public class InterpolationSearch {
     public static int search(int[] arr, int target) {
-        int left = 0, right = arr.length - 1;
+        if (arr == null || arr.length == 0) return -1;
+
+        int left = 0;
+        int right = arr.length - 1;
 
         while (left <= right && target >= arr[left] && target <= arr[right]) {
             if (arr[left] == arr[right]) {
                 return arr[left] == target ? left : -1;
             }
 
-            int pos = left + ((target - arr[left]) * (right - left))
-                    / (arr[right] - arr[left]);
+            long num = (long)(target - arr[left]) * (right - left);
+            long den = (long)(arr[right] - arr[left]);
+            int pos = left + (int)(num / den);
+
+            if (pos < left || pos > right) return -1;
 
             if (arr[pos] == target) return pos;
             if (arr[pos] < target) left = pos + 1;

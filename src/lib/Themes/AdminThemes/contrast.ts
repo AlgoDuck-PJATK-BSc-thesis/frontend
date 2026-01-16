@@ -19,7 +19,10 @@ export const contrast1 = {
 
 	'--color-admin-danger-bg': '242 181 0',
 	'--color-admin-danger-bg-hover': '242 181 0',
-	'--color-admin-danger-text': '242 181 0'
+	'--color-admin-danger-text': '242 181 0',
+
+    '--color-admin-success': '137 209 133',
+    '--color-admin-warning': '204 167 0'
 };
 
 export const contrast2 = {
@@ -43,5 +46,8 @@ export const contrast2 = {
 
 	'--color-admin-danger-bg': '0 0 0',
 	'--color-admin-danger-bg-hover': '0 0 0',
-	'--color-admin-danger-text': '0 0 0'
+	'--color-admin-danger-text': '0 0 0',
+
+    '--color-admin-success': '137 209 133',
+    '--color-admin-warning': '204 167 0'
 };

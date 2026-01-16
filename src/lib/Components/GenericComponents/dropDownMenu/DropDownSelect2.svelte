@@ -1,12 +1,13 @@
 <script lang="ts" generics="K extends Record<string, any>, V">
-	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
 	import type { Component } from "svelte";
 	import { hideGroupElem, registerGroupElem, showGroupElem, type DropDownData } from "./DropDownSelectGroups.svelte";
 	import type { DisplayCompArgs, DropDownMenuOptions2, KeyValuePair } from "./DropDownSelectOptions";
+	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+	import { clickOutside } from "$lib/actions/clickOutside";
 
 	let { options }: { options: DropDownMenuOptions2<K, V> } = $props();
 
-	let label: K = $state(options.options[0]?.key);
+	let label: K = $state(options.defaultSelected ? options.defaultSelected.key : options.options[0]?.key);
 
     let dropDownData: DropDownData = $state({
         groupId: options.groupId,
@@ -34,14 +35,14 @@
 
 </script>
 
-<main class="relative" {@attach () => {
+<main use:clickOutside={() => hideGroupElem(dropDownData!.groupId!)} class="relative" {@attach () => {
 		    dropDownData = registerGroupElem(dropDownData)
         }}>
-        <button class="relative flex items-center rounded-t-md" onclick={toggleDropDown}>
-            <DisplayComp options={{isSelected: false,  content: label }}/>            
+        <button class="relative flex items-center rounded-t-md {!dropDownData.isVisible ? "rounded-md": ""} overflow-hidden" onclick={toggleDropDown}>
+            <DisplayComp options={{isSelected: options.defaultSelected ? true : false,  content: label }}/>            
             <div class="h-full aspect-sqaure pointer-events-none absolute right-0 {dropDownData.isVisible ? "rotate-90" : ""}">
                 <div class="w-full h-full p-[30%]">
-                    <ChevronIconSvg options={{class: "w-full h-full stroke-white"}}/>
+                    <ChevronIconSvgNew options={{class: "w-full h-full stroke-white"}}/>
                 </div>
             </div>
         </button>

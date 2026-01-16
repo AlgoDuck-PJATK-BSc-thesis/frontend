@@ -3,7 +3,7 @@ export const meta = {
 	what: 'Halves the search range by comparing the target to the midpoint (sorted arrays).',
 	when: ['Sorted arrays', 'Repeated lookups', 'Large datasets'],
 	avoid: ['Unsorted arrays'],
-	time: { best: 'O(1)', avg: 'O(log n)', worst: 'O(log n)' },
+	time: { best: 'O(1) if middle immediately hits target', avg: 'O(log n)', worst: 'O(log n)' },
 	space: 'O(1)',
 	flags: { sortedRequired: true }
 };

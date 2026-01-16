@@ -51,13 +51,6 @@
 
 			<div class="mt-8 flex items-center gap-4">
 				<a
-					href="/login"
-					class="cursor-pointer rounded border-2 border-white/10 bg-white/80 px-4 py-2 text-black hover:bg-white"
-				>
-					Go to login
-				</a>
-
-				<a
 					href="/home"
 					class="cursor-pointer rounded border-2 border-white/10 bg-white/80 px-4 py-2 text-black hover:bg-white"
 				>

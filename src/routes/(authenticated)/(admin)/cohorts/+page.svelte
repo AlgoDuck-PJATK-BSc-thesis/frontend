@@ -1140,7 +1140,7 @@
 												Active: {searchResult.idMatch.isActive ? 'yes' : 'no'}
 											</div>
 											<div class="text-xs text-admin-text-muted">
-												Created at: {searchResult.idMatch.createdAt ?? '—'}
+												Created at: {searchResult.idMatch.createdAt ?? '-'}
 											</div>
 											<div class="text-xs text-admin-text-muted">
 												Created by: {searchResult.idMatch.createdByDisplay}

@@ -8,8 +8,6 @@
     
     let displayedText = $state("");
 
-    $inspect(options);
-    
     onMount(() => {
         if (!options.wasTypedFully){
             let i = 0;

@@ -1,58 +1,69 @@
 export const meta = {
 	title: 'Fractional Knapsack',
-	what: 'Maximize value with a weight capacity when you are allowed to take fractions of items. Greedy by value/weight ratio is optimal.',
-	when: ['Fractions are allowed', 'You can sort by value/weight ratio', 'You want maximum value'],
-	avoid: ['0/1 knapsack (no fractions)', 'You must pick whole items only'],
-	time: { avg: 'O(n log n)', worst: 'O(n log n)' },
+	what: 'You have items with (weight, value) and a capacity limit. Unlike 0/1 knapsack, you are allowed to take a fraction of an item. The greedy rule is: always take from the item with the highest value-per-weight ratio first. If the item does not fully fit, take only the fraction that fits. This is optimal because every unit of capacity is spent on the best available value rate.',
+	when: [
+		'Fractions are allowed',
+		'You want maximum total value under a weight limit',
+		'You can compare items by value/weight'
+	],
+	avoid: [
+		'You must take whole items only (0/1 knapsack needs DP)',
+		'Items have constraints beyond weight/value ratio'
+	],
+	time: { avg: 'O(n^2) (simple sort) / O(n log n) (with fast sort)', worst: 'O(n^2)' },
 	space: 'O(1)'
 };
 
-export const java = `import java.util.*;
+export const java = `public class FractionalKnapsack {
+    public static double maxValue(int[] weight, int[] value, int capacity) {
+        int n = weight.length;
+        if (n == 0 || capacity <= 0) return 0.0;
 
-public class FractionalKnapsack {
-    static class Item {
-        String name;
-        int weight;
-        int value;
-        double ratio;
+        int[] w = new int[n];
+        int[] v = new int[n];
+        double[] r = new double[n];
 
-        Item(String name, int weight, int value) {
-            this.name = name;
-            this.weight = weight;
-            this.value = value;
-            this.ratio = (double) value / weight;
+        for (int i = 0; i < n; i++) {
+            w[i] = weight[i];
+            v[i] = value[i];
+            r[i] = w[i] == 0 ? 0.0 : (double) v[i] / (double) w[i];
         }
-    }
 
-    public static double solve(Item[] items, int capacity) {
-        Arrays.sort(items, (a, b) -> Double.compare(b.ratio, a.ratio));
+        for (int i = 1; i < n; i++) {
+            int tw = w[i];
+            int tv = v[i];
+            double tr = r[i];
+            int j = i - 1;
 
-        double totalValue = 0.0;
-        int remaining = capacity;
+            while (j >= 0 && r[j] < tr) {
+                w[j + 1] = w[j];
+                v[j + 1] = v[j];
+                r[j + 1] = r[j];
+                j--;
+            }
 
-        for (Item item : items) {
-            if (remaining <= 0) break;
+            w[j + 1] = tw;
+            v[j + 1] = tv;
+            r[j + 1] = tr;
+        }
 
-            if (item.weight <= remaining) {
-                totalValue += item.value;
-                remaining -= item.weight;
+        int rem = capacity;
+        double total = 0.0;
+
+        for (int i = 0; i < n && rem > 0; i++) {
+            if (w[i] <= 0) continue;
+
+            if (w[i] <= rem) {
+                total += (double) v[i];
+                rem -= w[i];
             } else {
-                double fraction = (double) remaining / item.weight;
-                totalValue += item.value * fraction;
-                remaining = 0;
+                double f = (double) rem / (double) w[i];
+                total += (double) v[i] * f;
+                rem = 0;
             }
         }
 
-        return totalValue;
+        return total;
     }
-
-    public static void main(String[] args) {
-        Item[] items = {
-            new Item("A", 10, 60),
-            new Item("B", 20, 100),
-            new Item("C", 30, 120)
-        };
-
-        System.out.println(solve(items, 50));
-    }
-}`;
+}
+`;

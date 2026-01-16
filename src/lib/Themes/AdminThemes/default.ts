@@ -37,4 +37,7 @@ export const defaultTheme = {
     '--color-admin-danger-bg-hover': '110 36 36',
     // #f48771
     '--color-admin-danger-text': '244 135 113',
+
+    '--color-admin-success': '137 209 133',
+    '--color-admin-warning': '204 167 0'
 }

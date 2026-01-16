@@ -12,9 +12,9 @@
 	export let disabled: boolean = false;
 
 	const formatJoinedAt = (value: string | null | undefined) => {
-		if (!value) return '—';
+		if (!value) return '-';
 		const d = new Date(value);
-		if (Number.isNaN(d.getTime())) return '—';
+		if (Number.isNaN(d.getTime())) return '-';
 		return d.toLocaleString();
 	};
 </script>
@@ -52,7 +52,7 @@
 								Remove
 							</button>
 						{:else}
-							<span class="text-xs text-admin-text-muted">—</span>
+							<span class="text-xs text-admin-text-muted">-</span>
 						{/if}
 					</td>
 				</tr>
