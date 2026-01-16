@@ -187,7 +187,7 @@
 	});
 
   const insertTestCase = async (testCaseId: string) => {
-    let res = await FetchFromApi<testCaseInsertResp>("TestCaseInsert", {
+    let res = await FetchFromApi<testCaseInsertResp>("problem/test-case", {
       method: "POST",
       body: JSON.stringify({
         userCodeB64: btoa((config['code-editor'] as CodeEditorComponentArgs).templateContents),
@@ -195,7 +195,12 @@
         testCaseId: testCaseId
       })
     });
-    (config['code-editor'] as CodeEditorComponentArgs).templateContents = atob(res?.body?.modifiedCodeB64 ?? "")
+	console.log(atob(res.body.modifiedCodeB64));
+	if (!res?.body) return
+
+	(config['code-editor'] as CodeEditorComponentArgs).upstreamChanged = true;
+    (config['code-editor'] as CodeEditorComponentArgs).userCode = atob(res.body.modifiedCodeB64);
+
   } 
 
 </script>

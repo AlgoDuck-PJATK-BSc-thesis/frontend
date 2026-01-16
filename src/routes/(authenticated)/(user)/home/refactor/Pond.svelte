@@ -30,7 +30,7 @@
 	let placedPlants: UsedPlantDto[] = $state(userItems.plants);
 
 	let isSelectionMenuVisible: boolean = $state(false);
-	let activeTab: ItemType = $state('Duck');
+	let activeTab: ItemType = $state('duck');
 
 	let pondDucksRef: PondDucks | undefined = $state();
 	let pondPlantsRef: PondPlants | undefined = $state();
@@ -371,10 +371,10 @@
 			<div class="flex gap-2 border-b border-slate-200 px-4 py-2">
 				<button
 					onclick={() => {
-						activeTab = 'Duck';
+						activeTab = 'duck';
 					}}
 					class="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all
-					{activeTab === 'Duck'
+					{activeTab === 'duck'
 						? 'bg-amber-500 text-white shadow-md'
 						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 				>
@@ -382,10 +382,10 @@
 				</button>
 				<button
 					onclick={() => {
-						activeTab = 'Plant';
+						activeTab = 'plant';
 					}}
 					class="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all
-					{activeTab === 'Plant'
+					{activeTab === 'plant'
 						? 'bg-emerald-500 text-white shadow-md'
 						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
 				>
@@ -394,7 +394,7 @@
 			</div>
 
 			<div class="min-h-0 flex-1 overflow-hidden">
-				{#if activeTab === 'Duck'}
+				{#if activeTab === 'duck'}
 					{@render DuckTab()}
 				{:else}
 					{@render PlantTab()}

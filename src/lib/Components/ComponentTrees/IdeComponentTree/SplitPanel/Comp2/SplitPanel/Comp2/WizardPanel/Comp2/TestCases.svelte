@@ -90,22 +90,7 @@
 
 		{#if previewedTestCase?.isPublic}
 			<div class="h-[calc(100%-3rem)] w-full flex flex-col lg:flex-row overflow-hidden">
-				<div class="h-[40%] lg:h-full w-full lg:w-[50%] bg-ide-bg flex flex-col border-b lg:border-b-0 lg:border-r border-ide-accent/10">
-					<div class="w-full h-10 items-center px-4 flex justify-end">
-						<span class="text-xs text-ide-text-secondary select-none font-medium">Code Preview</span>
-					</div>
-					<div class="w-full h-[calc(100%-2.5rem)] p-3">
-						<div class="w-full h-full overflow-hidden rounded-lg border border-ide-accent/20">
-							<Monaco
-								editorContents={'//something'}
-								readOnly={true}
-								fontSize={16}
-							/>
-						</div>
-					</div>
-				</div>
-
-				<div class="flex-1 lg:h-full w-full lg:w-[50%] flex flex-col justify-between p-4 overflow-hidden">
+				<div class="flex-1 lg:h-full w-full flex flex-col justify-between p-4 overflow-hidden">
 					<div class="flex-1 overflow-y-auto space-y-3">
 						{@render TestCaseCard('Test Input', previewedTestCase.display)}
 						{@render TestCaseCard('Expected Output', previewedTestCase.displayRes)}

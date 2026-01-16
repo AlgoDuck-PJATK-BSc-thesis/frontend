@@ -99,14 +99,19 @@
 		}
 	});
 
-	$inspect($customLayoutQuery.data)
+	const userDefinedLayouts: number = $derived.by(() => $customLayoutQuery.data?.body.length ?? 3 - 3)
 
 </script>
 
 <main use:clickOutside={() => isVisible = false} transition:fly={{ y: -30, duration: 200 }} class="top-full absolute z-100 w-75 max-h-100 bg-ide-bg overflow-y-auto border border-ide-accent/25 rounded-lg flex flex-col">
-	<span class="py-3 px-5 text-lg justify-start w-full text-ide-text-primary font-semibold border-b border-b-ide-accent/30">
-		Layouts
-	</span>
+	<div class="flex flex-row py-3 px-5">
+		<span class="text-lg justify-start text-ide-text-primary font-semibold border-b border-b-ide-accent/30">
+			Layouts
+		</span>
+		<span class="text-sm">
+			{userDefinedLayouts}
+		</span>
+	</div>
 	
 	{#if $customLayoutQuery.isLoading}
 		<div class="w-full h-20 flex flex-row items-center justify-center">

@@ -30,25 +30,39 @@
 			document.removeEventListener('click', handleClickOutside);
 		};
 	});
+	let mainElement: HTMLDivElement | undefined = $state();
 </script>
 
-<div class="w-full aspect-square flex items-center justify-center p-[8%] relative rounded-[25%] bg-blue-500">
+<div bind:this={mainElement} class="w-full aspect-square flex items-center justify-center p-[8%] relative rounded-[25%] bg-blue-500">
 	<button bind:this={toggleButtonRef}
 		onclick={() => { isContextMenuVisible = !isContextMenuVisible }}
 		class="absolute hover:bg-amber-600 rounded-[20%] w-[20%] h-[20%] right-[10%] top-[10%]">
 		<ThreeDotIconSvg options={{ class: "w-full h-full stroke-black stroke-[2]" }} />
 	</button>
-	<img src={`https://d3018wbyyxg1xc.cloudfront.net/Ducks/Outfits/duck-${options.duck.itemId}.png`} alt="duck">
+	<img src={`https://d3018wbyyxg1xc.cloudfront.net/duck/${options.duck.itemId}/Sprite.png`} alt="duck">
 	{#if isContextMenuVisible}
-		<div bind:this={contextMenuRef}
-			class="w-50 h-25 absolute z-500 top-[30%] right-[10%] mt-2 flex flex-col rounded-lg bg-blue-400">
+		<div {@attach node => {
+			if (!mainElement || !mainElement.parentElement) return;
+			$effect(() => {
+				const nodeBoundingRect: DOMRect = node.getBoundingClientRect();
+				if (nodeBoundingRect.left < 0) {
+					node.style.left = '0';
+					node.style.right = 'auto';
+				}
+				else if (nodeBoundingRect.right > window.innerWidth) {
+					node.style.right = '0';
+					node.style.left = 'auto';
+				}
+			})
+		}} bind:this={contextMenuRef}
+			class="w-30 h-10 absolute z-500 top-[30%] right-[10%] mt-2 flex flex-col rounded-lg bg-blue-400">
 			<div class="p-1">
 				<button
-					class="w-full h-full py-3 hover:bg-blue-900 rounded-md"
+					class="w-full h-full hover:bg-blue-900 rounded-md"
 					onclick={async () => { 
                         await options.onclick(options.duck);
-                        isContextMenuVisible = false; }
-                    }>
+                        isContextMenuVisible = false; 
+					}}>
 					{!options.duck.isSelectedForPond ? "Select" : "Deselect"}
 				</button>
 			</div>
