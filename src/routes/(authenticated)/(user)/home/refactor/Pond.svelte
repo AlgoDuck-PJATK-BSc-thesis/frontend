@@ -30,7 +30,7 @@
 	let placedPlants: UsedPlantDto[] = $state(userItems.plants);
 
 	let isSelectionMenuVisible: boolean = $state(false);
-	let activeTab: ItemType = $state('Duck');
+	let activeTab: ItemType = $state('duck');
 
 	let pondDucksRef: PondDucks | undefined = $state();
 	let pondPlantsRef: PondPlants | undefined = $state();
@@ -171,6 +171,8 @@
 		});
 	};
 
+	let isShovelHovered: boolean = $state(false);
+
 	const handlePlantDragStart = (e: MouseEvent, plant: OwnedPlantDto) => {
 		if (pondPlantsRef?.isPlantPlaced(plant.itemId)) return;
 		pondPlantsRef?.startPlantDrag(e, plant);
@@ -196,6 +198,9 @@
 			}
 		};
 	});
+	let isDucksHovered: boolean = $state(false);
+	let isPlantsHovered: boolean = $state(false);
+	let isCancelHovered: boolean = $state(false);
 </script>
 
 <main bind:this={mainElem} bind:clientHeight bind:clientWidth class="relative h-full w-full">
@@ -236,15 +241,12 @@
 
 {#snippet DuckTab()}
 	<div class="flex h-full flex-col">
-		<div class="h-12 w-full flex-shrink-0 px-4">
-			<h4 class="border-b-2 border-b-slate-300 py-2 text-lg font-semibold text-slate-800">
-				Owned Ducks
-			</h4>
-		</div>
-		<div class="grid min-h-0 w-full grow grid-cols-4 gap-3 overflow-y-auto p-4">
+		<div class="grid min-h-0 w-full grow grid-cols-4 gap-[7px] p-[7px] overflow-y-auto">
 			{#if $duckQuery.isLoading}
 				{#each Array(8) as _}
-					<div class="aspect-square w-full animate-pulse rounded-xl bg-slate-200"></div>
+					<div class="aspect-square w-full flex items-center justify-center">
+						<div class="w-6 h-6 rounded-full border-t-2 border-t-slate-300 animate-spin"></div>
+					</div>
 				{/each}
 			{:else if $duckQuery.data}
 				{#each $duckQuery.data as duck}
@@ -280,41 +282,31 @@
 
 {#snippet PlantTab()}
 	<div class="flex h-full flex-col">
-		<div class="h-12 w-full flex-shrink-0 px-4 flex justify-between">
-			<h4 class="border-b-2 border-b-slate-300 py-2 text-lg font-semibold text-slate-800">
-				Owned Plants
-			</h4>
-			<button onclick={(e: MouseEvent) => {
-				if (!pondPlantsRef) return;
-				isSelectionMenuVisible = false;
-				pondPlantsRef.ToggleDeleteMode();
-			}} class="h-10">
-				<img class="h-full" src="/src/lib/images/ponds/shovel.png" alt="shovel"/>
-			</button>
-		</div>
-		<div class="grid min-h-0 w-full flex-1 grid-cols-4 gap-3 overflow-y-auto p-4">
+		<div class="grid min-h-0 w-full grow grid-cols-4 gap-[7px] p-[7px] overflow-y-auto">
 			{#if $plantQuery.isLoading}
 				{#each Array(8) as _}
-					<div class="aspect-square w-full animate-pulse rounded-xl bg-slate-200"></div>
+					<div class="aspect-square w-full flex items-center justify-center">
+						<div class="w-6 h-6 rounded-full border-t-2 border-t-slate-300 animate-spin"></div>
+					</div>
 				{/each}
 			{:else if $plantQuery.data}
 				{#each $plantQuery.data as plant}
 					{@const placed = pondPlantsRef?.isPlantPlaced(plant.itemId) ?? false}
-					<div
-						class="relative flex aspect-square w-full items-center justify-center rounded-xl p-2 transition-all
+					<div class="relative flex aspect-square w-full items-center justify-center rounded-xl p-3 transition-all
 						{placed
-							? 'cursor-not-allowed bg-slate-300 opacity-60'
-							: 'cursor-grab bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md hover:scale-105 hover:shadow-lg active:cursor-grabbing'}"
+							? 'cursor-not-allowed bg-slate-300 opacity-20'
+							: 'cursor-grab bg-gradient-to-br shadow-md hover:scale-105 hover:shadow-lg active:cursor-grabbing'}"
 					>
 						{#if placed}
 							<div class="absolute inset-0 flex items-center justify-center rounded-xl bg-black/20">
 								<TickIconSvg options={{ class: 'w-6 h-6 stroke-white stroke-[2]' }}/>
 							</div>
 						{/if}
-						<button class="h-full w-full" disabled={placed} onmousedown={(e) => handlePlantDragStart(e, plant)}>
-							<img
-								class="pointer-events-none h-full w-full select-none object-contain"
-								src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${plant.itemId}.png`}
+						<button class="h-full w-full hover:cursor-grab active:cursor-grabbing" disabled={placed} onmousedown={(e) => {
+							handlePlantDragStart(e, plant)}
+						}>
+							<img class="pointer-events-none h-full w-full select-none object-contain"
+								src={`https://d3018wbyyxg1xc.cloudfront.net/plant/${plant.itemId}/Day.png`}
 								alt="plant"
 							/>
 						</button>
@@ -336,10 +328,8 @@
 				}} class="col-span-4 h-4">
 					{#if $plantQuery.isFetchingNextPage}
 						<div class="flex items-center justify-center py-2">
-							<svg class="h-5 w-5 animate-spin text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-							</svg>
+							<div class="w-6 h-6 rounded-full border-t-2 border-t-slate-300 animate-spin"></div>
+							<span>Loading...</span>
 						</div>
 					{/if}
 				</div>
@@ -349,57 +339,37 @@
 {/snippet}
 
 {#snippet SelectionMenu()}
-	<div
-		transition:fly={{ x: -50, opacity: 0, duration: 200 }}
-		class="absolute left-4 top-[10%] z-500 h-[70%] w-96 overflow-hidden rounded-2xl bg-white/95 shadow-2xl backdrop-blur-sm"
+	<div transition:fly={{ x: -50, opacity: 0, duration: 200 }}
+		class="absolute left-4 bg-transparent top-[10%] z-500 w-[646px] h-[794px] flex flex-row overflow-hidden rounded-2xl"
 	>
-		<div class="flex h-full w-full flex-col">
-			<div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-				<h3 class="text-xl font-bold text-slate-800">Inventory</h3>
-				<button
-					onclick={() => {
-						isSelectionMenuVisible = false;
-					}}
-					class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 transition-colors hover:bg-red-100"
-					aria-label="Close menu"
-				>
-					<CrossIconSvg options={{ class: 'w-5 h-5 stroke-[3] stroke-slate-600 hover:text-red-500'}}/>
-
+		<div class="relative h-full w-full">
+			<button onclick={() => isSelectionMenuVisible = false} onmouseover={() => isCancelHovered = true} onfocus={() => isCancelHovered = true} onmouseout={() => isCancelHovered = false} onblur={() => isCancelHovered = false} class="w-[25px] hover:cursor-pointer h-[25px] z-999 top-[25px] absolute left-[55px]">
+				<img src="/src/lib/images/ponds/Cancel{isCancelHovered ? "-hover" : ""}.png" alt="Back">
 			</button>
-			</div>
-
-			<div class="flex gap-2 border-b border-slate-200 px-4 py-2">
-				<button
-					onclick={() => {
-						activeTab = 'Duck';
-					}}
-					class="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all
-					{activeTab === 'Duck'
-						? 'bg-amber-500 text-white shadow-md'
-						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
-				>
-					Ducks
-				</button>
-				<button
-					onclick={() => {
-						activeTab = 'Plant';
-					}}
-					class="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all
-					{activeTab === 'Plant'
-						? 'bg-emerald-500 text-white shadow-md'
-						: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
-				>
-					Plants
+			<img class="w-full h-full absolute x-100 bg-transparent" src="/src/lib/images/ponds/Inventory.png" alt="">
+			<button onclick={() => activeTab = "duck"} onmouseover={() => isDucksHovered = true} onfocus={() => isDucksHovered = true} onmouseout={() => isDucksHovered = false} onblur={() => isDucksHovered = false} class="absolute z-110 top-[60px] left-[80px] h-[60px]">
+				<img class="w-full h-full hover:cursor-pointer {isDucksHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src="/src/lib/images/ponds/Duck{isDucksHovered ? "-hover" : ""}.png" alt="ducks">
+			</button>
+			<button onclick={() => activeTab = "plant"} onmouseover={() => isPlantsHovered = true} onfocus={() => isPlantsHovered = true} onmouseout={() => isPlantsHovered = false} onblur={() => isPlantsHovered = false} class="absolute z-110 top-[40px] left-[180px] h-[80px]">
+				<img class="w-full h-full hover:cursor-pointer {isPlantsHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src="/src/lib/images/ponds/Plant{isPlantsHovered ? "-hover" : ""}.png" alt="ducks">
+			</button>
+			<div class="h-full w-15 flex flex-col absolute right-0 justify-center items-center">
+				<button onmouseover={() => isShovelHovered = true} onmouseout={() => isShovelHovered = false} onfocus={() => isShovelHovered = true} onblur={() => isShovelHovered = false} class="w-full {isShovelHovered ? " ease-out duration-300 transition-all -translate-y-2" : ""}" onclick={(e: MouseEvent) => {
+					if (!pondPlantsRef) return;
+					isSelectionMenuVisible = false;
+					pondPlantsRef.ToggleDeleteMode();
+				}}>
+					<img class="w-full" src="/src/lib/images/ponds/shovel-btn{isShovelHovered ? "-hover" : ""}.png" alt="" style="image-rendering: pixelated;">
 				</button>
 			</div>
-
-			<div class="min-h-0 flex-1 overflow-hidden">
-				{#if activeTab === 'Duck'}
+			<div class="w-[507px] min-h-[620px] bg-repeat-y bg-[url('/src/lib/images/ponds/Shelf.png')] left-[50px] top-[147px] flex-col bg-red-500 absolute z-200">
+				{#if activeTab === 'duck'}
 					{@render DuckTab()}
 				{:else}
 					{@render PlantTab()}
 				{/if}
 			</div>
 		</div>
+		
 	</div>
 {/snippet}

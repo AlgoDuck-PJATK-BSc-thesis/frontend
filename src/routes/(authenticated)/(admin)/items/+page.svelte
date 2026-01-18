@@ -17,6 +17,7 @@
 	import PopOverPreviewColumn from "./column-preview-comps/PopOverPreviewColumn.svelte";
 	import TriangleIconSvg from "$lib/svg/EditorComponentIcons/TriangleIconSvg.svelte";
 	import CreatedByCard from "./CreatedByCard.svelte";
+	import { type UserPreviewDto } from "./column-preview-comps/columnPreviewArgs";
 
 
     let totalItems: number = $state(0);
@@ -33,7 +34,7 @@
     // f*cking crazy...
     // f*cking crazy cool
     const fetchAndUpdateCache = async (colsNeeded: QueryableColumn[], orderByCapture: string | null, pageParam: number) => {
-        const params: URLSearchParams = new URLSearchParams({ columns: colsNeeded.join(), pageSize: "12", currentPage: pageParam.toString() });
+        const params: URLSearchParams = new URLSearchParams({ columns: colsNeeded.join(), pageSize: "18", currentPage: pageParam.toString() });
         if (orderByCapture) params.set("orderBy", orderByCapture);
 
         let res = await FetchFromApi<CustomPageData<ItemDto>>("item", {
@@ -52,7 +53,7 @@
             queryClient.setQueryData(["column", col, pageParam, orderByCapture], colValues)
         })
 
-
+        
         totalItems = res.body.totalItems;
         return res;
     }
@@ -162,7 +163,7 @@
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Item Management</h2>
         </div>
 
-        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded">
+        <div class="bg-admin-bg-secondary border border-admin-border-primary rounded min-h-0 flex flex-col">
             <div class="flex items-center justify-end gap-3 px-4 py-3">
                 <div class="flex items-center gap-3">
                     {#if selectedItems.length > 0}
@@ -219,7 +220,9 @@
                     <div class="w-0"></div>
                 </div>
                 <button onclick={() => isPreferencesShown = !isPreferencesShown} class="w-9 h-5 flex justify-center item-center relative">
-                    <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    <div class="w-full h-full hover:cursor-pointer">
+                        <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    </div>
                     {#if isPreferencesShown}                        
                         <div class="absolute top-7 z-999 -right-2">
                             <ColumnSelectDialog columnPicker={$state.snapshot(columnPicker)} bind:isVisible={isPreferencesShown} {updateColumnSelection}/>
@@ -252,10 +255,12 @@
 
                                 <!-- Looks scary but is just a match expression with a bunch of type assertions thrown in for clarity  -->
                                 {@const ColumnValueFormatted = ({
-                                    'createdBy': (value: string) => createColumnConfig(PopOverPreviewColumn, { label: value, displayComponent: CreatedByCard, getPreviewData: async () => {
-                                        return {}
+                                    'createdBy': (value: string) => createColumnConfig(PopOverPreviewColumn, { label: value, displayComponent: CreatedByCard, getPreviewData: async (): Promise<StandardResponseDto<UserPreviewDto>> => {
+                                        return await FetchFromApi<UserPreviewDto>("user/item", {
+                                            method: "GET"
+                                        }, fetch, new URLSearchParams({ userId: value }));
                                     }}),
-                                    'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: value.toString() }),
+                                    'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: (new Date(value ?? Date.now())).toLocaleDateString()}),
                                     'itemId': (value: string) => createColumnConfig(LinkColumn, { label: value, href: `items/item-details?itemId=${value}` }),
                                     'itemName': (value: string) => createColumnConfig(RegularColumn, { label: value }),
                                     'ownedCount': (value: number) => createColumnConfig(RegularColumn, { label: value.toString() }),

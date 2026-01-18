@@ -2,25 +2,29 @@
 	import type { ItemType } from "$lib/Components/Misc/Pond/duckTypes";
 	import { createQuery, useQueryClient } from "@tanstack/svelte-query";
 	import type { Item } from "./Dtos";
-	import { type Component } from "svelte";
+	import { onMount, type Component } from "svelte";
 	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
 
 	let {
-		options
+		options,
+        currentPage = $bindable(),
+        currentPageSize = $bindable()
 	}: {
 		options: {
             itemType: ItemType,
             endpoint: string,
             itemDisplay: Component<{ options: Item, onclick: (() => void) }>,
             select: (selected: Item, wasAutomatic: boolean) => void
-		};
+		},
+        currentPage: number, currentPageSize: number
 	} = $props();
     
     const queryClient = useQueryClient();
     
-    let currentPage: number = $state(1);
-    let currentPageSize: number = $state(12);
+    onMount(() => {
+        currentPage = 1;
+    })
     let isTransitioning: boolean = $state(false);
 
     let itemQuery = $derived(
@@ -77,13 +81,17 @@
         items: Item[],
     }
 
-    let allPages: pageIndexMapping[] = $derived(
-		Array.from({ length: totalPages }, (_, i) => ({
-			pageNum: i + 1,
-			items: (queryClient.getQueryData([ options.itemType, i + 1, currentPageSize ]) as StandardResponseDto<CustomPageData<Item>>)?.body?.items ?? []
-		} as pageIndexMapping))
-	);
+    let allPages: pageIndexMapping[] = $state([]);
 
+    $effect(() => {
+        const _ = $itemQuery.data;
+        
+        allPages = Array.from({ length: totalPages }, (_, i) => ({
+            pageNum: i + 1,
+            items: (queryClient.getQueryData([options.itemType, i + 1, currentPageSize]) as StandardResponseDto<CustomPageData<Item>>)?.body?.items ?? []
+        }));
+    });
+    
     let viewportHeight: number = $state(0);
 
     let isButtonDownPressed: boolean = $state(false);

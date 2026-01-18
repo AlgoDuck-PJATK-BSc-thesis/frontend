@@ -10,28 +10,25 @@
 	import { createColumnConfig } from "$lib/types/ComponentConfig";
     import type { ComponentConfigStatic } from "$lib/Components/GenericComponents/AutoCompleteInput/ComponentConfigStatic";
 	import TriangleIconSvg from "$lib/svg/EditorComponentIcons/TriangleIconSvg.svelte";
-	import { QueryableColumns, type CategoryDto, type CreatorDto, type DifficultyDto, type ProblemDto, type QueryableColumn } from "./problemTypes";
+	import { QueryableColumns, type CategoryDto, type CategoryPreviewDto, type CreatorDto, type DifficultyDto, type ProblemCreatorPreviewDto, type ProblemDto, type QueryableColumn } from "./problemTypes";
 	import PopOverPreviewColumn from "../items/column-preview-comps/PopOverPreviewColumn.svelte";
 	import RegularColumn from "../items/column-preview-comps/RegularColumn.svelte";
 	import LinkColumn from "../items/column-preview-comps/LinkColumn.svelte";
 	import ColumnSelectDialog from "./ColumnSelectDialog.svelte";
-	import CreatedByCard from "../items/CreatedByCard.svelte";
 	import DeletionModal from "./DeletionModal.svelte";
-
+	import CategoryPreviewCard from "./CategoryPreviewCard.svelte";
+	import ProblemCreatorPreviewCard from "./ProblemCreatorPreviewCard.svelte";
 
     let totalItems: number = $state(0);
     const queryClient = useQueryClient();
 
     let columnPicker: Record<QueryableColumn, boolean> = $state({
         ...Object.fromEntries(QueryableColumns.map((q) => [q, true])) as Record<QueryableColumn, boolean>,
-        "itemName": false,
         "createdBy": false
     });
     let orderBy: string | null = $state(null)
 
 
-    // f*cking crazy...
-    // f*cking crazy cool
     const fetchAndUpdateCache = async (colsNeeded: QueryableColumn[], orderByCapture: string | null, pageParam: number) => {
         const params: URLSearchParams = new URLSearchParams({ columns: colsNeeded.join(), pageSize: "12", currentPage: pageParam.toString() });
         if (orderByCapture) params.set("orderBy", orderByCapture);
@@ -39,7 +36,7 @@
         let res = await FetchFromApi<CustomPageData<ProblemDto>>("ProblemDetailsAdmin", {
             method: "GET"
         }, fetch, params);
-        queryClient.setQueryData(["column", "PageData", pageParam, orderByCapture], {
+        queryClient.setQueryData(["column", "problem", "PageData", pageParam, orderByCapture], {
             currPage: res.body.currPage,
             pageSize: res.body.pageSize,
             totalItems: res.body.totalItems,
@@ -49,7 +46,7 @@
 
         colsNeeded.forEach((col) => {
             const colValues: Record<string, Partial<ProblemDto>> = Object.fromEntries(res.body.items.map(i => [i.problemId, { [col]: i[col] }]))
-            queryClient.setQueryData(["column", col, pageParam, orderByCapture], colValues)
+            queryClient.setQueryData(["column", "problem", col, pageParam, orderByCapture], colValues)
         })
 
 
@@ -58,14 +55,14 @@
     }
 
     const itemQuery = $derived(createInfiniteQuery({
-        queryKey: ["all", "columns", orderBy],
+        queryKey: ["all", "problem", "columns", orderBy],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
             const orderByCapture: string = orderBy ?? "None";
             const columnPickerCapture: Record<QueryableColumn, boolean> = columnPicker;
 
             const selectedCols: QueryableColumn[] = Object.entries(columnPickerCapture).filter(([k, v]) => v).map(([k, v]) => k as QueryableColumn);
-            const cachedCols: QueryableColumn[] = selectedCols.filter(c => queryClient.getQueryData(["column", c, pageParam, orderByCapture]))
+            const cachedCols: QueryableColumn[] = selectedCols.filter(c => queryClient.getQueryData(["column", "problem", c, pageParam, orderByCapture]))
             const colsNeeded: QueryableColumn[] = selectedCols.filter(col => !cachedCols.includes(col))
 
             if (cachedCols.length === 0){
@@ -76,7 +73,7 @@
                 let itemData: Record<string, Partial<ProblemDto>> | undefined;
 
                 selectedCols.forEach(col => {
-                    const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
+                    const currentRow = queryClient.getQueryData(["column", "problem", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
                     if (!itemData){
                         itemData = { ...currentRow };
                         return;
@@ -91,7 +88,7 @@
                 return {
                     message: "Success",
                     body:{
-                        ...queryClient.getQueryData(["column", "PageData", pageParam, orderByCapture]) as Partial<CustomPageData<ProblemDto>>,
+                        ...queryClient.getQueryData(["column", "problem", "PageData", pageParam, orderByCapture]) as Partial<CustomPageData<ProblemDto>>,
                         items: Object.values(itemData!)
                     }
                 } as StandardResponseDto<CustomPageData<ProblemDto>>
@@ -101,7 +98,7 @@
             let res = await fetchAndUpdateCache(colsNeeded, orderByCapture, pageParam);
             
             cachedCols.forEach((col) => {
-                const currentRow = queryClient.getQueryData(["column", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
+                const currentRow = queryClient.getQueryData(["column", "problem", col, pageParam, orderByCapture]) as Record<string, Partial<ProblemDto>>;
                 Object.entries(currentRow).forEach(([k, v]) => {
                     const item: number = res.body.items.findIndex(i => i.problemId === k)
                     if (item === -1) return;
@@ -156,10 +153,10 @@
 
 <DeletionModal bind:isVisible={isDeletionModalShown} {selectedItems}/>
 
-<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary font-sans">
+<main class="w-full min-h-full bg-admin-bg-primary text-admin-text-secondary font-sans">
     <div class="max-w-6xl mx-auto p-6 flex flex-col gap-4">
         <div class="py-4 border-b border-admin-border-primary">
-            <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Item Management</h2>
+            <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Problem Management</h2>
         </div>
 
         <div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
@@ -219,7 +216,9 @@
                     <div class="w-0"></div>
                 </div>
                 <button onclick={() => isPreferencesShown = !isPreferencesShown} class="w-9 h-5 flex justify-center item-center relative">
-                    <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    <div class="w-full h-full hover:cursor-pointer">
+                        <SettingsIconSvg options={{ class: "h-full w-full stroke-[2] stroke-admin-text-secondary" }}/>
+                    </div>
                     {#if isPreferencesShown}                        
                         <div class="absolute top-7 -right-2">
                             <ColumnSelectDialog columnPicker={$state.snapshot(columnPicker)} bind:isVisible={isPreferencesShown} {updateColumnSelection}/>
@@ -228,7 +227,7 @@
                 </button>
             </div>
 
-            <div class="max-h-[60vh] overflow-y-auto">
+            <div class="max-h-[60vh] min-h-[50vh] overflow-y-auto">
                 {#if $itemQuery.isLoading}
                     <div class="flex items-center justify-center py-12 text-admin-text-muted gap-3">
                         <div class="w-4 h-4 rounded-full border-2 border-admin-text-muted border-t-admin-text-primary animate-spin"></div>
@@ -251,24 +250,35 @@
                                     {@const value = item[ColumnName]}
 
                                     {@const ColumnValueFormatted = ({
-                                        'createdBy': (value: CreatorDto) => createColumnConfig(PopOverPreviewColumn, { label: value.username, displayComponent: CreatedByCard, getPreviewData: async () => {
-                                            return {}
-                                        }}),
-                                        'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: value?.toString() ?? "" }),
+                                        'createdBy': (value: CreatorDto | null) => value 
+                                            ? createColumnConfig(PopOverPreviewColumn, { 
+                                                label: value.username, 
+                                                displayComponent: ProblemCreatorPreviewCard, 
+                                                getPreviewData: async () => {
+                                                    console.log(value.id);
+                                                    return await FetchFromApi<ProblemCreatorPreviewDto>("problem/creator/preview", { 
+                                                        method: "GET"
+                                                    }, fetch, new URLSearchParams({ userId: value.id }))
+                                                }
+                                            })
+                                            : createColumnConfig(RegularColumn, { label: 'Loading...' }),
+                                        'createdOn': (value: Date) => createColumnConfig(RegularColumn, { label: (new Date(value ?? Date.now())).toLocaleDateString() }),
                                         'problemId': (value: string) => createColumnConfig(LinkColumn, { label: value, href: `problem/problem-details?problemId=${value}` }),
                                         'name': (value: string) => createColumnConfig(RegularColumn, { label: value }),
                                         'difficulty': (value: DifficultyDto) => createColumnConfig(RegularColumn, { label: value.name }),
-                                        'category': (value: CategoryDto) => createColumnConfig(RegularColumn, { label: value.name }),
-                                        'completionRatio': (value: string) => createColumnConfig(RegularColumn, { label: value })
+                                        'category': (value: CategoryDto) => createColumnConfig(PopOverPreviewColumn, { label: value.name, displayComponent: CategoryPreviewCard, getPreviewData: async () => {
+                                            return await FetchFromApi<CategoryPreviewDto>("problem/category/preview", { 
+                                                method: "GET"
+                                            }, fetch , new URLSearchParams({ categoryId: value.categoryId}))                                            
+                                        } }),
+                                        'completionRatio': (value: string) => createColumnConfig(RegularColumn, { label: `${(parseFloat(value) * 100).toFixed(1)}%` })
                                     } as Record<keyof ProblemDto, (<P extends Record<string, any>>(value: any) => ComponentConfigStatic<P>)>)[ColumnName](value)}
-                                    
                                     {@const Comp = ColumnValueFormatted.component}
                                     <Comp options={ColumnValueFormatted.options}/>
 
                                 {/each}
                             </div>
-                            <div class="w-9 h-5 flex justify-center item-center">
-                            </div>
+                            <div class="w-9 h-5 flex justify-center item-center"></div>
                         </div>
                     {/each}
                 {/if}

@@ -14,21 +14,20 @@
 
     import 'highlight.js/styles/dark.css';
 	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
-	import { createInfiniteQuery } from "@tanstack/svelte-query";
+	import { createInfiniteQuery, createQuery } from "@tanstack/svelte-query";
 	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
 	import MessageIconSvg from "$lib/svg/EditorComponentIcons/MessageIconSvg.svelte";
 	import BugIconSvg from "$lib/svg/EditorComponentIcons/BugIconSvg.svelte";
 	import ReviewIconSvg from "$lib/svg/EditorComponentIcons/ReviewIconSvg.svelte";
 	import SuggestionComponent, { type SuggestionCardArgs } from "./SuggestionComponent.svelte";
+	import TickIconSvg from "$lib/svg/EditorComponentIcons/TickIconSvg.svelte";
+	import type { AvatarResponse } from "$lib/Components/Headers/MyProfile";
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
     
     let chatId: string = $derived(options.chatId);
     
     hljs.registerLanguage('java', java);
-
-    let connected: boolean = $state(false);
-    let isSending: boolean = $state(false);
 
     let userQuery: string = $state("");
     type FragmentType = "Code" | "Text" | "Name" | "Id";
@@ -37,6 +36,16 @@
         type: FragmentType
         message: string
     }
+    
+
+    const avatarQuery = createQuery({
+        queryFn: async () => {
+            return await FetchFromApi<AvatarResponse>("item/avatar", {
+                method: "GET"
+            });
+        },
+        queryKey: [ "selected-icon" ]
+    });
 
     
     const infiniteQuery = createInfiniteQuery({
@@ -79,23 +88,15 @@
             .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime())
     );
     let connection: signalR.HubConnection | undefined;
-
-    onDestroy(async () => {
-        if (connection){
-            await connection.stop();
-        }
-    });
+    $inspect(connection)
 
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
 
     const sendMessage = async () => {
         console.log('huh');
-        if (!userQuery.trim() || isSending) return;
-
-        isSending = true;
+        if (!userQuery.trim() || options.isConnected === true) return;
         let startedWithouChatName: boolean = options.chatName === undefined;
-
         if (options.pages.length == 0){
             options.pages.unshift({
                 currPage: 1,
@@ -113,9 +114,6 @@
             messageAuthor: "User"
         } as ChatMessage)
         
-
-
-        
         connection = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/assistant`, {
             withCredentials: true,
@@ -126,12 +124,11 @@
 
         try {
             await connection.start()
-            connected = true;
+            options.isConnected = true;
             console.log("connected")
         }catch (err){
-            connected = false;
+            options.isConnected = false;
             console.error("failed", err)
-            isSending = false;
             return;
         }
 
@@ -143,7 +140,7 @@
                 chatId: chatId,
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
-                query: btoa(userQuery),
+                query: userQuery,
             } as AssistantQuery).subscribe({
                 next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
                     console.log(messagePart);
@@ -202,22 +199,19 @@
                 complete: () => {
                     console.log('completed');
                     connection?.stop()
-                    connected = false;
-                    isSending = false;
+                    options.isConnected = false;
                 },
                 error: (err) => {
                     console.log('error inner');
                     console.log(`error: ${err}`);
                     connection?.stop()
-                    connected = false;
-                    isSending = false;
+                    options.isConnected = false;
                 }
             })
         }catch(err){
             console.log('error outer');
             console.log(`error: ${err}`);
-
-            isSending = false;
+            options.isConnected = false;
         }finally{
             console.log('finally outer');
         if (tiptapEditor) {
@@ -239,6 +233,8 @@
             sendMessage();
         }
     }
+    let hasBeenCopied: boolean = $state(false);
+    let copyDebounceTimeout: NodeJS.Timeout | undefined = $state(); 
 </script>
 
 <main class="w-full h-full bg-gradient-to-br from-ide-card to-ide-bg flex flex-col relative">
@@ -315,11 +311,10 @@
             </div>
             <button 
                 onclick={sendMessage} class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-lg transition-all duration-300 ease-out
-                       {isSending || !userQuery.trim() 
+                       {options.isConnected === true || !userQuery.trim() 
                            ? 'bg-ide-dcard/50 cursor-not-allowed opacity-50' 
-                           : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 active:scale-95'}"
-            >
-                {#if isSending}
+                           : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 active:scale-95'}">
+                {#if options.isConnected === true}
                     <div class="w-5 h-5 border-2 border-ide-text-primary/20 border-t-ide-text-primary rounded-full animate-spin"></div>
                 {:else}
                     <SendMessageIconSvg options={{ class: "w-5 h-5 stroke-ide-text-primary stroke-[2]"}}/>
@@ -387,8 +382,12 @@
         style="animation-delay: {index * 50}ms"
     >
         <div class="flex items-center gap-2 pb-2 border-b border-ide-bg/30">
-            <div class="w-10 h-10 rounded-full overflow-hidden flex justify-center items-center bg-red-500">
-                <!-- <CloudfrontImage path={`Ducks/Outfits/duck-16d4a949-0f5f-481a-b9d6-e0329f9d7dd3.png`} cls={"w-15 h-15"}/> -->
+            <div class="w-10 h-10 rounded-full overflow-hidden flex justify-center items-center bg-ide-dcard border-1 border-ide-accent/20 relative">
+                {#if $avatarQuery.isLoading || $avatarQuery.data === undefined}
+                    <div class="w-7 h-7 border-t-3 border-t-ide-text-primary rounded-full animate-spin"></div>
+                {:else}
+                    <img class="absolute w-20 h-20 max-w-none -scale-x-100 -mb-2 -ml-5" src={`https://d3018wbyyxg1xc.cloudfront.net/duck/${$avatarQuery.data.body.itemId}/Sprite.png`} alt="">
+                {/if}
             </div>
             <span class="text-xs text-ide-text-secondary font-medium">Assistant</span>
         </div>
@@ -408,8 +407,19 @@
             <span class="text-xs text-ide-text-secondary font-mono">Java</span>
             <button onclick={() => {
                 navigator.clipboard.writeText(content);
+                hasBeenCopied = true;
+                if (copyDebounceTimeout)
+                    clearTimeout(copyDebounceTimeout)
+                
+                copyDebounceTimeout = setTimeout(() => {
+                    hasBeenCopied = false;
+                }, 5_000)
             }} class="p-2 hover:bg-ide-dcard transition-colors duration-300 ease-out rounded" style="corner-shape: squircle; border-radius: 100px;">
-                <CopyIconSvg options={{ class: "w-4 h-4 stroke-[2] stroke-ide-text-secondary hover:stroke-ide-text-primary transition-colors ease-out duration-300"}}/>
+                {#if hasBeenCopied}
+                    <TickIconSvg options={{ class: "w-4 h-4 stroke-[2] stroke-ide-text-secondary hover:stroke-ide-text-primary transition-colors ease-out duration-300"}}/>
+                {:else}
+                    <CopyIconSvg options={{ class: "w-4 h-4 stroke-[2] stroke-ide-text-secondary hover:stroke-ide-text-primary transition-colors ease-out duration-300"}}/>
+                {/if}
             </button>
         </div>
         {@html `<pre class="hljs language-java text-xs px-4 py-3"><code>${hljs.highlight(content, { language: 'java' }).value}</code></pre>`}

@@ -5,9 +5,15 @@
     import TickIconSvg from "$lib/svg/EditorComponentIcons/TickIconSvg.svelte";
     import QuestionMarkIconSvg from "$lib/svg/Toast/QuestionMarkIconSvg.svelte";
     import WarningIconSvg from "$lib/svg/Toast/WarningIconSvg.svelte";
+	import { onMount } from "svelte";
     import type { SpriteSlot } from "./ItemCreationTypes";
     
     let { slots = $bindable() } : { slots: SpriteSlot[] } = $props();
+
+    onMount(() => {
+        slots = slots.map(slot => ({ ...slot, file: undefined }))
+    });
+
 
     const SLOTS_PER_PAGE = 3;
     
@@ -43,11 +49,6 @@
             slot.file = input.files[0];
         }
     };
-
-    const removeFile = (slot: SpriteSlot) => {
-        slot.file = undefined;
-    };
-
     const getPreviewUrl = (file: File | undefined): string | null => {
         return file ? URL.createObjectURL(file) : null;
     };
@@ -124,7 +125,7 @@
                     {@const preview = getPreviewUrl(slot.file)}
                     <div class="group relative">
                         {#if slot.file}
-                            <div class="aspect-square rounded-lg border-2 border-[#89d185] bg-admin-bg-primary overflow-hidden relative">
+                            <div class="aspect-square rounded-lg border-2 border-admin-success bg-admin-bg-primary overflow-hidden relative">
                                 <div class="w-full h-full flex items-center justify-center bg-admin-bg-hover/20 p-3">
                                     <img src={preview} alt={slot.label} class="max-w-full max-h-full object-contain" />
                                 </div>
@@ -132,7 +133,7 @@
                                     <div class="text-xs font-medium text-admin-text-secondary truncate">{slot.label}</div>
                                     <div class="text-[10px] text-[#89d185] truncate">{slot.file.name}</div>
                                 </div>
-                                <button onclick={() => removeFile(slot)}
+                                <button onclick={() => slot.file = undefined}
                                     class="absolute top-2 right-2 w-6 h-6 rounded-md bg-admin-bg-primary/80 hover:bg-admin-danger-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
                                 >
                                     <CrossIconSvg options={{ class: "w-3 h-3 stroke-[2] stroke-admin-danger-text" }} />
@@ -143,9 +144,7 @@
                             </div>
                         {:else}
                             <label class="aspect-square rounded-lg border-2 border-dashed bg-admin-bg-primary flex flex-col items-center justify-center gap-1.5 p-2 cursor-pointer transition-all
-                                    {dragOverSlot === slot.key 
-                                        ? 'border-admin-accent-link bg-admin-accent-selection/20' 
-                                        : 'border-admin-border-primary hover:border-admin-accent-link hover:bg-admin-bg-primary/80'}"
+                                    {dragOverSlot === slot.key ? 'border-admin-accent-link bg-admin-accent-selection/20' : 'border-admin-border-primary hover:border-admin-accent-link hover:bg-admin-bg-primary/80'}"
                                 ondragover={(e) => { e.preventDefault(); dragOverSlot = slot.key; }}
                                 ondragleave={() => dragOverSlot = null}
                                 ondrop={(e) => handleDrop(slot, e)}

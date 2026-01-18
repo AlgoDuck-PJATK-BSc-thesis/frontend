@@ -91,3 +91,10 @@ export type ProblemStatsDto = {
 export const PerformanceTabs: string[] = [ "Memory", "Runtime" ] as const
 export type PerformanceTab = (typeof PerformanceTabs)[number];
 
+
+export const formatRuntimeNs = (ns: number): string => {
+    const ms = ns / 1_000_000;
+    if (ms < 1) return `${(ns / 1000_000).toFixed(0)}μs`;
+    if (ms < 1000) return `${ms.toFixed(1)}ms`;
+    return `${(ms / 1000_000).toFixed(2)}s`;
+};

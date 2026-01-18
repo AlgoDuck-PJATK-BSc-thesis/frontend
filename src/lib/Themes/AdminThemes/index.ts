@@ -16,3 +16,14 @@ export const applyThemeAdmin = (themeName: AdminTheme) => {
     document.documentElement.style.setProperty(property, value);
   });
 }
+
+
+export const rgbToHex = (rgb: string): string => {
+    const [r, g, b] = rgb.split(' ').map(Number);
+    return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+};
+
+export const rgbToRgba = (rgb: string, alpha: number): string => {
+    const [r, g, b] = rgb.split(' ').map(Number);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};

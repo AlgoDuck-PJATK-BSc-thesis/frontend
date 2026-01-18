@@ -31,13 +31,13 @@
           "component": "TopLevelComponent",
           "options": {
             "component": {
-                "meta": {
-            "clampVal": 0.025,
-            "clamp": {
-              "component": "CodingAreaClamp",
-              "options": {}
-            }
-          },
+              "meta": {
+                "clampVal": 0.025,
+                "clamp": {
+                  "component": "CodingAreaClamp",
+                  "options": {}
+                }
+              },
               "compId": "coding-area",
               "component": "SplitPanel",
               "options": {
@@ -120,48 +120,48 @@
                             }
                           },
                           {
-  "compId": "assistant-wizard-wrapper",
-  "component": "TopLevelComponent",
-  "options": {
-    "component": {
-      "compId": "assistant-wizard",
-      "component": "WizardPanel",
-      "options": {
-        "side": 3,
-        "control": {
-          "compId": "wizard-control-panel",
-          "component": "AssistantWizardControlPanel",
-          "options": {}
-        },
-        "groups": [],
-        "components": []
-      },
-      "meta": {
-        "clampVal": 0.025,
-        "clamp": {
-          "component": "AssistantWizardClamp",
-          "options": {}
-        },
-        "label": {
-          "commonName": "Assistant",
-          "labelFor": "assistant-wizard",
-          "icon": {
-            "component": "AssistantIconSvg",
-            "options": {}
-          }
-        }
-      }
-    }
-  }
-}
+                            "compId": "assistant-wizard-wrapper",
+                            "component": "TopLevelComponent",
+                            "options": {
+                              "component": {
+                                "compId": "assistant-wizard",
+                                "component": "WizardPanel",
+                                "options": {
+                                  "side": 3,
+                                  "control": {
+                                    "compId": "wizard-control-panel",
+                                    "component": "AssistantWizardControlPanel",
+                                    "options": {}
+                                  },
+                                  "groups": [],
+                                  "components": []
+                                },
+                                "meta": {
+                                  "clampVal": 0.025,
+                                  "clamp": {
+                                    "component": "AssistantWizardClamp",
+                                    "options": {}
+                                  },
+                                  "label": {
+                                    "commonName": "Assistant",
+                                    "labelFor": "assistant-wizard",
+                                    "icon": {
+                                      "component": "AssistantIconSvg",
+                                      "options": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
                         ],
-                  "meta": {
-                    "clampVal": 0.025,
-                    "clamp": {
-                      "component": "SolutionDataAreaClamp",
-                      "options": {}
-                    }
-                  }
+                        "meta": {
+                          "clampVal": 0.025,
+                          "clamp": {
+                            "component": "SolutionDataAreaClamp",
+                            "options": {}
+                          }
+                        }
                       }
                     }
                   }
@@ -169,7 +169,6 @@
               }
             }
           }
-          
         }
       }
     }

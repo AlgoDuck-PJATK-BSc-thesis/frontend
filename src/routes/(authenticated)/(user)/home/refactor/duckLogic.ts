@@ -298,7 +298,7 @@ export const updateDuckAnimation = (
 		if (!duck.isSwimming) {
 			duck.isSwimming = true;
 			gifChanged = true;
-			newGifPath = `${`https://d3018wbyyxg1xc.cloudfront.net/Ducks/${duckId}/Swimming.gif`}`;
+			newGifPath = `${`https://d3018wbyyxg1xc.cloudfront.net/duck/${duckId}/Swimming.gif`}`;
 		}
 
 		duck.moveProgress += 1 / MOVE_DURATION;
@@ -311,7 +311,7 @@ export const updateDuckAnimation = (
 
 			duck.isSwimming = false;
 			gifChanged = true;
-			newGifPath = `https://d3018wbyyxg1xc.cloudfront.net/Ducks/${duckId}/Idle.gif`;
+			newGifPath = `https://d3018wbyyxg1xc.cloudfront.net/duck/${duckId}/Idle.gif`;
 		}
 
 

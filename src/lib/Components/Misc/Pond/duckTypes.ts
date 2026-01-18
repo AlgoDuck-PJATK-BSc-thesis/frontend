@@ -29,4 +29,4 @@ export type Coords = {
     y: number
 }
 
-export type ItemType = "Duck" | "Plant"
+export type ItemType = "duck" | "plant"

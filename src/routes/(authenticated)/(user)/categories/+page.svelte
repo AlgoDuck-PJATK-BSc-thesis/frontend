@@ -161,7 +161,7 @@
 	};
 
 	const selectCategory = (categoryName: string): void => {
-		goto(`./categories/problems?category=${categoryName}`);
+		goto(`./categories/problems?categoryId=${categoryName}`);
 	};
 
 	const calculateIslandCoordinates = (): void => {
@@ -252,7 +252,7 @@
 						const distance = Math.sqrt(dx * dx + dy * dy);
 
 						if (clicked && distance < DEADZONE) {
-							selectCategory(loadedCategory.categoryName);
+							selectCategory(loadedCategory.categoryId);
 						}
 					}}
 				>

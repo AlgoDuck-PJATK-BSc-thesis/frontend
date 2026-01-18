@@ -109,8 +109,10 @@
 
 	export const startPlantDrag = (e: MouseEvent, plant: OwnedPlantDto) => {
 		if (isPlantPlaced(plant.itemId)) return;
+		document.body.style.cursor = 'grabbing';
 
 		draggedPlant = plant;
+		dragPosition = { x: e.clientX, y: e.clientY };
 		dragPosition = { x: e.clientX, y: e.clientY };
 		isGridVisible = true;
 
@@ -133,6 +135,7 @@
 	};
 
 	const endPlantDrag = async (e: MouseEvent) => {
+		document.body.style.cursor = 'auto';
 		if (!draggedPlantDims || !draggedPlant || !containerDims || !mainElement) {
 			cleanupDrag();
 			return;
@@ -229,7 +232,7 @@
 				method: "DELETE"
 			}, fetch, new URLSearchParams({ plantId: occupyingPlant.itemId }))
 			if (result.status === "Success"){
-				placedPlants.splice(placedPlants.findIndex(plant => plant.itemId == occupyingPlant.itemId))
+				placedPlants.splice(placedPlants.findIndex(plant => plant.itemId == occupyingPlant.itemId), 1)
 				getPlantRemoveSubgrid(occupyingPlant).map(se => linearizeGridIndex(se)).forEach(index => {
 					if (isPointOnGridOccupied?.at(index)){
 						isPointOnGridOccupied[index] = false;
@@ -308,7 +311,7 @@
 			left: {placedPlant.gridX * cellDims.width}px; 
 			top: {placedPlant.gridY * cellDims.height}px;"
 	>
-		<img src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${placedPlant.itemId}.png`}
+		<img src={`https://d3018wbyyxg1xc.cloudfront.net/plant/${placedPlant.itemId}/Day.png`}
 			alt="plant"
 			class="h-full w-full object-contain"
 		/>
@@ -316,11 +319,11 @@
 {/each}
 
 {#if isGridVisible}
-	<canvas width="{containerDims.width}" height="{containerDims.height}" bind:this={gridCanvas} class="absolute z-901 {isRemoveMode ? "cursor-[url('/shovel.png'),_auto]" : "cursor-default"}" use:drawGrid></canvas>
+	<canvas width="{containerDims.width}" height="{containerDims.height}" bind:this={gridCanvas} class="absolute z-901 {isRemoveMode ? "cursor-[url('/shovel.png'),_auto]" : ""}" use:drawGrid></canvas>
 {/if}
 
 {#if draggedPlant && draggedPlantDims}
 	<div class="pointer-events-none fixed z-[1000]" style="width: {draggedPlantDims.width}px; height: {draggedPlantDims.height}px; left: {dragPosition.x}px; top: {dragPosition.y}px; transform: translate(-50%, -50%);">
-		<img src={`https://d3018wbyyxg1xc.cloudfront.net/Plants/${draggedPlant.itemId}.png`} alt="dragging plant" class="opacity-80"/>
+		<img src={`https://d3018wbyyxg1xc.cloudfront.net/plant/${draggedPlant.itemId}/Day.png`} alt="dragging plant" class="opacity-80"/>
 	</div>
 {/if}

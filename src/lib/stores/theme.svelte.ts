@@ -1,6 +1,6 @@
 import { type EditorThemeName, type ThemeName } from '$lib/Themes';
-
-export type { ThemeName, EditorThemeName } from '$lib/Themes';
+import type { EditorThemeDto, LayoutDto } from '../../routes/(authenticated)/(user)/categories/problems/solve/types';
+import DefaultLayout from '$lib/Components/ComponentTrees/IdeComponentTree/default-layout.json'
 
 export const SupportedLangs = ['pl', 'en'] as const;
 export type Lang = (typeof SupportedLangs)[number];
@@ -10,9 +10,15 @@ export const userThemePreference: { theme: ThemeName; lang: Lang } = $state({
 	lang: 'en'
 });
 
-export const userEditorPreferences: { theme: EditorThemeName; fontSize: number; layout: string } =
-	$state({
-		theme: 'vs-dark',
-		fontSize: 16,
-		layout: 'default'
-	});
+export const userEditorPreferences: { theme: EditorThemeDto; fontSize: number, layout: LayoutDto } = $state({
+	theme: {
+		themeName: 'vs-dark',
+		themeId: ''
+	},
+	fontSize: 16,
+	layout: {
+		layoutName: 'default',
+		layoutId: '',
+		layoutContent: DefaultLayout
+	}
+});

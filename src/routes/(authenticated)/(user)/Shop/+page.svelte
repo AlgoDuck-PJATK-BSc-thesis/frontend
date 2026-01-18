@@ -11,6 +11,8 @@
 	import { ConversationBuilder, type ConversationExecutor } from './MessageTypes';
 	import { UserData } from '$lib/stores/userData.svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 
 	const hoverAnimationTime = 3000;
 	const driftAmount = 15;
@@ -20,10 +22,17 @@
 
 	let contentRect: DOMRect | undefined = $state();
 
+	let primarySpriteName: Record<ItemType, string> = {
+		"duck": "Sprite.png",
+		"plant": "Day.png"
+	}
+
 	let isDuckButtonPressed: boolean = $state(false);
 	let isFlowerButtonPressed: boolean = $state(false);
 
 	let currentlySelectedItem: Item | undefined = $state();
+
+	const queryClient = useQueryClient();
 
 	const selectItem = (selected: Item, wasAutomatic: boolean) => {
 		currentlySelectedItem = selected;
@@ -41,20 +50,35 @@
 
 	const handlePurchase = async (item: Item) => {
 		const userCoins: number = UserData.user.coins;
+		const currPageCapture = currentPage;
+		const currPageSizeCapture = currentPageSize;
+		const itemTypeCapture = selectedTab;
 		conversation()
 			.react('purchase_accepted', { userCoins, item })
 			.end();
 		if (UserData.user.coins >= item.price) {
-
 			FetchFromApi<{ itemId: string }>("PurchaseItem", {
 				method: "POST",
 				body: JSON.stringify({
 					itemId: item.itemId
-				})
+			})
 			}).then((value: StandardResponseDto<{ itemId: string }>) => {
-				console.log(value.body.itemId)
+				console.log([itemTypeCapture, currPageCapture, currPageSizeCapture])
+				console.log(queryClient.getQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture]))
+				queryClient.setQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture], (oldData: any) => {
+					if (!oldData) return oldData;
+					return {
+						...oldData,
+						body: {
+							...oldData.body,
+							items: oldData.body.items.map((d: Item) =>
+								d.itemId === value.body.itemId ? { ...d, isOwned: true } : d
+							)
+						}
+					};
+				});
+				console.log(queryClient.getQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture]))
 				UserData.user.coins -= item.price;
-				item.isOwned = true;
 			}).catch();
 		
 		}
@@ -66,21 +90,21 @@
 			.end();
 	};
 
-	let selectedTab: ItemType = $state("Duck");
-	let tabs: Record<ItemType, { component: Component<{options: ShopPageArgs}>, options: ShopPageArgs }> = $state({
-		"Duck": {
+	let selectedTab: ItemType = $state("duck");
+	let tabs: Record<ItemType, { component: Component<{ options: ShopPageArgs, currentPage: number, currentPageSize: number }>, options: ShopPageArgs }> = $state({
+		"duck": {
 			component: ItemPager,
 			options: {
-				itemType: "Duck",
+				itemType: "duck",
 				endpoint: "item/duck",
 				itemDisplay: DuckDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
 			}
 		},
-		"Plant": {
+		"plant": {
 			component: ItemPager,
 			options: {
-				itemType: "Plant",
+				itemType: "plant",
 				endpoint: "item/plant",
 				itemDisplay: PlantDisplay,
 				select: (selected: Item, wasAutomatic: boolean) => selectItem(selected, wasAutomatic)
@@ -88,8 +112,8 @@
 		}
 	});
 
-	let CurrentTabComp: Component<{ options: ShopPageArgs }> = $derived(tabs[selectedTab].component ?? tabs["Duck"].component);
-	let CurrentTabOptions: ShopPageArgs = $derived(tabs[selectedTab].options ?? tabs["Duck"].options);
+	let CurrentTabComp: Component<{ options: ShopPageArgs, currentPage: number, currentPageSize: number }> = $derived(tabs[selectedTab].component ?? tabs["duck"].component);
+	let CurrentTabOptions: ShopPageArgs = $derived(tabs[selectedTab].options ?? tabs["duck"].options);
 
 	let chatWindowContents: ChatMessageEntry[] = $state([]);
 
@@ -244,6 +268,9 @@
 			.react('entered_shop', { userCurrencyCount: UserData.user.coins })
 			.end();
 	});
+
+	let currentPage: number = $state(1);
+	let currentPageSize: number = $state(12)
 </script>
 
 <main class="relative h-full w-full flex justify-center items-center overflow-none">
@@ -272,7 +299,7 @@
 		<div class="relative h-full w-3/4">
 			<div bind:contentRect class="absolute top-[9%] right-[1%] h-[57%] w-[88%] overflow-y-hidden">
 				{#key selectedTab}
-					<CurrentTabComp options={CurrentTabOptions}/>
+					<CurrentTabComp options={CurrentTabOptions} bind:currentPage bind:currentPageSize/>
 				{/key}
 			</div>
 			<div class="absolute h-[6%] top-[3%] z-999 left-[15%] flex flex-row gap-1 py-[0.1%] px-[1%]">
@@ -281,7 +308,7 @@
 				}}
 				onmouseup={() => {
 					isDuckButtonPressed = false;
-					selectedTab = 'Duck';
+					selectedTab = 'duck';
 				}}
 				class="h-full">
 					<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
@@ -291,7 +318,7 @@
 				}}
 				onmouseup={() => {
 					isFlowerButtonPressed = false;
-					selectedTab = 'Plant';
+					selectedTab = 'plant';
 				}}
 				class="h-full">
 					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
@@ -325,7 +352,7 @@
 						raf = requestAnimationFrame(animate);
 						return () => cancelAnimationFrame(raf);
 					}}>
-					<CloudfrontImage path={`${selectedTab}s/${currentlySelectedItem.itemId}/Sprite.png`} cls="max-h-full" />
+					<CloudfrontImage path={`${selectedTab}/${currentlySelectedItem.itemId}/${primarySpriteName[selectedTab]}`} cls="max-h-full" />
 				</div>
 			{/if}
 		</div>

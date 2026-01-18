@@ -12,6 +12,7 @@
 	import * as signalR from '@microsoft/signalr';
 	import { isTerminalStatus, type IntermediateStatus, type SubmissionResult, type TerminalStatus } from '$lib/types/domain/modules/problem/solve';
 	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
+	import PreviousSolutionsPanel from './IdeComponents/PreviousSolutionsPanel.svelte';
 
 	let { 
 		components = $bindable(),
@@ -93,11 +94,7 @@
 			.build();
 		
 		connection.on("ExecutionStatusUpdated", (executionResponse: StandardResponseDto<SubmissionResult>) => {
-			console.log(executionResponse);
-			// (components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.body.status;
-			console.log(`status: ${executionResponse.body.status}`);
-			console.log(components['terminal-comp']);
-			console.log("got through terminal comp set");
+			(components['terminal-comp'] as TerminalComponentArgs).status = executionResponse.body.status;
 
 			executingState = executionResponse.body.status;
 			
@@ -144,17 +141,40 @@
 		}
 	});
 
-	const registerAndSelectLayout = async (layoutId: string): Promise<void> => {
-		if (!layouts[layoutId]){
-			let res = await FetchFromApi<{ layoutId: string, layoutContents: string }>("CustomLayoutDetails", {
-				method: "GET"
-			}, fetch, new URLSearchParams({ layoutId: layoutId }))
+	type PreviousSolutionLoadDto = {
+		solutionId: string,
+		codeB64: string
+	}
 
-			layouts[layoutId] = res.body.layoutContents;
+	let stash: string | undefined;
+	const restorePreviousSolutionCallback = async (solutionId: string): Promise<void> => {
+		try{
+			console.log(solutionId);
+			let res: StandardResponseDto<PreviousSolutionLoadDto> = await FetchFromApi<PreviousSolutionLoadDto>("problem/solution", {
+				method: "GET"
+			}, fetch, new URLSearchParams({ solutionId: solutionId }));
+			console.log(res);
+			if (res.status === "Error" && res.message){
+				toast.error(`Failed while restoring attempt \nReason: ${res.message}`)
+				return;
+			}
+			stash = (components['code-editor'] as CodeEditorComponentArgs).userCode;
+
+			(components['code-editor'] as CodeEditorComponentArgs).isDetachedHeadMode = true;
+			(components['code-editor'] as CodeEditorComponentArgs).upstreamChanged = true;
+			(components['code-editor'] as CodeEditorComponentArgs).userCode = atob(res.body.codeB64);
+
+		}catch(err){
+			toast.error(`Failed while restoring attempt \nReason: ${err}`)
 		}
-		if (layouts[layoutId])
-			userEditorPreferences.layout = layoutId;
-	} 
+	}
+
+	const unloadPreviousSolutionCallback = () => {
+		if (!stash) return;
+		(components['code-editor'] as CodeEditorComponentArgs).isDetachedHeadMode = false;
+		(components['code-editor'] as CodeEditorComponentArgs).upstreamChanged = true;
+		(components['code-editor'] as CodeEditorComponentArgs).userCode = stash;
+	}
 </script>
 
 <main class="w-full h-[100vh] flex flex-col">
@@ -164,16 +184,17 @@
 	<div class="w-full h-[5%]">
 		<TopPanel
 		problemId={problemId}
-		{registerAndSelectLayout}
 		{executingState}
 		{executeCallback}
 		{submitCallback}
+		{restorePreviousSolutionCallback}
+		{unloadPreviousSolutionCallback}
 		bind:isSettingsPanelShown
 		/>
 	</div>
 	<div class="w-full h-[95%] flex p-[0.5%]">
 		<ComponentTreeRenderer
-		componentTree={layouts[userEditorPreferences.layout]} 
+		componentTree={userEditorPreferences.layout.layoutContent} 
 		{contextInjectors}
 		bind:componentOpts={components}
 		/>

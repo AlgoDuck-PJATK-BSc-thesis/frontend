@@ -23,9 +23,11 @@ class ToastStore {
 		}
 	}
 
-	remove(id: string) {
-		this.toasts = this.toasts.filter(t => t.id !== id);
-	}
+remove(id: string) {
+    console.log('removing', id, 'from', this.toasts.map(t => t.id));
+    this.toasts = this.toasts.filter(t => t.id !== id);
+    console.log('after remove', this.toasts.map(t => t.id));
+}
 
 	success(message: string, duration?: number) {
 		this.add(message, 'success', duration);

@@ -87,6 +87,7 @@
 			tiptapEditor.chain().focus().setHeading({ level: selected as Level }).run();
 		}
 	};
+
 </script>
 
 <main class="flex flex-col gap-1">
@@ -173,7 +174,7 @@
 						tiptapEditor = tiptapEditor;
 						updateActiveStates();
 					},
-					onUpdate: ({ editor }: { editor: Editor }) => {
+					onBlur: ({ editor }: { editor: Editor }) => {
 						editorContents = editor.getHTML();
 					},
 					onSelectionUpdate: () => {

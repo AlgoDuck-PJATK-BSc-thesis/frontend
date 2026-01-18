@@ -8,6 +8,7 @@ export type ItemType = (typeof ItemTypes)[number];
 
 
 export type ItemCreateDto = {
+    itemId?: string,
     itemName: string,
     description: string,
     itemCost: number,
@@ -42,4 +43,11 @@ export type SpriteSlot = {
     description: string;
     accept: string;
     file?: File;
+}
+
+export type ItemCreationPageArgs = {
+    rarities: RarityDto[],
+    itemData?: ItemCreateDto,
+    isEditMode: boolean,
+    itemId?: string,
 }

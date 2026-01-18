@@ -12,6 +12,7 @@ export interface Item {
     isOwned: boolean,
     description: string,
     itemRarity: RarityDto
+    $type: string
 }
 
 

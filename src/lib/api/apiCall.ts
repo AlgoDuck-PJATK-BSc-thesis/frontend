@@ -8,6 +8,17 @@ export type StandardResponseDto<T = {}> = {
 	body: T;
 };
 
+export class ApiError<T = unknown> extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public response: StandardResponseDto<T>
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 const normalizeApiOrigin = (v: string) => {
 	const s = (v ?? '').trim().replace(/\/+$/, '');
 	return s.endsWith('/api') ? s.slice(0, -4) : s;
@@ -130,11 +141,12 @@ export const FetchJsonFromApi = async <TResult>(
 			if (isStandardResponseDto(parsed)) {
 				const m = (parsed.message ?? '').toString().trim();
 				if (m) parsedMessage = m;
-			} else if (parsed && typeof parsed === 'object') {
-				const maybeMessage = (parsed as Record<string, unknown>).message;
-				if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
-					parsedMessage = maybeMessage.trim();
-				}
+				
+				throw new ApiError(
+					m || msg,
+					res.status,
+					parsed as StandardResponseDto<unknown>
+				);
 			}
 
 			if (res.status === 403 && !csrfReplay && isCsrfFailureMessage(parsedMessage)) {

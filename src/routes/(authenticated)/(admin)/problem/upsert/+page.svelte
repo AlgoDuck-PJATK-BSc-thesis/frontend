@@ -317,7 +317,7 @@
                         <span class="text-sm text-[#89d185]">
                             Problem {isInEditMode ? 'updated' : 'created'} successfully!
                         </span>
-                        <a href="/problems/{createdProblemId}" class="text-sm text-admin-accent-primary hover:underline ml-2">
+                        <a href={`./problem-details?problemId=${createdProblemId}`} class="text-sm text-admin-accent-primary hover:underline ml-2">
                             View problem
                         </a>
                     </div>

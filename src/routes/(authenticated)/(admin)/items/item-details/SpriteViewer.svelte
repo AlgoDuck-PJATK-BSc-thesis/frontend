@@ -1,107 +1,109 @@
 <script lang="ts">
     import ImageIconScg from "$lib/svg/EditorComponentIcons/ImageIconScg.svelte";
-    import { getSpriteConfigForType, type ItemType } from "./ItemDetailsTypes";
+	import { drawGrid } from "../../../(user)/home/refactor/gridUtils";
+	import type { ObjectDims2d } from "../../../(user)/home/refactor/PondTypes";
+    import type { ItemType } from "./ItemDetailsTypes";
 
-    let { itemId, itemType }: { itemId: string; itemType: ItemType } = $props();
+    let { itemId, itemType, spriteList }: { itemId: string; itemType: ItemType; spriteList: string[] } = $props();
 
-    const spriteConfig = $derived(getSpriteConfigForType(itemType));
-    
-    let activeSprite: string = $state(spriteConfig[0]?.key ?? "");
+    let activeSprite: string = $state(spriteList[0] ?? "");
+    let imageError: boolean = $state(false);
+    let isLoading: boolean = $state(true);
 
     const getSpriteUrl = (key: string): string => {
-        return `https://d3018wbyyxg1xc.cloudfront.net/${itemType.at(0)?.toUpperCase()}${itemType.slice(1)}s/${itemId}/${key}`;
+        return `https://d3018wbyyxg1xc.cloudfront.net/${itemType.toLowerCase()}/${itemId}/${key}`;
     };
 
     let activeUrl = $derived(getSpriteUrl(activeSprite));
 
-    let imageError: boolean = $state(false);
-
     const handleImageError = () => {
         imageError = true;
+        isLoading = false;
     };
 
     const handleImageLoad = () => {
         imageError = false;
+        isLoading = false;
     };
 
     $effect(() => {
         activeSprite;
         imageError = false;
+        isLoading = true;
     });
+    let grid1Dims: ObjectDims2d = $state({} as ObjectDims2d);
+    let grid2Dims: ObjectDims2d = $state({} as ObjectDims2d);
 </script>
 
-<div class="bg-admin-bg-secondary border border-admin-border-primary rounded-lg overflow-hidden">
-    <div class="flex items-center justify-between px-4 py-3 bg-admin-bg-tertiary border-b border-admin-border-primary">
-        <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Sprites</h3>
-        <span class="text-xs text-admin-text-muted">{spriteConfig.length} sprites</span>
-    </div>
-
-    <div class="p-5 flex flex-col gap-5">
-        <div class="p-4 bg-admin-bg-primary rounded-lg border border-admin-border-primary">
-            <div class="flex items-center justify-between mb-3">
-                <div class="text-xs text-admin-text-muted uppercase tracking-wider">Preview</div>
-                {#if spriteConfig.length > 1}
-                    <div class="flex flex-row items-center gap-1 bg-admin-border-primary rounded-full p-1">
-                        {#each spriteConfig as sprite}
-                            <button
-                                onclick={() => activeSprite = sprite.key}
-                                class="px-3 py-1 rounded-full text-xs transition-all
-                                    {activeSprite === sprite.key 
-                                        ? 'bg-admin-accent-primary text-white font-medium' 
-                                        : 'text-admin-text-muted hover:text-admin-text-secondary'}"
-                            >
-                                <span>{sprite.label}</span>
-                            </button>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-            <div class="h-48 rounded-lg bg-admin-bg-secondary flex items-center justify-center relative overflow-hidden">
-                <div class="w-32 h-32 flex items-center justify-center">
-                    {#if !imageError}
-                        <img
-                            src={activeUrl}
-                            alt={spriteConfig.find(s => s.key === activeSprite)?.label ?? "Sprite"}
-                            class="max-w-full max-h-full object-contain"
-                            onerror={handleImageError}
-                            onload={handleImageLoad}
-                        />
-                    {:else}
-                        <div class="flex flex-col items-center gap-2 text-admin-text-muted">
-                            <ImageIconScg options={{ class: 'w-10 h-10 stroke-[1] stroke-admin-text-muted' }} />
-                            <span class="text-xs">Failed to load</span>
-                        </div>
-                    {/if}
+<div class="bg-admin-bg-secondary border border-admin-border-primary rounded-xl overflow-hidden flex flex-col">
+    <div class="aspect-square w-full bg-admin-bg-primary relative overflow-hidden">
+        <canvas {@attach node => {
+            $effect(()=>{
+                drawGrid(node, 'rgba(55, 65, 81, 0.5)', 1, {width: 20, height: 20});
+            })
+        }} bind:clientHeight={grid1Dims.height} bind:clientWidth={grid1Dims.width} width={grid1Dims.width} height={grid1Dims.height} class="absolute inset-0 opacity-[0.03] w-full h-full"
+        ></canvas>
+        <canvas {@attach node => {
+            $effect(()=>{
+                drawGrid(node, 'rgba(255, 00, 00, 1)', 3, {width: 2, height: 2});
+            })
+        }} bind:clientHeight={grid2Dims.height} bind:clientWidth={grid2Dims.width} width={grid2Dims.width} height={grid2Dims.height} class="absolute inset-0 opacity-[0.03] w-full h-full"
+        ></canvas>
+        <div class="absolute inset-0 max-w-3xl flex items-center justify-center p-12">
+            {#if isLoading && !imageError}
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-8 h-8 border-2 border-admin-border-primary border-t-admin-accent-primary rounded-full animate-spin"></div>
                 </div>
+            {/if}
+            
+            {#if !imageError}
+                <img src={activeUrl} alt={activeSprite} class="max-w-full max-h-full object-contain transition-opacity duration-300 drop-shadow-2xl"
+                    class:opacity-0={isLoading}
+                    class:opacity-100={!isLoading}
+                    onerror={handleImageError}
+                    onload={handleImageLoad}
+                    style="image-rendering: pixelated;"
+                />
+            {:else}
+                <div class="flex flex-col items-center gap-3 text-admin-text-muted">
+                    <div class="w-16 h-16 rounded-2xl bg-admin-bg-secondary border border-admin-border-primary flex items-center justify-center">
+                        <ImageIconScg options={{ class: 'w-8 h-8 stroke-[1.5] stroke-current' }} />
+                    </div>
+                    <span class="text-sm">Failed to load sprite</span>
+                </div>
+            {/if}
+        </div>
+
+        <div class="absolute top-4 left-4">
+            <div class="px-3 py-1.5 bg-admin-bg-secondary/90 backdrop-blur-sm border border-admin-border-primary rounded-lg">
+                <span class="text-xs font-medium text-admin-text-primary">{activeSprite}</span>
             </div>
         </div>
 
-        <div class="grid gap-4" style="grid-template-columns: repeat({spriteConfig.length}, 1fr);">
-            {#each spriteConfig as sprite}
-                {@const url = getSpriteUrl(sprite.key)}
-                <button
-                    onclick={() => activeSprite = sprite.key}
-                    class="group relative aspect-square rounded-lg border-2 overflow-hidden transition-all
-                        {activeSprite === sprite.key 
-                            ? 'border-admin-accent-primary bg-admin-bg-primary' 
-                            : 'border-admin-border-primary bg-admin-bg-primary hover:border-admin-accent-link'}"
-                >
-                    <div class="w-full h-full flex items-center justify-center p-3">
-                        <img
-                            src={url}
-                            alt={sprite.label}
-                            class="max-w-full max-h-full object-contain"
-                            onerror={(e) => (e.currentTarget as HTMLImageElement).style.display = 'none'}
-                        />
-                    </div>
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-admin-bg-primary via-admin-bg-primary/90 to-transparent p-2 pt-4">
-                        <div class="text-xs font-medium text-admin-text-secondary text-center">{sprite.label}</div>
-                    </div>
-                    {#if activeSprite === sprite.key}
-                        <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-admin-accent-primary"></div>
-                    {/if}
-                </button>
-            {/each}
+        <div class="absolute top-4 right-4">
+            <div class="px-3 py-1.5 bg-admin-bg-secondary/90 backdrop-blur-sm border border-admin-border-primary rounded-lg">
+                <span class="text-xs text-admin-text-muted">{spriteList.indexOf(activeSprite) + 1} / {spriteList.length}</span>
+            </div>
         </div>
     </div>
+
+    {#if spriteList.length > 1}
+        <div class="px-4 py-3 bg-admin-bg-tertiary border-t border-admin-border-primary">
+            <div class="flex items-center gap-2 overflow-x-auto scrollbar-thin">
+                {#each spriteList as sprite}
+                    <button onclick={() => activeSprite = sprite}
+                        class="group relative flex-shrink-0 w-14 h-14 rounded-lg border-2 transition-all duration-200 overflow-hidden
+                            {activeSprite === sprite 
+                                ? 'border-admin-accent-primary bg-admin-accent-primary/10' 
+                                : 'border-admin-border-primary bg-admin-bg-primary hover:border-admin-text-muted/40'}">
+                        <img src={getSpriteUrl(sprite)} alt={sprite} class="w-full h-full object-contain p-1.5"/>
+                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="block text-[9px] text-white text-center py-1 truncate px-1">{sprite}</span>
+                        </div>
+                    </button>
+                {/each}
+            </div>
+        </div>
+    {/if}
 </div>
+

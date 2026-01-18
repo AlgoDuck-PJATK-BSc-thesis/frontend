@@ -8,6 +8,6 @@ export const load: PageLoad = async ({ params, url, fetch }) : Promise<StandardR
 }
 
 export type CategoryDto = {
-    id: string, /* TODO: I was under the impression that there was an UUID type??? */
+    categoryId: string, /* TODO: I was under the impression that there was an UUID type??? */
     categoryName: string
 }

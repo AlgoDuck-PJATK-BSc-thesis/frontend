@@ -3,9 +3,9 @@ export type ProblemDto = {
     name: string | null,
     createdOn: Date | null,
     createdBy: string | null,
+    category: string | null,
     completionRatio: number | null,
     difficulty: string | null,
-    category: string | null,
 }
 
 export type CategoryDto = {
@@ -28,5 +28,19 @@ export type CreatorDto = {
 export type ProblemKeys = keyof ProblemDto
 
 
-export const QueryableColumns =  ["problemId", "name", "createdOn", "createdBy", "completionRatio", "difficulty", "category"] as const;
+export const QueryableColumns =  ["problemId", "name", "createdOn", "createdBy", "category", "completionRatio", "difficulty"] as const;
 export type QueryableColumn = (typeof QueryableColumns)[number] & keyof ProblemDto;
+
+export type CategoryPreviewDto = {
+    categoryId: string,
+    categoryName: string,
+    problemCount: number
+}
+
+export type ProblemCreatorPreviewDto = {
+    id: string,
+    username: string,
+    email: string,
+    selectedAvatar: string,
+    problemCreatedCount: number
+}

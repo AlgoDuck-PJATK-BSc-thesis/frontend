@@ -1,3 +1,4 @@
+import AssistantWizardBuiler from "$lib/Components/ComponentTrees/BuilderComponentTree/AssistantWizardBuiler.svelte";
 import EditorBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/EditorBuilder.svelte";
 import InfoPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/InfoPanelBuilder.svelte";
 import SolutionAreaControlPanelBuilder from "$lib/Components/ComponentTrees/BuilderComponentTree/SolutionAreaControlPanelBuilder.svelte";
@@ -115,6 +116,7 @@ export const InitializeRegistryDefault = (): void => {
     builder.set('InfoPanelIconSvg', InfoPanelIconSvg);
     builder.set('TestCasesIconSvg', TestCasesIconSvg);
     builder.set("TerminalIconSvg", TerminalIconSvg);
+    builder.set("TerminalWizardPanel", AssistantWizardBuiler)
 
     ComponentRegistry.set('builder', builder);
 }

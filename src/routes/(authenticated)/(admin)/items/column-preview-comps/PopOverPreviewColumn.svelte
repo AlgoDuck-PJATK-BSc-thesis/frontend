@@ -2,19 +2,20 @@
     import type { Component } from "svelte";
     import type { PopOverColumnArgs } from "./columnPreviewArgs";
     import { fly } from "svelte/transition";
+	import type { StandardResponseDto } from "$lib/api/apiCall";
 
     let { options }: { options: PopOverColumnArgs<T> } = $props();
 
     let isPreviewVisible = $state(false);
-    let previewData = $state<T | null>(null);
+    let previewData: StandardResponseDto<T> | null = $state(null);
     let isLoading = $state(false);
-    let error = $state<string | null>(null);
+    let error: string | null = $state(null);
 
     let hoverTimeout: ReturnType<typeof setTimeout> | undefined;
     let hideTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    let triggerEl = $state<HTMLButtonElement | null>(null);
-    let popoverEl = $state<HTMLDivElement | null>(null);
+    let triggerEl: HTMLButtonElement | null = $state(null);
+    let popoverEl: HTMLDivElement | null = $state(null);
 
     const HOVER_DELAY = 300;
     const HIDE_DELAY = 150; 
@@ -66,7 +67,7 @@
         }
     };
 
-    let Comp: Component<{ options: T }> = $derived(options.displayComponent);
+    let Comp: Component<{ options: StandardResponseDto<T> }> = $derived(options.displayComponent);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />

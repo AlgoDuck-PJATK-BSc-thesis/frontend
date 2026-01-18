@@ -32,6 +32,8 @@ export interface CodeEditorComponentArgs extends DefaultLayoutTerminalComponentA
   templateContents: string,
   userCode?: string,
   problemId: string,
+  isDetachedHeadMode: boolean,
+  upstreamChanged?: boolean
 }
 
 export interface TestCaseComponentArgs extends DefaultLayoutTerminalComponentArgs {
@@ -46,6 +48,7 @@ export interface ChatWindowComponentArgs extends DefaultLayoutTerminalComponentA
   chatId: string,
   pages: CustomPageData<ChatMessage>[],
   problemId: string,
+  isConnected?: boolean,
   getUserCode: () => string,
   changeLabel: (id: string, newLabel: string) => void
 }
