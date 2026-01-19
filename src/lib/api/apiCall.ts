@@ -9,14 +9,14 @@ export type StandardResponseDto<T = {}> = {
 };
 
 export class ApiError<T = unknown> extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public response: StandardResponseDto<T>
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
+	constructor(
+		message: string,
+		public status: number,
+		public response: StandardResponseDto<T>
+	) {
+		super(message);
+		this.name = 'ApiError';
+	}
 }
 
 const normalizeApiOrigin = (v: string) => {
@@ -59,6 +59,34 @@ const isCsrfFailureMessage = (msg: string | null | undefined) => {
 	return m.includes('csrf validation failed');
 };
 
+const isApiDebugEnabled = (): boolean => {
+	try {
+		if (typeof localStorage !== 'undefined' && localStorage.getItem('api_debug') === '1')
+			return true;
+	} catch {}
+	try {
+		const w = typeof window !== 'undefined' ? (window as any) : null;
+		if (w && w.__API_DEBUG__ === true) return true;
+	} catch {}
+	return false;
+};
+
+const makeRequestId = (): string => {
+	try {
+		const c: any = typeof crypto !== 'undefined' ? crypto : null;
+		if (c && typeof c.randomUUID === 'function') return c.randomUUID();
+	} catch {}
+	const a = Math.random().toString(16).slice(2);
+	const b = Math.random().toString(16).slice(2);
+	return `${Date.now().toString(16)}-${a}-${b}`;
+};
+
+const buildError = (message: string, meta: Record<string, unknown>) => {
+	const err = new Error(message);
+	for (const [k, v] of Object.entries(meta)) (err as any)[k] = v;
+	return err;
+};
+
 export const FetchJsonFromApi = async <TResult>(
 	endpoint: string,
 	fetchOptions: RequestInit = {},
@@ -81,6 +109,11 @@ export const FetchJsonFromApi = async <TResult>(
 		url.search = searchParams.toString();
 	}
 
+	const method = ((fetchOptions.method ?? 'GET') as string).toUpperCase();
+	const requestId = makeRequestId();
+	const debug = isApiDebugEnabled();
+	const startedAt = Date.now();
+
 	const csrfToken = getCookie('csrf_token');
 
 	let res: Response;
@@ -92,15 +125,39 @@ export const FetchJsonFromApi = async <TResult>(
 		if (shouldSetJsonContentType(body) && !merged.has('Content-Type'))
 			merged.set('Content-Type', 'application/json');
 		if (csrfToken && !merged.has('X-CSRF-Token')) merged.set('X-CSRF-Token', csrfToken);
+		if (!merged.has('X-Client-Request-Id')) merged.set('X-Client-Request-Id', requestId);
+
+		if (debug && typeof console !== 'undefined') {
+			console.log('[api]', { requestId, method, url: url.toString() });
+		}
 
 		res = await usedFetcher(url.toString(), {
 			...fetchOptions,
 			credentials: fetchOptions.credentials ?? 'include',
 			headers: merged
 		});
-	} catch {
-		throw new Error('Backend unavailable.');
+	} catch (e) {
+		const durationMs = Date.now() - startedAt;
+		const msg = `Backend unavailable [${method} ${cleanEndpoint} id:${requestId}]`;
+		if (debug && typeof console !== 'undefined') {
+			console.error('[api:error]', {
+				requestId,
+				method,
+				url: url.toString(),
+				durationMs,
+				error: e
+			});
+		}
+		throw buildError(msg, {
+			requestId,
+			method,
+			endpoint: cleanEndpoint,
+			url: url.toString(),
+			durationMs
+		});
 	}
+
+	const durationMs = Date.now() - startedAt;
 
 	if (!res.ok) {
 		if (res.status === 401 && !replay) {
@@ -126,27 +183,24 @@ export const FetchJsonFromApi = async <TResult>(
 
 		const ct = res.headers.get('content-type') ?? '';
 		let msg = `API Error ${res.status}: ${res.statusText}`;
+		let parsedMessage: string | null = null;
+		let parsed: unknown = null;
+		let detailText: string | null = null;
 
 		if (ct.includes('application/json')) {
-			let parsed: unknown = null;
-
 			try {
 				parsed = (await res.json()) as unknown;
 			} catch {
 				parsed = null;
 			}
 
-			let parsedMessage: string | null = null;
-
 			if (isStandardResponseDto(parsed)) {
 				const m = (parsed.message ?? '').toString().trim();
 				if (m) parsedMessage = m;
-				
-				throw new ApiError(
-					m || msg,
-					res.status,
-					parsed as StandardResponseDto<unknown>
-				);
+			} else if (parsed && typeof parsed === 'object') {
+				const maybeMessage = (parsed as Record<string, unknown>).message;
+				if (typeof maybeMessage === 'string' && maybeMessage.trim())
+					parsedMessage = maybeMessage.trim();
 			}
 
 			if (res.status === 403 && !csrfReplay && isCsrfFailureMessage(parsedMessage)) {
@@ -163,12 +217,48 @@ export const FetchJsonFromApi = async <TResult>(
 			if (parsedMessage) msg = parsedMessage;
 		} else {
 			try {
-				const detail = (await res.text()).trim();
-				if (detail) msg = `${msg} - ${detail}`;
-			} catch {}
+				const t = (await res.text()).trim();
+				if (t) detailText = t;
+			} catch {
+				detailText = null;
+			}
+			if (detailText) msg = `${msg} - ${detailText}`;
 		}
 
-		throw new Error(msg);
+		const fullMsg = `${msg} [${method} ${cleanEndpoint} ${res.status} id:${requestId}]`;
+
+		if (debug && typeof console !== 'undefined') {
+			console.error('[api:fail]', {
+				requestId,
+				method,
+				url: url.toString(),
+				endpoint: cleanEndpoint,
+				status: res.status,
+				durationMs,
+				message: msg,
+				parsed
+			});
+		}
+
+		throw buildError(fullMsg, {
+			requestId,
+			method,
+			endpoint: cleanEndpoint,
+			url: url.toString(),
+			status: res.status,
+			durationMs,
+			message: msg
+		});
+	}
+
+	if (debug && typeof console !== 'undefined') {
+		console.log('[api:ok]', {
+			requestId,
+			method,
+			url: url.toString(),
+			status: res.status,
+			durationMs
+		});
 	}
 
 	const contentType = res.headers.get('content-type') ?? '';

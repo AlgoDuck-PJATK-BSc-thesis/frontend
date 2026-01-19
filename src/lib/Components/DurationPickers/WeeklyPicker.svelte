@@ -49,7 +49,7 @@
 </script>
 
 <div
-	class="rounded-xl bg-[color:var(--color-accent-3)] p-3 text-sm text-[color:var(--color-landingpage-subtitle)]"
+	class="rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-3 text-sm text-[color:var(--color-landingpage-subtitle)]"
 >
 	<div class="mb-3 text-xs font-semibold tracking-wide uppercase opacity-80">Weekly reminder</div>
 

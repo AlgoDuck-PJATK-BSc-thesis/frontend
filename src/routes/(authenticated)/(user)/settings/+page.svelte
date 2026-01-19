@@ -8,10 +8,16 @@
 	import type { WeeklyReminderConfig } from '$lib/types/StudyTimerTypes';
 	import { profileApi } from '$lib/api/profile';
 	import { authApi, type UserSessionDto } from '$lib/api/auth';
-	import { settingsApi, type Reminder, type UserConfigDto } from '$lib/api/settings';
-	import { userThemePreference, type ThemeName } from '$lib/stores/theme.svelte';
+	import { loadAndApplyUserConfig } from '$lib/api/userSettings';
+	import {
+		settingsApi,
+		type Reminder,
+		type UpdatePreferencesDto,
+		type UserConfigDto
+	} from '$lib/api/settings';
+	import { userThemePreference } from '$lib/stores/theme.svelte';
 	import { accessibility } from '$lib/stores/accessibility.svelte';
-	import { applyTheme } from '$lib/Themes';
+	import { setThemeWithContrast, type ThemeName } from '$lib/Themes';
 
 	type PageDataShape = {
 		config: UserConfigDto | null;
@@ -103,18 +109,22 @@
 		return out;
 	};
 
-	const config = data.config;
+	let config: UserConfigDto | null = data.config ?? null;
 
 	let username = config?.username ?? data.user?.username ?? '';
 	let email = config?.email ?? data.user?.email ?? '';
 	let newUsername = username;
 	let newEmail = '';
 
-	let theme: ThemeName = (config?.isDarkMode ?? true) ? 'dark' : 'light';
-	let highContrast = !!config?.isHighContrast;
+	let theme: ThemeName = config
+		? config.isDarkMode
+			? 'dark'
+			: 'light'
+		: userThemePreference.theme;
+	let highContrast = config ? !!config.isHighContrast : accessibility.contrast === 2;
 	let highContrastChoice: 'enabled' | 'disabled' = highContrast ? 'enabled' : 'disabled';
 
-	let emailNotificationsEnabled = !!config?.emailNotificationsEnabled;
+	let emailNotificationsEnabled = config ? !!config.emailNotificationsEnabled : false;
 	let reminders: WeeklyReminderConfig = (config?.weeklyReminders ?? []) as WeeklyReminderConfig;
 	$: hasAnyReminderEnabled = Array.isArray(reminders) && reminders.some((r: any) => !!r?.enabled);
 
@@ -161,6 +171,16 @@
 		}, 3000);
 	};
 
+	const formatErrorMessage = (e: unknown, fallback: string) => {
+		const anyE = e as any;
+		const base = anyE?.message ? String(anyE.message) : fallback;
+		const extras: string[] = [];
+		if (anyE?.status) extras.push(`HTTP ${String(anyE.status)}`);
+		if (anyE?.requestId) extras.push(`req ${String(anyE.requestId)}`);
+		if (extras.length) return `${base} (${extras.join(', ')})`;
+		return base;
+	};
+
 	let ownedAvatars: AvatarOption[] = [];
 	let selectedAvatarId: string | null = null;
 	let currentAvatarKey = normalizeToCloudfrontKey(config?.s3AvatarUrl || '') || defaultAvatar;
@@ -179,19 +199,37 @@
 
 	let deleteConfirm = '';
 
-	const setTheme = (t: ThemeName) => {
-		userThemePreference.theme = t;
-		applyTheme(t);
+	const currentContrastLevel = () => (highContrast ? '2' : '0');
+
+	const applyLocalThemeContrast = () => {
+		userThemePreference.theme = theme;
+		accessibility.contrast = highContrast ? 2 : 0;
+		setThemeWithContrast(theme, currentContrastLevel());
+		highContrastChoice = highContrast ? 'enabled' : 'disabled';
 	};
 
-	const setHighContrast = (enabled: boolean) => {
-		accessibility.contrast = enabled ? 2 : 0;
+	const applyConfigToLocalState = (cfg: UserConfigDto) => {
+		username = (cfg.username ?? username ?? '').toString();
+		email = (cfg.email ?? email ?? '').toString();
+		newUsername = username;
+		theme = cfg.isDarkMode ? 'dark' : 'light';
+		highContrast = !!cfg.isHighContrast;
+		highContrastChoice = highContrast ? 'enabled' : 'disabled';
+		emailNotificationsEnabled = !!cfg.emailNotificationsEnabled;
+		reminders = (cfg.weeklyReminders ?? []) as WeeklyReminderConfig;
+		const avatar = normalizeToCloudfrontKey(cfg.s3AvatarUrl || '');
+		if (avatar) currentAvatarKey = avatar;
+	};
+
+	const setTheme = (t: ThemeName) => {
+		theme = t;
+		applyLocalThemeContrast();
 	};
 
 	const setHighContrastSelection = (choice: 'enabled' | 'disabled') => {
 		highContrastChoice = choice;
 		highContrast = choice === 'enabled';
-		setHighContrast(highContrast);
+		applyLocalThemeContrast();
 	};
 
 	const buildRemindersPayload = (): Reminder[] | null => {
@@ -208,10 +246,18 @@
 			.filter((r: Reminder) => !!r.day);
 	};
 
-	const applyLocalPreferenceEffects = () => {
-		setTheme(theme);
-		setHighContrast(highContrast);
-		highContrastChoice = highContrast ? 'enabled' : 'disabled';
+	const buildPreferencesDto = (): UpdatePreferencesDto => {
+		return {
+			isDarkMode: theme === 'dark',
+			isHighContrast: highContrast,
+			emailNotificationsEnabled: !!emailNotificationsEnabled,
+			weeklyReminders: buildRemindersPayload()
+		};
+	};
+
+	const persistPreferences = async () => {
+		const dto = buildPreferencesDto();
+		await settingsApi.updatePreferences(dto, fetch);
 	};
 
 	const loadOwnedAvatars = async () => {
@@ -318,7 +364,21 @@
 
 	const init = async () => {
 		try {
-			applyLocalPreferenceEffects();
+			if (!config) {
+				try {
+					const cfg = await loadAndApplyUserConfig(fetch);
+					config = cfg;
+					applyConfigToLocalState(cfg);
+				} catch {
+					theme = userThemePreference.theme;
+					highContrast = accessibility.contrast === 2;
+					highContrastChoice = highContrast ? 'enabled' : 'disabled';
+				}
+			} else {
+				applyConfigToLocalState(config);
+			}
+
+			applyLocalThemeContrast();
 		} catch {}
 
 		try {
@@ -361,7 +421,7 @@
 
 			setSectionNotice('avatar', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice('avatar', 'error', e instanceof Error ? e.message : 'Could not save avatar');
+			setSectionNotice('avatar', 'error', formatErrorMessage(e, 'Could not save avatar'));
 		} finally {
 			saving.avatar = false;
 		}
@@ -380,11 +440,7 @@
 			await refreshProfile();
 			setSectionNotice('username', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice(
-				'username',
-				'error',
-				e instanceof Error ? e.message : 'Could not save username'
-			);
+			setSectionNotice('username', 'error', formatErrorMessage(e, 'Could not save username'));
 		} finally {
 			saving.username = false;
 		}
@@ -406,7 +462,7 @@
 			setSectionNotice(
 				'email',
 				'error',
-				e instanceof Error ? e.message : 'Could not send verification email'
+				formatErrorMessage(e, 'Could not send verification email')
 			);
 		} finally {
 			saving.email = false;
@@ -431,11 +487,7 @@
 			nextPasswordConfirm = '';
 			setSectionNotice('password', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice(
-				'password',
-				'error',
-				e instanceof Error ? e.message : 'Could not change password'
-			);
+			setSectionNotice('password', 'error', formatErrorMessage(e, 'Could not change password'));
 		} finally {
 			saving.password = false;
 		}
@@ -455,11 +507,7 @@
 			await refreshProfile();
 			setSectionNotice('twofactor', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice(
-				'twofactor',
-				'error',
-				e instanceof Error ? e.message : 'Could not update 2FA'
-			);
+			setSectionNotice('twofactor', 'error', formatErrorMessage(e, 'Could not update 2FA'));
 		} finally {
 			saving.twofactor = false;
 		}
@@ -468,19 +516,11 @@
 	const saveTheme = async () => {
 		saving.theme = true;
 		try {
-			await settingsApi.updatePreferences(
-				{
-					isDarkMode: theme === 'dark',
-					isHighContrast: highContrast,
-					emailNotificationsEnabled,
-					weeklyReminders: buildRemindersPayload()
-				},
-				fetch
-			);
-			applyLocalPreferenceEffects();
+			await persistPreferences();
+			applyLocalThemeContrast();
 			setSectionNotice('theme', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice('theme', 'error', e instanceof Error ? e.message : 'Could not save theme');
+			setSectionNotice('theme', 'error', formatErrorMessage(e, 'Could not save theme'));
 		} finally {
 			saving.theme = false;
 		}
@@ -489,23 +529,11 @@
 	const saveContrast = async () => {
 		saving.contrast = true;
 		try {
-			await settingsApi.updatePreferences(
-				{
-					isDarkMode: theme === 'dark',
-					isHighContrast: highContrast,
-					emailNotificationsEnabled,
-					weeklyReminders: buildRemindersPayload()
-				},
-				fetch
-			);
-			applyLocalPreferenceEffects();
+			await persistPreferences();
+			applyLocalThemeContrast();
 			setSectionNotice('contrast', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice(
-				'contrast',
-				'error',
-				e instanceof Error ? e.message : 'Could not save contrast'
-			);
+			setSectionNotice('contrast', 'error', formatErrorMessage(e, 'Could not save contrast'));
 		} finally {
 			saving.contrast = false;
 		}
@@ -514,22 +542,10 @@
 	const saveReminders = async () => {
 		saving.reminders = true;
 		try {
-			await settingsApi.updatePreferences(
-				{
-					isDarkMode: theme === 'dark',
-					isHighContrast: highContrast,
-					emailNotificationsEnabled,
-					weeklyReminders: buildRemindersPayload()
-				},
-				fetch
-			);
+			await persistPreferences();
 			setSectionNotice('reminders', 'success', 'Saved');
 		} catch (e) {
-			setSectionNotice(
-				'reminders',
-				'error',
-				e instanceof Error ? e.message : 'Could not save reminders'
-			);
+			setSectionNotice('reminders', 'error', formatErrorMessage(e, 'Could not save reminders'));
 		} finally {
 			saving.reminders = false;
 		}
@@ -543,11 +559,7 @@
 			await loadSessions();
 			setSectionNotice('sessions', 'success', 'Session revoked');
 		} catch (e) {
-			setSectionNotice(
-				'sessions',
-				'error',
-				e instanceof Error ? e.message : 'Could not revoke session'
-			);
+			setSectionNotice('sessions', 'error', formatErrorMessage(e, 'Could not revoke session'));
 		} finally {
 			saving.sessions = false;
 		}
@@ -568,7 +580,7 @@
 			setSectionNotice(
 				'sessions',
 				'error',
-				e instanceof Error ? e.message : 'Could not revoke other sessions'
+				formatErrorMessage(e, 'Could not revoke other sessions')
 			);
 		} finally {
 			saving.sessions = false;
@@ -589,11 +601,7 @@
 			} catch {}
 			await goto('/');
 		} catch (e) {
-			setSectionNotice(
-				'danger',
-				'error',
-				e instanceof Error ? e.message : 'Could not delete account'
-			);
+			setSectionNotice('danger', 'error', formatErrorMessage(e, 'Could not delete account'));
 		} finally {
 			saving.danger = false;
 		}
@@ -693,7 +701,7 @@
 		<SettingsCard
 			id="email"
 			title="Email"
-			className="bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+			className="bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))]"
 		>
 			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
 				Change your email address. You will receive a verification email.
@@ -875,7 +883,7 @@
 		<SettingsCard
 			id="preferences"
 			title="Preferences"
-			className="bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))]"
+			className="bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 		>
 			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
 				Theme and accessibility.
@@ -918,7 +926,7 @@
 						</label>
 					</div>
 
-					<div class={`mt-4 ${saving.theme ? 'pointer-events-none opacity-60' : ''}`}>
+					<div class={`mt-6 ${saving.theme ? 'pointer-events-none opacity-60' : ''}`}>
 						<Button
 							size="small"
 							label={saving.theme ? 'Saving' : 'Save'}
@@ -974,7 +982,7 @@
 						</label>
 					</div>
 
-					<div class={`mt-4 ${saving.contrast ? 'pointer-events-none opacity-60' : ''}`}>
+					<div class={`mt-6 ${saving.contrast ? 'pointer-events-none opacity-60' : ''}`}>
 						<Button
 							size="small"
 							label={saving.contrast ? 'Saving' : 'Save'}
@@ -1001,9 +1009,9 @@
 		<SettingsCard
 			id="reminder"
 			title="Study reminders"
-			className="border-2 border-[color:var(--color-accent-4)] bg-[color:var(--color-accent-4)]"
+			className="border-2 border-[color:var(--color-accent-4)] bg-[linear-gradient(to_bottom,var(--color-accent-4),var(--color-accent-3))]"
 		>
-			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
+			<p class="mt-2 mb-8 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
 				Choose on which days and at what hour you want a reminder email.
 			</p>
 
@@ -1067,7 +1075,7 @@
 			className="bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 		>
 			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
-				Manage active sessions. This list is collapsed by default.
+				Manage active sessions.
 			</p>
 
 			<details
@@ -1128,7 +1136,7 @@
 						<div class={saving.sessions ? 'pointer-events-none opacity-60' : ''}>
 							<Button
 								size="bigger"
-								label={saving.sessions ? 'Revoking' : 'Revoke all other sessions'}
+								label={saving.sessions ? 'Revoking' : 'Revoke all other'}
 								labelFontFamily="var(--font-ariw9500)"
 								labelColor="rgba(0,0,0,0.7)"
 								labelFontSize="1.2rem"
