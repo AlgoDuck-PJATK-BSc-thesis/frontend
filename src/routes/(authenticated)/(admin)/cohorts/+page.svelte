@@ -871,7 +871,7 @@
 	});
 </script>
 
-<main class="min-h-screen w-full bg-admin-bg-primary font-sans text-admin-text-secondary">
+<main class="min-h-screen w-full bg-admin-bg-primary text-admin-text-secondary">
 	<div class="mx-auto flex max-w-6xl flex-col gap-6 p-6">
 		<CohortsHeaderAny {tab} onSwitchTab={switchTab} />
 
