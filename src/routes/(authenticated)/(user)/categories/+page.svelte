@@ -1,217 +1,338 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import Island from '$lib/images/Categories/Wysepka2.png'
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
 	import type { CategoryDto } from './proxy+page';
+	import type { StandardResponseDto } from '$lib/api/apiCall';
+	import ToolTip from '../../(admin)/problem/upsert/ToolTip.svelte';
 
-  let { data } : { data: { categories: CategoryDto[] } } = $props();
+	let { data }: { data: StandardResponseDto<CategoryDto[]> } = $props();
 
-  let scrollableFrame : HTMLElement;
-  
-  const scrollableFrameComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
-    if (!scrollableFrame) return undefined;
-    return getComputedStyle(scrollableFrame);
-  });
-  
-  let main : HTMLElement;
-  
-  const mainComputedStyle: CSSStyleDeclaration | undefined = $derived.by(() => {
-    if (!main) return undefined;
-    return getComputedStyle(main);
-  });
+	let main: HTMLElement;
+	let scrollableFrame: HTMLElement;
+	let categoryDivs: HTMLElement[] = $state([]);
 
-  let categoryDivs: Array<HTMLElement> = $state([]);
-  
-  let lastXCoords : number;
-  let currXCoords : number;
+	let scrollLeft = $state(0);
+	let frameWidth = $state(0);
+	let viewportWidth = $state(0);
 
-  let lastD1X : number;
-  let lastTime : number = 0;
+	let maxScroll = $derived(Math.max(0, frameWidth - viewportWidth));
 
-  let windowWidth = $state(0);
-  let windowHeight = $state(0);
+	let isDragging = $state(false);
+	let velocity = $state(0);
+	let lastMouseX = 0;
+	let lastTime = 0;
+	let animationId: number | null = null;
 
-  let cancellationToken : number | null = null;
-  let isDragging : boolean = $state(false); 
+	let mouseDownPos = { x: 0, y: 0 };
+	let wasClick = $state(false);
+	const CLICK_THRESHOLD = 10;
 
-  let clicked: boolean = $state(false);
+	let hoveredIndex: number | null = $state(null);
 
-  const updateBasedOnMouse = (x : number) => {
-    const dx : number = x - lastXCoords;
+	let bobOffsets: number[] = $derived(
+		data.body?.map((_, i) => ((i * 17) % 10) / 10) ?? []
+	);
 
-    const newLeft : number = parseOptionalDimensions(scrollableFrameComputedStyle?.left) + dx
-    const maxLeft : number = parseOptionalDimensions(scrollableFrameComputedStyle?.width) - parseOptionalDimensions(mainComputedStyle?.width);
-    if (newLeft < 0 && Math.abs(newLeft) < maxLeft){
-      scrollableFrame.style.left = `${newLeft}px`
-    }
-  }
-  
-  const animateDragged = (currentTime : number) => {
-    if (!isDragging) {
-      cancellationToken = null;
-      return; 
-    }
-    
-    const deltaTime = (currentTime - lastTime) / 1000;
-    
-    if (deltaTime > 0 && lastTime !== 0) { 
-      const d1x = (currXCoords - lastXCoords) / deltaTime;
-      
-      updateBasedOnMouse(currXCoords);
-      
-      lastXCoords = currXCoords;
-      lastD1X = d1x;
-    }
-    
-    lastTime = currentTime; 
-    cancellationToken = requestAnimationFrame(animateDragged); 
-  }
-  
-  const handleDragged = (e: MouseEvent) => {
-    isDragging = true;
-    clicked = false;
-    currXCoords = e.x;
-  }
-  
-  
-  const bleedSpeed = () => {
-    if (Math.abs(lastD1X) < 10) {
-      cancellationToken = null;
-      return;
-    }
-    const dtxDampened = lastD1X / 100;
+	const clampScroll = (value: number): number => {
+		return Math.max(-maxScroll, Math.min(0, value));
+	};
 
-    const left = parseOptionalDimensions(scrollableFrameComputedStyle?.left);
-    const newLeft = left + dtxDampened;
-    const maxLeft = parseOptionalDimensions(scrollableFrameComputedStyle?.width) - parseOptionalDimensions(mainComputedStyle?.width);
-    
-    if (newLeft <= 0 && Math.abs(newLeft) <= maxLeft) {
-      scrollableFrame.style.left = `${newLeft}px`;
-    } else {
-      cancellationToken = null;
-      return;
-    }
+	const setScroll = (value: number) => {
+		scrollLeft = clampScroll(value);
+	};
 
-    lastD1X *= 0.95;
-     
-    cancellationToken = requestAnimationFrame(bleedSpeed);
-  }
+	const animateDrag = (currentTime: number) => {
+		if (!isDragging) {
+			animationId = null;
+			return;
+		}
 
-  const handleMouseUp = () => {
-    document.body.style.userSelect = "";
+		if (lastTime > 0) {
+			const dt = (currentTime - lastTime) / 1000;
+			if (dt > 0) {
+				velocity = velocity * 0.8; 
+			}
+		}
 
-    isDragging = false;
-    
-    if (cancellationToken) {
-      cancelAnimationFrame(cancellationToken);
-      cancellationToken = null;
-    }
-    
-    if (Math.abs(lastD1X) > 50) {
-      cancellationToken = requestAnimationFrame(bleedSpeed);
-    }
-    
-    document.removeEventListener('mousemove', handleDragged);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }
-  
-  const handleMouseDown = (e : MouseEvent) => {
-    document.body.style.userSelect = "none"; 
-    if (cancellationToken) {
-      cancelAnimationFrame(cancellationToken);
-      cancellationToken = null;
-    }
+		lastTime = currentTime;
+		animationId = requestAnimationFrame(animateDrag);
+	};
 
-    isDragging = true; 
-    lastXCoords = e.x;
-    currXCoords = e.x;
-    lastD1X = 0;
-    lastTime = 0;
-    
-    document.addEventListener('mousemove', handleDragged);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    cancellationToken = requestAnimationFrame(animateDragged);
-  }
+	const animateMomentum = () => {
+		if (Math.abs(velocity) < 10) {
+			animationId = null;
+			return;
+		}
 
-  export const parseComputedDimensions = (computedDimension: string) : number => {
-      return parseInt(computedDimension.replaceAll('px', ''))
-  }
+		const delta = Math.round(velocity / 60);
+		const newScroll = scrollLeft + delta;
+		const clamped = clampScroll(newScroll);
 
-  export const getOptionalDimesionsString = (dim: string | undefined) : string => {
-      return dim ?? "0px";
-  }
+		if (clamped !== newScroll) {
+			scrollLeft = clamped;
+			animationId = null;
+			return;
+		}
 
-  export const constGetOptionalDimensionsNumber = (dim: number | undefined) : number => {
-      return dim ?? 0;
-  }
+		scrollLeft = clamped;
+		velocity *= 0.95;
 
-  export const parseOptionalDimensions = (dim: string | undefined) : number => {
-      return parseComputedDimensions(getOptionalDimesionsString(dim));
-  }
+		animationId = requestAnimationFrame(animateMomentum);
+	};
 
-  const selectCategory = (categoryName: string) : void => {
-    goto(`./categories/problems?category=${categoryName}`);
-  }
+	const handleMouseDown = (e: MouseEvent) => {
+		if (isKeyboardMode) return;
+		if (animationId) {
+			cancelAnimationFrame(animationId);
+			animationId = null;
+		}
 
+		isDragging = true;
+		wasClick = true;
+		velocity = 0;
+		lastMouseX = e.clientX;
+		lastTime = 0;
+		mouseDownPos = { x: e.clientX, y: e.clientY };
 
-  const calculateIslandCoordinates = () : void => {
-    const clientRect: DOMRect = main.getBoundingClientRect();
-    const mainWidth: number = clientRect.width;
-    const mainHeight: number = clientRect.height;
+		document.body.style.userSelect = 'none';
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
 
-    const category1: HTMLElement | undefined = categoryDivs.at(0);
-    if (!category1) return;
-    
-    const baselineIslandComputedStyle: CSSStyleDeclaration = getComputedStyle(category1);
+		animationId = requestAnimationFrame(animateDrag);
+	};
 
-    const islandWidthParsed: number = parseComputedDimensions(baselineIslandComputedStyle.width);
-    const islandHeightParsed: number = parseComputedDimensions(baselineIslandComputedStyle.height);
+	const handleMouseMove = (e: MouseEvent) => {
+		const dx = e.clientX - lastMouseX;
+		const dt = performance.now() - lastTime;
 
-    const paddingX: number = islandWidthParsed / 2;
-    const paddingY: number = islandHeightParsed / 2;
+		if (dt > 0) {
+			velocity = (dx / dt) * 1000;
+		}
 
-    const scrollableFrameWidthInPixels: number = Math.max(paddingX + islandWidthParsed * 1.25 * categoryDivs.length, mainWidth);
+		setScroll(scrollLeft + dx);
+		lastMouseX = e.clientX;
 
-    const minY: number = paddingY;
-    const maxY: number = mainHeight - paddingY;
-    const legalRangeHeight: number = maxY - minY;
-    const halfRange: number = legalRangeHeight / 2;
-    
-    scrollableFrame.style.width = `${scrollableFrameWidthInPixels}px`;
-    
-    for (let i = 0; i < categoryDivs.length; ++i){
-      const islandX: number = paddingX + islandWidthParsed * 1.25 * i;
-      const waveInput: number = (i / categoryDivs.length) * Math.PI * 4;
-      const islandY: number = minY + (Math.sin(waveInput) + 1) * halfRange;
-      
-      categoryDivs[i].style.transform = `translateX(${islandX}px) translateY(${islandY - islandHeightParsed / 2}px)`;
-    }
-  }
+		const totalDx = Math.abs(e.clientX - mouseDownPos.x);
+		const totalDy = Math.abs(e.clientY - mouseDownPos.y);
+		if (totalDx > CLICK_THRESHOLD || totalDy > CLICK_THRESHOLD) {
+			wasClick = false;
+		}
+	};
 
-  onMount(() => { 
-    calculateIslandCoordinates();
-  });
+	const handleMouseUp = () => {
+		document.body.style.userSelect = '';
+		document.removeEventListener('mousemove', handleMouseMove);
+		document.removeEventListener('mouseup', handleMouseUp);
+
+		isDragging = false;
+
+		if (animationId) {
+			cancelAnimationFrame(animationId);
+			animationId = null;
+		}
+
+		if (Math.abs(velocity) > 50) {
+			animationId = requestAnimationFrame(animateMomentum);
+		}
+	};
+
+	const handleIslandClick = (categoryId: string) => {
+		if (wasClick) {
+			goto(`./categories/problems?categoryId=${categoryId}`);
+		}
+	};
+
+	const calculateLayout = () => {
+		if (!main || !categoryDivs.length || categoryDivs.some(d => !d)) return;
+
+		const rect = main.getBoundingClientRect();
+		viewportWidth = rect.width;
+		const viewportHeight = rect.height;
+
+		const islandRect = categoryDivs[0].getBoundingClientRect();
+		const islandWidth = islandRect.width;
+		const islandHeight = islandRect.height;
+
+		const paddingX = islandWidth / 2;
+		const paddingY = islandHeight / 2;
+
+		frameWidth = Math.max(
+			paddingX + islandWidth * 1.5 * categoryDivs.length,
+			viewportWidth
+		);
+
+		const tiers = [0.25, 0.5, 0.75];
+		const minY = paddingY;
+		const maxY = viewportHeight - paddingY - islandHeight;
+
+		categoryDivs.forEach((div, i) => {
+			const x = paddingX + islandWidth * 1.5 * i;
+
+			const tierIndex = i % 3;
+			const tierPosition = tiers[tierIndex];
+			const jitter = ((i * 7) % 5 - 2) * 8; 
+			const y = minY + tierPosition * (maxY - minY) + jitter;
+
+			div.style.setProperty('--island-x', `${x}px`);
+			div.style.setProperty('--island-y', `${y}px`);
+			div.style.setProperty('--bob-delay', `${bobOffsets[i]}s`);
+		});
+
+		scrollLeft = clampScroll(scrollLeft);
+	};
+
+	let initialized = false;
+	const waitForImages = async (): Promise<void> => {
+		const images = categoryDivs.map(div => div.querySelector('img'));
+		await Promise.all(
+			images.map(img => {
+				if (!img) return Promise.resolve();
+				if (img.complete) return Promise.resolve();
+				return new Promise(resolve => {
+					img.onload = resolve;
+					img.onerror = resolve;
+				});
+			})
+		);
+	};
+
+	$effect(() => {
+		if (initialized) return;
+		if (!main) return;
+		if (categoryDivs.length !== data.body.length) return;
+		if (categoryDivs.some(div => !div)) return;
+
+		waitForImages().then(() => {
+			requestAnimationFrame(() => {
+				calculateLayout();
+				initialized = true;
+			});
+		});
+	});
+
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === "Enter"){
+			isKeyboardMode = true;
+		}
+		if (e.key === "Escape"){
+			isKeyboardMode = false;
+		}
+
+		if (isKeyboardMode && e.key === "ArrowLeft" || e.key === "a"){
+			const newScroll = scrollLeft += 100;
+			scrollLeft = clampScroll(newScroll);
+		}
+		
+		if (isKeyboardMode && e.key === "ArrowRight" || e.key === "d"){
+			const newScroll = scrollLeft -= 100;
+			scrollLeft = clampScroll(newScroll);
+		}
+	}
+
+	let isKeyboardMode: boolean = $state(false);
+	let isScrollableFrameFocused: boolean = $state(false);
 </script>
 
-<svelte:window on:resize={calculateIslandCoordinates} bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+<svelte:window onresize={calculateLayout} onkeydown={handleKeyDown}/>
 
+<svelte:head>
+	<title>Categories - Algoduck</title>
+</svelte:head>
 
-<main bind:this={main} class="w-full h-full relative overflow-hidden">
-  <div bind:this={scrollableFrame}  role="button" tabindex="0" class="w-[300%] hover:cursor-grab active:cursor-grabbing h-full absolute z-10 bg-blue-900 bg-repeat-x bg-no-repeat-y bg-[length:auto_100%]"
-    onmousedown={handleMouseDown}
-    onmouseup={handleMouseUp}
-  >
+<main bind:this={main} style="image-rendering: pixelated;"
+	class="relative h-full w-full overflow-hidden [image-rendering:pixelated]">
+	<div class="fixed bg-black/20 top-16 z-999 font-['Press_Start_2P'] py-3 px-5 backdrop-blur-md flex flex-col rounded-br-xl">
+		<span class="text-md stroke-1 island-label flex items-center gap-5">Current mode: {isKeyboardMode ? "Keyboard" : "Mouse"} <ToolTip options={{ tip: "Press 'Enter' \nand 'Esc' \nto switch modes", svgIconOpts: { class: 'w-5 h-5 stroke-black stroke-[2]' } }}/></span>
+		{#if isKeyboardMode}
+			<span class="text-xs island-label">Press a/&lt; and d/&gt; to move</span>
+		{/if}
+	</div>
+	<div bind:this={scrollableFrame}
+		onfocus={() => isScrollableFrameFocused = true}
+		onblur={() => isScrollableFrameFocused = false}
+		role="button"
+		tabindex="0"
+		class="scrollable-frame absolute z-10 h-full min-w-full cursor-grab bg-[url('/src/lib/images/water.png')] bg-[length:auto_100%] bg-repeat-x active:cursor-grabbing"
+		style:left="{scrollLeft}px"
+		style:width="{frameWidth}px"
+		onmousedown={handleMouseDown}>
+		<div class="relative h-full w-full">
+			{#each data.body as category, i}
+				<button bind:this={categoryDivs[i]}
+					class="island absolute flex cursor-pointer items-center justify-center border-none bg-transparent p-0"
+					class:hovered={hoveredIndex === i}
+					class:dragging={isDragging}
+					onmouseenter={() => hoveredIndex = i}
+					onmouseleave={() => hoveredIndex = null}
+					onkeydown={(e: KeyboardEvent) => {
+						if (e.key === "Enter")
+							goto(`./categories/problems?categoryId=${category.categoryId}`);
+					}}
+					onmouseup={() => handleIslandClick(category.categoryId)}>
+					<div class="relative flex flex-col items-center">
+						<img src={`https://d3018wbyyxg1xc.cloudfront.net/category/${category.categoryId}/Sprite.png`}
+							alt="{category.categoryId} category"
+							draggable="false"
+							style="image-rendering: pixelated;"
+							class="island-sprite select-none"/>
+						<span class="island-label pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-['Press_Start_2P'] text-[10px] capitalize text-white opacity-0">
+							{category.categoryName}
+						</span>
+					</div>
+				</button>
+			{/each}
+		</div>
+	</div>
 
-  <!-- TODO this hypothetically presents an interesting opportunity to use tatacks infinite query. More so for presentation reasons rather than an actual practical application but still may be fun -->
-    <div class="relative w-full h-full">
-      {#each data.categories as loadedCategory, i}
-        <button bind:this={categoryDivs[i]} class="w-100 h-100 absolute rounded-full flex hover:cursor-pointer z50 justify-center items-center bg-transparent select-none" 
-          onmousedown="{() => {clicked = true}}"
-          onmouseup="{() => {if (clicked) selectCategory(loadedCategory.categoryName)}}">
-          <img class="w-full" src="{Island}" alt="category thematic island" draggable="false"/>
-        </button>
-      {/each}
-    </div>
-  </div>
 </main>
+
+<style>
+	.scrollable-frame {
+		animation: water-scroll 3s steps(4) infinite;
+	}
+
+	@keyframes water-scroll {
+		to {
+			background-position-x: -64px;
+		}
+	}
+
+	.island {
+		transform: translate(var(--island-x, 0), var(--island-y, 0));
+		animation: bob 2s steps(4) infinite;
+		animation-delay: var(--bob-delay, 0s);
+	}
+
+	.island.dragging {
+		animation-play-state: paused;
+	}
+
+	@keyframes bob {
+		0%, 100% { margin-top: 0; }
+		25% { margin-top: -3px; }
+		50% { margin-top: -1px; }
+		75% { margin-top: -4px; }
+	}
+
+	.island-sprite {
+		transition: transform 0.15s steps(3), filter 0.15s steps(2);
+	}
+
+	.island.hovered .island-sprite {
+		transform: translateY(-6px);
+	}
+
+	.island-label {
+		text-shadow:
+			2px 0 0 #222,
+			-2px 0 0 #222,
+			0 2px 0 #222,
+			0 -2px 0 #222;
+		transition: opacity 0.1s steps(2);
+	}
+
+	.island.hovered .island-label {
+		opacity: 1;
+	}
+
+</style>

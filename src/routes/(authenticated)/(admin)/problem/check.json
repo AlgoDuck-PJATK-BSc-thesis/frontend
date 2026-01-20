@@ -1,0 +1,33 @@
+{
+    "CurrPage": 1,
+    "PageSize": 12,
+    "TotalItems": 2,
+    "PrevCursor": null,
+    "NextCursor": null,
+    "Items": [
+        {
+            "Name": null,
+            "CreatedAt": null,
+            "CreatedBy": {
+                "Id": "a88e81ec-9a43-480c-8568-e9e3ceb3ba45",
+                "Username": "admin"
+            },
+            "ProblemId": "3152daea-43cd-426b-be3b-a7e6d0e376e1",
+            "CompletionRatio": null,
+            "Category": null,
+            "Difficulty": null
+        },
+        {
+            "Name": null,
+            "CreatedAt": null,
+            "CreatedBy": {
+                "Id": "a88e81ec-9a43-480c-8568-e9e3ceb3ba45",
+                "Username": "admin"
+            },
+            "ProblemId": "4263ebea-54de-437c-cf4c-b8f7e1f487f2",
+            "CompletionRatio": null,
+            "Category": null,
+            "Difficulty": null
+        }
+    ]
+}

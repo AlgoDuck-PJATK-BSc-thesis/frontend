@@ -33,7 +33,12 @@ export const contrast = {
 
 		'--color-header-guest': '#000000',
 		'--color-header-user': '#000000',
-		'--color-logo-header': '#f2b500'
+		'--color-logo-header': '#f2b500',
+		'--color-frame-coins-header': '#f2b500',
+		'--color-background-coins-header': '#000000',
+
+		'--color-title-black': '#000000',
+		'--color-shadow-black': '#000000'
 	},
 	'2': {
 		'--color-bg-a11y': '#f2b500',
@@ -67,7 +72,12 @@ export const contrast = {
 
 		'--color-header-guest': '#f2b500',
 		'--color-header-user': '#f2b500',
-		'--color-logo-header': '#000000'
+		'--color-logo-header': '#000000',
+		'--color-frame-coins-header': '#000000',
+		'--color-background-coins-header': '#f2b500',
+
+		'--color-title-black': '#f2b500',
+		'--color-shadow-black': '#f2b500'
 	}
 } as const;
 

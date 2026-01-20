@@ -1,0 +1,146 @@
+{
+    "TemplateB64": "cHVibGljIGNsYXNzIE1haW4gewogICAgcHJpdmF0ZSBzdGF0aWMgY2xhc3MgTm9kZSB7CiAgICAgICAgaW50IGRhdGE7CiAgICAgICAgTm9kZSBuZXh0OwogICAgICAgIE5vZGUgcHJldjsKCiAgICAgICAgcHVibGljIE5vZGUoaW50IGRhdGEpIHsKICAgICAgICAgICAgdGhpcy5kYXRhID0gZGF0YTsKICAgICAgICAgICAgdGhpcy5uZXh0ID0gbnVsbDsKICAgICAgICAgICAgdGhpcy5wcmV2ID0gbnVsbDsKICAgICAgICB9CiAgICB9CgogICAgcHVibGljIHN0YXRpYyBib29sZWFuIGhhc0N5Y2xlKE5vZGUgc3RhcnQpIHsKICAgICAgICAvLyBJbXBsZW1lbnQgdGhlIHRvcnRvaXNlIGFuZCBoYXJlIGFsZ29yaXRobSBoZXJlCiAgICAgICAgcmV0dXJuIGZhbHNlOwogICAgfQp9Cg==",
+    "ProblemTitle": "Linked List Cycle Detection",
+    "ProblemDescription": "\u003Cp\u003EIn many applications, linked lists are used to represent dynamic data structures.\u003Cbr\u003EHowever, faulty logic or unintended pointer manipulations can sometimes cause a \u003Cstrong\u003Ecycle\u003C/strong\u003E to appear in the list, meaning that traversal never reaches a \u003Ccode\u003Enull\u003C/code\u003E terminator.\u003C/p\u003E\u003Cp\u003EYour task is to implement a cycle detection algorithm for a \u003Cstrong\u003Edoubly linked list\u003C/strong\u003E. Specifically, you should:\u003C/p\u003E\u003Col\u003E\u003Cli\u003E\u003Cp\u003E\u003Cstrong\u003EDefine a \u003C/strong\u003E\u003Ccode\u003ENode\u003C/code\u003E\u003Cstrong\u003E class\u003C/strong\u003E\u003C/p\u003E\u003C/li\u003E\u003C/ol\u003E\u003Cul\u003E\u003Cli\u003E\u003Cp\u003EContains an integer value\u003C/p\u003E\u003C/li\u003E\u003Cli\u003E\u003Cp\u003EHas both \u003Ccode\u003Enext\u003C/code\u003E and \u003Ccode\u003Eprev\u003C/code\u003E references\u003C/p\u003E\u003C/li\u003E\u003C/ul\u003E\u003Col start=\u00222\u0022\u003E\u003Cli\u003E\u003Cp\u003E\u003Cstrong\u003EImplement a method \u003C/strong\u003E\u003Ccode\u003EhasCycle(Node start)\u003C/code\u003E\u003C/p\u003E\u003C/li\u003E\u003C/ol\u003E\u003Cul\u003E\u003Cli\u003E\u003Cp\u003EDetermines whether a cycle exists starting from the provided node\u003C/p\u003E\u003C/li\u003E\u003C/ul\u003E\u003Col start=\u00223\u0022\u003E\u003Cli\u003E\u003Cp\u003E\u003Cstrong\u003EUse Floyd\u0027s Tortoise and Hare algorithm\u003C/strong\u003E\u003C/p\u003E\u003C/li\u003E\u003C/ol\u003E\u003Cul\u003E\u003Cli\u003E\u003Cp\u003EA classic two-pointer technique\u003C/p\u003E\u003C/li\u003E\u003Cli\u003E\u003Cp\u003EDetects the cycle efficiently in \u003Cstrong\u003EO(n) time\u003C/strong\u003E and \u003Cstrong\u003EO(1) space\u003C/strong\u003E\u003Cbr\u003EA correct solution should be able to identify both the \u003Cstrong\u003Epresence and absence of cycles\u003C/strong\u003E for lists of varying sizes.\u003C/p\u003E\u003C/li\u003E\u003C/ul\u003E\u003Ch3\u003E\u003Cstrong\u003EEdge Cases to Consider\u003C/strong\u003E\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003E\u003Cp\u003EEmpty list (\u003Ccode\u003Enull\u003C/code\u003E start node)\u003C/p\u003E\u003C/li\u003E\u003Cli\u003E\u003Cp\u003ESingle-node list without a cycle\u003C/p\u003E\u003C/li\u003E\u003Cli\u003E\u003Cp\u003ESingle-node list that links to itself\u003C/p\u003E\u003C/li\u003E\u003C/ul\u003E\u003Cp\u003E\u003C/p\u003E",
+    "DifficultyId": "07c41ca9-9077-471a-ae30-3ff8f0b40c9a",
+    "CategoryId": "d018bd6e-2cb0-412c-939f-27b3cf654e58",
+    "Tags": [],
+    "TestCases": [
+        {
+            "TestCaseId": "7a2264fa-b7a2-4250-ac4b-a868f746c978",
+            "Display": "Linear list: 1 -\u003E 2 -\u003E 3 -\u003E 4 -\u003E null",
+            "DisplayRes": "false (no cycle)",
+            "ArrangeB64": "cHVibGljIGNsYXNzIFRlc3RDYXNlMHsKCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpewoJCQoJCQoJCQoJCU1haW4uTm9kZSB2YXIwID0gbmV3IE1haW4uTm9kZSgxKTsKICAgICAgICBNYWluLk5vZGUgdmFyMSA9IG5ldyBNYWluLk5vZGUoMik7CiAgICAgICAgTWFpbi5Ob2RlIHZhcjIgPSBuZXcgTWFpbi5Ob2RlKDMpOwogICAgICAgIE1haW4uTm9kZSB2YXIzID0gbmV3IE1haW4uTm9kZSg0KTsKICAgICAgICB2YXIwLm5leHQgPSB2YXIxOwogICAgICAgIHZhcjEucHJldiA9IHZhcjA7CiAgICAgICAgdmFyMS5uZXh0ID0gdmFyMjsKICAgICAgICB2YXIyLnByZXYgPSB2YXIxOwogICAgICAgIHZhcjIubmV4dCA9IHZhcjM7CiAgICAgICAgdmFyMy5wcmV2ID0gdmFyMjsKICAgICAgICBib29sZWFuIHZhcjQgPSBmYWxzZTsKCQoJCgkKCX0KfQ==",
+            "CallMethod": {
+                "MethodName": "hasCycle",
+                "QualifiedName": "Main.hasCycle",
+                "FunctionParams": [
+                    {
+                        "Type": "Node",
+                        "Name": "start"
+                    }
+                ],
+                "Generics": [],
+                "Modifiers": [
+                    "Static"
+                ],
+                "AccessModifier": "Public",
+                "ReturnType": "Boolean"
+            },
+            "CallArgs": [
+                {
+                    "Type": "Main.Node",
+                    "Name": "var0"
+                }
+            ],
+            "Expected": {
+                "Type": "Boolean",
+                "Name": "var4"
+            },
+            "IsPublic": true,
+            "OrderMatters": false
+        },
+        {
+            "TestCaseId": "2ed6b7ae-4dd0-4c26-84ee-ce849dd9ce13",
+            "Display": "Cyclic list: 1 -\u003E 2 -\u003E 3 -\u003E 4 -\u003E (back to 2)",
+            "DisplayRes": "false (no cycle)",
+            "ArrangeB64": "cHVibGljIGNsYXNzIFRlc3RDYXNlMXsKCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpewoJCQoJCQoJCQoJCU1haW4uTm9kZSB2YXIwID0gbmV3IE1haW4uTm9kZSgxKTsKICAgICAgICBNYWluLk5vZGUgdmFyMSA9IG5ldyBNYWluLk5vZGUoMik7CiAgICAgICAgTWFpbi5Ob2RlIHZhcjIgPSBuZXcgTWFpbi5Ob2RlKDMpOwogICAgICAgIE1haW4uTm9kZSB2YXIzID0gbmV3IE1haW4uTm9kZSg0KTsKICAgICAgICB2YXIwLm5leHQgPSB2YXIxOwogICAgICAgIHZhcjEucHJldiA9IHZhcjA7CiAgICAgICAgdmFyMS5uZXh0ID0gdmFyMjsKICAgICAgICB2YXIyLnByZXYgPSB2YXIxOwogICAgICAgIHZhcjIubmV4dCA9IHZhcjM7CiAgICAgICAgdmFyMy5wcmV2ID0gdmFyMjsKICAgICAgICB2YXIzLm5leHQgPSB2YXIxOwogICAgICAgIGJvb2xlYW4gdmFyNCA9IHRydWU7CgkKCQoJCgl9Cn0=",
+            "CallMethod": {
+                "MethodName": "hasCycle",
+                "QualifiedName": "Main.hasCycle",
+                "FunctionParams": [
+                    {
+                        "Type": "Node",
+                        "Name": "start"
+                    }
+                ],
+                "Generics": [],
+                "Modifiers": [
+                    "Static"
+                ],
+                "AccessModifier": "Public",
+                "ReturnType": "Boolean"
+            },
+            "CallArgs": [
+                {
+                    "Type": "Main.Node",
+                    "Name": "var0"
+                }
+            ],
+            "Expected": {
+                "Type": "Boolean",
+                "Name": "var4"
+            },
+            "IsPublic": true,
+            "OrderMatters": false
+        },
+        {
+            "TestCaseId": "c2031e76-abf0-4840-8f12-f404df11bb32",
+            "Display": "Two-node cycle: 10 \u003C-\u003E 20",
+            "DisplayRes": "true (cycle detected)",
+            "ArrangeB64": "cHVibGljIGNsYXNzIFRlc3RDYXNlMnsKCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpewoJCQoJCQoJCQoJCU1haW4uTm9kZSB2YXIwID0gbmV3IE1haW4uTm9kZSgxMCk7CiAgICAgICAgTWFpbi5Ob2RlIHZhcjEgPSBuZXcgTWFpbi5Ob2RlKDIwKTsKICAgICAgICB2YXIwLm5leHQgPSB2YXIxOwogICAgICAgIHZhcjEucHJldiA9IHZhcjA7CiAgICAgICAgdmFyMS5uZXh0ID0gdmFyMDsKICAgICAgICBib29sZWFuIHZhcjIgPSB0cnVlOwoJCgkKCQoJfQp9",
+            "CallMethod": {
+                "MethodName": "hasCycle",
+                "QualifiedName": "Main.hasCycle",
+                "FunctionParams": [
+                    {
+                        "Type": "Node",
+                        "Name": "start"
+                    }
+                ],
+                "Generics": [],
+                "Modifiers": [
+                    "Static"
+                ],
+                "AccessModifier": "Public",
+                "ReturnType": "Boolean"
+            },
+            "CallArgs": [
+                {
+                    "Type": "Main.Node",
+                    "Name": "var0"
+                }
+            ],
+            "Expected": {
+                "Type": "Boolean",
+                "Name": "var2"
+            },
+            "IsPublic": false,
+            "OrderMatters": false
+        },
+        {
+            "TestCaseId": "acb062e7-922f-4ed0-b86c-ac2562a4b959",
+            "Display": "Single node: 5 -\u003E null",
+            "DisplayRes": "false (no cycle)",
+            "ArrangeB64": "cHVibGljIGNsYXNzIFRlc3RDYXNlM3sKCXB1YmxpYyBzdGF0aWMgdm9pZCBtYWluKFN0cmluZ1tdIGFyZ3MpewoJCQoJCQoJCQoJCU1haW4uTm9kZSB2YXIwID0gbmV3IE1haW4uTm9kZSg1KTsKICAgICAgICBib29sZWFuIHZhcjEgPSBmYWxzZTsKCQoJCgkKCX0KfQ==",
+            "CallMethod": {
+                "MethodName": "hasCycle",
+                "QualifiedName": "Main.hasCycle",
+                "FunctionParams": [
+                    {
+                        "Type": "Node",
+                        "Name": "start"
+                    }
+                ],
+                "Generics": [],
+                "Modifiers": [
+                    "Static"
+                ],
+                "AccessModifier": "Public",
+                "ReturnType": "Boolean"
+            },
+            "CallArgs": [
+                {
+                    "Type": "Main.Node",
+                    "Name": "var0"
+                }
+            ],
+            "Expected": {
+                "Type": "Boolean",
+                "Name": "var1"
+            },
+            "IsPublic": false,
+            "OrderMatters": false
+        }
+    ]
+}

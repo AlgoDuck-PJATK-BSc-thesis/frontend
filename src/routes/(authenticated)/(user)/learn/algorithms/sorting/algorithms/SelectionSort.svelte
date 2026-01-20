@@ -1,0 +1,188 @@
+<script lang="ts">
+	import { onDestroy } from 'svelte';
+	import { flip } from 'svelte/animate';
+	import Icons from '../../../_components/Icons.svelte';
+	import CodePanel from '../../../_components/CodePanel.svelte';
+	import { meta, java } from '../snippets/selection.java';
+	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+
+	type Item = { id: number; value: number };
+	type Step = { items: Item[]; i: number; j: number; min: number; sortedTo: number; note: string };
+
+	const initialValues = [64, 25, 12, 22, 11];
+
+	function makeItems(values: number[]): Item[] {
+		return values.map((v, i) => ({ id: i, value: v }));
+	}
+
+	function snapshot(a: Item[]) {
+		return a.slice();
+	}
+
+	let items = $state<Item[]>(makeItems(initialValues));
+	let running = $state(false);
+
+	let iPtr = $state(-1);
+	let jPtr = $state(-1);
+	let minPtr = $state(-1);
+	let sortedTo = $state(-1);
+	let status = $state('Ready.');
+
+	let intervalId: ReturnType<typeof setInterval> | null = null;
+
+	let maxVal = $derived(Math.max(1, ...items.map((x) => x.value)));
+
+	function heightFor(v: number) {
+		return Math.max(60, Math.round((v / maxVal) * 220));
+	}
+
+	function reset() {
+		if (intervalId) clearInterval(intervalId);
+		intervalId = null;
+		running = false;
+		items = makeItems(initialValues);
+		iPtr = -1;
+		jPtr = -1;
+		minPtr = -1;
+		sortedTo = -1;
+		status = 'Ready.';
+	}
+
+	function buildSteps(start: Item[]): Step[] {
+		const a = start.slice();
+		const steps: Step[] = [];
+
+		function swap(x: number, y: number) {
+			const t = a[x];
+			a[x] = a[y];
+			a[y] = t;
+		}
+
+		for (let i = 0; i < a.length - 1; i++) {
+			let min = i;
+			steps.push({ items: snapshot(a), i, j: -1, min, sortedTo: i - 1, note: 'Start scan' });
+
+			for (let j = i + 1; j < a.length; j++) {
+				steps.push({ items: snapshot(a), i, j, min, sortedTo: i - 1, note: `Compare for minimum` });
+				if (a[j].value < a[min].value) {
+					min = j;
+					steps.push({ items: snapshot(a), i, j, min, sortedTo: i - 1, note: `New minimum` });
+				}
+			}
+
+			if (min !== i) {
+				swap(i, min);
+				steps.push({ items: snapshot(a), i, j: min, min, sortedTo: i, note: 'Swap into position' });
+			} else {
+				steps.push({ items: snapshot(a), i, j: -1, min, sortedTo: i, note: 'Already in position' });
+			}
+		}
+
+		steps.push({
+			items: snapshot(a),
+			i: -1,
+			j: -1,
+			min: -1,
+			sortedTo: a.length - 1,
+			note: 'Done.'
+		});
+		return steps;
+	}
+
+	function run() {
+		if (running) return;
+
+		if (intervalId) clearInterval(intervalId);
+		intervalId = null;
+
+		running = true;
+		const steps = buildSteps(items);
+
+		let idx = 0;
+		intervalId = setInterval(() => {
+			if (idx < steps.length) {
+				const s = steps[idx];
+				items = s.items;
+				iPtr = s.i;
+				jPtr = s.j;
+				minPtr = s.min;
+				sortedTo = s.sortedTo;
+				status = s.note;
+				idx += 1;
+			} else {
+				if (intervalId) clearInterval(intervalId);
+				intervalId = null;
+				running = false;
+				iPtr = -1;
+				jPtr = -1;
+				minPtr = -1;
+				sortedTo = items.length - 1;
+				status = 'Done.';
+			}
+		}, 520);
+	}
+
+	onDestroy(() => {
+		if (intervalId) clearInterval(intervalId);
+	});
+</script>
+
+<PixelFrameSimple
+	className="w-full px-4 pr-8 py-8 bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
+>
+	<div class="grid gap-6 md:grid-cols-2">
+		<div class="rounded-3xl p-6">
+			<div class="text-lg font-bold text-white">Selection Sort</div>
+			<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
+				Repeatedly selects the smallest remaining element and moves it into position.
+			</div>
+
+			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+				<div class="mb-3 text-center text-xs text-[color:var(--color-landingpage-subtitle)]">
+					{status}
+				</div>
+
+				<div class="flex items-end justify-center gap-2" style="height: 260px;">
+					{#each items as it, i (it.id)}
+						<div
+							animate:flip={{ duration: 320 }}
+							class={[
+								'w-14 rounded-t-lg border border-white/10 text-center text-sm font-bold text-white',
+								i <= sortedTo ? 'bg-emerald-600/45' : 'bg-white/10',
+								i === minPtr ? 'ring-2 ring-green-300/70' : '',
+								i === iPtr ? 'ring-2 ring-cyan-300/70' : '',
+								i === jPtr ? 'ring-2 ring-amber-300/70' : ''
+							].join(' ')}
+							style={`height:${heightFor(it.value)}px;`}
+						>
+							<div class="mt-2">{it.value}</div>
+						</div>
+					{/each}
+				</div>
+
+				<div class="mt-5 flex flex-wrap justify-center gap-3">
+					<button
+						type="button"
+						onclick={run}
+						disabled={running}
+						class="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2 font-semibold text-white disabled:bg-gray-600"
+					>
+						<Icons name="play" />
+						<span>Run</span>
+					</button>
+
+					<button
+						type="button"
+						onclick={reset}
+						class="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-5 py-2 font-semibold text-white"
+					>
+						<Icons name="reset" />
+						<span>Reset</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<CodePanel {meta} {java} />
+	</div>
+</PixelFrameSimple>

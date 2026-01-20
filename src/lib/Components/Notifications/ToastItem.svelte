@@ -6,13 +6,8 @@
 	import SuccessIconSvg from '$lib/svg/Toast/SuccessIconSvg.svelte';
 	import ErrorIconSvg from '$lib/svg/Toast/ErrorIconSvg.svelte';
 	import WarningIconSvg from '$lib/svg/Toast/WarningIconSvg.svelte';
-
-	
-	interface ComponentConfigStatic<TData extends Record<string, any>> {
-    	component: Component<{ options: TData, errors?: Record<string, any>, rootElement?: HTMLElement}>
-    	options: TData
-    	rootElement?: HTMLElement
-	}
+	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
+	import type { ComponentConfigStatic } from '../GenericComponents/AutoCompleteInput/ComponentConfigStatic';
 
 	let { 
 		toast, 
@@ -22,30 +17,23 @@
 		onRemove: (id: string) => void 
 	} = $props();
 
-	const typeStyles = {
-		success: 'bg-green-500 text-white',
-		error: 'bg-red-500 text-white',
-		warning: 'bg-yellow-500 text-black',
-		info: 'bg-blue-500 text-white'
-	};
-
     let icons: Record<string, ComponentConfigStatic<svgArg>> = {
         success: {
             component: SuccessIconSvg,
             options: {
-                class: "stroke-green-500 w-6 h-6"
+                class: "stroke-green-500 stroke-[2] w-6 h-6"
             }
         },
         error: {
             component: ErrorIconSvg,
             options: {
-                class: "stroke-red-500 w-6 h-6"
+                class: "stroke-red-500 stroke-[2] w-6 h-6"
             }
         },
         warning: {
             component: WarningIconSvg,
             options: {
-                class: "stroke-amber-500 w-6 h-6"
+                class: "stroke-amber-500 stroke-[2] w-6 h-6"
             }
         }
     }
@@ -58,15 +46,15 @@
 <div
 	in:fly={{ x: 300, duration: 300 }}
 	out:fade={{ duration: 200 }}
-	class="pointer-events-auto flex fixed top-[20%] right-[1%] items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-bg border-card border-2"
+	class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md bg-white text-black border-2"
 >
     <Comp options={compOptions}/>
-	<p class="flex-1 text-sm font-medium">{toast.message}</p>
+	<p class="flex-1 text-sm font-medium whitespace-pre">{toast.message}</p>
 	<button
 		onclick={() => onRemove(toast.id)}
-		class="text-xl hover:opacity-70 transition-opacity"
+		class="text-xl hover:bg-black/10 transition-colors ease-out duration-250 p-2 rounded-[25%]"
 		aria-label="Close notification"
 	>
-		×
+		<CrossIconSvg options={{class: 'w-4 h-4 stroke-[2] stroke-black'}}/>
 	</button>
 </div>

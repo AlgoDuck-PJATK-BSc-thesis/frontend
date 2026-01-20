@@ -20,7 +20,7 @@
 	<ul>
 		<li>
 			Account data: username, email, password hash, or data from OAuth providers (Google, GitHub,
-			Facebook).
+			Microsoft).
 		</li>
 		<li>Service data: submissions, progress, messages, preferences.</li>
 		<li>Technical data: IP address, device/browser info, cookies for session and security.</li>
@@ -45,7 +45,7 @@
 	<ul>
 		<li>AWS (hosting and S3 storage)</li>
 		<li>Postmark (transactional email)</li>
-		<li>OAuth providers you choose (Google, GitHub, Facebook) for sign-in</li>
+		<li>OAuth providers you choose (Google, GitHub, Microsoft) for sign-in</li>
 	</ul>
 
 	<h2>Retention</h2>
@@ -68,7 +68,7 @@
 
 	<h2>Your rights</h2>
 	<p>
-		You may access, correct, or delete your data. Contact <a href="mailto:s24331@pjwstk.edu.pl"
+		You may access, correct, or delete your data. Contact <a href="mailto:algoduckpl@gmail.com"
 			>support@algoduck.com</a
 		>.
 	</p>

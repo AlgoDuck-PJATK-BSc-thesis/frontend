@@ -3,12 +3,12 @@
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { userEditorPreferences } from '$lib/stores/theme.svelte';
-	import type { ThemeName } from '$lib/Themes';
+	import type { EditorThemeDto } from '../../../../routes/(authenticated)/(user)/categories/problems/solve/types';
 	
 	let {
 		editorContents = $bindable(),
 		readOnly
-	}: { editorContents: string; fontSize?: number; readOnly?: boolean;} = $props();
+	}: { editorContents: string | undefined, fontSize?: number; readOnly?: boolean;} = $props();
 
 	let editor: Monaco.editor.IStandaloneCodeEditor;
 	let monaco: typeof Monaco;
@@ -26,7 +26,7 @@
 		editor = monaco.editor.create(editorContainer, {
 			value: editorContents,
 			language: 'java',
-			theme: userEditorPreferences.theme,
+			theme: userEditorPreferences.theme.themeName,
 			fontSize: userEditorPreferences.fontSize,
 			minimap: {
 				enabled: false
@@ -42,11 +42,11 @@
 	});
 
 	$effect(() => {
-		const theme: ThemeName = userEditorPreferences.theme as ThemeName;
+		const theme: EditorThemeDto = userEditorPreferences.theme;
 		const fontSize: number = userEditorPreferences.fontSize;
 
 		if (editor && monaco) {
-			monaco.editor.setTheme(theme);
+			monaco.editor.setTheme(theme.themeName);
 
 			editor.updateOptions({
 				fontSize: fontSize
@@ -54,16 +54,15 @@
 		}
 	});
 
-	// $effect(() => {
-	// 	const content: string = editorContents;
-	// 	if (editor && monaco) {
-	// 		const position = editor.getPosition();
-	// 		editor.setValue(content);
-	// 		if (position) {
-	// 			editor.setPosition(position);
-	// 		}
-	// 	}
-	// });
+	export const updateEditorExternal = (newContents: string) => {
+		if (editor && monaco) {
+			const position = editor.getPosition();
+			editor.setValue(newContents);
+			if (position) {
+				editor.setPosition(position);
+			}
+		}
+	}
 
 	onDestroy(() => {
 		if (browser && monaco && editor) {

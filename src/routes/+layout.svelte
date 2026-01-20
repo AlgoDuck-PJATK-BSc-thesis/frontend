@@ -5,6 +5,9 @@
 	import ThemeInitializer from '$lib/Components/Misc/ThemeInitializer.svelte';
 	import RegistryInitializer from '$lib/Components/GenericComponents/layoutManager/RegistryInitializer.svelte';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { onMount } from 'svelte';
+	import { FetchFromApi } from '$lib/api/apiCall';
+	import ToastProvider from '$lib/Components/Notifications/ToastProvider.svelte';
 
 	let togglePanelFn: () => void;
 
@@ -21,6 +24,12 @@
     	  	},
     	},
   	});
+
+	onMount(async () => {
+		let res = await FetchFromApi("user/profile", {
+			method: "GET"
+		}, fetch);
+	});
 </script>
 
 <ThemeInitializer />
@@ -30,7 +39,7 @@
 	<div class="h-screen w-screen">
 	<AccessibilitySquareButton ontoggle={handleToggle} />
 	<AccessibilityPanel toggleRef={(fn) => (togglePanelFn = fn)} />
-		
+	<ToastProvider/>
 		<main class="h-full w-full">
 			{@render children?.()}
 		</main>

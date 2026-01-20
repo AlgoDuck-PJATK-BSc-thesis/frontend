@@ -15,5 +15,5 @@
 		<!-- <Chevron args={{ color: '#FF13F0' }} /> -->
 	</div>
 	<FileIconSvg options={{class: "h-[70%] aspect-square stroke-ide-text-secondary"}}/>
-	<span class="px-2 flex justify-center items-center">{leaf.label}</span>
+	<span class="px-2 flex justify-center text-ide-text-secondary items-center">{leaf.label}</span>
 </button>

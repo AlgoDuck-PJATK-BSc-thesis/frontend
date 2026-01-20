@@ -1,18 +1,162 @@
 <script lang="ts">
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
-	import coin from '$lib/images/headers/Coin.png';
-	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
-	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
-	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
+	import PixelFrameCoins from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameCoins.svelte';
+	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
+	import { userApi, type UserLeaderboardEntryDto } from '$lib/api/user';
+	import { onDestroy, onMount } from 'svelte';
+	import { coins, initCoinsSync, setCoins } from '$lib/stores/coins';
 
-	let coins = 1000000;
-	let level = 5;
+	let myUserId = $state<string>('');
+	let myAvatarUrl = $state<string>('');
+	let avatarOverride = $state<string>('');
 
-	const logout = () => {
-		alert('Logging out...');
-		window.location.href = 'http://localhost:5173';
+	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
+	const coinSrc = '/headers/coin.png';
+
+	const normalizeToCloudfrontKey = (value: string): string => {
+		const v = (value ?? '').toString().trim();
+		if (!v) return '';
+		if (v.startsWith('http://') || v.startsWith('https://')) {
+			try {
+				const u = new URL(v);
+				const p = (u.pathname ?? '').replace(/^\/+/, '').trim();
+				return p || '';
+			} catch {
+				return '';
+			}
+		}
+		return v;
 	};
+
+	const refreshHeaderStats = async () => {
+		try {
+			const s = await userApi.getMyStatistics(fetch);
+			const maybeCoins = (s as unknown as { coins?: unknown })?.coins;
+			setCoins(maybeCoins);
+		} catch {}
+	};
+
+	const tryResolveAvatarFromLeaderboard = async () => {
+		if (!myUserId) return;
+		try {
+			const all = await userApi.getGlobalLeaderboardAll(fetch);
+			const hit = all.find((x: UserLeaderboardEntryDto) => x.userId === myUserId);
+			const url = (hit?.userAvatarUrl ?? '').toString().trim();
+			if (url) avatarOverride = url;
+		} catch {}
+	};
+
+	const refreshMe = async () => {
+		try {
+			const me = await userApi.getMe(fetch);
+
+			myUserId = ((me as unknown as { userId?: unknown })?.userId ?? '').toString().trim();
+
+			const s3 = ((me as unknown as { s3AvatarUrl?: unknown })?.s3AvatarUrl ?? '')
+				.toString()
+				.trim();
+			const u = ((me as unknown as { userAvatarUrl?: unknown })?.userAvatarUrl ?? '')
+				.toString()
+				.trim();
+
+			myAvatarUrl = s3 || u || '';
+
+			const meCoins = (me as unknown as { coins?: unknown })?.coins;
+			if (meCoins !== undefined) setCoins(meCoins);
+
+			if (!myAvatarUrl) {
+				avatarOverride = '';
+				await tryResolveAvatarFromLeaderboard();
+			}
+		} catch {
+			myUserId = '';
+			myAvatarUrl = '';
+			avatarOverride = '';
+		}
+	};
+
+	const refreshAll = async () => {
+		await Promise.all([refreshHeaderStats(), refreshMe()]);
+	};
+
+	const goShop = async () => {
+		await goto('/Shop');
+	};
+
+	const onKey = async (e: KeyboardEvent, fn: () => Promise<void>) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			await fn();
+		}
+	};
+
+	let pollId: ReturnType<typeof setInterval> | undefined;
+
+	const onFocus = () => {
+		void refreshHeaderStats();
+	};
+
+	const onVisibility = () => {
+		if (document.visibilityState === 'visible') void refreshHeaderStats();
+	};
+
+	const onAvatar = (e: Event) => {
+		const ce = e as CustomEvent;
+		const v = (ce?.detail ?? '').toString().trim();
+		if (!v) return;
+		avatarOverride = '';
+		myAvatarUrl = v;
+	};
+
+	onMount(() => {
+		initCoinsSync();
+		void refreshAll();
+
+		afterNavigate(() => {
+			void refreshHeaderStats();
+			void refreshMe();
+		});
+
+		if (typeof window !== 'undefined') {
+			window.addEventListener('focus', onFocus);
+			window.addEventListener('algoduck:avatar', onAvatar as EventListener);
+		}
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', onVisibility);
+		}
+
+		pollId = setInterval(() => {
+			void refreshHeaderStats();
+		}, 15000);
+
+		return () => {
+			if (pollId) clearInterval(pollId);
+			pollId = undefined;
+
+			if (typeof window !== 'undefined') {
+				window.removeEventListener('focus', onFocus);
+				window.removeEventListener('algoduck:avatar', onAvatar as EventListener);
+			}
+			if (typeof document !== 'undefined') {
+				document.removeEventListener('visibilitychange', onVisibility);
+			}
+		};
+	});
+
+	onDestroy(() => {
+		if (pollId) clearInterval(pollId);
+		pollId = undefined;
+
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('focus', onFocus);
+			window.removeEventListener('algoduck:avatar', onAvatar as EventListener);
+		}
+		if (typeof document !== 'undefined') {
+			document.removeEventListener('visibilitychange', onVisibility);
+		}
+	});
 </script>
 
 <header
@@ -20,12 +164,14 @@
 >
 	<div class="flex items-center gap-6 whitespace-nowrap">
 		<a href="/home" class="text-lg font-semibold text-[color:var(--color-primary)] no-underline">
-			AlgoDuck</a
-		>
+			AlgoDuck
+		</a>
 	</div>
 
-	<nav class="ml-6">
-		<ul class="mr-4 flex list-none gap-6 font-semibold tracking-wider whitespace-nowrap">
+	<nav class="mr-6 ml-6 overflow-y-auto">
+		<ul
+			class="mr-4 flex list-none items-center gap-6 font-semibold tracking-wider whitespace-nowrap"
+		>
 			<li>
 				<a
 					href="/home"
@@ -38,10 +184,19 @@
 			<li>
 				<a
 					href="/categories"
-					aria-current={page.url.pathname === '/Categories' ? 'page' : undefined}
+					aria-current={page.url.pathname === '/categories' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Problems
+				</a>
+			</li>
+			<li>
+				<a
+					href="/learn"
+					aria-current={page.url.pathname === '/learn' ? 'page' : undefined}
+					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
+				>
+					Learn
 				</a>
 			</li>
 			<li>
@@ -51,16 +206,6 @@
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
 				>
 					Cohort
-				</a>
-			</li>
-
-			<li>
-				<a
-					href="/contest"
-					aria-current={page.url.pathname === '/contest' ? 'page' : undefined}
-					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Contest
 				</a>
 			</li>
 			<li>
@@ -74,15 +219,6 @@
 			</li>
 			<li>
 				<a
-					href="/studytimer"
-					aria-current={page.url.pathname === '/studytimer' ? 'page' : undefined}
-					class="tracking-tight text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Study Timer
-				</a>
-			</li>
-			<li>
-				<a
 					href="/Shop"
 					aria-current={page.url.pathname === '/Shop' ? 'page' : undefined}
 					class="text-[color:var(--color-landingpage-subtitle)] no-underline hover:text-[color:var(--color-primary)]"
@@ -90,6 +226,7 @@
 					Shop
 				</a>
 			</li>
+
 			<li>
 				<a
 					href="/settings"
@@ -99,47 +236,54 @@
 					Settings
 				</a>
 			</li>
-			<!-- <div class=" relative mr-1 h-[1rem] w-[1rem] translate-y-[-0px]">
+
+			<li>
+				<div class="relative w-16">
 					<ThemeToggle />
-				</div> -->
+				</div>
+			</li>
 		</ul>
 	</nav>
 
-	<div class="flex h-full flex-row items-center justify-center gap-2">
-		<div class="mr-2 flex flex-row items-center justify-between gap-4">
-			<div class="relative w-18">
-				<ThemeToggle />
-			</div>
-
-			<PixelFrameMini
-				className="bg-[color:var(--color-accent-3)] relative inline-flex items-center px-1 text-[1rem] tracking-widest"
+	<div class="-ml-[6rem] flex h-full flex-row items-center justify-center gap-5">
+		<div>
+			<PixelFrameCoins
+				className="bg-[color:var(--color-background-coins-header)] relative inline-flex min-w-[9rem] -ml-2 -mr-5 items-center px-1 text-[1rem] tracking-widest"
 			>
 				<div
-					class="relative z-10 inline-flex items-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
+					class="relative z-10 inline-flex items-center justify-center py-[0.2rem] pr-3 pl-2 font-bold whitespace-nowrap text-[color:var(--color-landingpage-subtitle)]"
+					role="button"
+					tabindex="0"
+					aria-label="Open shop"
+					onclick={goShop}
+					onkeydown={(e) => onKey(e, goShop)}
 				>
-					<span class="mr-1">{coins.toLocaleString()}</span>
+					<span class="mr-1">{$coins}</span>
 					<img
-						src={coin}
+						src={coinSrc}
 						alt="coin"
-						class="inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
+						class="mr-1 inline-block h-[1.2rem] w-[1.2rem] shrink-0 align-[-0.2em]"
 					/>
 				</div>
-			</PixelFrameMini>
+			</PixelFrameCoins>
 		</div>
-		<!-- <div class="h-10 w-20">
-			<DropDownSelect
-				options={{
-					options: SupportedLangs.map((l) => {
-						return {
-							key: l,
-							value: l
-						};
-					}),
-					onSelectCallback: (selected: Lang) => {
-						userThemePreference.lang = selected;
-					}
-				}}
-			/>
-		</div> -->
+
+		<a
+			href="/user/me"
+			aria-label="Profile"
+			aria-current={page.url.pathname.startsWith('/user') ? 'page' : undefined}
+			class="no-underline"
+		>
+			<div
+				class="-mr-2 ml-4 h-11 w-11 overflow-hidden rounded-full border-3 border-white bg-[color:var(--color-primary)] shadow"
+			>
+				<CloudfrontImage
+					path={normalizeToCloudfrontKey(
+						(avatarOverride || myAvatarUrl || defaultAvatar).toString()
+					) || defaultAvatar}
+					cls="h-full w-full -translate-x-[-20%] -translate-y-[-15%] scale-[200%] object-cover object-[left_top]"
+				/>
+			</div>
+		</a>
 	</div>
 </header>

@@ -1,0 +1,9 @@
+<script lang="ts">
+	import type { svgArg } from '$lib/types/SvgIcon';
+
+	let { options }: { options: svgArg } = $props();
+</script>
+
+<svg class={options.class} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 5H3.01M3 12H3.01M3 19H3.01M8 5H21M8 12H21M8 19H21" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

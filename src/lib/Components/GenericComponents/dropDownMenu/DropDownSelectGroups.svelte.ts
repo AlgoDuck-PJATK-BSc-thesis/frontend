@@ -1,54 +1,44 @@
-const registeredGroups: Record<string, Record<string, GroupElements>> = {};
-const groupHighlightedMember: Record<string, GroupElements | undefined> = {};
+const registeredGroups: Record<string, Record<string, DropDownData>> = {};
+const groupHighlightedMember: Record<string, DropDownData | undefined> = {};
 
 let hideCallbacks: Record<string, () => void> = {};
 
 export interface GroupElements {
-    dropDown: HTMLDivElement,
+    dropDown?: HTMLDivElement,
     chevron: HTMLDivElement 
 }
 
 export const hideGroupElem = ( groupId: string ): void => {
     if (groupHighlightedMember[groupId]) {
-        const elem: GroupElements = groupHighlightedMember[groupId];
-		elem.dropDown.style.top = '';
-		elem.dropDown.style.height = '';
-		elem.chevron.style.rotate = '';
-
-        if (hideCallbacks[groupId]){
-            hideCallbacks[groupId]?.();
-        }else{
-            console.log("no callback");
+        const elem: DropDownData = groupHighlightedMember[groupId];
+        if (elem.isVisible){
+            elem.isVisible = false;
         }
         groupHighlightedMember[groupId] = undefined;
     }
 }
 
 export interface DropDownData{
-    groupId: string,
-    menuId: string,
+    groupId?: string;
+    dropDownId: string,
+    isVisible: boolean;
 }
 
-export const registerGroupElem = (groupId: string | undefined, elements: GroupElements): DropDownData => {
-    const gid: string = groupId ?? generateSynthGroupid();
-    const ddId: string = generateSynthName();
-    if (!registeredGroups[gid]){
-        registeredGroups[gid] = {};
-        registeredGroups[gid] = {};
+export const registerGroupElem = (data: DropDownData): DropDownData => {
+    data.groupId ??= generateSynthGroupid();
+    data.dropDownId ??= generateSynthName();
+    if (!registeredGroups[data.groupId]){
+        registeredGroups[data.groupId] = {};
     }
-    registeredGroups[gid][ddId] = elements;
-    return { groupId: gid, menuId: ddId};
+    registeredGroups[data.groupId][data.dropDownId] = data;
+    return data;
 }
 
-export const showGroupElem = ( groupId: string, elementId: string, targetHeight: string, onHide: () => void ): void => {
-    hideGroupElem(groupId);
-    const elem: GroupElements = registeredGroups[groupId][elementId];
-    elem.dropDown.style.top = '110%';
-    elem.dropDown.style.height = targetHeight;
-    elem.chevron.style.rotate = '90deg';
-    groupHighlightedMember[groupId] = elem;
-    hideCallbacks[groupId] = onHide;
-
+export const showGroupElem = ( data: DropDownData ): void => {
+    hideGroupElem(data.groupId!);
+    const elem: DropDownData = registeredGroups[data.groupId!][data.dropDownId!];
+    elem.isVisible = true;
+    groupHighlightedMember[data.groupId!] = elem;
 }
 
 export const generateSynthGroupid = () : string => {

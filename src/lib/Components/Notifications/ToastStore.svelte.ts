@@ -14,7 +14,7 @@ class ToastStore {
 		const id = Math.random().toString(36).substring(2, 9);
 		const toast: Toast = { id, message, type, duration };
 		
-		this.toasts = [...this.toasts, toast];
+		this.toasts.push(toast);
 
 		if (duration > 0) {
 			setTimeout(() => {
@@ -23,9 +23,9 @@ class ToastStore {
 		}
 	}
 
-	remove(id: string) {
-		this.toasts = this.toasts.filter(t => t.id !== id);
-	}
+remove(id: string) {
+    this.toasts = this.toasts.filter(t => t.id !== id);
+}
 
 	success(message: string, duration?: number) {
 		this.add(message, 'success', duration);

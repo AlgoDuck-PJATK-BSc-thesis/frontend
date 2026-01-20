@@ -14,6 +14,7 @@
 
   StaticBaselineComponents.set('SplitPanel', ResizeableComponent);
   StaticBaselineComponents.set('WizardPanel', WizardComponent);
+  StaticBaselineComponents.set('TerminalWizardPanel', WizardComponent);
   StaticBaselineComponents.set('TopLevelComponent', TopLevelComponent); 
   StaticBaselineComponents.set('PlaceholderPanel', PlaceHolderComponent);
 

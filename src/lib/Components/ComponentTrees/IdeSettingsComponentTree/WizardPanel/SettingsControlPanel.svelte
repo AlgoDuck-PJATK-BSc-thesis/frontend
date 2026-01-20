@@ -2,6 +2,7 @@
     import { activeProfile, ComponentRegistry } from "$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte";
     import type { ControlPanelArgs, GroupData, Label } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
     import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
+	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
     import type { svgArg } from "$lib/types/SvgIcon";
     import type { Component } from "svelte";
 
@@ -36,7 +37,7 @@
             {groups[groupName].groupData.label.commonName}
           </span>
           <div class="w-4 h-4 min-w-4 min-h-4 transition-all duration-150 ease-out {isGroupExpanded[i] ? 'rotate-90' : 'rotate-0'}">
-            <ChevronIconSvg options={{ class: "w-full h-full stroke-ide-text-primary"}}/>
+            <ChevronIconSvgNew options={{ class: "w-full h-full stroke-ide-text-primary"}}/>
           </div>
         </button>
         

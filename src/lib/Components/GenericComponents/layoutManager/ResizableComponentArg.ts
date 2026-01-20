@@ -4,7 +4,7 @@ export type ResizeAxis = 0 | 1;
 
 export type tabSide = 0 | 1 | 2 | 3;
 
-export interface ComponentConfig<P> {
+export interface ComponentConfig<P extends {}> {
     compId: string,
     component: string;
     options: P;
@@ -12,7 +12,7 @@ export interface ComponentConfig<P> {
     meta?: Meta,
 }
 
-export interface ResizeableComponentArg<T1, T2>{
+export interface ResizeableComponentArg<T1 extends {}, T2 extends {}>{
     axis: ResizeAxis; 
     comp1: ComponentConfig<T1>;
     comp2: ComponentConfig<T2>;
@@ -38,10 +38,10 @@ export interface LayoutManagerComponentArgs{
   }
 
 export interface WizardComponentArg{
-    components: ComponentConfig<any>[],
-    componentsContainer: HTMLDivElement | undefined,
+    components: ComponentConfig<MyTopLevelComponentArg<any>>[],
+    componentsContainer?: HTMLDivElement,
     side: tabSide,
-    control: ComponentConfig<any>,
+    control: ComponentConfig<ControlPanelArgs>,
     groups?: GroupData[],
 
 }
@@ -52,13 +52,28 @@ export interface GroupData{
     groupMembers: string[]
 }
 
-export interface MyTopLevelComponentArg<T>{
+export interface MyTopLevelComponentArg<T extends {}>{
     component: ComponentConfig<T>
 }
 
 export interface ControlPanelArgs{
     labels: Label[],
-    selectedElemId: string,
+    selectedElemId?: string,
+    controlCallbacks?: Record<string, (...args: any[]) => any>,
     side: number,
     groups?: GroupData[],
+    components: ComponentConfig<MyTopLevelComponentArg<any>>[]
+}
+
+
+export type InsertData = {
+    compId: string,
+    compType: string, 
+    compCommonName?: string
+    compArgs?: object
+}
+
+export interface ControlPanelArgsBuild extends ControlPanelArgs{
+    removeComp?: (compId: string) => void
+    swapComponents?: (comp1Index: number, comp2Index: number ) => void
 }

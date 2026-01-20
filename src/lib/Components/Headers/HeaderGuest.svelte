@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
-	import { SupportedLangs, userThemePreference, type Lang } from '$lib/stores/theme.svelte';
-	import DropDownSelect from '../GenericComponents/dropDownMenu/DropDownSelect.svelte';
 
 </script>
 
@@ -68,21 +66,6 @@
 	<div class="flex h-full flex-row items-center justify-center gap-4">
 		<div class="w-18">
 			<ThemeToggle />
-		</div>
-		<div class="h-10 w-20">
-			<DropDownSelect
-				options={{
-					options: SupportedLangs.map((l) => {
-						return {
-							key: l,
-							value: l
-						};
-					}),
-					onSelectCallback: (selected: Lang) => {
-						userThemePreference.lang = selected;
-					}
-				}}
-			/>
 		</div>
 	</div>
 </header>
