@@ -1,4 +1,6 @@
 <script lang="ts">
+	import TriangleIconSvg from '$lib/svg/EditorComponentIcons/TriangleIconSvg.svelte';
+
 	type CohortRow = {
 		cohortId: string;
 		name: string;
@@ -105,9 +107,13 @@
 				aria-label={selectedOpen
 					? 'Collapse selected cohorts section'
 					: 'Expand selected cohorts section'}
-				class="flex h-9 w-9 items-center justify-center rounded-sm bg-admin-bg-input text-lg font-semibold text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+				class="relative flex h-9 w-9 items-center justify-center rounded-sm bg-admin-bg-input text-lg font-semibold text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 			>
-				{selectedOpen ? '▴' : '▾'}
+				<div class={`absolute right-3 h-3 w-3 ${selectedOpen ? 'rotate-180' : ''}`}>
+					<TriangleIconSvg
+						options={{ class: 'h-full w-full stroke-[2] stroke-admin-text-muted' }}
+					/>
+				</div>
 			</button>
 
 			<button

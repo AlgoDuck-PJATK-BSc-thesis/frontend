@@ -5,6 +5,7 @@
 
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import {
 		userApi,
 		type UserAchievementDto,
@@ -13,6 +14,7 @@
 		type UserLeaderboardEntryDto
 	} from '$lib/api/user';
 	import { authApi } from '$lib/api/auth';
+	import { cohortApi, type CohortDetailsDto } from '$lib/api/cohort';
 
 	const userIdParam = $derived(page.params.userId ?? '');
 
@@ -28,6 +30,15 @@
 
 	let resolvedUserId = $state<string>('');
 	let isMe = $state<boolean>(false);
+
+	let myCohortId = $state<string>('');
+
+	let cohortDetails = $state<CohortDetailsDto | null>(null);
+	let cohortLoading = $state<boolean>(false);
+	let joiningCohort = $state<boolean>(false);
+	let cohortError = $state<string>('');
+
+	let copied = $state<boolean>(false);
 
 	const titleText = $derived(isMe ? 'My Profile' : 'Profile');
 
@@ -77,6 +88,15 @@
 	const tle = $derived(stats?.timeLimitExceeded);
 	const re = $derived(stats?.runtimeError);
 
+	const cohortId = $derived.by(() => {
+		const s = stats as any;
+		const u = user as any;
+		const id = (s?.cohortId ?? u?.cohortId ?? '').toString().trim();
+		return id;
+	});
+
+	const cohortJoinCode = $derived.by(() => (cohortDetails?.joinCode ?? '').toString().trim());
+
 	const achievementName = (a: UserAchievementDto) =>
 		(a.name ?? (a as any).title ?? '').toString().trim() || 'Achievement';
 
@@ -90,6 +110,115 @@
 			const url = (hit?.userAvatarUrl ?? '').toString().trim();
 			if (url) avatarOverride = url;
 		} catch {}
+	};
+
+	const loadCohortDetails = async (id: string) => {
+		const clean = (id ?? '').toString().trim();
+		cohortError = '';
+		cohortDetails = null;
+
+		if (!clean) return;
+
+		cohortLoading = true;
+		try {
+			cohortDetails = await cohortApi.getById(clean, fetch);
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to load cohort.';
+			cohortError = msg;
+			cohortDetails = null;
+		} finally {
+			cohortLoading = false;
+		}
+	};
+
+	const navigateToCohortChat = async (id: string) => {
+		await goto(`/cohort/${encodeURIComponent(id)}/chat`, {
+			replaceState: true,
+			keepFocus: true,
+			noScroll: true,
+			invalidateAll: false
+		});
+	};
+
+	const joinTheirCohort = async () => {
+		const id = (cohortDetails?.cohortId ?? cohortId ?? '').toString().trim();
+		if (!id) return;
+
+		cohortError = '';
+		joiningCohort = true;
+		try {
+			await cohortApi.joinById(id, fetch);
+			await navigateToCohortChat(id);
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to join cohort.';
+			cohortError = msg;
+		} finally {
+			joiningCohort = false;
+		}
+	};
+
+	const leaveCurrentAndJoinTheirCohort = async () => {
+		const targetId = (cohortDetails?.cohortId ?? cohortId ?? '').toString().trim();
+		if (!targetId) return;
+
+		if (!myCohortId.trim()) {
+			await joinTheirCohort();
+			return;
+		}
+
+		if (myCohortId.trim() === targetId) {
+			await navigateToCohortChat(targetId);
+			return;
+		}
+
+		const ok =
+			typeof window !== 'undefined'
+				? window.confirm('Leave your current cohort and join this one?')
+				: false;
+		if (!ok) return;
+
+		cohortError = '';
+		joiningCohort = true;
+		try {
+			await cohortApi.leave(fetch);
+			myCohortId = '';
+			await cohortApi.joinById(targetId, fetch);
+			myCohortId = targetId;
+			await navigateToCohortChat(targetId);
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : 'Failed to switch cohorts.';
+			cohortError = msg;
+		} finally {
+			joiningCohort = false;
+		}
+	};
+
+	const copyJoinCode = async () => {
+		const code = cohortJoinCode;
+		if (!code) return;
+
+		let didCopy = false;
+
+		try {
+			await navigator.clipboard.writeText(code);
+			didCopy = true;
+		} catch {}
+
+		if (!didCopy) {
+			try {
+				if (typeof window !== 'undefined') {
+					window.prompt('Copy this cohort code:', code);
+					didCopy = true;
+				}
+			} catch {}
+		}
+
+		if (didCopy) {
+			copied = true;
+			window.setTimeout(() => {
+				copied = false;
+			}, 1200);
+		}
 	};
 
 	onMount(async () => {
@@ -109,12 +238,18 @@
 
 		if (!resolvedUserId) return;
 
+		let fetchedUser: UserDto | null = null;
+		let fetchedStats: UserStatisticsDto | null = null;
+
 		try {
 			const [u, s, a] = await Promise.all([
 				userApi.getUserById(resolvedUserId),
 				userApi.getUserStatisticsById(resolvedUserId),
 				userApi.getUserAchievementsById(resolvedUserId)
 			]);
+
+			fetchedUser = u;
+			fetchedStats = s;
 
 			user = u;
 			stats = s;
@@ -125,9 +260,34 @@
 			achievements = [];
 		}
 
+		if (meId) {
+			if (isMe) {
+				const cid = ((fetchedStats as any)?.cohortId ?? (fetchedUser as any)?.cohortId ?? '')
+					.toString()
+					.trim();
+				myCohortId = cid;
+			} else {
+				try {
+					const myStats = await userApi.getUserStatisticsById(meId);
+					myCohortId = ((myStats as any)?.cohortId ?? '').toString().trim();
+				} catch {
+					myCohortId = '';
+				}
+			}
+		} else {
+			myCohortId = '';
+		}
+
 		if (avatarPath.trim() === defaultAvatar) {
 			await tryResolveAvatarFromLeaderboard();
 		}
+
+		try {
+			const cid = ((fetchedStats as any)?.cohortId ?? (fetchedUser as any)?.cohortId ?? '')
+				.toString()
+				.trim();
+			await loadCohortDetails(cid);
+		} catch {}
 	});
 </script>
 
@@ -188,6 +348,71 @@
 					</PixelFrameMini>
 				</div>
 			</div>
+		</div>
+
+		<div class="mt-8 flex flex-col gap-2">
+			{#if !cohortId}
+				<div class="text-[1rem] text-[color:var(--color-landingpage-subtitle)]">
+					User is not in any cohort.
+				</div>
+			{:else}
+				<div class="flex flex-wrap items-center gap-2">
+					<div class="text-[1rem] text-[color:var(--color-landingpage-subtitle)]">Cohort:</div>
+
+					{#if cohortLoading}
+						<PixelFrameMini
+							className="flex items-center gap-2 bg-[color:var(--color-primary)] px-3 py-0.5 text-[1rem] text-[color:var(--color-accent-4)]"
+						>
+							<span>Loading</span>
+						</PixelFrameMini>
+					{:else if cohortJoinCode}
+						<button
+							type="button"
+							onclick={copyJoinCode}
+							class="group"
+							aria-label="Copy cohort code"
+						>
+							<PixelFrameMini
+								className="flex items-center gap-2 bg-[color:var(--color-primary)] px-3 py-0.5 text-[1rem] text-[color:var(--color-accent-4)] transition group-hover:brightness-110"
+							>
+								<span>{copied ? 'Copied' : cohortJoinCode}</span>
+							</PixelFrameMini>
+						</button>
+					{/if}
+
+					{#if !isMe && cohortDetails}
+						{#if cohortDetails.isMember}
+							<PixelFrameMini
+								className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
+							>
+								<span>In your cohort</span>
+							</PixelFrameMini>
+						{:else}
+							<button
+								type="button"
+								onclick={myCohortId.trim() ? leaveCurrentAndJoinTheirCohort : joinTheirCohort}
+								class={joiningCohort ? 'pointer-events-none opacity-60' : ''}
+							>
+								<PixelFrameMini
+									className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
+								>
+									<span>
+										{joiningCohort
+											? 'Joining'
+											: myCohortId.trim()
+												? 'Leave current cohort to join'
+												: 'Join'}
+									</span>
+								</PixelFrameMini>
+							</button>
+						{/if}
+					{/if}
+				</div>
+
+				{#if cohortError}
+					<div class="text-sm text-red-500">{cohortError}</div>
+				{/if}
+			{/if}
 		</div>
 
 		<div class="mt-6 flex w-full flex-col gap-3">

@@ -36,6 +36,10 @@ export type ChangePasswordDto = {
 	newPassword: string;
 };
 
+export type DeleteAccountDto = {
+	confirmationText: string;
+};
+
 export const settingsApi = {
 	getUserConfig: async (fetcher?: typeof fetch): Promise<UserConfigDto> => {
 		const res = await FetchFromApi<UserConfigDto>('user/config', { method: 'GET' }, fetcher);
@@ -88,7 +92,14 @@ export const settingsApi = {
 		);
 	},
 
-	deleteAccount: async (fetcher?: typeof fetch): Promise<void> => {
-		await FetchJsonFromApi<unknown>('user/account', { method: 'DELETE' }, fetcher);
+	deleteAccount: async (dto: DeleteAccountDto, fetcher?: typeof fetch): Promise<void> => {
+		await FetchJsonFromApi<unknown>(
+			'user/account',
+			{
+				method: 'DELETE',
+				body: JSON.stringify(dto)
+			},
+			fetcher
+		);
 	}
 };

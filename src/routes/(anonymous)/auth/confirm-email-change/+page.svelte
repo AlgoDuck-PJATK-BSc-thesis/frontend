@@ -74,7 +74,7 @@
 
 				<div class="mt-6 flex gap-3">
 					<Button
-						size="small"
+						size="bigger"
 						label="Go to Settings"
 						labelFontFamily="var(--font-ariw9500)"
 						labelColor="rgba(0,0,0,0.7)"
@@ -103,7 +103,7 @@
 
 				<div class="mt-6 flex gap-3">
 					<Button
-						size="small"
+						size="big"
 						label="Try again"
 						labelFontFamily="var(--font-ariw9500)"
 						labelColor="rgba(0,0,0,0.7)"
@@ -114,7 +114,7 @@
 						onclick={confirmChange}
 					/>
 					<Button
-						size="small"
+						size="bigger"
 						label="Go to Settings"
 						labelFontFamily="var(--font-ariw9500)"
 						labelColor="rgba(0,0,0,0.7)"

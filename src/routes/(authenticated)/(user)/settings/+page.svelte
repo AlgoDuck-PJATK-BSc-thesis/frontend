@@ -7,7 +7,7 @@
 	import AvatarPickerCard from './AvatarPickerCard.svelte';
 	import type { WeeklyReminderConfig } from '$lib/types/StudyTimerTypes';
 	import { profileApi } from '$lib/api/profile';
-	import { authApi, type UserSessionDto } from '$lib/api/auth';
+	import { authApi } from '$lib/api/auth';
 	import { loadAndApplyUserConfig } from '$lib/api/userSettings';
 	import {
 		settingsApi,
@@ -32,6 +32,20 @@
 	const deletePhrase = 'I am sure I want to delete my account';
 
 	const coerceString = (v: unknown) => (v ?? '').toString();
+
+	const coerceBool = (v: unknown, fallback: boolean = false): boolean => {
+		if (typeof v === 'boolean') return v;
+		if (typeof v === 'number') return v !== 0;
+		if (typeof v === 'string') {
+			const s = v.trim().toLowerCase();
+			if (s === 'true' || s === '1' || s === 'yes' || s === 'y' || s === 'on') return true;
+			if (s === 'false' || s === '0' || s === 'no' || s === 'n' || s === 'off' || s === '')
+				return false;
+			return fallback;
+		}
+		return fallback;
+	};
+
 	const normalizeToCloudfrontKey = (value: string): string => {
 		const v = (value ?? '').toString().trim();
 		if (!v) return '';
@@ -117,14 +131,21 @@
 	let newEmail = '';
 
 	let theme: ThemeName = config
-		? config.isDarkMode
+		? coerceBool((config as any).isDarkMode, userThemePreference.theme === 'dark')
 			? 'dark'
 			: 'light'
 		: userThemePreference.theme;
-	let highContrast = config ? !!config.isHighContrast : accessibility.contrast === 2;
+
+	let highContrast = config
+		? coerceBool((config as any).isHighContrast, accessibility.contrast === 1)
+		: accessibility.contrast === 1;
+
 	let highContrastChoice: 'enabled' | 'disabled' = highContrast ? 'enabled' : 'disabled';
 
-	let emailNotificationsEnabled = config ? !!config.emailNotificationsEnabled : false;
+	let emailNotificationsEnabled = config
+		? coerceBool((config as any).emailNotificationsEnabled, false)
+		: false;
+
 	let reminders: WeeklyReminderConfig = (config?.weeklyReminders ?? []) as WeeklyReminderConfig;
 	$: hasAnyReminderEnabled = Array.isArray(reminders) && reminders.some((r: any) => !!r?.enabled);
 
@@ -137,7 +158,6 @@
 		theme: false,
 		contrast: false,
 		reminders: false,
-		sessions: false,
 		danger: false
 	};
 
@@ -150,7 +170,6 @@
 		theme: null,
 		contrast: null,
 		reminders: null,
-		sessions: null,
 		danger: null
 	};
 
@@ -189,21 +208,17 @@
 	let twoFactorEnabled = false;
 	let twoFactorChoice: 'enabled' | 'disabled' = 'disabled';
 
-	let sessionsOpen = false;
-	let sessionsLoading = false;
-	let sessions: UserSessionDto[] = [];
-
 	let currentPassword = '';
 	let nextPassword = '';
 	let nextPasswordConfirm = '';
 
 	let deleteConfirm = '';
 
-	const currentContrastLevel = () => (highContrast ? '2' : '0');
+	const currentContrastLevel = () => (highContrast ? '1' : '0');
 
 	const applyLocalThemeContrast = () => {
 		userThemePreference.theme = theme;
-		accessibility.contrast = highContrast ? 2 : 0;
+		accessibility.contrast = highContrast ? 1 : 0;
 		setThemeWithContrast(theme, currentContrastLevel());
 		highContrastChoice = highContrast ? 'enabled' : 'disabled';
 	};
@@ -212,11 +227,18 @@
 		username = (cfg.username ?? username ?? '').toString();
 		email = (cfg.email ?? email ?? '').toString();
 		newUsername = username;
-		theme = cfg.isDarkMode ? 'dark' : 'light';
-		highContrast = !!cfg.isHighContrast;
+
+		theme = coerceBool((cfg as any).isDarkMode, theme === 'dark') ? 'dark' : 'light';
+		highContrast = coerceBool((cfg as any).isHighContrast, highContrast);
 		highContrastChoice = highContrast ? 'enabled' : 'disabled';
-		emailNotificationsEnabled = !!cfg.emailNotificationsEnabled;
+
+		emailNotificationsEnabled = coerceBool(
+			(cfg as any).emailNotificationsEnabled,
+			emailNotificationsEnabled
+		);
+
 		reminders = (cfg.weeklyReminders ?? []) as WeeklyReminderConfig;
+
 		const avatar = normalizeToCloudfrontKey(cfg.s3AvatarUrl || '');
 		if (avatar) currentAvatarKey = avatar;
 	};
@@ -234,9 +256,10 @@
 
 	const buildRemindersPayload = (): Reminder[] | null => {
 		if (!emailNotificationsEnabled) return null;
-		if (!hasAnyReminderEnabled) return null;
+
 		const list = Array.isArray(reminders) ? reminders : [];
-		return list
+
+		const mapped = list
 			.map((r: any) => ({
 				day: String(r?.day ?? '').trim(),
 				enabled: !!r?.enabled,
@@ -244,6 +267,12 @@
 				minute: Number(r?.minute ?? 0)
 			}))
 			.filter((r: Reminder) => !!r.day);
+
+		const anyEnabled = mapped.some((r) => r.enabled);
+
+		if (!anyEnabled) return [];
+
+		return mapped;
 	};
 
 	const buildPreferencesDto = (): UpdatePreferencesDto => {
@@ -351,17 +380,6 @@
 		twoFactorChoice = twoFactorEnabled ? 'enabled' : 'disabled';
 	};
 
-	const loadSessions = async () => {
-		sessionsLoading = true;
-		try {
-			const list = await authApi.getSessions(fetch);
-			sessions = Array.isArray(list) ? list : [];
-			sessions = sessions.sort((a, b) => (a.isCurrent === b.isCurrent ? 0 : a.isCurrent ? -1 : 1));
-		} finally {
-			sessionsLoading = false;
-		}
-	};
-
 	const init = async () => {
 		try {
 			if (!config) {
@@ -371,7 +389,7 @@
 					applyConfigToLocalState(cfg);
 				} catch {
 					theme = userThemePreference.theme;
-					highContrast = accessibility.contrast === 2;
+					highContrast = accessibility.contrast === 1;
 					highContrastChoice = highContrast ? 'enabled' : 'disabled';
 				}
 			} else {
@@ -392,12 +410,6 @@
 				{ id: idFromDuckKey(defaultAvatar), name: 'AlgoDuck', imageUrl: defaultAvatar }
 			];
 			selectedAvatarId = idFromDuckKey(currentAvatarKey || defaultAvatar);
-		}
-
-		try {
-			await loadSessions();
-		} catch {
-			sessions = [];
 		}
 	};
 
@@ -551,51 +563,20 @@
 		}
 	};
 
-	const revokeSession = async (sessionId: string) => {
-		if (!sessionId) return;
-		saving.sessions = true;
-		try {
-			await authApi.revokeSession({ sessionId }, fetch);
-			await loadSessions();
-			setSectionNotice('sessions', 'success', 'Session revoked');
-		} catch (e) {
-			setSectionNotice('sessions', 'error', formatErrorMessage(e, 'Could not revoke session'));
-		} finally {
-			saving.sessions = false;
-		}
-	};
-
-	const revokeOtherSessions = async () => {
-		saving.sessions = true;
-		try {
-			const current = sessions.find((s) => !!s.isCurrent)?.sessionId ?? null;
-			try {
-				await authApi.revokeOtherSessions({}, fetch);
-			} catch {
-				await authApi.revokeOtherSessions({ currentSessionId: current, sessionId: current }, fetch);
-			}
-			await loadSessions();
-			setSectionNotice('sessions', 'success', 'Other sessions revoked');
-		} catch (e) {
-			setSectionNotice(
-				'sessions',
-				'error',
-				formatErrorMessage(e, 'Could not revoke other sessions')
-			);
-		} finally {
-			saving.sessions = false;
-		}
-	};
-
 	const deleteAccount = async () => {
 		if (deleteConfirm.trim() !== deletePhrase) {
 			setSectionNotice('danger', 'error', 'Type the confirmation text exactly');
 			return;
 		}
 
+		const confirmed = confirm(
+			'This will permanently delete your account. This action cannot be undone. Continue?'
+		);
+		if (!confirmed) return;
+
 		saving.danger = true;
 		try {
-			await settingsApi.deleteAccount(fetch);
+			await settingsApi.deleteAccount({ confirmationText: deleteConfirm.trim() }, fetch);
 			try {
 				await authApi.logout(fetch);
 			} catch {}
@@ -752,7 +733,8 @@
 			className="bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
 		>
 			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
-				Change your password.
+				Change your password. Note that if you signed in with external provider like Google, GitHub
+				or Microsoft your password may be managed by that provider.
 			</p>
 
 			<div class="grid gap-4">
@@ -1067,96 +1049,6 @@
 					{notices.reminders.message}
 				</p>
 			{/if}
-		</SettingsCard>
-
-		<SettingsCard
-			id="sessions"
-			title="Sessions"
-			className="bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))]"
-		>
-			<p class="mt-2 mb-6 text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
-				Manage active sessions.
-			</p>
-
-			<details
-				bind:open={sessionsOpen}
-				class="rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-3"
-			>
-				<summary
-					class="cursor-pointer text-sm font-semibold text-[color:var(--color-landingpage-subtitle)]"
-				>
-					{sessionsOpen ? 'Hide sessions' : 'Show sessions'}
-				</summary>
-
-				<div class="mt-4 flex flex-col gap-3">
-					{#if sessionsLoading}
-						<p class="text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
-							Loading...
-						</p>
-					{:else if !sessions.length}
-						<p class="text-sm text-[color:var(--color-landingpage-subtitle)] opacity-70">
-							No sessions found.
-						</p>
-					{:else}
-						{#each sessions as s (s.sessionId)}
-							<div class="flex items-center justify-between gap-4">
-								<div class="flex flex-col">
-									<span
-										class="text-sm font-semibold text-[color:var(--color-landingpage-subtitle)]"
-									>
-										{s.isCurrent ? 'Current session' : 'Session'}
-									</span>
-									<span class="text-xs text-[color:var(--color-landingpage-subtitle)] opacity-70">
-										Last used: {s.lastUsedAt}
-									</span>
-									<span class="text-xs text-[color:var(--color-landingpage-subtitle)] opacity-70">
-										IP: {s.ipAddress ?? '-'}
-									</span>
-								</div>
-								{#if !s.isCurrent}
-									<div class={saving.sessions ? 'pointer-events-none opacity-60' : ''}>
-										<Button
-											size="small"
-											label="Revoke"
-											labelFontFamily="var(--font-ariw9500)"
-											labelColor="rgba(0,0,0,0.7)"
-											labelFontSize="1.2rem"
-											labelFontWeight="normal"
-											labelTracking="normal"
-											labelClass=""
-											onclick={() => revokeSession(s.sessionId)}
-										/>
-									</div>
-								{/if}
-							</div>
-						{/each}
-					{/if}
-
-					<div class="mt-2 flex justify-start">
-						<div class={saving.sessions ? 'pointer-events-none opacity-60' : ''}>
-							<Button
-								size="bigger"
-								label={saving.sessions ? 'Revoking' : 'Revoke all other'}
-								labelFontFamily="var(--font-ariw9500)"
-								labelColor="rgba(0,0,0,0.7)"
-								labelFontSize="1.2rem"
-								labelFontWeight="normal"
-								labelTracking="normal"
-								labelClass=""
-								onclick={revokeOtherSessions}
-							/>
-						</div>
-					</div>
-
-					{#if notices.sessions}
-						<p
-							class={`mt-3 text-sm font-semibold ${notices.sessions.type === 'success' ? 'text-[color:var(--color-primary)]' : 'text-red-500'}`}
-						>
-							{notices.sessions.message}
-						</p>
-					{/if}
-				</div>
-			</details>
 		</SettingsCard>
 
 		<SettingsCard

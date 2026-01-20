@@ -14,7 +14,7 @@ export const applyPreferenceEffects = (prefs: PreferenceEffectsInput) => {
 	}
 
 	if (typeof prefs.isHighContrast === 'boolean') {
-		accessibility.contrast = prefs.isHighContrast ? 2 : 0;
-		applyContrast(prefs.isHighContrast ? '2' : '0');
+		accessibility.contrast = prefs.isHighContrast ? 1 : 0;
+		applyContrast(prefs.isHighContrast ? '1' : '0');
 	}
 };

@@ -2,7 +2,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
 
 export type QueryResult = 'Success' | 'Warning' | 'Error';
 
-export type StandardResponseDto<T = {}> = {
+export type StandardResponseDto<T = unknown> = {
 	status: QueryResult;
 	message: string | null;
 	body: T;
@@ -36,12 +36,6 @@ const getCookie = (name: string): string | null => {
 		return raw ? decodeURIComponent(raw) : null;
 	}
 	return null;
-};
-
-const isStandardResponseDto = (v: unknown): v is StandardResponseDto<unknown> => {
-	if (!v || typeof v !== 'object') return false;
-	const o = v as Record<string, unknown>;
-	return typeof o.status === 'string' && 'body' in o && 'message' in o;
 };
 
 const shouldSetJsonContentType = (body: RequestInit['body']): boolean => {
@@ -85,6 +79,91 @@ const buildError = (message: string, meta: Record<string, unknown>) => {
 	const err = new Error(message);
 	for (const [k, v] of Object.entries(meta)) (err as any)[k] = v;
 	return err;
+};
+
+const getFieldCI = (o: Record<string, unknown>, name: string): unknown => {
+	if (name in o) return o[name];
+	const want = name.toLowerCase();
+	for (const k of Object.keys(o)) {
+		if (k.toLowerCase() === want) return o[k];
+	}
+	return undefined;
+};
+
+const asTrimmedStringOrNull = (v: unknown): string | null => {
+	if (typeof v !== 'string') return null;
+	const s = v.trim();
+	return s ? s : null;
+};
+
+const normalizeQueryResult = (v: unknown): QueryResult | null => {
+	if (typeof v !== 'string') return null;
+	const s = v.trim().toLowerCase();
+	if (s === 'success') return 'Success';
+	if (s === 'warning') return 'Warning';
+	if (s === 'error') return 'Error';
+	return null;
+};
+
+const extractMessageFromJson = (parsed: unknown): string | null => {
+	if (parsed == null) return null;
+
+	if (typeof parsed === 'string') {
+		const s = parsed.trim();
+		return s ? s : null;
+	}
+
+	if (typeof parsed !== 'object') return null;
+
+	const o = parsed as Record<string, unknown>;
+
+	const msg = asTrimmedStringOrNull(getFieldCI(o, 'message'));
+	if (msg) return msg;
+
+	const detail = asTrimmedStringOrNull(getFieldCI(o, 'detail'));
+	if (detail) return detail;
+
+	const title = asTrimmedStringOrNull(getFieldCI(o, 'title'));
+	if (title) return title;
+
+	const errors = getFieldCI(o, 'errors');
+	if (errors && typeof errors === 'object') {
+		const e = errors as Record<string, unknown>;
+		for (const v of Object.values(e)) {
+			if (Array.isArray(v)) {
+				for (const item of v) {
+					const s = asTrimmedStringOrNull(item);
+					if (s) return s;
+				}
+			} else {
+				const s = asTrimmedStringOrNull(v);
+				if (s) return s;
+			}
+		}
+	}
+
+	const statusText = asTrimmedStringOrNull(getFieldCI(o, 'status'));
+	if (statusText && statusText.toLowerCase() === 'error') {
+		const fallback = asTrimmedStringOrNull(getFieldCI(o, 'code'));
+		if (fallback) return fallback;
+	}
+
+	return null;
+};
+
+const normalizeStandardResponse = <T>(
+	raw: unknown,
+	fallbackStatus: QueryResult
+): StandardResponseDto<T> => {
+	if (raw && typeof raw === 'object') {
+		const o = raw as Record<string, unknown>;
+		const status = normalizeQueryResult(getFieldCI(o, 'status')) ?? fallbackStatus;
+		const message = asTrimmedStringOrNull(getFieldCI(o, 'message'));
+		const bodyField = getFieldCI(o, 'body');
+		const body = (bodyField === undefined ? raw : bodyField) as T;
+		return { status, message, body };
+	}
+	return { status: fallbackStatus, message: null, body: raw as T };
 };
 
 export const FetchJsonFromApi = async <TResult>(
@@ -183,8 +262,8 @@ export const FetchJsonFromApi = async <TResult>(
 
 		const ct = res.headers.get('content-type') ?? '';
 		let msg = `API Error ${res.status}: ${res.statusText}`;
-		let parsedMessage: string | null = null;
 		let parsed: unknown = null;
+		let parsedMessage: string | null = null;
 		let detailText: string | null = null;
 
 		if (ct.includes('application/json')) {
@@ -194,14 +273,7 @@ export const FetchJsonFromApi = async <TResult>(
 				parsed = null;
 			}
 
-			if (isStandardResponseDto(parsed)) {
-				const m = (parsed.message ?? '').toString().trim();
-				if (m) parsedMessage = m;
-			} else if (parsed && typeof parsed === 'object') {
-				const maybeMessage = (parsed as Record<string, unknown>).message;
-				if (typeof maybeMessage === 'string' && maybeMessage.trim())
-					parsedMessage = maybeMessage.trim();
-			}
+			parsedMessage = extractMessageFromJson(parsed);
 
 			if (res.status === 403 && !csrfReplay && isCsrfFailureMessage(parsedMessage)) {
 				return await FetchJsonFromApi<TResult>(
@@ -277,7 +349,7 @@ export const FetchFromApi = async <TResult>(
 	replay: boolean = false,
 	csrfReplay: boolean = false
 ): Promise<StandardResponseDto<TResult>> => {
-	return await FetchJsonFromApi<StandardResponseDto<TResult>>(
+	const raw = await FetchJsonFromApi<unknown>(
 		endpoint,
 		fetchOptions,
 		fetcher,
@@ -285,4 +357,6 @@ export const FetchFromApi = async <TResult>(
 		replay,
 		csrfReplay
 	);
+	const normalized = normalizeStandardResponse<TResult>(raw, 'Success');
+	return normalized;
 };

@@ -12,6 +12,9 @@
 	let confirmPassword = $state('');
 	let error = $state<string | null>(null);
 
+	let showPassword = $state(false);
+	let showConfirmPassword = $state(false);
+
 	let externalLoading = $state<string | null>(null);
 	let externalError = $state<string | null>(null);
 
@@ -103,22 +106,48 @@
 
 				<label class="flex flex-col">
 					<span>Password</span>
-					<input
-						type="password"
-						required
-						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={password}
-					/>
+					<div class="relative mt-2">
+						<input
+							type={showPassword ? 'text' : 'password'}
+							required
+							class="font-body w-full rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 pr-16 text-black"
+							bind:value={password}
+						/>
+						<button
+							type="button"
+							class="absolute top-1/2 right-2 -translate-y-1/2 rounded border border-black/10 bg-white/80 px-2 py-1 text-xs font-semibold text-black hover:bg-white"
+							aria-label={showPassword ? 'Hide password' : 'Show password'}
+							onclick={() => {
+								showPassword = !showPassword;
+							}}
+						>
+							{showPassword ? 'Hide' : 'Show'}
+						</button>
+					</div>
 				</label>
 
 				<label class="flex flex-col">
 					<span>Confirm password</span>
-					<input
-						type="password"
-						required
-						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={confirmPassword}
-					/>
+					<div class="relative mt-2">
+						<input
+							type={showConfirmPassword ? 'text' : 'password'}
+							required
+							class="font-body w-full rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 pr-16 text-black"
+							bind:value={confirmPassword}
+						/>
+						<button
+							type="button"
+							class="absolute top-1/2 right-2 -translate-y-1/2 rounded border border-black/10 bg-white/80 px-2 py-1 text-xs font-semibold text-black hover:bg-white"
+							aria-label={showConfirmPassword
+								? 'Hide password confirmation'
+								: 'Show password confirmation'}
+							onclick={() => {
+								showConfirmPassword = !showConfirmPassword;
+							}}
+						>
+							{showConfirmPassword ? 'Hide' : 'Show'}
+						</button>
+					</div>
 				</label>
 
 				{#if error}

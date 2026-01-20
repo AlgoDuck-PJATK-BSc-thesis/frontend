@@ -10,7 +10,6 @@ export type AuthUserDto = {
 export type LoginRequest = {
 	userNameOrEmail: string;
 	password: string;
-	rememberMe?: boolean;
 };
 
 export type LoginOk = {
@@ -188,8 +187,7 @@ export const authApi = {
 				method: 'POST',
 				body: JSON.stringify({
 					userNameOrEmail: req.userNameOrEmail,
-					password: req.password,
-					rememberMe: !!req.rememberMe
+					password: req.password
 				})
 			},
 			fetcher

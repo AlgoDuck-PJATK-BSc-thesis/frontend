@@ -8,8 +8,9 @@
 
 	let userNameOrEmail = $state('');
 	let password = $state('');
-	let rememberMe = $state(false);
 	let error = $state<string | null>(null);
+
+	let showPassword = $state(false);
 
 	let showForgot = $state(false);
 	let resetEmail = $state('');
@@ -37,7 +38,7 @@
 	const login = async () => {
 		error = null;
 		try {
-			const res = await authApi.login({ userNameOrEmail, password, rememberMe }, fetch);
+			const res = await authApi.login({ userNameOrEmail, password }, fetch);
 
 			if (res.twoFactorRequired) {
 				const next = getSafeNext();
@@ -127,17 +128,24 @@
 
 				<label class="flex flex-col">
 					<span>Password</span>
-					<input
-						type="password"
-						required
-						class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-						bind:value={password}
-					/>
-				</label>
-
-				<label class="mt-3 flex items-center gap-2">
-					<input type="checkbox" bind:checked={rememberMe} />
-					<span>Remember me</span>
+					<div class="relative mt-2">
+						<input
+							type={showPassword ? 'text' : 'password'}
+							required
+							class="font-body w-full rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 pr-16 text-black"
+							bind:value={password}
+						/>
+						<button
+							type="button"
+							class="absolute top-1/2 right-2 -translate-y-1/2 rounded border border-black/10 bg-white/80 px-2 py-1 text-xs font-semibold text-black hover:bg-white"
+							aria-label={showPassword ? 'Hide password' : 'Show password'}
+							onclick={() => {
+								showPassword = !showPassword;
+							}}
+						>
+							{showPassword ? 'Hide' : 'Show'}
+						</button>
+					</div>
 				</label>
 
 				<div class="mt-2 flex items-center justify-between">
