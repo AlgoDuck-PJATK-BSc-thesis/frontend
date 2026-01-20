@@ -12,6 +12,8 @@
 	import ToolTip from "../../problem/upsert/ToolTip.svelte";
 	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
 	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
+    import CoinSrc from "$lib/images/store/coin.png"
+
 
     let { data }: { data: ItemCreationPageArgs } = $props(); 
 
@@ -231,7 +233,7 @@
                                 Cost <span class="text-admin-danger-text">*</span>
                             </span>
                             <div class="relative flex items-center">
-                                <img class="w-4 h-4 left-3 absolute" src="/src/lib/images/store/coin.png" alt="coin" />
+                                <img class="w-4 h-4 left-3 absolute" src={CoinSrc} alt="coin" />
                                 <input type="number" bind:value={formContents.itemCost} min={0}
                                     class="w-full pl-9 pr-3 py-2 bg-admin-border-primary border border-admin-border-primary rounded text-sm text-admin-text-secondary outline-none transition-colors focus:border-[#007fd4]"/>
                             </div>

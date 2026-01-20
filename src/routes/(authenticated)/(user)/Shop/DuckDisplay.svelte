@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Item } from "./Dtos";
+    import CoinSrc from "$lib/images/store/coin.png";
 
     let { options, onclick } : { options: Item, onclick: (() => void) } = $props();
     
@@ -49,7 +50,7 @@
             class:translate-y-0={effectiveHover}>
 
             <span class="text-white text-sm font-bold drop-shadow">{options.price}</span>
-            <img class="h-6 w-6" src="/src/lib/images/store/coin.png" alt="coin" />
+            <img class="h-6 w-6" src={CoinSrc} alt="coin" />
         </div>
     </button>
 </main>

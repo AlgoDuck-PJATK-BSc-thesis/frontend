@@ -8,6 +8,8 @@
     import SpriteViewer from "./SpriteViewer.svelte";
 	import ItemStatistics from "./ItemStatistics.svelte";
 	import ItemDeletionModal from "./ItemDeletionModal.svelte";
+    import CoinSrc from "$lib/images/store/coin.png"
+
 
     let { data }: { data: StandardResponseDto<FullItemDetailsDto> } = $props();
 
@@ -85,7 +87,7 @@
                             <div class="flex-1">
                                 <div class="text-[10px] uppercase tracking-wider text-admin-text-muted mb-1">Price</div>
                                 <div class="flex items-center gap-1.5">
-                                    <img class="w-5 h-5" src="/src/lib/images/store/coin.png" alt="coin" />
+                                    <img class="w-5 h-5" src={CoinSrc} alt="coin" />
                                     <span class="text-2xl font-semibold text-admin-text-primary tabular-nums">{data.body.itemDetailsCore.price.toLocaleString()}</span>
                                 </div>
                             </div>

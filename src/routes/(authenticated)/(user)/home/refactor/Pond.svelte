@@ -14,6 +14,21 @@
 	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
 	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
 	import TickIconSvg from '$lib/svg/EditorComponentIcons/TickIconSvg.svelte';
+	import BlackNWhite from "$lib/images/ponds/BlacknWhite.png"
+	import HomePageLight from "$lib/images/ponds/Homepage_light.png"
+	import HomePageDark from "$lib/images/ponds/Homepage_dark.png"
+	import HomePageLightTrees from "$lib/images/ponds/Homepage_light_trees.png"
+	import HomePageDarkTrees from "$lib/images/ponds/Homepage_dark_trees.png"
+	import Cancel from "$lib/images/ponds/Cancel.png"
+	import CancelHover from "$lib/images/ponds/Cancel-hover.png"
+	import Inventory from "$lib/images/ponds/Inventory.png"
+	import Shelf from "$lib/images/ponds/Shelf.png"
+	import Duck from "$lib/images/ponds/Duck.png"
+	import DuckHover from "$lib/images/ponds/Duck-hover.png"
+	import Plant from "$lib/images/ponds/Plant.png"
+	import PlantHover from "$lib/images/ponds/Plant-hover.png"
+	import Shovel from "$lib/images/ponds/shovel-btn.png"
+	import ShovelHover from "$lib/images/ponds/shovel-btn-hover.png"
 
 	let { userItems }: { userItems: { ducks: UsedDuckDto[]; plants: UsedPlantDto[] } } = $props();
 
@@ -35,9 +50,8 @@
 	let pondDucksRef: PondDucks | undefined = $state();
 	let pondPlantsRef: PondPlants | undefined = $state();
 
-	let pondPath: string = $derived(`/src/lib/images/ponds/Homepage_${userThemePreference.theme}.png`);
-	let pondTopLevelLayerPath: string = $derived(`/src/lib/images/ponds/Homepage_${userThemePreference.theme}_trees.png`);
-	let workPondPath: string = $derived(`/src/lib/images/ponds/BlacknWhite.png`);
+	let pondPath: string = $derived(userThemePreference.theme === "light" ? HomePageLight : HomePageDark);
+	let pondTopLevelLayerPath: string = $derived(userThemePreference.theme === "light" ? HomePageLightTrees : HomePageDarkTrees);
 
 	let prevWidth = 0;
 	let prevHeight = 0;
@@ -211,7 +225,7 @@
 		<PondPlants bind:this={pondPlantsRef}
 			bind:placedPlants
 			containerDims={{ width: clientWidth, height: clientHeight}}
-			{workPondPath}
+			workPondPath={BlackNWhite}
 			mainElement={mainElem}
 		/>
 	{/if}
@@ -221,7 +235,7 @@
 			bind:this={pondDucksRef}
 			ducks={PondSelectedDucks}
 			containerDims={{width: clientWidth, height: clientHeight}}
-			{workPondPath}
+			workPondPath={BlackNWhite}
 		/>
 	{/if}
 
@@ -344,14 +358,14 @@
 	>
 		<div class="relative h-full w-full">
 			<button onclick={() => isSelectionMenuVisible = false} onmouseover={() => isCancelHovered = true} onfocus={() => isCancelHovered = true} onmouseout={() => isCancelHovered = false} onblur={() => isCancelHovered = false} class="w-[25px] hover:cursor-pointer h-[25px] z-999 top-[25px] absolute left-[55px]">
-				<img src="/src/lib/images/ponds/Cancel{isCancelHovered ? "-hover" : ""}.png" alt="Back">
+				<img src={isCancelHovered ? CancelHover : Cancel} alt="Back">
 			</button>
-			<img class="w-full h-full absolute x-100 bg-transparent" src="/src/lib/images/ponds/Inventory.png" alt="">
+			<img class="w-full h-full absolute x-100 bg-transparent" src={Inventory} alt="">
 			<button onclick={() => activeTab = "duck"} onmouseover={() => isDucksHovered = true} onfocus={() => isDucksHovered = true} onmouseout={() => isDucksHovered = false} onblur={() => isDucksHovered = false} class="absolute z-110 top-[60px] left-[80px] h-[60px]">
-				<img class="w-full h-full hover:cursor-pointer {isDucksHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src="/src/lib/images/ponds/Duck{isDucksHovered ? "-hover" : ""}.png" alt="ducks">
+				<img class="w-full h-full hover:cursor-pointer {isDucksHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src={isDucksHovered ? DuckHover : Duck} alt="ducks">
 			</button>
 			<button onclick={() => activeTab = "plant"} onmouseover={() => isPlantsHovered = true} onfocus={() => isPlantsHovered = true} onmouseout={() => isPlantsHovered = false} onblur={() => isPlantsHovered = false} class="absolute z-110 top-[40px] left-[180px] h-[80px]">
-				<img class="w-full h-full hover:cursor-pointer {isPlantsHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src="/src/lib/images/ponds/Plant{isPlantsHovered ? "-hover" : ""}.png" alt="ducks">
+				<img class="w-full h-full hover:cursor-pointer {isPlantsHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src={isPlantsHovered ? PlantHover : Plant} alt="ducks">
 			</button>
 			<div class="h-full w-15 flex flex-col absolute right-0 justify-center items-center">
 				<button onmouseover={() => isShovelHovered = true} onmouseout={() => isShovelHovered = false} onfocus={() => isShovelHovered = true} onblur={() => isShovelHovered = false} class="w-full {isShovelHovered ? " ease-out duration-300 transition-all -translate-y-2" : ""}" onclick={(e: MouseEvent) => {
@@ -359,10 +373,10 @@
 					isSelectionMenuVisible = false;
 					pondPlantsRef.ToggleDeleteMode();
 				}}>
-					<img class="w-full" src="/src/lib/images/ponds/shovel-btn{isShovelHovered ? "-hover" : ""}.png" alt="" style="image-rendering: pixelated;">
+					<img class="w-full" src={isShovelHovered ? ShovelHover : Shovel} alt="" style="image-rendering: pixelated;">
 				</button>
 			</div>
-			<div class="w-[507px] min-h-[620px] bg-repeat-y bg-[url('/src/lib/images/ponds/Shelf.png')] left-[50px] top-[147px] flex-col bg-red-500 absolute z-200">
+			<div style="background-image: url('{Shelf}');" class="w-[507px] min-h-[620px] bg-repeat-y left-[50px] top-[147px] flex-col bg-red-500 absolute z-200">
 				{#if activeTab === 'duck'}
 					{@render DuckTab()}
 				{:else}

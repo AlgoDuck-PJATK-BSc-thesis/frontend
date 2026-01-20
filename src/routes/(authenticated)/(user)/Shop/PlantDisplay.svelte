@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Item } from "./Dtos";
+    import Coin from "$lib/images/store/coin.png";
 
     let { options, onclick } : { options: Item, onclick: (() => void) } = $props();
     
@@ -43,7 +44,7 @@
         
         <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 h-[15%] max-h-[20%] min-h-[10%] min-w-[20%] to-yellow-500 rounded-full shadow-lg transition-all duration-300 flex items-center gap-[10%] px-[4%] py-[1%] {effectiveHover ? "opacity-100" : "opacity-0 translate-y-2"}">
             <span class="text-white text-sm font-bold drop-shadow">{options.price}</span> 
-            <img class="h-[99%] aspect-square" src="/src/lib/images/store/coin.png" alt="coin" />
+            <img class="h-[99%] aspect-square" src={Coin} alt="coin" />
         </div>
     </button>
 </main>

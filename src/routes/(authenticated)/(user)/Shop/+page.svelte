@@ -12,6 +12,12 @@
 	import { UserData } from '$lib/stores/userData.svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import { useQueryClient } from '@tanstack/svelte-query';
+	import StoreBg from "$lib/images/store/store-bg.gif"
+	import Shopkeep from "$lib/images/store/shopkeep.gif"
+	import SignDuck1 from "$lib/images/store/sign-duck-1.png"
+	import SignDuck2 from "$lib/images/store/sign-duck-2.png"
+	import SignFlower1 from "$lib/images/store/sign-flower-1.png"
+	import SignFlower2 from "$lib/images/store/sign-flower-2.png"
 
 	const hoverAnimationTime = 3000;
 	const driftAmount = 15;
@@ -289,9 +295,9 @@
 <main bind:clientWidth={mainWidth} bind:clientHeight={mainHeight} style="height: calc(100vh - {headerHeight}px);"
 	class="relative w-full flex justify-center items-center overflow-hidden bg-black">
 	<img class="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
-		src="/src/lib/images/store/store-bg.gif" alt="shop background gif"/>
+		src={StoreBg} alt="shop background gif"/>
 	<img class="pointer-events-none absolute z-999 inset-0 h-full w-full object-cover select-none"alt="shopkeep"
-			src="/src/lib/images/store/shopkeep.gif"/>
+			src={Shopkeep}/>
 	<div class="relative" style="width: {containerWidth}px; height: {containerHeight}px;">
 		<div class="w-[20%] max-h-[45%] absolute z-[75] left-[28%] bottom-[30%] flex flex-col-reverse justify-end">
 			{#each chatWindowContents as chatMessage (chatMessage.messageId)}
@@ -320,7 +326,7 @@
 						}}
 						class="h-full"
 					>
-						<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
+						<img class="h-full" src={isDuckButtonPressed ? SignDuck2 : SignDuck1} alt="duck tab">
 					</button>
 					<button 
 						onmousedown={() => isFlowerButtonPressed = true}
@@ -330,7 +336,7 @@
 						}}
 						class="h-full"
 					>
-						<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
+						<img class="h-full" src={isDuckButtonPressed ? SignFlower2 : SignFlower1} alt="plant tab">
 					</button>
 				</div>
 			</div>

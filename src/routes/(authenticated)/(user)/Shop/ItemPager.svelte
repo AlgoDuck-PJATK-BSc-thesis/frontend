@@ -5,6 +5,10 @@
 	import { onMount, type Component } from "svelte";
 	import { FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
+    import ArrowUp from "$lib/images/store/arrow-up.png";
+    import ArrowUpDown from "$lib/images/store/arrow-up-down.png";
+    import ArrowDown from "$lib/images/store/arrow-down.png";
+    import ArrowDownDown from "$lib/images/store/arrow-down-down.png";
 
 	let {
 		options,
@@ -157,12 +161,12 @@
             <button 
                 onmousedown={() => addTransitionAndScroll('up')}
                 class="w-full">
-                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={`/src/lib/images/store/arrow-up${isButtonUpPressed ? "-down" : ""}.png`} alt="arrow up">
+                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={isButtonUpPressed ? ArrowUpDown : ArrowUp} alt="arrow up">
             </button>
             <button 
                 onmousedown={() => addTransitionAndScroll('down')}
                 class="w-full">
-                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={`/src/lib/images/store/arrow-down${isButtonDownPressed ? "-down" : ""}.png`} alt="arrow down">
+                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={isButtonUpPressed ? ArrowDownDown : ArrowDown} alt="arrow down">
             </button>
         </div>
     </div>

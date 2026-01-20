@@ -1,6 +1,6 @@
 <script>
 	import PixelFrame from '$lib/Components/LayoutComponents/PixelFrames/PixelFrame.svelte';
-	import landingPageBackground from '$lib/images/LandingPage/Landing_page.gif';
+	import landingPageBackground from '$lib/images/LandingPage/lightLandingPage.gif';
 </script>
 
 <svelte:head>

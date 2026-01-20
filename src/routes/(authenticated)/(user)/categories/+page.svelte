@@ -4,6 +4,7 @@
 	import type { CategoryDto } from './proxy+page';
 	import type { StandardResponseDto } from '$lib/api/apiCall';
 	import ToolTip from '../../(admin)/problem/upsert/ToolTip.svelte';
+	  import waterBg from '$lib/images/water.png';
 
 	let { data }: { data: StandardResponseDto<CategoryDto[]> } = $props();
 
@@ -252,9 +253,8 @@
 		onblur={() => isScrollableFrameFocused = false}
 		role="button"
 		tabindex="0"
-		class="scrollable-frame absolute z-10 h-full min-w-full cursor-grab bg-[url('/src/lib/images/water.png')] bg-[length:auto_100%] bg-repeat-x active:cursor-grabbing"
-		style:left="{scrollLeft}px"
-		style:width="{frameWidth}px"
+		class="scrollable-frame absolute z-10 h-full min-w-full cursor-grab bg-[length:auto_100%] bg-repeat-x active:cursor-grabbing"
+		style="background-image: url('{waterBg}'); left: {scrollLeft}px; width: {frameWidth}px"		
 		onmousedown={handleMouseDown}>
 		<div class="relative h-full w-full">
 			{#each data.body as category, i}
