@@ -135,7 +135,6 @@
 			toBeExplored = frontier;
 		}
 
-		console.log(JSON.stringify(componentTree, null, 2));
 		return JSON.stringify(componentTree, null, 2);
 	};
 
@@ -407,6 +406,9 @@
 		target.component = clonedReplacement.component;
 		target.options = clonedReplacement.options;
 		target.meta = clonedReplacement.meta;
+
+		placedComponentTypes.add(replacement.component);
+		placedComponentTypes = new Set(placedComponentTypes);
 	};
 
 	const makeIntoWizard = (target: ComponentConfig<any>): void => {
@@ -565,6 +567,7 @@
 			}
 		};
 		componentOpts = {};
+		placedComponentTypes = new Set(); 
 		
 		await tick();
 		shouldRender = true;
@@ -583,25 +586,13 @@
 		onclick: async (layoutName: string): Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> => {
 		let treeSerialized: string | undefined = serializeTree();
 		if (!treeSerialized) return;
-
-		try{
-			let res = await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
-				method: "POST",
-				body: JSON.stringify({
-					layoutContent: treeSerialized,
-					layoutName: layoutName
-				})
-			});
-
-			queryClient.invalidateQueries({queryKey: [ "custom-layout" ]})
-			creationModalArgs.isVisible = false;
-			history.back();
-			return res;
-		}catch(err){
-			if (err instanceof ApiError){
-				toast.error(err.response.body ?? "could not create layout");
-			}
-		}
+		return await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
+			method: "POST",
+			body: JSON.stringify({
+				layoutContent: treeSerialized,
+				layoutName: layoutName
+			})
+		})
 	}})
 </script>
 

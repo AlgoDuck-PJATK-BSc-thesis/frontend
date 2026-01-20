@@ -4,7 +4,7 @@ import type { CategoryDto, DifficultyDto, ProblemCreatePageArgs } from "./proble
 import type { problemCreationDto, TestCaseCreateDto } from "./TestCase";
 
 export const load: PageLoad = async ({ fetch, url }) => {
-    let categoryPromise = FetchFromApi<CategoryDto[]>("ProblemCategories", {
+    let categoryPromise = FetchFromApi<CategoryDto[]>("category/all", {
         method: "GET"
     }, fetch);
     let diffPromise = FetchFromApi<DifficultyDto[]>("AllDifficulties", {

@@ -5,7 +5,7 @@
 
 </script>
 
-<div class="bg-admin-bg-secondary border border-admin-border-primary rounded overflow-hidden">
+<div class="bg-admin-bg-secondary h-full min-h-screen border border-admin-border-primary rounded overflow-hidden">
     <div class="flex items-center gap-3 px-4 py-3 bg-admin-bg-tertiary border-b border-admin-border-primary">
         <div class="w-6 h-6 rounded-full bg-admin-accent-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-[#89d185]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +17,7 @@
     <div class="p-4 flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm">
             <span class="text-admin-text-muted">Item ID:</span>
-            <code class="px-2 py-0.5 bg-admin-bg-primary rounded text-admin-danger-text text-xs">{submitResult.createdItemGuid}</code>
+            <code class="px-2 py-0.5 bg-admin-bg-primary rounded text-admin-danger-text text-xs">{submitResult.itemId}</code>
         </div>
         
         {#if submitResult.files.length > 0}
@@ -45,7 +45,7 @@
         {/if}
 
         <div class="flex items-center gap-3 mt-2">
-            <a href={`/items/item-details?itemId=${submitResult.createdItemGuid}`} class="px-4 py-2 text-sm bg-admin-accent-primary text-white rounded hover:bg-admin-accent-primary-hover transition-colors">
+            <a href={`/items/item-details?itemId=${submitResult.itemId}`} class="px-4 py-2 text-sm bg-admin-accent-primary text-white rounded hover:bg-admin-accent-primary-hover transition-colors">
                 View Item
             </a>
             <button onclick={resetForm} class="px-4 py-2 text-sm text-admin-text-secondary border border-admin-border-primary rounded hover:bg-admin-border-primary transition-colors">

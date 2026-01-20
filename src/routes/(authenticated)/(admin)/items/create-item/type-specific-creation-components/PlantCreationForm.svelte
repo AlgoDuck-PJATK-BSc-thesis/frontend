@@ -7,11 +7,7 @@
 	import ToggleButton from "./ToggleButton.svelte";
 
 	let { itemData = $bindable(), sprite }: { itemData: PlantData, sprite?: File } = $props();
-
-	$inspect(itemData);
 	const MAX_DIMENSION = 5;
-
-	$inspect(sprite);
 
 	const highlightColor: Rgba = $derived({
 		r: 0,

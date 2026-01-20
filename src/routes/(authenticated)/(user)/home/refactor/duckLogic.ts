@@ -245,8 +245,6 @@ export const calculateSpawnPosition = (duckId: string, containerCenter: Coords, 
 			x: containerCenter.x + Math.cos(angle) * radius,
 			y: containerCenter.y + Math.sin(angle) * radius
 		}
-		console.log(spawnCoords);
-
 		attempts++;
 
 		if (attempts >= maxAttempts) {

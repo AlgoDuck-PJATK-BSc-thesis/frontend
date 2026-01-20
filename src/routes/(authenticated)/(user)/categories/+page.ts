@@ -2,7 +2,7 @@ import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, url, fetch }) : Promise<StandardResponseDto<CategoryDto[]>> => {    
-    return await FetchFromApi<CategoryDto[]>("ProblemCategories", {
+    return await FetchFromApi<CategoryDto[]>("category/all", {
         method: "GET"
     }, fetch);
 }

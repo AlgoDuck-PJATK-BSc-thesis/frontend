@@ -2,9 +2,9 @@
 	import { clickOutside } from "$lib/actions/clickOutside";
 	import { FetchFromApi } from "$lib/api/apiCall";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
-	import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
 	import WarningIconSvg from "$lib/svg/Toast/WarningIconSvg.svelte";
 	import type { ProblemDto } from "./problemTypes";
+	import FileIconSvg from "$lib/svg/EditorComponentIcons/FileIconSvg.svelte";
 
     let { isVisible = $bindable(), selectedItems }: { isVisible: boolean, selectedItems: ProblemDto[] } = $props();
 
@@ -48,11 +48,8 @@
             class="w-full max-w-lg bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 bg-[#2d2d2d] border-b border-[#3c3c3c]">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#5a1d1d] flex items-center justify-center">
-                        <BinIconSvg options={{ class: 'w-4 h-4 stroke-[2] stroke-[#f48771]'}}/>
-                    </div>
-                    <h3 id="modal-title" class="text-base font-semibold text-[#e7e7e7]">
-                        Delete {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
+                    <h3 class="text-xl font-semibold text-[#e7e7e7]">
+                        Delete {selectedItems.length} {selectedItems.length === 1 ? 'problem' : 'problems'}
                     </h3>
                 </div>
                 <button onclick={closeModal} disabled={isDeleting} class="p-1.5 rounded hover:bg-[#3c3c3c] transition-colors text-[#858585] hover:text-[#cccccc] disabled:opacity-50" aria-label="Close modal">
@@ -67,8 +64,9 @@
                     </span>
                     <div class="max-h-40 overflow-y-auto bg-[#1e1e1e] border border-[#3c3c3c] rounded">
                         {#each selectedItems as item}
-                            <div class="flex items-center px-3 py-2 border-b border-[#3c3c3c] last:border-b-0">
-                                <a href={`items/problem-details?itemId=${item.problemId}`} class="text-sm text-[#4fc1ff] hover:underline truncate">
+                            <div class="flex flex-row items-center px-3 py-2 gap-3 border-b border-[#3c3c3c] last:border-b-0">
+                                <FileIconSvg options={{ class: 'w-4 h-4 stroke-[2] stroke-admin-text-muted' }}/>
+                                <a href={`problem/problem-details?problemId=${item.problemId}`} class="text-sm text-[#4fc1ff] hover:underline truncate">
                                     {item.problemId}
                                 </a>
                             </div>

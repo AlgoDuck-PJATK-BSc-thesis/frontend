@@ -203,7 +203,7 @@
 	let isCancelHovered: boolean = $state(false);
 </script>
 
-<main bind:this={mainElem} bind:clientHeight bind:clientWidth class="relative h-full w-full">
+<main bind:this={mainElem} bind:clientHeight bind:clientWidth class="relative h-full w-full flex items-center">
 	<canvas class="absolute z-10" bind:this={canvas} style="width: {clientWidth}px; height: {clientHeight}px;"></canvas>
 	<canvas class="absolute z-30" bind:this={canvasTrees} style="width: {clientWidth}px; height: {clientHeight}px;"></canvas>
 
@@ -340,7 +340,7 @@
 
 {#snippet SelectionMenu()}
 	<div transition:fly={{ x: -50, opacity: 0, duration: 200 }}
-		class="absolute left-4 bg-transparent top-[10%] z-500 w-[646px] h-[794px] flex flex-row overflow-hidden rounded-2xl"
+		class="absolute left-4 bg-transparent z-500 w-[646px] h-[794px] flex flex-row overflow-hidden rounded-2xl"
 	>
 		<div class="relative h-full w-full">
 			<button onclick={() => isSelectionMenuVisible = false} onmouseover={() => isCancelHovered = true} onfocus={() => isCancelHovered = true} onmouseout={() => isCancelHovered = false} onblur={() => isCancelHovered = false} class="w-[25px] hover:cursor-pointer h-[25px] z-999 top-[25px] absolute left-[55px]">

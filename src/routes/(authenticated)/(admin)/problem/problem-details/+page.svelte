@@ -90,17 +90,19 @@
 
     const drawCurrentTab = $derived(performanceTabsConfig[currentlyPreviewedPerformanceTab])
 
-$inspect(currentlyPreviewedPerformanceTab);
-
     let performanceContainerWidth: number = $state(0);
     let performanceContainerHeight: number = $state(0);
 </script>
+
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>
 
 {#if isDeletionModalVisible}
     <DeletionModal bind:isVisible={isDeletionModalVisible} problemId={data.problemDetailsCore.problemId}/>
 {/if}
 {#key CurrentAdminTheme.theme}
-    <main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-muted font-sans">
+    <main class="w-full min-h-full bg-admin-bg-primary text-admin-text-muted">
         <div class="max-w-7xl mx-auto p-6 flex flex-col gap-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-admin-bg-input">
                 <div class="flex flex-col gap-2">

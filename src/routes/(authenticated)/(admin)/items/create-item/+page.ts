@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<ItemCreationPageAr
     const itemId: string | undefined = url.searchParams.get("itemId") ?? undefined;
     let rarities: StandardResponseDto<RarityDto[]> = await FetchFromApi<RarityDto[]>("item/rarity", {
         method: "GET"
-    });
+    }, fetch);
 
     let itemData: StandardResponseDto<ItemCreateDto> | undefined;
 
@@ -15,7 +15,6 @@ export const load: PageLoad = async ({ url, fetch }): Promise<ItemCreationPageAr
         itemData = await FetchFromApi<ItemCreateDto>("item/admin/form", {
             method: "GET"
         }, fetch, new URLSearchParams({ itemId: itemId }));
-        console.log(itemData);
     }
 
     return {

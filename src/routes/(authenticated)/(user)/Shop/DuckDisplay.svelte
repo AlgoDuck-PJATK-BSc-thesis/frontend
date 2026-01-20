@@ -10,7 +10,7 @@
     let effectivePress = $derived(isPressed && !options.isOwned);
 </script>
 
-<main class="w-full h-full p-5 flex justify-center items-center">
+<main class="w-full h-full p-[10%] flex justify-center items-center">
     <button onclick={options.isOwned ? undefined : onclick} onmouseenter={() => isHovered = true}
         onmouseleave={() => { isHovered = false; isPressed = false; }}
         onmousedown={() => isPressed = true}

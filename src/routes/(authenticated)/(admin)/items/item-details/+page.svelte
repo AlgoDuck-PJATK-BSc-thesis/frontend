@@ -7,11 +7,9 @@
     import PlantDataDisplay from "./PlantDataDisplay.svelte";
     import SpriteViewer from "./SpriteViewer.svelte";
 	import ItemStatistics from "./ItemStatistics.svelte";
-	import DeletionModal from "../DeletionModal.svelte";
 	import ItemDeletionModal from "./ItemDeletionModal.svelte";
 
     let { data }: { data: StandardResponseDto<FullItemDetailsDto> } = $props();
-
 
     const Tabs = ['General', 'Statistics'] as const;
     type Tab = (typeof Tabs)[number];
@@ -31,10 +29,14 @@
 
 </script>
 
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>
+
 {#if isDeletionModalVisible}
     <ItemDeletionModal bind:isVisible={isDeletionModalVisible} itemId={data.body.itemDetailsCore.itemId}/>
 {/if}
-<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary font-sans">
+<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary">
     <div class="max-w-6xl mx-auto p-6 flex flex-col gap-6">
         <header class="flex items-center justify-between py-2">
             <div class="flex items-center gap-4">

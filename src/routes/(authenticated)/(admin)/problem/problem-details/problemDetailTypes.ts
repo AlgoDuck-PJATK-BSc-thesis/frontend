@@ -93,6 +93,8 @@ export type PerformanceTab = (typeof PerformanceTabs)[number];
 
 
 export const formatRuntimeNs = (ns: number): string => {
+    if (ns === 0)
+        return "DNF";
     const ms = ns / 1_000_000;
     if (ms < 1) return `${(ns / 1000_000).toFixed(0)}μs`;
     if (ms < 1000) return `${ms.toFixed(1)}ms`;

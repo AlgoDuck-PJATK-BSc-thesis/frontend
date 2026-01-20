@@ -6,7 +6,8 @@
 
 	export type ToolTipOptions = {
 		tip: string;
-        customIcon?: ComponentConfigStatic<any>
+        customIcon?: ComponentConfigStatic<any>,
+		svgIconOpts?: svgArg
 	};
 
 	let { options }: { options: ToolTipOptions } = $props();
@@ -80,7 +81,7 @@
         {@const Icon = options.customIcon.component}
         <Icon options={options.customIcon.options}/>
     {:else}
-	    <QuestionMarkIconSvg options={{ class: "w-3 h-3 stroke-[#858585] stroke-[1.5] group-hover:stroke-[#cccccc]" }}/>
+	    <QuestionMarkIconSvg options={ options.svgIconOpts ?? { class: "w-3 h-3 stroke-[#858585] stroke-[1.5] group-hover:stroke-[#cccccc]" }}/>
     {/if}
 	{#if isVisible}
 		<div bind:this={tooltipElement}
@@ -88,7 +89,7 @@
 			class="absolute top-[calc(100%+8px)] p-0 m-0 bg-[#2d2d2d] border border-[#3c3c3c] z-[9999] w-max rounded-md"
 			style="max-width: {parentWidth * 0.8}px; {tooltipStyle}">
 			<div class="px-3.5 py-2.5">
-				<p class="m-0 font-sans text-xs leading-relaxed whitespace-pre text-[#cccccc]">
+				<p class="m-0 text-xs leading-relaxed whitespace-pre text-[#cccccc]">
 					{options.tip}
 				</p>
 			</div>

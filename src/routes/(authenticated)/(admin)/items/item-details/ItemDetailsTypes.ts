@@ -2,14 +2,14 @@ export interface IItemTypeSpecificData {
     $type: ItemType;
 }
 
-export type ItemType = "Duck" | "Plant";
+export type ItemType = "duck" | "plant";
 
 export interface DuckData extends IItemTypeSpecificData {
-    $type: "Duck";
+    $type: "duck";
 }
 
 export interface PlantData extends IItemTypeSpecificData {
-    $type: "Plant";
+    $type: "plant";
     width: number;
     height: number;
 }

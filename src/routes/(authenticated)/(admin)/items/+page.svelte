@@ -157,7 +157,11 @@
 
 <DeletionModal bind:isVisible={isDeletionModalShown} {selectedItems}/>
 
-<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary font-sans">
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>
+
+<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary">
     <div class="max-w-6xl mx-auto p-6 flex flex-col gap-4">
         <div class="py-4 border-b border-admin-border-primary">
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Item Management</h2>

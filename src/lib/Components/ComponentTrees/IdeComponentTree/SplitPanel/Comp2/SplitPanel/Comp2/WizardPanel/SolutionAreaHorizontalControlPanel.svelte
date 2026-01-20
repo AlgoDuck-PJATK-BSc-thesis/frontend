@@ -14,7 +14,7 @@
 
 </script>
 
-<main class="h-14 py-2 w-full">
+<main class="h-14 shrink-0 py-2 w-full">
     <div class="w-full h-full flex flex-row rounded-lg justify-start items-center gap-3 bg-ide-card py-1 px-2">
         {#each options.labels.filter(l => l.icon?.component !== undefined) as label}
             {@const Comp = ComponentRegistry.get(activeProfile.profile)!.get(label.icon?.component!)}

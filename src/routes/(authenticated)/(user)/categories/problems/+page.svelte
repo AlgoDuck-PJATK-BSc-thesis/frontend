@@ -92,10 +92,10 @@
 </script>
 
 <svelte:head>
-	<title>Problems - Beetcode</title>
+	<title>Problems - Algoduck</title>
 </svelte:head>
 
-<main class="min-h-screen w-full overflow-x-hidden bg-ide-bg font-sans text-ide-text-secondary">
+<main class="min-h-screen w-full overflow-x-hidden bg-ide-bg text-ide-text-secondary">
 	<div
 		class="mx-auto flex w-full max-w-[450px] flex-col gap-6 bg-ide-dcard p-6 lg:max-w-[900px] xl:max-w-[1200px]"
 	>
@@ -209,3 +209,4 @@
 		{/if}
 	</div>
 </main>
+

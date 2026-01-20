@@ -28,13 +28,14 @@
 	let loadedChatData: StandardResponseDto<ChatList> = $state({} as StandardResponseDto<ChatList>)
 	let loadedAutoSave: StandardResponseDto<AutoSaveDto | undefined> = $state({} as StandardResponseDto<AutoSaveDto | undefined>);
 
+$inspect(loadedData);
+
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
 		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
 			loadedAutoSave = value;
-			console.log(value);
 		}).catch((reason: any) => {
-			console.log(reason);
+			// well this is a 404 if the user is new to the problem so... Ignored???
 		})
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
@@ -54,7 +55,12 @@
 				userCode: loadedAutoSave?.body?.userCodeB64 !== undefined && atob(loadedAutoSave.body.userCodeB64).trim() !== "" ? atob(loadedAutoSave!.body!.userCodeB64) : loadedData.body.templateContents,
 				problemId: loadedData.body.problemId,
 				templateContents: loadedData.body.templateContents,
-				isDetachedHeadMode: false
+				isDetachedHeadMode: false,
+				restoreTemplate: () => {
+					const templateCapture = loadedData.body.templateContents;
+					(config['code-editor'] as CodeEditorComponentArgs).upstreamChanged = true;
+    				(config['code-editor'] as CodeEditorComponentArgs).userCode = templateCapture;
+				}
 			 } as CodeEditorComponentArgs,
 			'terminal-comp':  { 
 				stdOut: '',
@@ -99,8 +105,8 @@
 
 	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
 		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
-			(target as ChatWindowComponentArgs).problemId = (config['problem-info'] as InfoPanelComponentArgs).problemId;
-			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs).templateContents;
+			(target as ChatWindowComponentArgs).problemId = loadedData.body?.problemId;
+			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs)?.templateContents ?? loadedAutoSave.body?.userCodeB64 !== undefined ? atob(loadedAutoSave.body!.userCodeB64) : "";
 			(target as ChatWindowComponentArgs).changeLabel = (id: string, newLabel: string) => {
 				const components = (config['assistant-wizard'] as WizardComponentArg).components;
 				const comp = components.find(c => c.options.component.compId === id);
@@ -144,8 +150,6 @@
 					} as ComponentConfig<MyTopLevelComponentArg<any>>)
 				},
 				remove: async (compId: string): Promise<boolean> => {
-
-					console.log('deleting: ', compId);
 					(config['assistant-wizard'] as WizardComponentArg).components = (config['assistant-wizard'] as WizardComponentArg).components.filter(comp => comp.options.component.compId !== compId);
 
 					let didDelete = false
@@ -175,7 +179,6 @@
 								problemId: loadedData.body.problemId 
 							})
 						}, fetch);
-						console.log(res);
 					}
 					(comp.options.component.options as ChatWindowComponentArgs).chatName = newName;
 				},
@@ -195,12 +198,10 @@
         testCaseId: testCaseId
       })
     });
-	console.log(atob(res.body.modifiedCodeB64));
 	if (!res?.body) return
 
 	(config['code-editor'] as CodeEditorComponentArgs).upstreamChanged = true;
     (config['code-editor'] as CodeEditorComponentArgs).userCode = atob(res.body.modifiedCodeB64);
-
   } 
 
 </script>
@@ -208,3 +209,7 @@
 <main class="w-full h-[100vh] bg-ide-bg">
 	<Ide {contextInjectors} bind:components={config} />
 </main>
+
+<svelte:head>
+	<title>Problem - Algoduck</title>
+</svelte:head>

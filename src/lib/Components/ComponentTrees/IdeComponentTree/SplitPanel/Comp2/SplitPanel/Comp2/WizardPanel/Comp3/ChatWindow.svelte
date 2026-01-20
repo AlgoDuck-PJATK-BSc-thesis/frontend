@@ -88,13 +88,11 @@
             .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime())
     );
     let connection: signalR.HubConnection | undefined;
-    $inspect(connection)
 
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
 
     const sendMessage = async () => {
-        console.log('huh');
         if (!userQuery.trim() || options.isConnected === true) return;
         let startedWithouChatName: boolean = options.chatName === undefined;
         if (options.pages.length == 0){
@@ -125,10 +123,8 @@
         try {
             await connection.start()
             options.isConnected = true;
-            console.log("connected")
         }catch (err){
             options.isConnected = false;
-            console.error("failed", err)
             return;
         }
 
@@ -143,11 +139,9 @@
                 query: userQuery,
             } as AssistantQuery).subscribe({
                 next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
-                    console.log(messagePart);
                     if (messagePart.body.type === "Id"){
                         options.chatId = messagePart.body.message;
                         chatId = messagePart.body.message;
-                        console.log(chatId);
                         return;                    
                     }
 
@@ -197,23 +191,17 @@
                       }
                 },
                 complete: () => {
-                    console.log('completed');
                     connection?.stop()
                     options.isConnected = false;
                 },
                 error: (err) => {
-                    console.log('error inner');
-                    console.log(`error: ${err}`);
                     connection?.stop()
                     options.isConnected = false;
                 }
             })
         }catch(err){
-            console.log('error outer');
-            console.log(`error: ${err}`);
             options.isConnected = false;
         }finally{
-            console.log('finally outer');
         if (tiptapEditor) {
                 tiptapEditor.commands.clearContent();
             }
@@ -229,7 +217,6 @@
         if (tiptapEditor) {
             tiptapEditor.commands.setContent(prompt);
             userQuery = prompt;
-            console.log(userQuery);
             sendMessage();
         }
     }

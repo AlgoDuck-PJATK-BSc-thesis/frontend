@@ -4,9 +4,9 @@ export type TestCaseCreateDto = {
     display: string,
     displayRes: string,
     arrangeB64: string,
-    callMethod: MethodRecommendation,
+    callMethod: MethodRecommendation | undefined,
     callArgs: (FunctionParam | undefined)[],
-    expected: FunctionParam,
+    expected: FunctionParam | undefined,
     isPublic: boolean,
     orderMatters: boolean,
 }

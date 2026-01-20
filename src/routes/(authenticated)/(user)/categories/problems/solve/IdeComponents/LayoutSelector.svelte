@@ -33,7 +33,6 @@
 			userEditorPreferences.layout = res.body; 
 		}catch(err){
 			if (err instanceof ApiError) {
-				console.log(err.status);          
 				toast.error("Could not find layout template");
 			} else {
 				toast.error("Could not load layout");
@@ -250,13 +249,15 @@
 					</div>
 				{/if}
 			{/each}
-			<div class="w-full h-28 flex flex-col justify-center items-center">
-				<button onclick={() => goto('solve/editor')}
-					class="w-full h-full flex justify-center items-center bg-ide-card border border-ide-accent/50 rounded-xs hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent">
-					<CrossIconSvg options={{ class: "h-6 w-6 rotate-45 stroke-ide-text-primary stroke-[3]" }} />
-				</button>
-				<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Build your own</span>
-			</div>
+			{#if userDefinedLayouts < 10}
+				<div class="w-full h-28 flex flex-col justify-center items-center">
+					<button onclick={() => goto('solve/editor')}
+						class="w-full h-full flex justify-center items-center bg-ide-card border border-ide-accent/50 rounded-xs hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-ide-accent">
+						<CrossIconSvg options={{ class: "h-6 w-6 rotate-45 stroke-ide-text-primary stroke-[3]" }} />
+					</button>
+					<span class="px-3 flex justify-center text-xs font-mono text-ide-text-primary">Build your own</span>
+				</div>
+			{/if}
 		</div>
 
 	{/if}

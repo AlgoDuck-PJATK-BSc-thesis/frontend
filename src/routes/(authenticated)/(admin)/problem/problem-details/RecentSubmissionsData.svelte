@@ -69,7 +69,11 @@
                                 </a>
                             </div>
                             <div class="px-4 py-3 text-sm w-full flex justify-center items-center text-admin-text-secondary font-mono">
-                                {formatRuntimeNs(submission.runtimeNs)}
+                                {#if submission.runtimeNs === 0}
+                                    DNF
+                                {:else}
+                                    {(submission.runtimeNs / 1_000_000).toFixed(2)}ms
+                                {/if}
                             </div>
                             <div class="px-4 py-3 text-sm w-full flex justify-center items-center text-admin-text-muted">
                                 {formatTimeAgo(submission.submittedAt)}

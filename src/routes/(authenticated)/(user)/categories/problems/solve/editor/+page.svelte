@@ -95,7 +95,11 @@
 
 </script>
 <main class="w-full flex justify-center items-center h-full">
-  <div class="w-[60%] h-[80%]">
+  <div class="w-380 h-200 max-w-full max-h-full">
     <Editor {registeredComponents}/>
   </div>
 </main>
+
+<svelte:head>
+	<title>Editor - Algoduck</title>
+</svelte:head>

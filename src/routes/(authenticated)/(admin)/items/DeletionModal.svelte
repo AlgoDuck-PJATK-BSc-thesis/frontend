@@ -2,7 +2,7 @@
 	import { clickOutside } from "$lib/actions/clickOutside";
 	import { FetchFromApi } from "$lib/api/apiCall";
 	import CrossIconSvg from "$lib/svg/CrossIconSvg.svelte";
-	import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
+	import FileIconSvg from "$lib/svg/EditorComponentIcons/FileIconSvg.svelte";
 	import WarningIconSvg from "$lib/svg/Toast/WarningIconSvg.svelte";
 	import type { ItemDto } from "./types";
 
@@ -43,15 +43,12 @@
 </script>
 
 {#if isVisible}
-    <div role="dialog" class="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/50 z-[999] flex items-center justify-center p-4">
         <div use:clickOutside={closeModal} 
             class="w-full max-w-lg bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 bg-[#2d2d2d] border-b border-[#3c3c3c]">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-[#5a1d1d] flex items-center justify-center">
-                        <BinIconSvg options={{ class: 'w-4 h-4 stroke-[2] stroke-[#f48771]'}}/>
-                    </div>
-                    <h3 id="modal-title" class="text-base font-semibold text-[#e7e7e7]">
+                    <h3 class="text-xl font-semibold text-[#e7e7e7]">
                         Delete {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
                     </h3>
                 </div>
@@ -68,14 +65,9 @@
                     <div class="max-h-40 overflow-y-auto bg-[#1e1e1e] border border-[#3c3c3c] rounded">
                         {#each selectedItems as item}
                             <div class="flex items-center px-3 py-2 border-b border-[#3c3c3c] last:border-b-0">
-                                <svg class="w-4 h-4 mr-2.5 text-[#858585] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <a 
-                                    href={`items/item-details?itemId=${item.itemId}`}
-                                    class="text-sm text-[#4fc1ff] hover:underline truncate"
-                                >
-                                    {item.itemName}
+                                <FileIconSvg options={{ class: 'w-4 h-4 stroke-[2] gap-3 stroke-admin-text-muted'}}/>
+                                <a href={`items/item-details?itemId=${item.itemId}`} class="text-sm text-[#4fc1ff] hover:underline truncate">
+                                    {item.itemId}
                                 </a>
                             </div>
                         {/each}

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import MarkdownRenderer from '$lib/Components/Misc/MarkdownRenderer.svelte';
     import type { InfoPanelComponentArgs } from '../../component-args';
     let { options = $bindable() }: { options: InfoPanelComponentArgs } = $props();
 </script>
@@ -18,7 +17,7 @@
         </div>
     </div>
     
-    <div class="px-8 py-6 flex-1 editor-wrapper">
+    <div class="px-8 py-6 flex-1 editor-wrapper text-ide-text-secondary">
         {#if options.description}
             {@html options.description}
 			<!-- <MarkdownRenderer options={{markdown: options.description}}/> -->

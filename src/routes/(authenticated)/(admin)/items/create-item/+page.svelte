@@ -11,6 +11,7 @@
 	import { Tooltip } from "chart.js";
 	import ToolTip from "../../problem/upsert/ToolTip.svelte";
 	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
+	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
 
     let { data }: { data: ItemCreationPageArgs } = $props(); 
 
@@ -98,9 +99,6 @@
         spriteSlots = spriteSlotConfigs[formContents.itemData.$type].map(s => ({ ...s, file: undefined }));
     });
 
-
-    $inspect(spriteSlots);
-
     const urlToFile = async (url: string, filename: string): Promise<File | undefined> => {
         try {
             const response = await fetch(url, { 
@@ -110,7 +108,7 @@
             const blob = await response.blob();
             return new File([blob], filename, { type: blob.type });
         } catch (err) {
-            console.log(err);
+            toast.error(`Error getting file: ${err}`)
         }
     }
 
@@ -143,7 +141,6 @@
         if (isEditMode && data.itemId){
             formData.append("itemId", data.itemId);
         }
-        console.log(data.itemId)
         FetchFromApi<ItemCreateResponseDto>("admin/item", {
             method: isEditMode ? "PUT" : "POST",
             body: formData
@@ -165,7 +162,11 @@
 
 </script>
 
-<main class="w-full bg-admin-bg-primary text-admin-text-secondary font-sans">
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>
+
+<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary">
     <div class="max-w-4xl mx-auto grow p-6 flex flex-col gap-5">
         <div class="py-4 border-b border-admin-border-primary">
             <div class="flex items-center gap-3">

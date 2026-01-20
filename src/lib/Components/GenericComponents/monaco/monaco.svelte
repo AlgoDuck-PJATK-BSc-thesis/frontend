@@ -3,7 +3,6 @@
 	import { browser } from '$app/environment';
 	import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 	import { userEditorPreferences } from '$lib/stores/theme.svelte';
-	import type { ThemeName } from '$lib/Themes';
 	import type { EditorThemeDto } from '../../../../routes/(authenticated)/(user)/categories/problems/solve/types';
 	
 	let {
@@ -56,15 +55,12 @@
 	});
 
 	export const updateEditorExternal = (newContents: string) => {
-		console.log("updating")
 		if (editor && monaco) {
-			console.log("null check")
 			const position = editor.getPosition();
 			editor.setValue(newContents);
 			if (position) {
 				editor.setPosition(position);
 			}
-			console.log("done")
 		}
 	}
 

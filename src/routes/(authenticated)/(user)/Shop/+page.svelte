@@ -12,13 +12,27 @@
 	import { UserData } from '$lib/stores/userData.svelte';
 	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import { useQueryClient } from '@tanstack/svelte-query';
-	import type { CustomPageData } from '$lib/types/domain/Shared/CustomPageData';
 
 	const hoverAnimationTime = 3000;
 	const driftAmount = 15;
 
-	let bgImageWidth: number | undefined = $state();
-	let bgImageHeight: number | undefined = $state();
+	const imageAspectRatio = 2645 / 1234;
+	const headerHeight = 64;
+
+	let mainWidth: number = $state(0);
+	let mainHeight: number = $state(0);
+
+	let containerWidth: number = $derived.by(() => {
+		const widthFromHeight = mainHeight * imageAspectRatio;
+		
+		if (widthFromHeight <= mainWidth) {
+			return widthFromHeight;
+		} else {
+			return mainWidth;
+		}
+	});
+	
+	let containerHeight: number = $derived(containerWidth / imageAspectRatio);
 
 	let contentRect: DOMRect | undefined = $state();
 
@@ -63,8 +77,7 @@
 					itemId: item.itemId
 			})
 			}).then((value: StandardResponseDto<{ itemId: string }>) => {
-				console.log([itemTypeCapture, currPageCapture, currPageSizeCapture])
-				console.log(queryClient.getQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture]))
+				queryClient.invalidateQueries({queryKey: [`user/item/${selectedTab}`]})
 				queryClient.setQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture], (oldData: any) => {
 					if (!oldData) return oldData;
 					return {
@@ -77,7 +90,6 @@
 						}
 					};
 				});
-				console.log(queryClient.getQueryData([itemTypeCapture, currPageCapture, currPageSizeCapture]))
 				UserData.user.coins -= item.price;
 			}).catch();
 		
@@ -270,91 +282,92 @@
 	});
 
 	let currentPage: number = $state(1);
-	let currentPageSize: number = $state(12)
+	let currentPageSize: number = $state(12);
+
 </script>
 
-<main class="relative h-full w-full flex justify-center items-center overflow-none">
-	<img bind:clientWidth={bgImageWidth} bind:clientHeight={bgImageHeight}
-		class="pointer-events-none absolute h-full object-cover select-none overflow-none"
-		src="/src/lib/images/store/store-bg.gif"
-		alt="shop background gif"
-	/>
-	<img class="pointer-events-none absolute inset-0 top-0 z-500 h-full object-cover select-none overflow-none"
-		src="/src/lib/images/store/shopkeep.gif"
-		alt="shopkeep"
-	/>
-
-<div class="w-[20%] max-h-[45%] absolute z-750 left-[28%] bottom-[30%] flex flex-col-reverse justify-end">
-		{#each chatWindowContents as chatMessage (chatMessage.messageId)}
-			{#if chatMessage.type === 'shopkeep'}
-				<ShopkeepMessageComp options={chatMessage.options}/>
-			{:else if chatMessage.type === 'binary'}
-				<BinaryInteractionMessageComp options={chatMessage.options}/>
-			{/if}
-		{/each}
-	</div>
-
-	<div class="absolute top-0 z-150 flex flex-row"
-		style="width: {bgImageWidth ?? 1920}px; height: {bgImageHeight ?? 1080}px;">
-		<div class="relative h-full w-3/4">
-			<div bind:contentRect class="absolute top-[9%] right-[1%] h-[57%] w-[88%] overflow-y-hidden">
-				{#key selectedTab}
-					<CurrentTabComp options={CurrentTabOptions} bind:currentPage bind:currentPageSize/>
-				{/key}
-			</div>
-			<div class="absolute h-[6%] top-[3%] z-999 left-[15%] flex flex-row gap-1 py-[0.1%] px-[1%]">
-				<button onmousedown={() => {
-					isDuckButtonPressed = true;
-				}}
-				onmouseup={() => {
-					isDuckButtonPressed = false;
-					selectedTab = 'duck';
-				}}
-				class="h-full">
-					<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
-				</button>
-				<button onmousedown={() => {
-					isFlowerButtonPressed = true;
-				}}
-				onmouseup={() => {
-					isFlowerButtonPressed = false;
-					selectedTab = 'plant';
-				}}
-				class="h-full">
-					<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
-				</button>
-			</div>
+<main bind:clientWidth={mainWidth} bind:clientHeight={mainHeight} style="height: calc(100vh - {headerHeight}px);"
+	class="relative w-full flex justify-center items-center overflow-hidden bg-black">
+	<img class="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+		src="/src/lib/images/store/store-bg.gif" alt="shop background gif"/>
+	<img class="pointer-events-none absolute z-999 inset-0 h-full w-full object-cover select-none"alt="shopkeep"
+			src="/src/lib/images/store/shopkeep.gif"/>
+	<div class="relative" style="width: {containerWidth}px; height: {containerHeight}px;">
+		<div class="w-[20%] max-h-[45%] absolute z-[75] left-[28%] bottom-[30%] flex flex-col-reverse justify-end">
+			{#each chatWindowContents as chatMessage (chatMessage.messageId)}
+				{#if chatMessage.type === 'shopkeep'}
+					<ShopkeepMessageComp options={chatMessage.options}/>
+				{:else if chatMessage.type === 'binary'}
+					<BinaryInteractionMessageComp options={chatMessage.options}/>
+				{/if}
+			{/each}
 		</div>
 
-		<div class="relative flex h-full w-1/4 flex-col items-center">
-			<div class="absolute text-text top-[15%] flex h-[12.5%] left-[12%] w-[47%] flex-col items-center justify-center [font-family:var(--font-ariw9500)]">
-				{#if currentlySelectedItem}
-					<h3 class="text-2xl font-bold flex items-center">
-						{`${currentlySelectedItem?.name.at(0)?.toUpperCase()}${currentlySelectedItem?.name.substring(1)}`}
-					</h3>
-				{/if}
+		<div class="absolute inset-0 z-[15] flex flex-row">
+			<div class="relative h-full w-3/4">
+				<div bind:contentRect class="absolute top-[9%] right-[1%] h-[57%] w-[88%] overflow-y-hidden">
+					{#key selectedTab}
+						<CurrentTabComp options={CurrentTabOptions} bind:currentPage bind:currentPageSize/>
+					{/key}
+				</div>
+				
+				<div class="absolute h-[6%] top-[3%] z-[999] left-[15%] flex flex-row gap-1 py-[0.1%] px-[1%]">
+					<button 
+						onmousedown={() => isDuckButtonPressed = true}
+						onmouseup={() => {
+							isDuckButtonPressed = false;
+							selectedTab = 'duck';
+						}}
+						class="h-full"
+					>
+						<img class="h-full" src="/src/lib/images/store/sign-duck-{isDuckButtonPressed ? 2 : 1}.png" alt="duck tab">
+					</button>
+					<button 
+						onmousedown={() => isFlowerButtonPressed = true}
+						onmouseup={() => {
+							isFlowerButtonPressed = false;
+							selectedTab = 'plant';
+						}}
+						class="h-full"
+					>
+						<img class="h-full" src="/src/lib/images/store/sign-flower-{isFlowerButtonPressed ? 2 : 1}.png" alt="plant tab">
+					</button>
+				</div>
 			</div>
 
 			{#if currentlySelectedItem}
-				<div
-					class="absolute top-[40%] aspect-square w-[47%] left-[12%] flex justify-center item-center"
-					{@attach (node) => {
-						let startTime: number | undefined;
-						let raf: number;
-
-						const animate = (time: number) => {
-							if (!startTime) startTime = time;
-							const progress = ((time - startTime) % hoverAnimationTime) / hoverAnimationTime;
-							node.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
-							raf = requestAnimationFrame(animate);
-						};
-
-						raf = requestAnimationFrame(animate);
-						return () => cancelAnimationFrame(raf);
-					}}>
-					<CloudfrontImage path={`${selectedTab}/${currentlySelectedItem.itemId}/${primarySpriteName[selectedTab]}`} cls="max-h-full" />
+				<div 
+					class="fixed right-[10.5%] aspect-square w-[11%] flex justify-center items-center"
+					style="top: calc(6vh + {headerHeight}px);"
+				>
+					<h3 class="text-[4vh] font-bold flex items-center">
+						{`${currentlySelectedItem?.name.at(0)?.toUpperCase()}${currentlySelectedItem?.name.substring(1)}`}
+					</h3>
 				</div>
 			{/if}
+			{#if currentlySelectedItem}
+					<div class="fixed top-[40%] right-[10%] aspect-square w-[11%] flex justify-center items-center"
+						{@attach (node) => {
+							let startTime: number | undefined;
+							let raf: number;
+
+							const animate = (time: number) => {
+								if (!startTime) startTime = time;
+								const progress = ((time - startTime) % hoverAnimationTime) / hoverAnimationTime;
+								node.style.transform = `translateY(${Math.sin(progress * Math.PI * 2) * driftAmount}px)`;
+								raf = requestAnimationFrame(animate);
+							};
+
+							raf = requestAnimationFrame(animate);
+							return () => cancelAnimationFrame(raf);
+						}}>
+						<CloudfrontImage path={`${selectedTab}/${currentlySelectedItem.itemId}/${primarySpriteName[selectedTab]}`} cls="max-h-full" />
+					</div>
+				{/if}
 		</div>
 	</div>
 </main>
+
+<svelte:head>
+	<title>Shop - Algoduck</title>
+</svelte:head>

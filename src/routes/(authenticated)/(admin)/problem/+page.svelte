@@ -153,7 +153,7 @@
 
 <DeletionModal bind:isVisible={isDeletionModalShown} {selectedItems}/>
 
-<main class="w-full min-h-full bg-admin-bg-primary text-admin-text-secondary font-sans">
+<main class="w-full min-h-full bg-admin-bg-primary text-admin-text-secondary">
     <div class="max-w-6xl mx-auto p-6 flex flex-col gap-4">
         <div class="py-4 border-b border-admin-border-primary">
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Problem Management</h2>
@@ -255,7 +255,6 @@
                                                 label: value.username, 
                                                 displayComponent: ProblemCreatorPreviewCard, 
                                                 getPreviewData: async () => {
-                                                    console.log(value.id);
                                                     return await FetchFromApi<ProblemCreatorPreviewDto>("problem/creator/preview", { 
                                                         method: "GET"
                                                     }, fetch, new URLSearchParams({ userId: value.id }))
@@ -314,3 +313,7 @@
         {/if}
     </div>
 </main>
+
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>

@@ -24,7 +24,6 @@
 	});
 
 
-	$inspect($themeQuery.data);
 	const updateEditorPreferences = async () => {
 		const capturedTheme: EditorThemeDto = userEditorPreferences.theme;
 		const capturedFontSize: number = userEditorPreferences.fontSize;
@@ -50,7 +49,6 @@
 							clearTimeout(currentUpdateTimeout);
 
 						currentUpdateTimeout = setTimeout(async () => {
-							console.log("updating")
 							try{
 								await updateEditorPreferences();
 							}catch(err){
@@ -81,8 +79,6 @@
 							clearTimeout(currentUpdateTimeout);
 
 						currentUpdateTimeout = setTimeout(async () => {
-							console.log("updating")
-
 							try{
 								await updateEditorPreferences();
 							}catch(err){

@@ -33,7 +33,7 @@ export type FilePostingResult = {
 };
 
 export type ItemCreateResponseDto = {
-    createdItemGuid: string;
+    itemId: string;
     files: FilePostingResult[];
 };
 

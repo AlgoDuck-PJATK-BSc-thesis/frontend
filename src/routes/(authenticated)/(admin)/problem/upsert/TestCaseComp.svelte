@@ -14,6 +14,7 @@
     import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
     import ToolTip from "./ToolTip.svelte";
 	import MethodRecommentaionSelectedComp from "./SuggestionCards/MethodRecommentaionSelectedComp.svelte";
+	import ErrorIconSvg from "$lib/svg/Toast/ErrorIconSvg.svelte";
 
     let {
         mountExpanded, 
@@ -88,6 +89,11 @@
         getCurrentRecommendationsForQuery: (prefix: string) => methodRecommendationTrie?.getAllSubtreeValues(prefix),
         DisplayComp: MethodRecommendationComp,
         SelectedDisplayComp: MethodRecommentaionSelectedComp,
+        onDeselect: () => {
+            testCase.callMethod = undefined;
+            testCase.expected = undefined;
+            targetSuggestionOptions.defaultSelected = undefined;
+        },
         selectedValue: testCase.callMethod,
         defaultSelected: testCase.callMethod
     });
@@ -98,7 +104,6 @@
         getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
         DisplayComp: VariableRecommendationComp,
         SelectedDisplayComp: VariableRecommendationSelectedComp,
-        selectedValue: testCase.expected,
         defaultSelected: testCase.expected
     });
 
@@ -170,14 +175,11 @@
         </div>
 
         {#if analysisStatus === "Failed"}
-            <div class="bg-[#5a1d1d] border-l-4 border-[#f14c4c] p-4">
+            <div class="bg-admin-danger-bg border-l-4 border-admin-danger-text p-4">
                 <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 stroke-[#f14c4c] flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 8v4m0 4h.01"/>
-                    </svg>
+                    <ErrorIconSvg options={{ class: 'w-5 h-5 stroke-admin-danger-bg stroke-[2]'}}/>
                     <div class="flex flex-col gap-1">
-                        <span class="text-sm font-medium text-[#f14c4c]">
+                        <span class="text-sm font-medium text-admin-danger-bg">
                             Syntax Error
                         </span>
                     </div>
@@ -201,7 +203,7 @@
                 </div>
                 <ToolTip options={{ tip: "Setup code that runs before the test. Define variables and objects to use in the test."}}/>
             </div>
-            <div class="h-[200px] border border-[#3c3c3c] rounded-sm overflow-hidden">
+            <div class="h-[300px] border border-[#3c3c3c] rounded-sm overflow-hidden">
                 <Monaco bind:editorContents={testCase.arrangeB64}/>
             </div>
             <div class="mt-4">
@@ -227,7 +229,6 @@
                     </div>
                     <div class="flex flex-col gap-2.5">
                         {#each testCase.callMethod.functionParams as param, i}
-                        {console.log("here: ", $state.snapshot(testCase.callArgs[i]))}
                             <div class="flex items-center gap-3 p-2 px-3 bg-[#2d2d2d] rounded border border-[#3c3c3c]">
                                 <span class="font-mono text-xs text-[#4ec9b0] bg-[#4ec9b0]/10 px-1.5 py-0.5 rounded whitespace-nowrap">{param.type}</span>
                                 <span class="font-mono text-xs text-[#9cdcfe] min-w-[80px]">{param.name}</span>
@@ -250,15 +251,17 @@
                     </div>
                 </div>
             {/if}
-            <div class="mt-4">
-                <div class="flex items-center justify-start gap-4 mb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="font-mono text-xs font-semibold text-[#569cd6] bg-[#569cd6]/10 px-2 py-0.5 rounded">Expected Output</span>
+            {#if testCase.callMethod}
+                <div class="mt-4">
+                    <div class="flex items-center justify-start gap-4 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs font-semibold text-[#569cd6] bg-[#569cd6]/10 px-2 py-0.5 rounded">Expected Output</span>
+                        </div>
+                        <ToolTip options={{ tip: "The expected value against which to compare function output"}}/>
                     </div>
-                    <ToolTip options={{ tip: "The expected value against which to compare function output"}}/>
+                    <SuggestedInput bind:options={targetSuggestionOptions}/>
                 </div>
-                <SuggestedInput bind:options={targetSuggestionOptions}/>
-            </div>
+            {/if}
 
         </div>
 

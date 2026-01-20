@@ -28,6 +28,9 @@
 
     let { data }: { data: ProblemCreatePageArgs } = $props();
 
+    $inspect(data);
+
+
     let tiptapEditor: Editor;
 
     const isInEditMode: boolean = data.loadedCreateDto !== undefined && data.isEditMode;
@@ -100,7 +103,6 @@
 
 
             if (isInEditMode && data.problemId){
-                console.log(problemCreationDto);
                 res = await FetchFromApi<CreateUnverifiedProblemDto>("UpdateProblem", {
                     method: 'PUT',
                     body: JSON.stringify(problemCreationDto)
@@ -165,7 +167,7 @@
     const firstCategory: CategoryDto | undefined = data.categories.at(0);
 </script>
 
-<main class="w-full grow bg-admin-bg-primary text-admin-text-muted font-sans">
+<main class="w-full grow bg-admin-bg-primary text-admin-text-muted">
     <div class="max-w-6xl mx-auto p-6 flex flex-col gap-6 overflow-y-auto">
         <div class="py-4 border-b border-admin-bg-input mb-2">
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Add Problem</h2>
@@ -358,3 +360,7 @@
         </div>
     </div>
 </main>
+
+<svelte:head>
+	<title>Admin - Algoduck</title>
+</svelte:head>
