@@ -135,7 +135,7 @@
 					>
 						<div class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
 							<div class="flex min-w-[240px] flex-1 flex-col gap-1">
-								<div class="font-mono text-sm break-all text-admin-text-primary">{u.userId}</div>
+								<div class="text-sm break-all text-admin-text-primary">{u.userId}</div>
 								<div class="text-xs text-admin-text-muted">{(u.roles ?? []).join(', ')}</div>
 
 								{#if selectedExpanded[u.userId]}
@@ -184,12 +184,11 @@
 		<div class="p-3">
 			{#if activeUser}
 				<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-					<div class="font-mono text-sm break-all text-admin-text-muted">{activeUser.userId}</div>
+					<div class=" text-sm break-all text-admin-text-muted">{activeUser.userId}</div>
 					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-admin-text-muted">
 						<span>{(activeUser.roles ?? []).join(', ')}</span>
 						<span>{activeUser.username}</span>
 						<span>{activeUser.email}</span>
-						<span class="mx-1 text-admin-border-primary">|</span>
 						<span>(expand to see all selected users)</span>
 					</div>
 				</div>

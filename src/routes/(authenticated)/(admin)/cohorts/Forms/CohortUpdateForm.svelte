@@ -53,7 +53,7 @@
 
 		{#if success}
 			<div class="text-sm text-admin-accent-link">
-				Saved: <span class="font-mono text-xs">{success.cohortId}</span> - {success.name}
+				Saved: <span class="text-xs">{success.cohortId}</span> - {success.name}
 			</div>
 		{/if}
 
@@ -64,7 +64,7 @@
 				type="text"
 				bind:value={cohortId}
 				disabled={disabled || saving}
-				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 font-mono text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			/>
 		</div>
 

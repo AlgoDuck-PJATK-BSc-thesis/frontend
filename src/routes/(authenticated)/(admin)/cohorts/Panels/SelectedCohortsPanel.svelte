@@ -153,7 +153,7 @@
 					>
 						<div class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
 							<div class="flex min-w-[240px] flex-1 flex-col gap-1">
-								<div class="font-mono text-sm break-all text-admin-text-primary">{c.cohortId}</div>
+								<div class="text-sm break-all text-admin-text-primary">{c.cohortId}</div>
 
 								{#if selectedExpanded[c.cohortId]}
 									<div class="flex flex-col gap-1 pt-2">
@@ -217,13 +217,12 @@
 		<div class="p-3">
 			{#if activeCohort}
 				<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-					<div class="font-mono text-sm break-all text-admin-text-muted">
+					<div class="text-sm break-all text-admin-text-muted">
 						{activeCohort.cohortId}
 					</div>
 					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-admin-text-muted">
 						<span>{activeCohort.name}</span>
 						<span>active: {activeCohort.isActive ? 'yes' : 'no'}</span>
-						<span class="mx-1 text-admin-border-primary">|</span>
 						<span>(expand to see all selected cohorts)</span>
 					</div>
 				</div>

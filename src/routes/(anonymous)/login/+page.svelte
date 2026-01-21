@@ -5,6 +5,7 @@
 	import { redirectToOAuth } from '$lib/api/oauth';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
+	import BlinkingEye from '$lib/Components/Misc/BlinkingEye.svelte';
 
 	let userNameOrEmail = $state('');
 	let password = $state('');
@@ -137,13 +138,13 @@
 						/>
 						<button
 							type="button"
-							class="absolute top-1/2 right-2 -translate-y-1/2 rounded border border-black/10 bg-white/80 px-2 py-1 text-xs font-semibold text-black hover:bg-white"
+							class="absolute top-1/2 right-2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded border border-black/10 bg-white/80 text-black hover:bg-white"
 							aria-label={showPassword ? 'Hide password' : 'Show password'}
 							onclick={() => {
 								showPassword = !showPassword;
 							}}
 						>
-							{showPassword ? 'Hide' : 'Show'}
+							<BlinkingEye open={showPassword} options={{ class: 'h-5 w-5' }} />
 						</button>
 					</div>
 				</label>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LoadingDots from '$lib/Components/Misc/LoadingDots.svelte';
+	import BlinkingEye from '$lib/Components/Misc/BlinkingEye.svelte';
 
 	type CreateRole = 'user' | 'admin';
 
@@ -198,7 +199,7 @@
 
 		{#if created}
 			<div class="text-sm text-admin-accent-link">
-				Created: <span class="font-mono text-xs">{created.userId}</span> - {created.username} ({created.role})
+				Created: <span class="text-xs">{created.userId}</span> - {created.username} ({created.role})
 				- verified: {created.emailVerified ? 'yes' : 'no'}
 			</div>
 		{/if}
@@ -277,7 +278,7 @@
 					bind:value={username}
 					readonly={usernameMode === 'generate'}
 					disabled={disabled || creating}
-					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${usernameMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${usernameMode === 'generate' ? '' : ''}`}
 				/>
 
 				{#if usernameMode === 'generate'}
@@ -324,16 +325,17 @@
 					bind:value={password}
 					readonly={passwordMode === 'generate'}
 					disabled={disabled || creating}
-					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${passwordMode === 'generate' ? 'font-mono' : ''}`}
+					class={`min-w-[240px] flex-1 rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50 ${passwordMode === 'generate' ? '' : ''}`}
 				/>
 
 				<button
 					type="button"
 					onclick={() => (showPassword = !showPassword)}
 					disabled={disabled || creating}
-					class="rounded-sm bg-admin-bg-input px-3 py-2 text-xs font-medium text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+					aria-label={showPassword ? 'Hide password' : 'Show password'}
+					class="flex h-9 w-9 items-center justify-center rounded-sm bg-admin-bg-input text-admin-text-primary hover:bg-admin-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					{showPassword ? 'Hide' : 'Show'}
+					<BlinkingEye open={showPassword} options={{ class: 'h-4 w-4' }} />
 				</button>
 
 				{#if passwordMode === 'generate'}

@@ -50,7 +50,7 @@
 				type="text"
 				bind:value={cohortId}
 				disabled={disabled || deleting}
-				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 font-mono text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
+				class="rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover disabled:opacity-50"
 			/>
 		</div>
 

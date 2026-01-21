@@ -171,7 +171,7 @@
 			{#each cohorts as c (c.cohortId)}
 				{@const sel = isSelected(c.cohortId)}
 				<tr class={rowClass(sel)}>
-					<td class="border-b border-admin-border-primary py-2 pr-4 font-mono text-xs">
+					<td class="border-b border-admin-border-primary py-2 pr-4 text-xs">
 						{#if isSearchMode}
 							{@html highlight(c.cohortId, highlightQuery)}
 						{:else}

@@ -317,7 +317,7 @@
 						{#if searchResult.idMatch && !idMatchHiddenByFilter}
 							<div class="flex flex-wrap items-start justify-between gap-3">
 								<div class="flex flex-col gap-1">
-									<div class="font-mono text-xs break-all text-admin-text-muted">
+									<div class="text-xs break-all text-admin-text-muted">
 										{@html highlight(searchResult.idMatch.userId, searchQuery)}
 									</div>
 									<div class="text-sm text-admin-text-primary">{searchResult.idMatch.username}</div>
@@ -370,8 +370,7 @@
 								<tbody>
 									{#each mode === 'username' ? filteredUsernameItems : filteredEmailItems as u (u.userId)}
 										<tr class={tableRowClass(u)}>
-											<td
-												class="border-b border-admin-border-primary py-2 pr-4 font-mono text-xs break-all"
+											<td class="border-b border-admin-border-primary py-2 pr-4 text-xs break-all"
 												>{u.userId}</td
 											>
 											<td class="border-b border-admin-border-primary py-2 pr-4">

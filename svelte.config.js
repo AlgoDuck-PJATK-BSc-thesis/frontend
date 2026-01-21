@@ -11,7 +11,8 @@ const config = {
 			fallback: 'index.html'
 		}),
 		alias: {
-			'$stores': './src/stores'
+			$lib: './src/lib',
+			$stores: './src/stores'
 		}
 	}
 };

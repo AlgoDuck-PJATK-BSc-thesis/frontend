@@ -46,7 +46,7 @@
 
 		{#if created}
 			<div class="text-sm text-admin-accent-link">
-				Created: <span class="font-mono text-xs">{created.cohortId}</span> - {created.name}
+				Created: <span class=" text-xs">{created.cohortId}</span> - {created.name}
 			</div>
 		{/if}
 

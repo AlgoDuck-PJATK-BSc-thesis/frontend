@@ -1130,7 +1130,7 @@
 											ID match
 										</div>
 										<div class="mt-2 flex flex-col gap-1">
-											<div class="font-mono text-xs break-all text-admin-text-muted">
+											<div class="text-xs break-all text-admin-text-muted">
 												{@html highlight(searchResult.idMatch.cohortId, searchQuery)}
 											</div>
 											<div class="text-sm text-admin-text-primary">

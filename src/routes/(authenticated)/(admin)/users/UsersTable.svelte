@@ -75,9 +75,7 @@
 						? 'bg-admin-accent-selection text-admin-text-primary'
 						: 'text-admin-text-secondary'}
 				>
-					<td class="border-b border-admin-border-primary py-2 pr-4 font-mono text-xs"
-						>{u.userId}</td
-					>
+					<td class="border-b border-admin-border-primary py-2 pr-4 text-xs">{u.userId}</td>
 					<td class="border-b border-admin-border-primary py-2 pr-4">{u.username}</td>
 					<td class="border-b border-admin-border-primary py-2 pr-4">{u.email}</td>
 					<td class="border-b border-admin-border-primary py-2 pr-4"

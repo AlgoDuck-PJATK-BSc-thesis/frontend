@@ -233,7 +233,7 @@
 									<div class="rounded-xl border border-white/10 bg-slate-900/40 px-3 py-2">
 										<div class="flex items-center justify-between">
 											<div class="font-semibold text-white">{ch}</div>
-											<div class="font-mono text-sm text-purple-200">{code}</div>
+											<div class="text-sm text-purple-200">{code}</div>
 										</div>
 									</div>
 								{/each}
