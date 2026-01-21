@@ -1,8 +1,14 @@
 import type { PageLoad } from './$types';
+import { settingsApi } from '$lib/api/settings';
+
+export const ssr = false;
+export const prerender = false;
 
 export const load: PageLoad = async ({ fetch }) => {
-	const res = await fetch('/settings', { headers: { accept: 'application/json' } });
-	if (!res.ok) return { settings: null };
-	const settings = await res.json();
-	return { settings };
+	try {
+		const settings = await settingsApi.getUserConfig(fetch);
+		return { settings };
+	} catch {
+		return { settings: null };
+	}
 };

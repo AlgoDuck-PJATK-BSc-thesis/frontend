@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import WeeklyPicker from '$lib/Components/DurationPickers/WeeklyPicker.svelte';
-	import SettingsCard from './SettingsCard.svelte';
-	import AvatarPickerCard from './AvatarPickerCard.svelte';
+	import SettingsCard from './Cards/SettingsCard.svelte';
+	import AvatarPickerCard from './Cards/AvatarPickerCard.svelte';
 	import type { WeeklyReminderConfig } from '$lib/types/StudyTimerTypes';
 	import { profileApi } from '$lib/api/profile';
 	import { authApi } from '$lib/api/auth';
-	import { loadAndApplyUserConfig } from '$lib/api/userSettings';
 	import {
 		settingsApi,
 		type Reminder,
@@ -19,14 +19,9 @@
 	import { accessibility } from '$lib/stores/accessibility.svelte';
 	import { setThemeWithContrast, type ThemeName } from '$lib/Themes';
 
-	type PageDataShape = {
-		config: UserConfigDto | null;
-		user: { username: string; email: string } | null;
-	};
-
 	type Notice = { type: 'success' | 'error'; message: string };
 
-	export let data: PageDataShape;
+	export let data: PageData;
 
 	const defaultAvatar = `Ducks/Outfits/duck-016a1fce-3d78-46cd-8b25-b0f911c55644.png`;
 	const deletePhrase = 'I am sure I want to delete my account';
@@ -83,7 +78,7 @@
 		isOwned: boolean;
 	} & Record<string, unknown>;
 
-	type PageData<T> = {
+	type PageDataList<T> = {
 		currPage: number;
 		pageSize: number;
 		totalItems: number;
@@ -123,10 +118,10 @@
 		return out;
 	};
 
-	let config: UserConfigDto | null = data.config ?? null;
+	let config: UserConfigDto | null = data.settings ?? null;
 
-	let username = config?.username ?? data.user?.username ?? '';
-	let email = config?.email ?? data.user?.email ?? '';
+	let username = config?.username ?? '';
+	let email = config?.email ?? '';
 	let newUsername = username;
 	let newEmail = '';
 
@@ -306,7 +301,7 @@
 
 				const res = await (
 					await import('$lib/api/apiCall')
-				).FetchFromApi<PageData<DuckItemDto>>('item/duck', { method: 'GET' }, fetch, sp);
+				).FetchFromApi<PageDataList<DuckItemDto>>('item/duck', { method: 'GET' }, fetch, sp);
 
 				const items = Array.isArray(res.body?.items) ? res.body.items : [];
 				all = all.concat(items);
@@ -384,7 +379,7 @@
 		try {
 			if (!config) {
 				try {
-					const cfg = await loadAndApplyUserConfig(fetch);
+					const cfg = await settingsApi.getUserConfig(fetch);
 					config = cfg;
 					applyConfigToLocalState(cfg);
 				} catch {
