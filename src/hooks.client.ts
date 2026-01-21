@@ -3,9 +3,16 @@ import { userApi } from '$lib/api/user';
 
 const COINS_STORAGE_KEY = 'algoduck:coins';
 
+const REFRESH_COOLDOWN_MS = 20000;
+const REFRESH_RETRY_DELAYS_MS = [0, 1200, 3500];
+
 let currentCoins: number | null = null;
-let refreshRunning = false;
+
+let refreshPromise: Promise<void> | null = null;
 let refreshQueued = false;
+let lastRefreshStartedAt = 0;
+let refreshCooldownTimer: ReturnType<typeof setTimeout> | null = null;
+
 let fetchPatched = false;
 let baseFetch: typeof fetch | null = null;
 
@@ -53,20 +60,56 @@ const extractCoins = (data: any): unknown => {
 	);
 };
 
-const tryParseJsonCoins = async (res: Response): Promise<boolean> => {
+const safeReadJson = async (res: Response): Promise<any | null> => {
 	const ct = res.headers.get('content-type') ?? '';
-	if (!ct.includes('application/json')) return false;
+	if (!ct.includes('application/json')) return null;
+	try {
+		return await res.clone().json();
+	} catch {
+		return null;
+	}
+};
+
+const tryParseJsonCoins = async (res: Response): Promise<boolean> => {
+	const data = await safeReadJson(res);
+	if (data == null) return false;
+
+	const maybeCoins = extractCoins(data);
+	if (maybeCoins === undefined) return false;
+
+	setClientCoins(maybeCoins);
+	return true;
+};
+
+const getErrorStatus = (e: unknown): number | null => {
+	if (!e || typeof e !== 'object') return null;
+	const anyE = e as any;
+	if (typeof anyE.status === 'number') return anyE.status;
+	if (typeof anyE?.response?.status === 'number') return anyE.response.status;
+	return null;
+};
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+const pullCoinsFromServer = async (fetchFn: typeof fetch): Promise<number | null> => {
+	try {
+		const s = await userApi.getMyStatistics(fetchFn);
+		const c = (s as unknown as { coins?: unknown })?.coins;
+		const n = coerceNumber(c);
+		if (n !== null) return n;
+	} catch (e) {
+		const st = getErrorStatus(e);
+		if (st === 401 || st === 403 || st === 429) return null;
+	}
 
 	try {
-		const data = await res.clone().json();
-		const maybeCoins = extractCoins(data);
-		if (maybeCoins !== undefined) {
-			setClientCoins(maybeCoins);
-			return true;
-		}
+		const me = await userApi.getMe(fetchFn);
+		const c = (me as unknown as { coins?: unknown })?.coins;
+		const n = coerceNumber(c);
+		if (n !== null) return n;
 	} catch {}
 
-	return false;
+	return null;
 };
 
 const shouldKickRefresh = (req: Request, res: Response) => {
@@ -82,81 +125,86 @@ const shouldKickRefresh = (req: Request, res: Response) => {
 		return false;
 	}
 
-	if (!url.pathname.includes('/api/')) return false;
-
 	const p = url.pathname.toLowerCase();
-	if (
-		p.includes('mystatistics') ||
-		p.includes('getmystatistics') ||
-		p.includes('/me') ||
-		p.includes('getme')
-	)
-		return false;
+	if (!p.includes('/api/')) return false;
+
+	if (p.startsWith('/api/user/')) return false;
+	if (p.startsWith('/api/auth/')) return false;
+	if (p.startsWith('/api/leaderboard/')) return false;
 
 	return true;
 };
 
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const scheduleAfterCooldown = (fetchFn: typeof fetch) => {
+	const now = Date.now();
+	const remaining = REFRESH_COOLDOWN_MS - (now - lastRefreshStartedAt);
 
-const pullCoinsFromServer = async (fetchFn: typeof fetch): Promise<number | null> => {
-	try {
-		const s = await userApi.getMyStatistics(fetchFn);
-		const c = (s as unknown as { coins?: unknown })?.coins;
-		const n = coerceNumber(c);
-		if (n !== null) return n;
-	} catch {}
+	if (remaining <= 0) {
+		queueRefresh(fetchFn);
+		return;
+	}
 
-	try {
-		const me = await userApi.getMe(fetchFn);
-		const c = (me as unknown as { coins?: unknown })?.coins;
-		const n = coerceNumber(c);
-		if (n !== null) return n;
-	} catch {}
+	if (refreshCooldownTimer) return;
 
-	return null;
+	refreshCooldownTimer = setTimeout(() => {
+		refreshCooldownTimer = null;
+		queueRefresh(fetchFn);
+	}, remaining);
 };
 
-const refreshUntilChanged = async (fetchFn: typeof fetch) => {
+const runRefresh = async (fetchFn: typeof fetch) => {
 	readCurrentCoins();
 	const baseline = currentCoins;
 
-	const delays = [
-		0, 150, 250, 400, 650, 900, 1200, 1600, 2200, 3000, 4000, 5500, 7000, 8500, 10000
-	];
-
-	for (const d of delays) {
+	for (let i = 0; i < REFRESH_RETRY_DELAYS_MS.length; i += 1) {
+		const d = REFRESH_RETRY_DELAYS_MS[i];
 		if (d > 0) await sleep(d);
+
 		const n = await pullCoinsFromServer(fetchFn);
 		if (n === null) continue;
-		if (baseline === null || n !== baseline) {
+
+		if (baseline === null) {
+			setClientCoins(n);
+			return;
+		}
+
+		if (n !== baseline) {
+			setClientCoins(n);
+			return;
+		}
+
+		if (i === REFRESH_RETRY_DELAYS_MS.length - 1) {
 			setClientCoins(n);
 			return;
 		}
 	}
-
-	const finalN = await pullCoinsFromServer(fetchFn);
-	if (finalN !== null) setClientCoins(finalN);
 };
 
 const queueRefresh = (fetchFn: typeof fetch) => {
 	const f = baseFetch ?? fetchFn;
+	const now = Date.now();
 
-	if (refreshRunning) {
+	if (refreshPromise) {
 		refreshQueued = true;
 		return;
 	}
 
-	refreshRunning = true;
+	if (now - lastRefreshStartedAt < REFRESH_COOLDOWN_MS) {
+		refreshQueued = true;
+		scheduleAfterCooldown(fetchFn);
+		return;
+	}
+
+	lastRefreshStartedAt = now;
 	refreshQueued = false;
 
-	(async () => {
-		try {
-			await refreshUntilChanged(f);
-		} finally {
-			refreshRunning = false;
-			if (refreshQueued) queueRefresh(fetchFn);
+	refreshPromise = runRefresh(f).finally(() => {
+		refreshPromise = null;
+		if (refreshQueued) {
+			refreshQueued = false;
+			scheduleAfterCooldown(fetchFn);
 		}
-	})();
+	});
 };
 
 const instrument = async (req: Request, res: Response, fetchFnForRefresh: typeof fetch) => {
