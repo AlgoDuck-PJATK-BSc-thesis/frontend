@@ -18,6 +18,7 @@
 	import { userThemePreference } from '$lib/stores/theme.svelte';
 	import { accessibility } from '$lib/stores/accessibility.svelte';
 	import { setThemeWithContrast, type ThemeName } from '$lib/Themes';
+	import BlinkingEye from '$lib/Components/Misc/BlinkingEye.svelte';
 
 	type Notice = { type: 'success' | 'error'; message: string };
 
@@ -206,6 +207,10 @@
 	let currentPassword = '';
 	let nextPassword = '';
 	let nextPasswordConfirm = '';
+
+	let showCurrentPassword = false;
+	let showNextPassword = false;
+	let showNextPasswordConfirm = false;
 
 	let deleteConfirm = '';
 
@@ -492,6 +497,9 @@
 			currentPassword = '';
 			nextPassword = '';
 			nextPasswordConfirm = '';
+			showCurrentPassword = false;
+			showNextPassword = false;
+			showNextPasswordConfirm = false;
 			setSectionNotice('password', 'success', 'Saved');
 		} catch (e) {
 			setSectionNotice('password', 'error', formatErrorMessage(e, 'Could not change password'));
@@ -737,33 +745,69 @@
 					class="flex flex-col gap-2 text-sm font-semibold text-[color:var(--color-landingpage-subtitle)]"
 				>
 					<span>Current password</span>
-					<input
-						type="password"
-						bind:value={currentPassword}
-						class="font-body w-full rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
-					/>
+					<div class="mt-2 flex items-center gap-2">
+						<input
+							type={showCurrentPassword ? 'text' : 'password'}
+							bind:value={currentPassword}
+							class="font-body w-full flex-1 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
+						/>
+						<button
+							type="button"
+							class="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] text-[color:var(--color-landingpage-subtitle)] hover:brightness-110"
+							aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+							onclick={() => {
+								showCurrentPassword = !showCurrentPassword;
+							}}
+						>
+							<BlinkingEye open={showCurrentPassword} options={{ class: 'h-5 w-5' }} />
+						</button>
+					</div>
 				</label>
 
 				<label
 					class="flex flex-col gap-2 text-sm font-semibold text-[color:var(--color-landingpage-subtitle)]"
 				>
 					<span>New password</span>
-					<input
-						type="password"
-						bind:value={nextPassword}
-						class="font-body w-full rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
-					/>
+					<div class="mt-2 flex items-center gap-2">
+						<input
+							type={showNextPassword ? 'text' : 'password'}
+							bind:value={nextPassword}
+							class="font-body w-full flex-1 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
+						/>
+						<button
+							type="button"
+							class="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] text-[color:var(--color-landingpage-subtitle)] hover:brightness-110"
+							aria-label={showNextPassword ? 'Hide password' : 'Show password'}
+							onclick={() => {
+								showNextPassword = !showNextPassword;
+							}}
+						>
+							<BlinkingEye open={showNextPassword} options={{ class: 'h-5 w-5' }} />
+						</button>
+					</div>
 				</label>
 
 				<label
 					class="flex flex-col gap-2 text-sm font-semibold text-[color:var(--color-landingpage-subtitle)]"
 				>
 					<span>Confirm new password</span>
-					<input
-						type="password"
-						bind:value={nextPasswordConfirm}
-						class="font-body w-full rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
-					/>
+					<div class="mt-2 flex items-center gap-2">
+						<input
+							type={showNextPasswordConfirm ? 'text' : 'password'}
+							bind:value={nextPasswordConfirm}
+							class="font-body w-full flex-1 rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] p-2 text-sm text-[color:var(--color-landingpage-subtitle)]"
+						/>
+						<button
+							type="button"
+							class="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] text-[color:var(--color-landingpage-subtitle)] hover:brightness-110"
+							aria-label={showNextPasswordConfirm ? 'Hide password' : 'Show password'}
+							onclick={() => {
+								showNextPasswordConfirm = !showNextPasswordConfirm;
+							}}
+						>
+							<BlinkingEye open={showNextPasswordConfirm} options={{ class: 'h-5 w-5' }} />
+						</button>
+					</div>
 				</label>
 
 				<div class={saving.password ? 'pointer-events-none opacity-60' : ''}>
@@ -879,7 +923,7 @@
 								value="dark"
 								bind:group={theme}
 								class="peer hidden"
-								on:change={() => setTheme('dark')}
+								onchange={() => setTheme('dark')}
 							/>
 							<div
 								class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
@@ -894,7 +938,7 @@
 								value="light"
 								bind:group={theme}
 								class="peer hidden"
-								on:change={() => setTheme('light')}
+								onchange={() => setTheme('light')}
 							/>
 							<div
 								class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
@@ -935,7 +979,7 @@
 								value="enabled"
 								bind:group={highContrastChoice}
 								class="peer hidden"
-								on:change={() => setHighContrastSelection('enabled')}
+								onchange={() => setHighContrastSelection('enabled')}
 							/>
 							<div
 								class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
@@ -950,7 +994,7 @@
 								value="disabled"
 								bind:group={highContrastChoice}
 								class="peer hidden"
-								on:change={() => setHighContrastSelection('disabled')}
+								onchange={() => setHighContrastSelection('disabled')}
 							/>
 							<div
 								class="flex h-4 w-4 items-center justify-center rounded-full border-2 border-[color:var(--color-primary)] bg-[color:var(--color-accent-3)] after:h-2 after:w-2 after:rounded-full after:bg-[color:var(--color-accent-3)] after:content-[''] peer-checked:after:bg-[color:var(--color-primary)]"
