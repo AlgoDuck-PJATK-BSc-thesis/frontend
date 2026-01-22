@@ -75,12 +75,6 @@ const makeRequestId = (): string => {
 	return `${Date.now().toString(16)}-${a}-${b}`;
 };
 
-const buildError = (message: string, meta: Record<string, unknown>) => {
-	const err = new Error(message);
-	for (const [k, v] of Object.entries(meta)) (err as any)[k] = v;
-	return err;
-};
-
 const getFieldCI = (o: Record<string, unknown>, name: string): unknown => {
 	if (name in o) return o[name];
 	const want = name.toLowerCase();
@@ -88,6 +82,14 @@ const getFieldCI = (o: Record<string, unknown>, name: string): unknown => {
 		if (k.toLowerCase() === want) return o[k];
 	}
 	return undefined;
+};
+
+const hasFieldCI = (o: Record<string, unknown>, name: string): boolean => {
+	const want = name.toLowerCase();
+	for (const k of Object.keys(o)) {
+		if (k.toLowerCase() === want) return true;
+	}
+	return false;
 };
 
 const asTrimmedStringOrNull = (v: unknown): string | null => {
@@ -157,12 +159,18 @@ const normalizeStandardResponse = <T>(
 ): StandardResponseDto<T> => {
 	if (raw && typeof raw === 'object') {
 		const o = raw as Record<string, unknown>;
-		const status = normalizeQueryResult(getFieldCI(o, 'status')) ?? fallbackStatus;
-		const message = asTrimmedStringOrNull(getFieldCI(o, 'message'));
-		const bodyField = getFieldCI(o, 'body');
-		const body = (bodyField === undefined ? raw : bodyField) as T;
-		return { status, message, body };
+		const isWrapped = hasFieldCI(o, 'status') && hasFieldCI(o, 'message') && hasFieldCI(o, 'body');
+
+		if (isWrapped) {
+			const status = normalizeQueryResult(getFieldCI(o, 'status')) ?? fallbackStatus;
+			const message = asTrimmedStringOrNull(getFieldCI(o, 'message'));
+			const body = getFieldCI(o, 'body') as T;
+			return { status, message, body };
+		}
+
+		return { status: fallbackStatus, message: null, body: raw as T };
 	}
+
 	return { status: fallbackStatus, message: null, body: raw as T };
 };
 
@@ -217,7 +225,8 @@ export const FetchJsonFromApi = async <TResult>(
 		});
 	} catch (e) {
 		const durationMs = Date.now() - startedAt;
-		const msg = `Backend unavailable [${method} ${cleanEndpoint} id:${requestId}]`;
+		const publicMsg = 'Backend unavailable. Please try again.';
+
 		if (debug && typeof console !== 'undefined') {
 			console.error('[api:error]', {
 				requestId,
@@ -227,13 +236,15 @@ export const FetchJsonFromApi = async <TResult>(
 				error: e
 			});
 		}
-		throw buildError(msg, {
-			requestId,
-			method,
-			endpoint: cleanEndpoint,
-			url: url.toString(),
-			durationMs
-		});
+
+		const err = new ApiError(publicMsg, 0, { status: 'Error', message: publicMsg, body: null });
+		(err as any).requestId = requestId;
+		(err as any).method = method;
+		(err as any).endpoint = cleanEndpoint;
+		(err as any).url = url.toString();
+		(err as any).durationMs = durationMs;
+		(err as any).cause = e;
+		throw err;
 	}
 
 	const durationMs = Date.now() - startedAt;
@@ -261,7 +272,7 @@ export const FetchJsonFromApi = async <TResult>(
 		}
 
 		const ct = res.headers.get('content-type') ?? '';
-		let msg = `API Error ${res.status}: ${res.statusText}`;
+		let publicMsg = `Request failed (${res.status}).`;
 		let parsed: unknown = null;
 		let parsedMessage: string | null = null;
 		let detailText: string | null = null;
@@ -286,7 +297,7 @@ export const FetchJsonFromApi = async <TResult>(
 				);
 			}
 
-			if (parsedMessage) msg = parsedMessage;
+			if (parsedMessage) publicMsg = parsedMessage;
 		} else {
 			try {
 				const t = (await res.text()).trim();
@@ -294,10 +305,19 @@ export const FetchJsonFromApi = async <TResult>(
 			} catch {
 				detailText = null;
 			}
-			if (detailText) msg = `${msg} - ${detailText}`;
+			if (detailText) publicMsg = detailText;
 		}
 
-		const fullMsg = `${msg} [${method} ${cleanEndpoint} ${res.status} id:${requestId}]`;
+		const responseDtoBase = ct.includes('application/json')
+			? normalizeStandardResponse<unknown>(parsed, 'Error')
+			: ({ status: 'Error', message: null, body: detailText } as StandardResponseDto<unknown>);
+
+		const responseDto: StandardResponseDto<unknown> = {
+			status: responseDtoBase.status ?? 'Error',
+			message:
+				responseDtoBase.message ?? parsedMessage ?? (detailText ? detailText : null) ?? publicMsg,
+			body: responseDtoBase.body
+		};
 
 		if (debug && typeof console !== 'undefined') {
 			console.error('[api:fail]', {
@@ -307,20 +327,18 @@ export const FetchJsonFromApi = async <TResult>(
 				endpoint: cleanEndpoint,
 				status: res.status,
 				durationMs,
-				message: msg,
+				message: publicMsg,
 				parsed
 			});
 		}
 
-		throw buildError(fullMsg, {
-			requestId,
-			method,
-			endpoint: cleanEndpoint,
-			url: url.toString(),
-			status: res.status,
-			durationMs,
-			message: msg
-		});
+		const err = new ApiError(publicMsg, res.status, responseDto);
+		(err as any).requestId = requestId;
+		(err as any).method = method;
+		(err as any).endpoint = cleanEndpoint;
+		(err as any).url = url.toString();
+		(err as any).durationMs = durationMs;
+		throw err;
 	}
 
 	if (debug && typeof console !== 'undefined') {
@@ -357,6 +375,6 @@ export const FetchFromApi = async <TResult>(
 		replay,
 		csrfReplay
 	);
-	const normalized = normalizeStandardResponse<TResult>(raw, 'Success');
-	return normalized;
+
+	return normalizeStandardResponse<TResult>(raw, 'Success');
 };

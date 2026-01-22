@@ -336,7 +336,7 @@
 						}}
 						class="h-full"
 					>
-						<img class="h-full" src={isDuckButtonPressed ? SignFlower2 : SignFlower1} alt="plant tab">
+						<img class="h-full" src={isFlowerButtonPressed ? SignFlower2 : SignFlower1} alt="plant tab">
 					</button>
 				</div>
 			</div>
