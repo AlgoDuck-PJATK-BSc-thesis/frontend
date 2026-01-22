@@ -461,7 +461,7 @@ export const cohortApi = {
 		handlers: CohortChatConnectionHandlers = {}
 	): signalR.HubConnection => {
 		const origin = apiOriginFromApiUrl();
-		const hubUrl = `${origin}/hubs/cohort-chat?cohortId=${encodeURIComponent(cohortId)}`;
+		const hubUrl = `${origin}/api/hubs/cohort-chat?cohortId=${encodeURIComponent(cohortId)}`;
 
 		const connection = new signalR.HubConnectionBuilder()
 			.withUrl(hubUrl, { withCredentials: true })
