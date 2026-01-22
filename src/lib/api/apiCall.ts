@@ -90,6 +90,14 @@ const getFieldCI = (o: Record<string, unknown>, name: string): unknown => {
 	return undefined;
 };
 
+const hasFieldCI = (o: Record<string, unknown>, name: string): boolean => {
+	const want = name.toLowerCase();
+	for (const k of Object.keys(o)) {
+		if (k.toLowerCase() === want) return true;
+	}
+	return false;
+};
+
 const asTrimmedStringOrNull = (v: unknown): string | null => {
 	if (typeof v !== 'string') return null;
 	const s = v.trim();
@@ -157,12 +165,18 @@ const normalizeStandardResponse = <T>(
 ): StandardResponseDto<T> => {
 	if (raw && typeof raw === 'object') {
 		const o = raw as Record<string, unknown>;
-		const status = normalizeQueryResult(getFieldCI(o, 'status')) ?? fallbackStatus;
-		const message = asTrimmedStringOrNull(getFieldCI(o, 'message'));
-		const bodyField = getFieldCI(o, 'body');
-		const body = (bodyField === undefined ? raw : bodyField) as T;
-		return { status, message, body };
+		const isWrapped = hasFieldCI(o, 'status') && hasFieldCI(o, 'message') && hasFieldCI(o, 'body');
+
+		if (isWrapped) {
+			const status = normalizeQueryResult(getFieldCI(o, 'status')) ?? fallbackStatus;
+			const message = asTrimmedStringOrNull(getFieldCI(o, 'message'));
+			const body = getFieldCI(o, 'body') as T;
+			return { status, message, body };
+		}
+
+		return { status: fallbackStatus, message: null, body: raw as T };
 	}
+
 	return { status: fallbackStatus, message: null, body: raw as T };
 };
 
@@ -218,6 +232,7 @@ export const FetchJsonFromApi = async <TResult>(
 	} catch (e) {
 		const durationMs = Date.now() - startedAt;
 		const msg = `Backend unavailable [${method} ${cleanEndpoint} id:${requestId}]`;
+
 		if (debug && typeof console !== 'undefined') {
 			console.error('[api:error]', {
 				requestId,
@@ -227,13 +242,14 @@ export const FetchJsonFromApi = async <TResult>(
 				error: e
 			});
 		}
-		throw buildError(msg, {
-			requestId,
-			method,
-			endpoint: cleanEndpoint,
-			url: url.toString(),
-			durationMs
-		});
+
+		const err = new ApiError(msg, 0, { status: 'Error', message: msg, body: null });
+		(err as any).requestId = requestId;
+		(err as any).method = method;
+		(err as any).endpoint = cleanEndpoint;
+		(err as any).url = url.toString();
+		(err as any).durationMs = durationMs;
+		throw err;
 	}
 
 	const durationMs = Date.now() - startedAt;
@@ -297,6 +313,16 @@ export const FetchJsonFromApi = async <TResult>(
 			if (detailText) msg = `${msg} - ${detailText}`;
 		}
 
+		const responseDtoBase = ct.includes('application/json')
+			? normalizeStandardResponse<unknown>(parsed, 'Error')
+			: ({ status: 'Error', message: null, body: detailText } as StandardResponseDto<unknown>);
+
+		const responseDto: StandardResponseDto<unknown> = {
+			status: responseDtoBase.status ?? 'Error',
+			message: responseDtoBase.message ?? parsedMessage ?? (detailText ? detailText : null) ?? msg,
+			body: responseDtoBase.body
+		};
+
 		const fullMsg = `${msg} [${method} ${cleanEndpoint} ${res.status} id:${requestId}]`;
 
 		if (debug && typeof console !== 'undefined') {
@@ -312,15 +338,13 @@ export const FetchJsonFromApi = async <TResult>(
 			});
 		}
 
-		throw buildError(fullMsg, {
-			requestId,
-			method,
-			endpoint: cleanEndpoint,
-			url: url.toString(),
-			status: res.status,
-			durationMs,
-			message: msg
-		});
+		const err = new ApiError(fullMsg, res.status, responseDto);
+		(err as any).requestId = requestId;
+		(err as any).method = method;
+		(err as any).endpoint = cleanEndpoint;
+		(err as any).url = url.toString();
+		(err as any).durationMs = durationMs;
+		throw err;
 	}
 
 	if (debug && typeof console !== 'undefined') {
@@ -357,6 +381,6 @@ export const FetchFromApi = async <TResult>(
 		replay,
 		csrfReplay
 	);
-	const normalized = normalizeStandardResponse<TResult>(raw, 'Success');
-	return normalized;
+
+	return normalizeStandardResponse<TResult>(raw, 'Success');
 };

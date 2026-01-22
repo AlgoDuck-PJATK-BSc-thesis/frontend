@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import { ApiError, FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
 	import type { AssistantConversationMessage, ChatWindowComponentArgs, CodeEditorComponentArgs, DefaultLayoutTerminalComponentArgs, InfoPanelComponentArgs, TerminalComponentArgs, TestCaseComponentArgs } from '$lib/Components/ComponentTrees/IdeComponentTree/component-args';
 	import type { AutoSaveDto, ProblemDetailsDto } from '$lib/Components/ComponentTrees/IdeComponentTree/IdeComponentArgs';
 	import { activeProfile } from '$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte';
@@ -106,7 +106,18 @@ $inspect(loadedData);
 	let contextInjectors: Record<string, (target: DefaultLayoutTerminalComponentArgs) => void> = $derived({
 		"ChatWindow" : (target: DefaultLayoutTerminalComponentArgs) => {
 			(target as ChatWindowComponentArgs).problemId = loadedData.body?.problemId;
-			(target as ChatWindowComponentArgs).getUserCode = () => (config['code-editor'] as CodeEditorComponentArgs)?.templateContents ?? loadedAutoSave.body?.userCodeB64 !== undefined ? atob(loadedAutoSave.body!.userCodeB64) : "";
+			(target as ChatWindowComponentArgs).getUserCode = () => {
+				const userCode: string | undefined = (config['code-editor'] as CodeEditorComponentArgs)?.userCode; 
+				const templateCode: string | undefined = (config['code-editor'] as CodeEditorComponentArgs)?.templateContents; 
+				const lastAutoSaveCode: string | undefined = loadedAutoSave?.body?.userCodeB64;
+				if (userCode)
+					return userCode;
+				if (lastAutoSaveCode)
+					return lastAutoSaveCode;
+				if (templateCode) 
+					return templateCode;
+				return "could not retrieve user code";
+			};
 			(target as ChatWindowComponentArgs).changeLabel = (id: string, newLabel: string) => {
 				const components = (config['assistant-wizard'] as WizardComponentArg).components;
 				const comp = components.find(c => c.options.component.compId === id);
@@ -171,16 +182,33 @@ $inspect(loadedData);
 					const chatId: string | undefined = (comp.options.component.options as ChatWindowComponentArgs).chatId;
 
 					if (prevChatName){
-						let res = await FetchFromApi("UpdateChatName", {
-							method: "PUT",
-							body: JSON.stringify({
-								chatId: chatId,
-								newChatName: newName,
-								problemId: loadedData.body.problemId 
-							})
-						}, fetch);
+						try{
+							let res = await FetchFromApi("UpdateChatName", {
+								method: "PUT",
+								body: JSON.stringify({
+									chatId: chatId,
+									newChatName: newName,
+									problemId: loadedData.body.problemId 
+								})
+							}, fetch);
+							(comp.options.component.options as ChatWindowComponentArgs).chatName = newName;
+
+						}catch(err){
+															console.log("err here");
+								console.log(err);
+								console.log("err here");
+							if (err instanceof ApiError){
+
+								const error: ApiError = err as ApiError;
+								if (error.response.status === "Error" && error.response.message){
+									toast.error(error.response.message)
+								}
+							}else{
+								console.log("nope");
+							}
+						}
+						
 					}
-					(comp.options.component.options as ChatWindowComponentArgs).chatName = newName;
 				},
 				getProblemId: () => {
 					return loadedData.body.problemId

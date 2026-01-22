@@ -166,7 +166,7 @@
             <button 
                 onmousedown={() => addTransitionAndScroll('down')}
                 class="w-full">
-                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={isButtonUpPressed ? ArrowDownDown : ArrowDown} alt="arrow down">
+                <img class="w-full hover:cursor-pointer select-none pointer-events-none" src={isButtonDownPressed ? ArrowDownDown : ArrowDown} alt="arrow down">
             </button>
         </div>
     </div>

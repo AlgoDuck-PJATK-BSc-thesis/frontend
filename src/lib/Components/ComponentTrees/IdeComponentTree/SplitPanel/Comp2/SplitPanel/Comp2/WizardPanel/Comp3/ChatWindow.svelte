@@ -112,6 +112,13 @@
             messageAuthor: "User"
         } as ChatMessage)
         
+        console.log(`${API_URL}/hubs/assistant`);
+        console.log({
+                chatId: chatId,
+                exerciseId: options.problemId,
+                codeB64: btoa(options.getUserCode()),
+                query: userQuery,
+            })
         connection = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/assistant`, {
             withCredentials: true,
@@ -125,6 +132,7 @@
             options.isConnected = true;
         }catch (err){
             options.isConnected = false;
+            console.error("SignalR connection failed:", err); // Add this
             return;
         }
 
