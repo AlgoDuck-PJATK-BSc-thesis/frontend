@@ -8,18 +8,28 @@
 		imageUrl: string;
 	};
 
-	export let ownedAvatars: AvatarOption[] = [];
-	export let selectedAvatarId: string | null = null;
-	export let currentImageUrl: string | null = null;
-	export let onSave: ((avatarId: string) => Promise<void> | void) | undefined;
-	export let disabled = false;
+	let {
+		ownedAvatars = [],
+		selectedAvatarId = null,
+		currentImageUrl = null,
+		onSave,
+		disabled = false,
+		onchange
+	} = $props<{
+		ownedAvatars?: AvatarOption[];
+		selectedAvatarId?: string | null;
+		currentImageUrl?: string | null;
+		onSave?: (avatarId: string) => Promise<void> | void;
+		disabled?: boolean;
+		onchange?: (e: CustomEvent<{ avatarId: string }>) => void;
+	}>();
 
 	const dispatch = createEventDispatcher<{ change: { avatarId: string } }>();
 
-	let dialogEl: HTMLDialogElement | null = null;
-	let tempSelectedId: string | null = null;
-	let saving = false;
-	let errorMsg = '';
+	let dialogEl = $state<HTMLDialogElement | null>(null);
+	let tempSelectedId = $state<string | null>(null);
+	let saving = $state(false);
+	let errorMsg = $state('');
 
 	const normalizeToCloudfrontKey = (value: string): string => {
 		const v = (value ?? '').toString().trim();
@@ -38,13 +48,18 @@
 
 	const eachKey = (a: AvatarOption) => `${a.id}|${normalizeToCloudfrontKey(a.imageUrl)}`;
 
-	$: selected = selectedAvatarId
-		? (ownedAvatars.find((a) => a.id === selectedAvatarId) ?? null)
-		: null;
-	$: displayKey =
-		normalizeToCloudfrontKey(selected?.imageUrl || '') ||
-		normalizeToCloudfrontKey(currentImageUrl || '') ||
-		'';
+	let selected = $derived.by(() => {
+		if (!selectedAvatarId) return null;
+		return ownedAvatars.find((a: AvatarOption) => a.id === selectedAvatarId) ?? null;
+	});
+
+	let displayKey = $derived.by(() => {
+		return (
+			normalizeToCloudfrontKey(selected?.imageUrl || '') ||
+			normalizeToCloudfrontKey(currentImageUrl || '') ||
+			''
+		);
+	});
 
 	function openModal() {
 		if (disabled) return;
@@ -53,7 +68,9 @@
 
 		const currentKey = normalizeToCloudfrontKey(currentImageUrl || '');
 		const matchByKey = currentKey
-			? (ownedAvatars.find((a) => normalizeToCloudfrontKey(a.imageUrl) === currentKey) ?? null)
+			? (ownedAvatars.find(
+					(a: AvatarOption) => normalizeToCloudfrontKey(a.imageUrl) === currentKey
+				) ?? null)
 			: null;
 
 		tempSelectedId = selectedAvatarId ?? matchByKey?.id ?? ownedAvatars[0]?.id ?? null;
@@ -76,6 +93,9 @@
 		try {
 			await onSave?.(tempSelectedId);
 			dispatch('change', { avatarId: tempSelectedId });
+			onchange?.(
+				new CustomEvent<{ avatarId: string }>('change', { detail: { avatarId: tempSelectedId } })
+			);
 			closeModal();
 		} catch (e: any) {
 			errorMsg = (e?.message ?? 'Could not update avatar.').toString();

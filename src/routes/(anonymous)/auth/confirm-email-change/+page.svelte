@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import { FetchJsonFromApi } from '$lib/api/apiCall';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 
 	export let data: { userId: string; newEmail: string; token: string };
 
@@ -55,6 +56,7 @@
 </svelte:head>
 
 <section class="mt-2 flex h-[calc(100vh-5rem)] justify-center overflow-hidden px-6 pt-7">
+	<LandingPage />
 	<div class="flex h-full w-full max-w-2xl flex-col gap-5 overflow-y-auto pb-8">
 		<div
 			class="rounded-2xl border-2 border-[color:var(--color-accent-1)] bg-[color:var(--color-accent-3)] px-6 py-6"

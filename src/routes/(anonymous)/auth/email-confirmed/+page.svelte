@@ -4,11 +4,17 @@
 	import { authApi } from '$lib/api/auth';
 	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 
+	const normalizeTokenFromQuery = (raw: string) => {
+		const t = (raw ?? '').toString().trim();
+		if (!t) return '';
+		return t.replaceAll(' ', '+');
+	};
+
 	let email = $state<string | null>(null);
 	let loading = $state(false);
 
-	const userId = $derived(page.url.searchParams.get('userId') ?? '');
-	const token = $derived(page.url.searchParams.get('token') ?? '');
+	const userId = $derived((page.url.searchParams.get('userId') ?? '').trim());
+	const token = $derived(normalizeTokenFromQuery(page.url.searchParams.get('token') ?? ''));
 
 	onMount(async () => {
 		if (!userId || !token) return;

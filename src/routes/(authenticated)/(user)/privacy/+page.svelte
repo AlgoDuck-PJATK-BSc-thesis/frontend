@@ -2,7 +2,7 @@
 	<title>Privacy Policy - AlgoDuck</title>
 	<meta name="description" content="How AlgoDuck collects, uses, and protects your data." />
 	<meta name="robots" content="index,follow" />
-	<link rel="canonical" href="https://algoduck.com/privacy" />
+	<link rel="canonical" href="https://algoduck.pl/privacy" />
 </svelte:head>
 
 <main class="mx-auto prose max-w-3xl p-6">
@@ -11,9 +11,9 @@
 
 	<h2>Who we are</h2>
 	<p>
-		AlgoDuck (“we”, “us”) provides programming practice services at <a href="https://algoduck.com"
+		AlgoDuck (“we”, “us”) provides programming practice services at <a href="https://algoduck.pl"
 			>algoduck.com</a
-		>. Contact: <a href="mailto:support@algoduck.com">support@algoduck.com</a>.
+		>. Contact: <a href="mailto:algoduckpl@gmail.com">support@algoduck.com</a>.
 	</p>
 
 	<h2>Data we collect</h2>
@@ -69,7 +69,7 @@
 	<h2>Your rights</h2>
 	<p>
 		You may access, correct, or delete your data. Contact <a href="mailto:algoduckpl@gmail.com"
-			>support@algoduck.com</a
+			>algoduckpl@gmail.com</a
 		>.
 	</p>
 

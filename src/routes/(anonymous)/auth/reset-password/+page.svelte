@@ -2,15 +2,25 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { authApi } from '$lib/api/auth';
+	import BlinkingEye from '$lib/Components/Misc/BlinkingEye.svelte';
+	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
+
+	const normalizeTokenFromQuery = (raw: string) => {
+		const t = (raw ?? '').toString().trim();
+		if (!t) return '';
+		return t.replaceAll(' ', '+');
+	};
 
 	let password = $state('');
 	let confirmPassword = $state('');
+	let showPassword = $state(false);
+	let showConfirmPassword = $state(false);
 	let error = $state<string | null>(null);
 	let info = $state<string | null>(null);
 	let loading = $state(false);
 
-	const userId = $derived(page.url.searchParams.get('userId') ?? '');
-	const token = $derived(page.url.searchParams.get('token') ?? '');
+	const userId = $derived((page.url.searchParams.get('userId') ?? '').trim());
+	const token = $derived(normalizeTokenFromQuery(page.url.searchParams.get('token') ?? ''));
 
 	const reset = async () => {
 		error = null;
@@ -49,6 +59,7 @@
 </svelte:head>
 
 <section class="relative h-full w-full overflow-x-hidden">
+	<LandingPage />
 	<div class="relative z-20 mx-auto mt-16 max-w-100 text-center">
 		<h1
 			class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
@@ -71,22 +82,46 @@
 				>
 					<label class="flex flex-col">
 						<span>New password</span>
-						<input
-							type="password"
-							required
-							class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-							bind:value={password}
-						/>
+						<div class="mt-2 flex items-center gap-2">
+							<input
+								type={showPassword ? 'text' : 'password'}
+								required
+								class="font-body flex-1 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
+								bind:value={password}
+							/>
+							<button
+								type="button"
+								class="flex h-11 w-11 items-center justify-center rounded border-2 border-[color:var(--color-accent-1)] bg-white text-black hover:bg-white/90"
+								aria-label={showPassword ? 'Hide password' : 'Show password'}
+								onclick={() => {
+									showPassword = !showPassword;
+								}}
+							>
+								<BlinkingEye open={showPassword} options={{ class: 'h-5 w-5' }} />
+							</button>
+						</div>
 					</label>
 
 					<label class="flex flex-col">
 						<span>Confirm new password</span>
-						<input
-							type="password"
-							required
-							class="font-body mt-2 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
-							bind:value={confirmPassword}
-						/>
+						<div class="mt-2 flex items-center gap-2">
+							<input
+								type={showConfirmPassword ? 'text' : 'password'}
+								required
+								class="font-body flex-1 rounded border-2 border-[color:var(--color-accent-1)] bg-white p-2.5 text-black"
+								bind:value={confirmPassword}
+							/>
+							<button
+								type="button"
+								class="flex h-11 w-11 items-center justify-center rounded border-2 border-[color:var(--color-accent-1)] bg-white text-black hover:bg-white/90"
+								aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+								onclick={() => {
+									showConfirmPassword = !showConfirmPassword;
+								}}
+							>
+								<BlinkingEye open={showConfirmPassword} options={{ class: 'h-5 w-5' }} />
+							</button>
+						</div>
 					</label>
 
 					<div class="mt-4 flex items-center gap-3">

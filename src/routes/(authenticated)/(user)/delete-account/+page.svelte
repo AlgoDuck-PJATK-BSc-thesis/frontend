@@ -2,7 +2,7 @@
 	<title>Delete Your Account - AlgoDuck</title>
 	<meta name="description" content="How to delete your AlgoDuck account and data." />
 	<meta name="robots" content="index,follow" />
-	<link rel="canonical" href="https://algoduck.com/delete-account" />
+	<link rel="canonical" href="https://algoduck.pl/delete-account" />
 </svelte:head>
 
 <main class="mx-auto prose max-w-3xl p-6">
@@ -19,8 +19,8 @@
 
 	<h2>Request deletion by email</h2>
 	<p>
-		Send an email from your account email to <a href="mailto:support@algoduck.com"
-			>support@algoduck.com</a
+		Send an email from your account email to <a href="mailto:algoduckpl@gmail.com"
+			>algoduckpl@gmail.com</a
 		> with the subject “Delete my account”.
 	</p>
 
@@ -30,5 +30,5 @@
 		<li>We may retain minimal records required for security or legal obligations.</li>
 	</ul>
 
-	<p>If you need help, contact <a href="mailto:support@algoduck.com">support@algoduck.com</a>.</p>
+	<p>If you need help, contact <a href="mailto:algoduckpl@gmail.com">algoduckpl@gmail.com</a>.</p>
 </main>
