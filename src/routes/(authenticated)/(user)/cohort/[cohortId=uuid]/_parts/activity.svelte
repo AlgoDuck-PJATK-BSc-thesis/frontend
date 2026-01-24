@@ -15,7 +15,7 @@
 		Activity
 	</h1>
 
-	<div class="mt-2 ml-[0rem] h-[58vh] w-full flex-1 overflow-auto px-4">
+	<div class="mt-2 ml-[0rem] h-[50vh] w-full flex-1 overflow-auto px-4">
 		{#each users as user}
 			<div class="mb-2 ml-4 flex w-[80%] items-center gap-3">
 				<div class="relative h-12 w-12 shrink-0">

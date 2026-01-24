@@ -42,11 +42,13 @@ export type UserStatisticsDto = {
 };
 
 export type UserAchievementDto = {
-	achievementId?: string;
+	code?: string;
 	name?: string;
-	title?: string;
 	description?: string;
-	unlockedAt?: string;
+	currentValue?: number;
+	targetValue?: number;
+	isCompleted?: boolean;
+	completedAt?: string | null;
 };
 
 export type UserRankingsDto = {
@@ -154,6 +156,27 @@ export const userApi = {
 		return res.body;
 	},
 
+	getMyAchievements: async (
+		request?: Record<string, string | number | boolean | null | undefined>,
+		fetcher?: typeof fetch
+	): Promise<UserAchievementDto[]> => {
+		const sp = new URLSearchParams();
+		if (request) {
+			for (const [k, v] of Object.entries(request)) {
+				if (v === undefined || v === null) continue;
+				sp.set(k, String(v));
+			}
+		}
+
+		const res = await FetchFromApi<UserAchievementDto[]>(
+			'user/achievements',
+			{ method: 'GET' },
+			fetcher,
+			sp
+		);
+		return res.body;
+	},
+
 	getUserAchievementsById: async (
 		userId: string,
 		request?: Record<string, string | number | boolean | null | undefined>,
@@ -196,4 +219,63 @@ export const userApi = {
 			fetcher
 		);
 	}
+};
+
+const stableKey = (v: unknown) => JSON.stringify(v ?? {});
+
+export const userQueryKeys = {
+	cohortLeaderboard: (cohortId: string, pageSize: number) =>
+		['leaderboard', 'cohort', cohortId, pageSize] as const,
+	globalLeaderboard: (pageSize: number) => ['leaderboard', 'global', pageSize] as const,
+
+	me: () => ['user', 'me'] as const,
+	myStatistics: () => ['user', 'statistics', 'me'] as const,
+	myAchievements: (request?: Record<string, unknown>) =>
+		['user', 'achievements', 'me', stableKey(request)] as const,
+	userById: (userId: string) => ['user', userId] as const,
+	userStatisticsById: (userId: string) => ['user', userId, 'statistics'] as const,
+	userAchievementsById: (userId: string, request?: Record<string, unknown>) =>
+		['user', userId, 'achievements', stableKey(request)] as const,
+	rankings: (query: Record<string, unknown>) => ['user', 'rankings', stableKey(query)] as const,
+	myLeaderboardPosition: () => ['user', 'leaderboard', 'me'] as const
+};
+
+export const userQueryOptions = {
+	globalLeaderboardInfinite: (pageSize = 40, fetcher?: typeof fetch) => ({
+		queryKey: userQueryKeys.globalLeaderboard(pageSize),
+		initialPageParam: 1,
+		queryFn: async ({ pageParam }: { pageParam: number }) => {
+			return await userApi.getGlobalLeaderboard(pageParam, pageSize, fetcher);
+		},
+		getNextPageParam: (lastPage: UserLeaderboardPageDto, allPages: UserLeaderboardPageDto[]) => {
+			const pages = allPages ?? [];
+			const loaded = pages.reduce((acc, p) => acc + ((p.entries ?? []).length || 0), 0);
+			const total = lastPage.totalUsers ?? 0;
+
+			if ((lastPage.entries ?? []).length === 0) return undefined;
+			if (total > 0 && loaded >= total) return undefined;
+
+			const next = (lastPage.page ?? pages.length) + 1;
+			return next;
+		}
+	}),
+
+	cohortLeaderboardInfinite: (cohortId: string, pageSize = 40, fetcher?: typeof fetch) => ({
+		queryKey: userQueryKeys.cohortLeaderboard(cohortId, pageSize),
+		initialPageParam: 1,
+		queryFn: async ({ pageParam }: { pageParam: number }) => {
+			return await userApi.getCohortLeaderboard(cohortId, pageParam, pageSize, fetcher);
+		},
+		getNextPageParam: (lastPage: UserLeaderboardPageDto, allPages: UserLeaderboardPageDto[]) => {
+			const pages = allPages ?? [];
+			const loaded = pages.reduce((acc, p) => acc + ((p.entries ?? []).length || 0), 0);
+			const total = lastPage.totalUsers ?? 0;
+
+			if ((lastPage.entries ?? []).length === 0) return undefined;
+			if (total > 0 && loaded >= total) return undefined;
+
+			const next = (lastPage.page ?? pages.length) + 1;
+			return next;
+		}
+	})
 };

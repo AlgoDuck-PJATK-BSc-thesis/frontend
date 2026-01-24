@@ -3,6 +3,10 @@
 	import type { TopUser } from '../types';
 
 	let { topUsers } = $props<{ topUsers: TopUser[] }>();
+
+	type AnyTopUser = TopUser & { avatarKey?: string; avatarPath?: string };
+
+	const avatar = (u: AnyTopUser | undefined) => (u?.avatarKey ?? u?.avatarPath ?? '').toString();
 </script>
 
 <div>
@@ -15,7 +19,7 @@
 	<div class="absolute -top-[15rem] right-[5rem] z-10 -translate-x-50">
 		{#if topUsers[0]}
 			<CloudfrontImage
-				path={topUsers[0].avatarPath}
+				path={avatar(topUsers[0] as AnyTopUser)}
 				cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2"
 			/>
 		{/if}
@@ -24,7 +28,7 @@
 	<div class="absolute -top-[11.9rem] right-[11.2rem] z-10 -translate-x-50">
 		{#if topUsers[1]}
 			<CloudfrontImage
-				path={topUsers[1].avatarPath}
+				path={avatar(topUsers[1] as AnyTopUser)}
 				cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2"
 			/>
 		{/if}
@@ -33,7 +37,7 @@
 	<div class="absolute -top-[11.2rem] -right-[2.2rem] z-10 -translate-x-53">
 		{#if topUsers[2]}
 			<CloudfrontImage
-				path={topUsers[2].avatarPath}
+				path={avatar(topUsers[2] as AnyTopUser)}
 				cls="h-[7rem] w-[7.2rem] drop-shadow-md -ml-2"
 			/>
 		{/if}

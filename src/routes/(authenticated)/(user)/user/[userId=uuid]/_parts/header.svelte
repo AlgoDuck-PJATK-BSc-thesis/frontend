@@ -2,12 +2,13 @@
 	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
 	import CloudfrontImage from '$lib/Components/Misc/CloudfrontImage.svelte';
 
-	let { avatarPath, displayName, isLongName, xp, coins, starSrc, coinSrc } = $props<{
+	let { avatarPath, displayName, isLongName, xp, coins, globalRank, starSrc, coinSrc } = $props<{
 		avatarPath: string;
 		displayName: string;
 		isLongName: boolean;
 		xp: number;
 		coins: number;
+		globalRank: number | null;
 		starSrc: string;
 		coinSrc: string;
 	}>();
@@ -35,6 +36,17 @@
 		</div>
 
 		<div class="flex flex-wrap gap-2">
+			{#if globalRank !== null}
+				<PixelFrameMini
+					className="flex items-center gap-1 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
+				>
+					<span class="opacity-85">Global Rank</span>
+					<span class="ml-1 font-bold tracking-wide text-[color:var(--color-landingpage-title)]"
+						>#{globalRank}</span
+					>
+				</PixelFrameMini>
+			{/if}
+
 			<PixelFrameMini
 				className="flex items-center gap-1 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
 			>

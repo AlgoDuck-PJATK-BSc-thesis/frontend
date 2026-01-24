@@ -58,23 +58,5 @@
 				<span>{wa}</span>
 			</PixelFrameMini>
 		{/if}
-
-		{#if typeof tle === 'number'}
-			<PixelFrameMini
-				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
-			>
-				<span>TLE</span>
-				<span>{tle}</span>
-			</PixelFrameMini>
-		{/if}
-
-		{#if typeof re === 'number'}
-			<PixelFrameMini
-				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
-			>
-				<span>RE</span>
-				<span>{re}</span>
-			</PixelFrameMini>
-		{/if}
 	</div>
 </div>

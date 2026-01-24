@@ -42,7 +42,9 @@
 
 	let copied = $state<boolean>(false);
 
-	const titleText = $derived(isMe ? 'My Profile' : 'Profile');
+	let globalRank = $state<number | null>(null);
+
+	const titleText = $derived(isMe ? 'My Profile' : '');
 
 	const displayName = $derived((user?.username ?? '').trim() || 'User');
 	const isLongName = $derived(displayName.length > 18);
@@ -164,6 +166,7 @@
 			myCohortId = loaded.myCohortId;
 			cohortDetails = loaded.cohortDetails;
 			cohortError = loaded.cohortError;
+			globalRank = loaded.globalRank;
 		} finally {
 			cohortLoading = false;
 		}
@@ -175,10 +178,12 @@
 </svelte:head>
 
 <section
-	class="font-body flex max-h-[calc(100vh-8rem)] flex-col items-center gap-6 overflow-y-auto pt-12 pr-8 pb-0 pl-8"
+	class="font-body flex max-h-[calc(100vh-5rem)] flex-col items-center gap-6 overflow-y-auto pt-12 pr-8 pb-0 pl-8"
 >
 	<h1
-		class="ocr-outline ocr-title isolate mt-0 mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)]"
+		class="ocr-outline ocr-title isolate mb-8 ml-2 [font-family:var(--font-ariw9500)] text-6xl font-black tracking-widest text-[var(--color-landingpage-title)] {isMe
+			? ''
+			: '-mt-[5rem]'}"
 	>
 		{titleText}
 	</h1>
@@ -186,7 +191,7 @@
 	<PixelFrameSimple
 		className="mb-10 flex h-max w-full max-w-4xl flex-col bg-[linear-gradient(to_bottom,var(--color-accent-3),var(--color-accent-4))] pt-8 pr-6 pb-8 pl-6 text-[color:var(--color-landingpage-subtitle)]"
 	>
-		<Header {avatarPath} {displayName} {isLongName} {xp} {coins} {starSrc} {coinSrc} />
+		<Header {avatarPath} {displayName} {isLongName} {xp} {coins} {globalRank} {starSrc} {coinSrc} />
 
 		<Cohort
 			{cohortId}

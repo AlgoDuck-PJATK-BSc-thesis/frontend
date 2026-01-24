@@ -14,6 +14,16 @@ const str = (v: unknown) => (v ?? '').toString();
 
 const trim = (v: unknown) => str(v).trim();
 
+const asArr = (v: unknown) => {
+	if (Array.isArray(v)) return v as unknown[];
+	const o = v as any;
+	if (Array.isArray(o?.body)) return o.body as unknown[];
+	if (Array.isArray(o?.Body)) return o.Body as unknown[];
+	if (Array.isArray(o?.data)) return o.data as unknown[];
+	if (Array.isArray(o?.Data)) return o.Data as unknown[];
+	return [];
+};
+
 export const getCohortId = (user: UserDto | null, stats: UserStatisticsDto | null) => {
 	const s = stats as unknown as AnyRecord | null;
 	const u = user as unknown as AnyRecord | null;
@@ -51,9 +61,11 @@ export const pickAvatarPath = (
 };
 
 export const achievementName = (a: UserAchievementDto) =>
-	trim((a as any)?.name ?? (a as any)?.title ?? '') || 'Achievement';
+	trim((a as any)?.name ?? (a as any)?.Name ?? (a as any)?.title ?? (a as any)?.Title ?? '') ||
+	'Achievement';
 
-export const achievementDesc = (a: UserAchievementDto) => trim((a as any)?.description ?? '');
+export const achievementDesc = (a: UserAchievementDto) =>
+	trim((a as any)?.description ?? (a as any)?.Description ?? '');
 
 export type LoadedProfile = {
 	meId: string;
@@ -66,6 +78,7 @@ export type LoadedProfile = {
 	myCohortId: string;
 	cohortDetails: CohortDetailsDto | null;
 	cohortError: string;
+	globalRank: number | null;
 };
 
 export const loadProfile = async (
@@ -75,9 +88,14 @@ export const loadProfile = async (
 ): Promise<LoadedProfile> => {
 	let meId = '';
 	try {
-		const me = await authApi.me();
-		meId = trim((me as any)?.id ?? '');
-	} catch {}
+		const me = await userApi.getMe(fetchFn);
+		meId = trim((me as any)?.userId ?? (me as any)?.id ?? '');
+	} catch {
+		try {
+			const me = await authApi.me();
+			meId = trim((me as any)?.id ?? (me as any)?.userId ?? '');
+		} catch {}
+	}
 
 	let resolvedUserId = '';
 	let isMe = false;
@@ -101,23 +119,40 @@ export const loadProfile = async (
 			avatarOverride: '',
 			myCohortId: '',
 			cohortDetails: null,
-			cohortError: ''
+			cohortError: '',
+			globalRank: null
 		};
 	}
 
 	let user: UserDto | null = null;
 	let stats: UserStatisticsDto | null = null;
 	let achievements: UserAchievementDto[] = [];
+	let globalRank: number | null = null;
 
 	try {
 		const [u, s, a] = await Promise.all([
-			userApi.getUserById(resolvedUserId),
-			userApi.getUserStatisticsById(resolvedUserId),
-			userApi.getUserAchievementsById(resolvedUserId)
+			userApi.getUserById(resolvedUserId, fetchFn),
+			userApi.getUserStatisticsById(resolvedUserId, fetchFn),
+			userApi.getUserAchievementsById(resolvedUserId, undefined, fetchFn)
 		]);
+
 		user = u ?? null;
 		stats = s ?? null;
-		achievements = (a ?? []) as UserAchievementDto[];
+
+		const arr = asArr(a);
+		achievements = (arr as UserAchievementDto[]) ?? [];
+
+		try {
+			const allUsers = await userApi.getGlobalLeaderboardAll(fetchFn);
+			const userEntry = allUsers.find(
+				(entry: UserLeaderboardEntryDto) => trim(entry.userId) === resolvedUserId
+			);
+			if (userEntry) {
+				globalRank = userEntry.rank;
+			}
+		} catch {
+			globalRank = null;
+		}
 	} catch {
 		user = null;
 		stats = null;
@@ -130,7 +165,7 @@ export const loadProfile = async (
 			myCohortId = getCohortId(user, stats);
 		} else {
 			try {
-				const myStats = await userApi.getUserStatisticsById(meId);
+				const myStats = await userApi.getUserStatisticsById(meId, fetchFn);
 				myCohortId = trim((myStats as any)?.cohortId ?? '');
 			} catch {
 				myCohortId = '';
@@ -174,6 +209,7 @@ export const loadProfile = async (
 		avatarOverride,
 		myCohortId,
 		cohortDetails,
-		cohortError
+		cohortError,
+		globalRank
 	};
 };

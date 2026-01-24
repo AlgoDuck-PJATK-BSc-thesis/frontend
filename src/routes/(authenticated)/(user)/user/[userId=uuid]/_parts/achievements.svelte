@@ -18,10 +18,32 @@
 			</div>
 		{:else}
 			{#each achievements as a}
-				<div class="flex flex-col rounded bg-white/10 px-3 py-2">
-					<div class="font-black">{nameOf(a)}</div>
+				<div
+					class="flex flex-col rounded px-3 py-2 {a.isCompleted
+						? 'border border-green-500/30 bg-green-600/20'
+						: 'bg-white/10'}"
+				>
+					<div class="flex items-center justify-between">
+						<div class="font-black">{nameOf(a)}</div>
+						{#if a.isCompleted}
+							<span class="text-xs text-green-400">✓ Completed</span>
+						{:else}
+							<span class="text-xs opacity-70">{a.currentValue ?? 0}/{a.targetValue ?? 0}</span>
+						{/if}
+					</div>
 					{#if descOf(a)}
 						<div class="text-sm opacity-90">{descOf(a)}</div>
+					{/if}
+					{#if !a.isCompleted && (a.targetValue ?? 0) > 0}
+						<div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+							<div
+								class="h-full bg-blue-500 transition-all duration-300"
+								style="width: {Math.min(
+									100,
+									((a.currentValue ?? 0) / (a.targetValue ?? 1)) * 100
+								)}%"
+							></div>
+						</div>
 					{/if}
 				</div>
 			{/each}
