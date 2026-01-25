@@ -161,12 +161,12 @@
                 onclick={toggleDeleteDialog} 
                 class="w-6 h-6 p-1 hover:bg-ide-dcard absolute top-2 right-4 transition-colors ease-out duration-300 rounded-[30%]"
             >
-                <CrossIconSvg options={{ class: "stroke-[2] stroke-black w-full h-full"}}/>
+                <CrossIconSvg options={{ class: "stroke-[2] stroke-ide-text-primary w-full h-full"}}/>
             </button>
             <span class="font-bold text-lg">Delete</span>
             <span class="text-sm">Are you sure you want to delete this chat? This action is <strong>irreversible</strong></span>
             <div class="flex flex-row justify-end gap-1">
-                <button class="px-3 py-1 rounded-md border-2 border-ide-dcard" onclick={toggleDeleteDialog}>cancel</button>
+                <button class="px-3 py-1 rounded-md border-2 border-ide-dcard hover:bg-ide-dcard transition-colors ease-out duration-300" onclick={toggleDeleteDialog}>cancel</button>
                 <button 
                     onclick={async () => {
                         deleteYourself().then((value: boolean) => {
@@ -174,7 +174,7 @@
                                 toggleDeleteDialog();
                         });
                     }} 
-                    class="px-3 py-1 rounded-md border-2 border-ide-dcard"
+                    class="px-3 py-1 rounded-md border-2 border-ide-dcard hover:bg-ide-dcard transition-colors ease-out duration-300"
                 >
                     delete
                 </button>

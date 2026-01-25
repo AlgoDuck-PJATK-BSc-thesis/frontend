@@ -40,7 +40,7 @@
 				<PixelFrameMini
 					className="flex items-center gap-1 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
 				>
-					<span class="opacity-85">Global Rank</span>
+					<span>Global Rank</span>
 					<span class="ml-1 font-bold tracking-wide text-[color:var(--color-landingpage-title)]"
 						>#{globalRank}</span
 					>

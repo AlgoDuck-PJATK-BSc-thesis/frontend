@@ -1061,7 +1061,7 @@
 							id="cohorts_search_query"
 							bind:value={searchQuery}
 							class="w-full rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover"
-							placeholder="Type part of cohort name (GUID also supported)"
+							placeholder="Type part of cohort name or it's GUID"
 							onkeydown={(e) => {
 								if (e.key === 'Enter') {
 									searchPage = 1;
@@ -1225,9 +1225,7 @@
 							<div class="text-sm text-admin-text-muted">No results.</div>
 						{/if}
 					{:else}
-						<div class="text-sm text-admin-text-muted">
-							Type a query (e.g. “abc”) and click Search.
-						</div>
+						<div class="text-sm text-admin-text-muted"></div>
 					{/if}
 				</div>
 			</div>

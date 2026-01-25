@@ -3,6 +3,7 @@
 	import CodePanel from '../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/queue.java';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	let queue = $state<number[]>([1, 2, 3, 4]);
 	let queueInput = $state('');
@@ -35,7 +36,12 @@
 
 			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
 				<div class="flex flex-wrap items-center justify-center gap-3">
-					<div class="text-sm font-semibold text-emerald-300">Front →</div>
+					<div class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">
+						<span>Front</span>
+						<span class="inline-flex translate-y-[3px] opacity-90">
+							<Arrow size={14} stroke="currentColor" />
+						</span>
+					</div>
 					{#each queue as item}
 						<div
 							class="flex h-16 w-16 items-center justify-center rounded-xl border border-white/10 bg-emerald-600/60 text-lg font-bold text-white"
@@ -43,7 +49,12 @@
 							{item}
 						</div>
 					{/each}
-					<div class="text-sm font-semibold text-emerald-300">← Rear</div>
+					<div class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">
+						<span class="inline-flex translate-y-[3px] opacity-90">
+							<Arrow size={14} class="rotate-180" stroke="currentColor" />
+						</span>
+						<span>Rear</span>
+					</div>
 				</div>
 
 				<div class="mt-5 grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">

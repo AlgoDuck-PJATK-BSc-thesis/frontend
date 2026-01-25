@@ -3,6 +3,7 @@
 	import CodePanel from '../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/linked-list.java';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	type ListNode = { value: number; next: number | null };
 
@@ -68,11 +69,18 @@
 								<div class="text-xs text-purple-200">Node</div>
 								<div class="text-2xl font-bold">{node.value}</div>
 								<div class="text-xs text-purple-200">
-									{node.next === null ? 'next: null' : 'next: →'}
+									{node.next === null ? 'next: null' : 'next:'}
+									{#if node.next !== null}
+										<span class="ml-1 inline-flex translate-y-[3px] opacity-90">
+											<Arrow size={14} stroke="currentColor" />
+										</span>
+									{/if}
 								</div>
 							</div>
 							{#if node.next !== null}
-								<div class="text-2xl font-bold text-purple-300">→</div>
+								<span class="inline-flex translate-y-[-1px]">
+									<Arrow size={22} stroke="currentColor" />
+								</span>
 							{/if}
 						</div>
 					{/each}

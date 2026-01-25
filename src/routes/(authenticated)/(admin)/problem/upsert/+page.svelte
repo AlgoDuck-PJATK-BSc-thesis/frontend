@@ -4,6 +4,7 @@
 	import { Editor } from "@tiptap/core";
 	import Placeholder from "@tiptap/extension-placeholder";
 	import StarterKit from "@tiptap/starter-kit";
+    import CharacterCount from '@tiptap/extension-character-count'
 	import { 
 		type problemCreationDto, 
 		type TagCreateDto, 
@@ -27,9 +28,6 @@
 	import TickIconSvg from "$lib/svg/EditorComponentIcons/TickIconSvg.svelte";
 
     let { data }: { data: ProblemCreatePageArgs } = $props();
-
-    $inspect(data);
-
 
     let tiptapEditor: Editor;
 
@@ -178,7 +176,7 @@
                 <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Problem Title</h3>
                 <span class="text-admin-danger-text text-xs">*</span>
             </div>
-            <div class="p-4">
+            <div class="p-4 flex flex-col items-center justify-end">
                 <div {@attach node => {
                     tiptapEditor = new Editor({
                     element: node,
@@ -187,6 +185,9 @@
                         StarterKit,
                         Placeholder.configure({
                             placeholder: 'Example: Linked list cycle detection'
+                        }),
+                        CharacterCount.configure({
+                            limit: 256,
                         })
                     ],
                     onTransaction: () => {
@@ -204,6 +205,9 @@
                     tiptapEditor?.destroy()
                 }
                 }} class="w-full min-h-[40px] bg-admin-bg-input border border-admin-bg-input rounded-sm px-3 py-2 text-admin-text-muted text-sm focus-within:border-[#007fd4] transition-colors [&_.ProseMirror]:outline-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-[#858585] [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"></div>
+                <div class="w-full flex justify-end p-1">
+                    <span class="text-xs">{Math.min(256, creationDto.problemTitle.length)}/256</span>
+                </div>
             </div>
         </div>
 
@@ -264,7 +268,7 @@
                 <h3 class="text-xs font-semibold text-admin-text-primary uppercase tracking-wider">Problem Template</h3>
                 <ToolTip options={{ tip: "The Java template code that users will start with" }}/>
             </div>
-            <div class="h-56">
+            <div class="h-84">
                 <Monaco bind:editorContents={creationDto.templateB64}/>
             </div>
         </div>

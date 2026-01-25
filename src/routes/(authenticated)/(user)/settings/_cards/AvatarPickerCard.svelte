@@ -157,7 +157,7 @@
 					onclick={closeModal}
 					aria-label="Close"
 				>
-					×
+					x
 				</button>
 			</div>
 
@@ -224,7 +224,7 @@
 					onclick={confirm}
 					disabled={saving || !tempSelectedId || !ownedAvatars.length}
 				>
-					{saving ? 'Saving…' : 'OK'}
+					{saving ? 'Saving...' : 'OK'}
 				</button>
 			</div>
 		</div>

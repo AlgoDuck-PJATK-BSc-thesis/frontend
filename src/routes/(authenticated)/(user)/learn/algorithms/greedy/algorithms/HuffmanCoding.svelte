@@ -201,7 +201,7 @@
 
 					<div class="mt-2 text-center text-xs text-slate-300">
 						"Merge X" means an internal (combined) node with total frequency X. The number X is the
-						sum of its two children’s frequencies (the two nodes that were merged).
+						sum of its two children's frequencies (the two nodes that were merged).
 					</div>
 
 					<div class="mt-3 flex flex-wrap justify-center gap-2">

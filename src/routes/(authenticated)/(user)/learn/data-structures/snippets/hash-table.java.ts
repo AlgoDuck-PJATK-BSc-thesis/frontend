@@ -1,7 +1,7 @@
 export const meta = {
 	title: 'Hash Table (Separate Chaining)',
-	what: 'Stores key → value pairs by hashing the key into a bucket index. If multiple keys map to the same bucket (collision), they are stored in a small linked list inside that bucket. Put updates an existing key or adds a new entry.',
-	when: ['Need fast key→value lookups', 'Implement sets/maps', 'Caching and indexing'],
+	what: 'Stores key to value pairs by hashing the key into a bucket index. If multiple keys map to the same bucket (collision), they are stored in a small linked list inside that bucket. Put updates an existing key or adds a new entry.',
+	when: ['Need fast key to value lookups', 'Implement sets/maps', 'Caching and indexing'],
 	avoid: [
 		'Need ordered iteration',
 		'Need guaranteed worst-case performance without extra structure'

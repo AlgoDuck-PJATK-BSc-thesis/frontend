@@ -1,14 +1,10 @@
 <script lang="ts">
 	import PixelFrameMini from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameMini.svelte';
 
-	let { solved, acceptance, totalSubs, accepted, wa, tle, re } = $props<{
+	let { solved, acceptance, totalSubs } = $props<{
 		solved: number;
 		acceptance: number | undefined;
 		totalSubs: number | undefined;
-		accepted: number | undefined;
-		wa: number | undefined;
-		tle: number | undefined;
-		re: number | undefined;
 	}>();
 </script>
 
@@ -23,15 +19,6 @@
 			<span>{solved}</span>
 		</PixelFrameMini>
 
-		{#if typeof acceptance === 'number'}
-			<PixelFrameMini
-				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
-			>
-				<span>Acceptance</span>
-				<span>{Math.round(acceptance * 100)}%</span>
-			</PixelFrameMini>
-		{/if}
-
 		{#if typeof totalSubs === 'number'}
 			<PixelFrameMini
 				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
@@ -41,21 +28,12 @@
 			</PixelFrameMini>
 		{/if}
 
-		{#if typeof accepted === 'number'}
+		{#if typeof acceptance === 'number'}
 			<PixelFrameMini
 				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
 			>
-				<span>Accepted</span>
-				<span>{accepted}</span>
-			</PixelFrameMini>
-		{/if}
-
-		{#if typeof wa === 'number'}
-			<PixelFrameMini
-				className="flex items-center gap-2 bg-[color:var(--color-header-user)] px-3 py-0.5 text-[1rem] text-[color:var(--color-landingpage-subtitle)]"
-			>
-				<span>Wrong</span>
-				<span>{wa}</span>
+				<span>Acceptance</span>
+				<span>{Math.round(acceptance * 100)}%</span>
 			</PixelFrameMini>
 		{/if}
 	</div>

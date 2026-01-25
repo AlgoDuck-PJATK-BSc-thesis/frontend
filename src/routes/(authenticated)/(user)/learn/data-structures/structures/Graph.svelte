@@ -3,6 +3,7 @@
 	import CodePanel from '../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/graph.java';
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -231,9 +232,21 @@
 					<div class="text-xs font-semibold tracking-wider text-white/70 uppercase">
 						Visited order
 					</div>
-					<div class="mt-2 text-sm text-slate-200">
-						{visited.length ? visited.join(' → ') : 'Run BFS/DFS to see the visit order.'}
-					</div>
+
+					{#if visited.length}
+						<div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-200">
+							{#each visited as v, i (v + '-' + i)}
+								<span>{v}</span>
+								{#if i < visited.length - 1}
+									<span class="inline-flex translate-y-[-1px] opacity-90">
+										<Arrow size={16} stroke="currentColor" />
+									</span>
+								{/if}
+							{/each}
+						</div>
+					{:else}
+						<div class="mt-2 text-sm text-slate-200">Run BFS/DFS to see the visit order.</div>
+					{/if}
 				</div>
 
 				<div class="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -242,7 +255,13 @@
 					</div>
 					<div class="mt-2 space-y-1 text-sm text-slate-200">
 						{#each Object.entries(adj) as [k, v] (k)}
-							<div>{k} → [{v.join(', ')}]</div>
+							<div class="flex items-center gap-2">
+								<span>{k}</span>
+								<span class="inline-flex translate-y-[-1px] opacity-90">
+									<Arrow size={14} stroke="currentColor" />
+								</span>
+								<span>[{v.join(', ')}]</span>
+							</div>
 						{/each}
 					</div>
 				</div>

@@ -4,6 +4,7 @@
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/bellman-ford.java';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const nodes = ['A', 'B', 'C', 'D', 'E'];
 
@@ -247,7 +248,17 @@
 					{#if dist}
 						<div class="font-semibold text-white">
 							{#if done}
-								Result (from A): {nodes.map((n) => `${n}=${fmt(distValue(n))}`).join(', ')}
+								<span>Result (from A):</span>
+								<span class="ml-2 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+									{#each nodes as n, idx (n)}
+										<span>{n}={fmt(distValue(n))}</span>
+										{#if idx < nodes.length - 1}
+											<span class="inline-flex translate-y-[3px] opacity-90">
+												<Arrow size={14} stroke="currentColor" />
+											</span>
+										{/if}
+									{/each}
+								</span>
 							{:else}
 								Pass {pass} of {nodes.length - 1}
 							{/if}
@@ -264,7 +275,13 @@
 						{#if edgeIndex !== null}
 							{@const e = edges[edgeIndex]}
 							<div class="mt-1 text-slate-200">
-								Checking edge {e.a}-{e.b} (w={e.w}) {updated ? '→ improved a distance' : ''}
+								Checking edge {e.a}-{e.b} (w={e.w})
+								{#if updated}
+									<span class="mx-1 inline-flex translate-y-[3px] opacity-90">
+										<Arrow size={14} stroke="currentColor" />
+									</span>
+									improved a distance
+								{/if}
 							</div>
 						{/if}
 					{:else}

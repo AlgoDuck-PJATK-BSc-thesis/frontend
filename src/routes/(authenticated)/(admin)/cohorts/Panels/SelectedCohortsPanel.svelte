@@ -82,7 +82,7 @@
 	const membersText = (cohortId: string) => {
 		const st = membersByCohort?.[cohortId];
 		if (!st) return '-';
-		if (st.loading) return 'loading…';
+		if (st.loading) return 'loading...';
 		if (!st.loaded) return '-';
 		return String(st.totalMembers ?? 0);
 	};

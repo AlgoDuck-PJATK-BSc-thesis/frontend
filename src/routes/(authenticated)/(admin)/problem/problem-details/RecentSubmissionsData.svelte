@@ -1,6 +1,7 @@
 <script lang='ts'>
 	import TickIconSvg from "$lib/svg/EditorComponentIcons/TickIconSvg.svelte";
 	import ErrorIconSvg from "$lib/svg/Toast/ErrorIconSvg.svelte";
+	import SuccessIconSvg from "$lib/svg/Toast/SuccessIconSvg.svelte";
     import { formatRuntimeNs, type ProblemStatsDto } from "./problemDetailTypes";
 
     let { data }: { data: ProblemStatsDto } = $props()
@@ -46,27 +47,28 @@
                     <div class="text-center w-full px-4 py-2 font-semibold">
                         <span>Submitted</span>
                     </div>
-                    <div class="text-center w-full px-4 py-2 font-semibold">
+                    <!-- <div class="text-center w-full px-4 py-2 font-semibold">
                         <span>Actions</span>
-                    </div>
+                    </div> -->
                 </div>
                 <div>
                     {#each data.recentSubmission as submission}
                         <div class="border-b border-admin-bg-input flex flex-row last:border-b-0 hover:bg-[#2a2d2e] transition-colors">
                             <div class="px-4 py-3 w-full flex justify-center items-center">
                                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded">
-                                    {#if submission.status === 'Accepted' || submission.status === 'Success'}
-                                        <TickIconSvg options={{ class: "w-5 h-5 stroke-current stroke-2" }}/>
+                                    {console.log(submission.status)}
+                                    {#if submission.status === 'Completed'}
+                                        <SuccessIconSvg options={{ class: "w-5 h-5 stroke-admin-success stroke-2" }}/>
                                     {:else}
-                                        <ErrorIconSvg options={{ class: "w-5 h-5 stroke-current stroke-2" }}/>
+                                        <ErrorIconSvg options={{ class: "w-5 h-5 stroke-admin-danger-bg stroke-2" }}/>
                                     {/if}
                                     <span>{submission.status}</span>
                                 </span>
                             </div>
                             <div class="px-4 py-3 w-full flex justify-center items-center">
-                                <a href="/users/{submission.userId}" class="text-sm text-admin-accent-primary hover:underline">
+                                <span class="text-sm ext-admin-text-secondary font-mono">
                                     {submission.username}
-                                </a>
+                                </span>
                             </div>
                             <div class="px-4 py-3 text-sm w-full flex justify-center items-center text-admin-text-secondary font-mono">
                                 {#if submission.runtimeNs === 0}
@@ -78,9 +80,9 @@
                             <div class="px-4 py-3 text-sm w-full flex justify-center items-center text-admin-text-muted">
                                 {formatTimeAgo(submission.submittedAt)}
                             </div>
-                            <div class="px-4 py-3 w-full flex justify-center items-center">
+                            <!-- <div class="px-4 py-3 w-full flex justify-center items-center">
 
-                            </div>
+                            </div> -->
                         </div>
                     {/each}
                 </div>

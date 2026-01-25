@@ -6,6 +6,7 @@
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 	import BlinkingEye from '$lib/Components/Misc/BlinkingEye.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	let userNameOrEmail = $state('');
 	let password = $state('');
@@ -217,17 +218,26 @@
 			</form>
 
 			<div class="mt-8 mb-2 flex justify-center">
-				<Button
-					size="medium"
-					label="→"
-					labelFontFamily="var(--font-ariw9500)"
-					labelColor="rgba(0,0,0,0.7)"
-					labelFontSize="2rem"
-					labelFontWeight="normal"
-					labelTracking="extra"
-					labelClass=""
-					onclick={login}
-				/>
+				<div class="group relative inline-block">
+					<Button
+						size="medium"
+						label={'\u00A0'}
+						labelFontFamily="var(--font-ariw9500)"
+						labelColor="rgba(0,0,0,0.7)"
+						labelFontSize="2rem"
+						labelFontWeight="normal"
+						labelTracking="extra"
+						labelClass=""
+						onclick={login}
+					/>
+					<span class="pointer-events-none absolute inset-0 flex items-center justify-center">
+						<span
+							class="translate-y-[-4px] transition-transform duration-100 group-hover:translate-y-0"
+						>
+							<Arrow size={32} stroke="rgba(0,0,0,0.7)" />
+						</span>
+					</span>
+				</div>
 			</div>
 
 			{#if externalError}

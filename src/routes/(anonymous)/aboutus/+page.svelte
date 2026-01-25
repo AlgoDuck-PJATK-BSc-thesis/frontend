@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const images = Array.from({ length: 10 }, (_, i) => {
 		const n = i + 1;
@@ -121,7 +122,9 @@
 						class="mt-3 inline-flex items-center gap-2 rounded-xl border-2 border-[color:color-mix(in_srgb,var(--color-landingpage-subtitle)_78%,transparent)] bg-[color:color-mix(in_srgb,var(--color-landingpage-subtitle)_14%,transparent)] px-4 py-2 text-[var(--color-input-text)] no-underline hover:bg-[color:color-mix(in_srgb,var(--color-landingpage-title)_20%,transparent)]"
 					>
 						View the project on GitHub
-						<span class="opacity-70">↗</span>
+						<span class="inline-flex translate-y-[-1px] opacity-70">
+							<Arrow size={18} class="rotate-[-45deg]" stroke="currentColor" />
+						</span>
 					</a>
 				</div>
 			</div>

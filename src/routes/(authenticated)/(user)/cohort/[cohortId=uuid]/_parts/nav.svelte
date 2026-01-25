@@ -43,7 +43,7 @@
 				onclick={toggleOptions}
 				aria-label="Cohort options"
 			>
-				…
+				...
 			</button>
 
 			{#if showOptions}

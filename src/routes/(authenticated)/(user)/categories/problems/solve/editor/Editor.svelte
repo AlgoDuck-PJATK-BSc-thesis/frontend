@@ -1,17 +1,29 @@
 <script lang="ts">
-	import { tick, type Component, type Snippet } from "svelte";
-	import type { svgArg } from "$lib/types/SvgIcon";
-	import { activeProfile, ComponentRegistry } from "$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte";
-	import type { ComponentConfig, ControlPanelArgs, ControlPanelArgsBuild, MyTopLevelComponentArg, ResizeAxis, tabSide, WizardComponentArg } from "$lib/Components/GenericComponents/layoutManager/ResizableComponentArg";
-	import ComponentTreeRenderer from "$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte";
-	import ChevronIconSvg from "$lib/svg/ChevronIconSvg.svelte";
-	import CreationModal from "./CreationModal.svelte";
-	import { ApiError, FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
-	import ToolTip from "../../../../../(admin)/problem/upsert/ToolTip.svelte";
-	import type { LayoutCreationResultDto } from "./EditorEditorTypes";
-	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
-	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
-	import { useQueryClient } from "@tanstack/svelte-query";
+	import { tick, type Component, type Snippet } from 'svelte';
+	import type { svgArg } from '$lib/types/SvgIcon';
+	import {
+		activeProfile,
+		ComponentRegistry
+	} from '$lib/Components/GenericComponents/layoutManager/ComponentRegistry.svelte';
+	import type {
+		ComponentConfig,
+		ControlPanelArgs,
+		ControlPanelArgsBuild,
+		MyTopLevelComponentArg,
+		ResizeAxis,
+		tabSide,
+		WizardComponentArg
+	} from '$lib/Components/GenericComponents/layoutManager/ResizableComponentArg';
+	import ComponentTreeRenderer from '$lib/Components/GenericComponents/layoutManager/ComponentTreeRenderer.svelte';
+	import ChevronIconSvg from '$lib/svg/ChevronIconSvg.svelte';
+	import CreationModal from './CreationModal.svelte';
+	import { ApiError, FetchFromApi, type StandardResponseDto } from '$lib/api/apiCall';
+	import ToolTip from '../../../../../(admin)/problem/upsert/ToolTip.svelte';
+	import type { LayoutCreationResultDto } from './EditorEditorTypes';
+	import ChevronIconSvgNew from '$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte';
+	import { toast } from '$lib/Components/Notifications/ToastStore.svelte';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import TickIconSvg from '$lib/svg/EditorComponentIcons/TickIconSvg.svelte';
 
 	type Coords = { x: number; y: number };
 
@@ -44,44 +56,50 @@
 		return result;
 	});
 
-  let orphanPlaceholders = $derived.by(() => {
-       const allPlaceholders = availableTargets.filter(t => t.target.component === 'PlaceholderPanel');
-       
-       const wizardTabPlaceholderIds = new Set<string>();
-       availableTargets
-           .filter(t => t.target.component === 'WizardPanel' || t.target.component === 'TerminalWizardPanel')
-           .forEach(wt => {
-               wt.target.options?.components?.forEach((tabWrapper: any) => {
-                   const tabContent = tabWrapper?.options?.component;
-                   if (tabContent?.component === 'PlaceholderPanel') {
-                       wizardTabPlaceholderIds.add(tabContent.compId);
-                   }
-               });
-           });
-       
-       return allPlaceholders.filter(p => !wizardTabPlaceholderIds.has(p.target.compId));
-   });
+	let orphanPlaceholders = $derived.by(() => {
+		const allPlaceholders = availableTargets.filter(
+			(t) => t.target.component === 'PlaceholderPanel'
+		);
+
+		const wizardTabPlaceholderIds = new Set<string>();
+		availableTargets
+			.filter(
+				(t) => t.target.component === 'WizardPanel' || t.target.component === 'TerminalWizardPanel'
+			)
+			.forEach((wt) => {
+				wt.target.options?.components?.forEach((tabWrapper: any) => {
+					const tabContent = tabWrapper?.options?.component;
+					if (tabContent?.component === 'PlaceholderPanel') {
+						wizardTabPlaceholderIds.add(tabContent.compId);
+					}
+				});
+			});
+
+		return allPlaceholders.filter((p) => !wizardTabPlaceholderIds.has(p.target.compId));
+	});
 
 	const validateTree = (): ValidationResult => {
 		const errors: string[] = [];
 		const warnings: string[] = [];
 		const orphanTargets: HTMLDivElement[] = [];
-		
+
 		orphanPlaceholders.forEach(({ wrapper, target }) => {
 			errors.push(`Empty placeholder: ${target.compId}`);
 			if (wrapper) {
 				orphanTargets.push(wrapper);
 			}
 		});
-		
+
 		availableTargets
-			.filter(t => t.target.component === 'WizardPanel' || t.target.component === 'TerminalWizardPanel')
+			.filter(
+				(t) => t.target.component === 'WizardPanel' || t.target.component === 'TerminalWizardPanel'
+			)
 			.forEach(({ target }) => {
 				if (!target.options?.components || target.options.components.length === 0) {
 					warnings.push(`WizardPanel ${target.compId} has no tabs`);
 				}
 			});
-		
+
 		return {
 			isValid: errors.length === 0,
 			errors,
@@ -99,21 +117,20 @@
 		});
 	};
 
-
 	const serializeTree = (): string | undefined => {
 		const validation = validateTree();
-		
+
 		if (!validation.isValid) {
-			validationErrors = [...validation.errors, ...validation.warnings.map(w => `Warning: ${w}`)];
+			validationErrors = [...validation.errors, ...validation.warnings.map((w) => `Warning: ${w}`)];
 			showValidationModal = true;
-			
-			validation.orphanTargets.forEach(wrapper => {
+
+			validation.orphanTargets.forEach((wrapper) => {
 				wrapper.classList.add('orphan-flash');
 				setTimeout(() => wrapper.classList.remove('orphan-flash'), 2000);
 			});
 			return;
 		}
-		
+
 		let toBeExplored: ComponentConfig<any>[] = [componentTree];
 		while (toBeExplored.length > 0) {
 			const frontier: ComponentConfig<any>[] = [];
@@ -123,10 +140,13 @@
 				const nodeStripped: ComponentConfig<any> = cc.options.component;
 				if (nodeStripped) {
 					nodeStripped.contentWrapper = undefined;
-					if (nodeStripped.component === "WizardPanel" || nodeStripped.component === "TerminalWizardPanel") {
+					if (
+						nodeStripped.component === 'WizardPanel' ||
+						nodeStripped.component === 'TerminalWizardPanel'
+					) {
 						nodeStripped.options.componentsContainer = undefined;
 						frontier.push(...(nodeStripped.options.components || []));
-					} else if (nodeStripped.component === "SplitPanel") {
+					} else if (nodeStripped.component === 'SplitPanel') {
 						frontier.push(nodeStripped.options.comp1, nodeStripped.options.comp2);
 					}
 				}
@@ -171,8 +191,10 @@
 	};
 
 	const handleMouseUp = (onClickFallback?: () => void) => {
-		const wasClick = dragging.initCoords && 
-			lastMouseX !== null && lastMouseY !== null &&
+		const wasClick =
+			dragging.initCoords &&
+			lastMouseX !== null &&
+			lastMouseY !== null &&
 			Math.abs(lastMouseX - dragging.initCoords.x) < 5 &&
 			Math.abs(lastMouseY - dragging.initCoords.y) < 5;
 
@@ -216,9 +238,14 @@
 		return handler;
 	};
 
-	const handleMouseDownWithFallback = (e: MouseEvent, button: HTMLButtonElement, comp: ComponentConfig<any>, onClickFallback?: () => void) => {
+	const handleMouseDownWithFallback = (
+		e: MouseEvent,
+		button: HTMLButtonElement,
+		comp: ComponentConfig<any>,
+		onClickFallback?: () => void
+	) => {
 		const rect = button.getBoundingClientRect();
-		
+
 		lastMouseX = e.clientX;
 		lastMouseY = e.clientY;
 
@@ -275,7 +302,7 @@
 	const exploreNode = (target: ComponentConfig<any>): ComponentConfig<any>[] => {
 		if (!target) return [];
 		const inner = target.options?.component || target;
-		
+
 		if (inner.component === 'SplitPanel') {
 			const results: ComponentConfig<any>[] = [];
 			if (inner.options?.comp1) results.push(inner.options.comp1);
@@ -292,7 +319,7 @@
 	): Array<{ wrapper: HTMLDivElement | undefined; target: ComponentConfig<any> }> => {
 		if (!target) return [];
 		const inner = target.options?.component || target;
-		
+
 		if (inner.component === 'WizardPanel') {
 			return [
 				{
@@ -311,15 +338,21 @@
 		return [];
 	};
 
-	const findExistingComponent = (componentType: string): { parent: ComponentConfig<any>, key: string, config: ComponentConfig<any> } | null => {
-		const search = (node: ComponentConfig<any>, parent: ComponentConfig<any> | null, parentKey: string): { parent: ComponentConfig<any>, key: string, config: ComponentConfig<any> } | null => {
+	const findExistingComponent = (
+		componentType: string
+	): { parent: ComponentConfig<any>; key: string; config: ComponentConfig<any> } | null => {
+		const search = (
+			node: ComponentConfig<any>,
+			parent: ComponentConfig<any> | null,
+			parentKey: string
+		): { parent: ComponentConfig<any>; key: string; config: ComponentConfig<any> } | null => {
 			if (!node) return null;
 			const inner = node.options?.component || node;
-			
+
 			if (inner.component === componentType) {
 				return parent ? { parent, key: parentKey, config: node } : null;
 			}
-			
+
 			if (inner.component === 'SplitPanel') {
 				if (inner.options?.comp1) {
 					const inComp1 = search(inner.options.comp1, inner, 'comp1');
@@ -334,10 +367,10 @@
 					if (result) return result;
 				}
 			}
-			
+
 			return null;
 		};
-		
+
 		return search(componentTree, null, '');
 	};
 
@@ -346,11 +379,11 @@
 	};
 
 	const getTerminalComponentTypes = (): Set<string> => {
-		return new Set(registeredComponents.map(c => c.component));
+		return new Set(registeredComponents.map((c) => c.component));
 	};
 
 	const getFixedCompId = (componentType: string): string | undefined => {
-		const registered = registeredComponents.find(c => c.component === componentType);
+		const registered = registeredComponents.find((c) => c.component === componentType);
 		return registered?.compId;
 	};
 
@@ -360,7 +393,7 @@
 	}> = $derived.by(() => {
 		let targets: Array<{ wrapper: HTMLDivElement | undefined; target: ComponentConfig<any> }> = [];
 		let toBeExplored: ComponentConfig<any>[] = [componentTree];
-		
+
 		while (toBeExplored.length > 0) {
 			let frontier: ComponentConfig<any>[] = [];
 			toBeExplored.forEach((cc) => {
@@ -384,24 +417,27 @@
 		});
 	};
 
-	const makeIntoComponent = (target: ComponentConfig<any>, replacement: ComponentConfig<any>): void => {
-		if (!registeredComponents.some(comp => comp.component === replacement.component)) return;
-		
+	const makeIntoComponent = (
+		target: ComponentConfig<any>,
+		replacement: ComponentConfig<any>
+	): void => {
+		if (!registeredComponents.some((comp) => comp.component === replacement.component)) return;
+
 		const terminalTypes = getTerminalComponentTypes();
-		
+
 		if (terminalTypes.has(replacement.component) && componentExistsInTree(replacement.component)) {
 			return;
 		}
-		
+
 		const fixedId = getFixedCompId(replacement.component);
 		const compId = fixedId || replacement.compId;
-		
+
 		const clonedReplacement = JSON.parse(JSON.stringify(replacement));
 		clonedReplacement.compId = compId;
 		if (clonedReplacement.meta?.label) {
 			clonedReplacement.meta.label.labelFor = compId;
 		}
-		
+
 		target.compId = clonedReplacement.compId;
 		target.component = clonedReplacement.component;
 		target.options = clonedReplacement.options;
@@ -413,9 +449,10 @@
 
 	const makeIntoWizard = (target: ComponentConfig<any>): void => {
 		const compId: string = generateId('wizard');
-		const controlCompType = (wizardPipPosition as tabSide) === 1 || (wizardPipPosition as tabSide) === 3 
-			? 'SolutionAreaControlPanel' 
-			: 'SolutionAreaControlPanelHorizontal';
+		const controlCompType =
+			(wizardPipPosition as tabSide) === 1 || (wizardPipPosition as tabSide) === 3
+				? 'SolutionAreaControlPanel'
+				: 'SolutionAreaControlPanelHorizontal';
 
 		componentOpts[compId] = {
 			components: [],
@@ -434,10 +471,12 @@
 		});
 	};
 
-	const wizardRerouteGuard = (target: ComponentConfig<any>): ComponentConfig<MyTopLevelComponentArg<any>> => {
+	const wizardRerouteGuard = (
+		target: ComponentConfig<any>
+	): ComponentConfig<MyTopLevelComponentArg<any>> => {
 		if (target.component === 'WizardPanel') {
 			const newComponent: ComponentConfig<MyTopLevelComponentArg<any>> = createPlaceHolder();
-			
+
 			newComponent.options.component.meta = {
 				label: {
 					commonName: `Tab ${target.options.components.length + 1}`,
@@ -450,14 +489,16 @@
 				}
 			};
 			(componentOpts[target.compId] as WizardComponentArg).components.push(newComponent);
-			return (componentOpts[target.compId] as WizardComponentArg).components[(componentOpts[target.compId] as WizardComponentArg).components.length - 1].options.component;
+			return (componentOpts[target.compId] as WizardComponentArg).components[
+				(componentOpts[target.compId] as WizardComponentArg).components.length - 1
+			].options.component;
 		}
 		return target;
 	};
 
 	const makeTargetIntoComponent = (target: ComponentConfig<any>): void => {
-		if (target.component === 'WizardPanel' && (dragging.compData.component === 'WizardPanel')) return;
-		
+		if (target.component === 'WizardPanel' && dragging.compData.component === 'WizardPanel') return;
+
 		target = wizardRerouteGuard(target);
 		switch (dragging.compData.component) {
 			case 'SplitPanel':
@@ -484,7 +525,12 @@
 	const isCursorWithinBounds = (cursorPosition: Coords, div: HTMLDivElement | undefined) => {
 		if (!div) return false;
 		const divDomRect: DOMRect = div.getBoundingClientRect();
-		return (cursorPosition.x >= divDomRect.left && cursorPosition.x <= divDomRect.right && cursorPosition.y >= divDomRect.top && cursorPosition.y <= divDomRect.bottom);
+		return (
+			cursorPosition.x >= divDomRect.left &&
+			cursorPosition.x <= divDomRect.right &&
+			cursorPosition.y >= divDomRect.top &&
+			cursorPosition.y <= divDomRect.bottom
+		);
 	};
 
 	interface ComponentPipConfig {
@@ -498,18 +544,20 @@
 	let isContentHarmonicaExpanded: boolean = $state(true);
 
 	const contextInjectors: Record<string, (options: any) => void> = {
-		'SolutionAreaControlPanel': (opts: ControlPanelArgsBuild) => {
+		SolutionAreaControlPanel: (opts: ControlPanelArgsBuild) => {
 			const wizardId = findWizardIdForControlPanel(opts);
 			if (wizardId) {
 				opts.removeComp = (compId: string) => removeComponentFromWizard(wizardId, compId);
-				opts.swapComponents = (idx1: number, idx2: number) => swapComponentsInWizard(wizardId, idx1, idx2);
+				opts.swapComponents = (idx1: number, idx2: number) =>
+					swapComponentsInWizard(wizardId, idx1, idx2);
 			}
 		},
-		'SolutionAreaControlPanelHorizontal': (opts: ControlPanelArgsBuild) => {
+		SolutionAreaControlPanelHorizontal: (opts: ControlPanelArgsBuild) => {
 			const wizardId = findWizardIdForControlPanel(opts);
 			if (wizardId) {
 				opts.removeComp = (compId: string) => removeComponentFromWizard(wizardId, compId);
-				opts.swapComponents = (idx1: number, idx2: number) => swapComponentsInWizard(wizardId, idx1, idx2);
+				opts.swapComponents = (idx1: number, idx2: number) =>
+					swapComponentsInWizard(wizardId, idx1, idx2);
 			}
 		}
 	};
@@ -523,11 +571,16 @@
 		for (const [wizardId, wizardOpts] of Object.entries(componentOpts)) {
 			const wizard = wizardOpts as WizardComponentArg;
 			if (wizard?.components && controlOpts.labels) {
-				const wizardLabels = wizard.components.filter(c => c.options.component.meta?.label).map(c => c.options.component.meta!.label!.labelFor);
+				const wizardLabels = wizard.components
+					.filter((c) => c.options.component.meta?.label)
+					.map((c) => c.options.component.meta!.label!.labelFor);
 
-				const controlLabels = controlOpts.labels.map(l => l.labelFor);
-				if (wizardLabels.length > 0 && controlLabels.length > 0 && 
-					wizardLabels.some(wl => controlLabels.includes(wl))) {
+				const controlLabels = controlOpts.labels.map((l) => l.labelFor);
+				if (
+					wizardLabels.length > 0 &&
+					controlLabels.length > 0 &&
+					wizardLabels.some((wl) => controlLabels.includes(wl))
+				) {
 					return wizardId;
 				}
 			}
@@ -538,16 +591,23 @@
 	const removeComponentFromWizard = (wizardId: string, compId: string): void => {
 		const wizard = componentOpts[wizardId] as WizardComponentArg;
 		if (wizard?.components) {
-			wizard.components = wizard.components.filter(
-				c => c.options.component.compId !== compId
-			);
+			wizard.components = wizard.components.filter((c) => c.options.component.compId !== compId);
 		}
 	};
 
 	const swapComponentsInWizard = (wizardId: string, idx1: number, idx2: number): void => {
 		const wizard = componentOpts[wizardId] as WizardComponentArg;
-		if (wizard?.components && idx1 >= 0 && idx2 >= 0 && idx1 < wizard.components.length && idx2 < wizard.components.length) {
-			[wizard.components[idx1], wizard.components[idx2]] = [wizard.components[idx2], wizard.components[idx1]];
+		if (
+			wizard?.components &&
+			idx1 >= 0 &&
+			idx2 >= 0 &&
+			idx1 < wizard.components.length &&
+			idx2 < wizard.components.length
+		) {
+			[wizard.components[idx1], wizard.components[idx2]] = [
+				wizard.components[idx2],
+				wizard.components[idx1]
+			];
 		}
 	};
 
@@ -567,75 +627,98 @@
 			}
 		};
 		componentOpts = {};
-		placedComponentTypes = new Set(); 
-		
+		placedComponentTypes = new Set();
+
 		await tick();
 		shouldRender = true;
 	};
 
-	type TerminalPipArgs = { 
-		component: ComponentConfig<any>,
-		isPlaced?: boolean 
-	}
-
+	type TerminalPipArgs = {
+		component: ComponentConfig<any>;
+		isPlaced?: boolean;
+	};
 
 	const queryClient = useQueryClient();
 
-	let creationModalArgs = $state({ 
+	let creationModalArgs = $state({
 		isVisible: false,
-		onclick: async (layoutName: string): Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> => {
-		let treeSerialized: string | undefined = serializeTree();
-		if (!treeSerialized) return;
-		return await FetchFromApi<LayoutCreationResultDto>("CreateLayout",{
-			method: "POST",
-			body: JSON.stringify({
-				layoutContent: treeSerialized,
-				layoutName: layoutName
-			})
-		})
-	}})
+		onclick: async (
+			layoutName: string
+		): Promise<StandardResponseDto<LayoutCreationResultDto> | undefined> => {
+			let treeSerialized: string | undefined = serializeTree();
+			if (!treeSerialized) return;
+			return await FetchFromApi<LayoutCreationResultDto>('CreateLayout', {
+				method: 'POST',
+				body: JSON.stringify({
+					layoutContent: treeSerialized,
+					layoutName: layoutName
+				})
+			});
+		}
+	});
 </script>
 
 {#if creationModalArgs.isVisible}
-	<CreationModal bind:options={creationModalArgs}/>
+	<CreationModal bind:options={creationModalArgs} />
 {/if}
 
-<main {@attach (node) => {
-	activeProfile.profile = 'builder'
-	return () => {
-		activeProfile.profile = 'default';
-	};
-	}} class="w-full h-full flex bg-ide-dcard flex-row rounded-xl overflow-hidden">
-	<div class="w-56 h-full bg-ide-card flex flex-col border-r border-ide-accent/20">
-		<div class="px-4 py-3 border-b border-ide-accent/20">
-			<span class="font-semibold text-lg text-ide-text-primary">Components</span>
+<main
+	{@attach (node) => {
+		activeProfile.profile = 'builder';
+		return () => {
+			activeProfile.profile = 'default';
+		};
+	}}
+	class="flex h-full w-full flex-row overflow-hidden rounded-xl bg-ide-dcard"
+>
+	<div class="flex h-full w-56 flex-col border-r border-ide-accent/20 bg-ide-card">
+		<div class="border-b border-ide-accent/20 px-4 py-3">
+			<span class="text-lg font-semibold text-ide-text-primary">Components</span>
 		</div>
-		
+
 		<div class="flex-1 overflow-y-auto">
 			<div class="border-b border-ide-accent/10">
-				<button 
-					onclick={() => isLayoutHarmonicaExpanded = !isLayoutHarmonicaExpanded} 
-					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
-					<div class="flex flex-row grow gap-3">
+				<button
+					onclick={() => (isLayoutHarmonicaExpanded = !isLayoutHarmonicaExpanded)}
+					class="flex h-12 w-full flex-row items-center justify-between px-4 transition-colors hover:bg-ide-accent/5"
+				>
+					<div class="flex grow flex-row gap-3">
 						<span class="text-sm font-medium text-ide-text-secondary">Layout</span>
-						<ToolTip options={{ tip: "These components \nhold the useful stuff \nin an arranged way \nclick to rotate \ndrop to emplace"}}/>	
+						<ToolTip
+							options={{
+								tip: 'These components \nhold the useful stuff \nin an arranged way \nclick to rotate \ndrop to emplace'
+							}}
+						/>
 					</div>
-					<div class="h-3 w-3 transition-transform duration-150 ease-out {isLayoutHarmonicaExpanded ? 'rotate-90' : ''}">
-						<ChevronIconSvgNew options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
+					<div
+						class="h-3 w-3 transition-transform duration-150 ease-out {isLayoutHarmonicaExpanded
+							? 'rotate-90'
+							: ''}"
+					>
+						<ChevronIconSvgNew
+							options={{ class: 'h-full w-full stroke-[2] stroke-ide-text-secondary' }}
+						/>
 					</div>
 				</button>
-				
+
 				{#if isLayoutHarmonicaExpanded}
-					<div class="px-2 pb-3 flex flex-wrap gap-2 justify-center">
+					<div class="flex flex-wrap justify-center gap-2 px-2 pb-3">
 						{@render ComponentList([
 							{
 								attachable: (node) => {
 									node.onmousedown = (e) => {
-										handleMouseDownWithFallback(e, node, {
-											compId: generateId('wizard-panel'),
-											component: 'WizardPanel',
-											options: {}
-										}, () => { wizardPipPosition = (wizardPipPosition + 1) % 4; });
+										handleMouseDownWithFallback(
+											e,
+											node,
+											{
+												compId: generateId('wizard-panel'),
+												component: 'WizardPanel',
+												options: {}
+											},
+											() => {
+												wizardPipPosition = (wizardPipPosition + 1) % 4;
+											}
+										);
 									};
 								},
 								display: WizardContents,
@@ -644,11 +727,18 @@
 							{
 								attachable: (node) => {
 									node.onmousedown = (e) => {
-										handleMouseDownWithFallback(e, node, {
-											compId: generateId('split-panel'),
-											component: 'SplitPanel',
-											options: {}
-										}, () => { isResizablePipRotated = !isResizablePipRotated; });
+										handleMouseDownWithFallback(
+											e,
+											node,
+											{
+												compId: generateId('split-panel'),
+												component: 'SplitPanel',
+												options: {}
+											},
+											() => {
+												isResizablePipRotated = !isResizablePipRotated;
+											}
+										);
 									};
 								},
 								display: SplitPaneContents,
@@ -660,19 +750,31 @@
 			</div>
 
 			<div class="border-b border-ide-accent/10">
-				<button onclick={() => isContentHarmonicaExpanded = !isContentHarmonicaExpanded} 
-					class="w-full h-12 flex flex-row justify-between items-center px-4 hover:bg-ide-accent/5 transition-colors">
-					<div class="flex flex-row gap-3 grow">
+				<button
+					onclick={() => (isContentHarmonicaExpanded = !isContentHarmonicaExpanded)}
+					class="flex h-12 w-full flex-row items-center justify-between px-4 transition-colors hover:bg-ide-accent/5"
+				>
+					<div class="flex grow flex-row gap-3">
 						<span class="text-sm font-medium text-ide-text-secondary">Content</span>
-						<ToolTip options={{ tip: "These components \ncontain the useful \nstuff. Drop inside \nthe layout components" }}/>	
+						<ToolTip
+							options={{
+								tip: 'These components \ncontain the useful \nstuff. Drop inside \nthe layout components'
+							}}
+						/>
 					</div>
-					<div class="h-3 w-3 transition-transform duration-150 ease-out {isContentHarmonicaExpanded ? 'rotate-90' : ''}">
-						<ChevronIconSvgNew options={{ class: "h-full w-full stroke-[2] stroke-ide-text-secondary" }}/>
+					<div
+						class="h-3 w-3 transition-transform duration-150 ease-out {isContentHarmonicaExpanded
+							? 'rotate-90'
+							: ''}"
+					>
+						<ChevronIconSvgNew
+							options={{ class: 'h-full w-full stroke-[2] stroke-ide-text-secondary' }}
+						/>
 					</div>
 				</button>
-				
+
 				{#if isContentHarmonicaExpanded}
-					<div class="px-2 pb-3 flex flex-wrap gap-2 justify-center">
+					<div class="flex flex-wrap justify-center gap-2 px-2 pb-3">
 						{@render ComponentList([
 							...registeredComponents.map<ComponentPipConfig>((comp) => ({
 								attachable: (node) => {
@@ -682,7 +784,7 @@
 									};
 								},
 								display: ContentCompContents,
-								displayArgs: { 
+								displayArgs: {
 									component: comp,
 									isPlaced: placedComponents.has(comp.component)
 								} as TerminalPipArgs,
@@ -694,44 +796,52 @@
 			</div>
 		</div>
 
-		<div class="p-3 border-t border-ide-accent/20 flex flex-col gap-2">
+		<div class="flex flex-col gap-2 border-t border-ide-accent/20 p-3">
 			{#if orphanPlaceholders.length > 0}
 				<button
-					class="w-full py-2 px-4 bg-red-500/20 text-red-400 border border-red-500/40 rounded-lg text-sm font-medium hover:bg-red-500/30 transition-all duration-200 active:scale-[0.98]"
-					onclick={flashOrphanPlaceholders}>
-					<span>{orphanPlaceholders.length} empty slot{orphanPlaceholders.length > 1 ? 's' : ''}</span>
+					class="w-full rounded-lg border border-red-500/40 bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-all duration-200 hover:bg-red-500/30 active:scale-[0.98]"
+					onclick={flashOrphanPlaceholders}
+				>
+					<span
+						>{orphanPlaceholders.length} empty slot{orphanPlaceholders.length > 1 ? 's' : ''}</span
+					>
 				</button>
 			{/if}
 			<button
-				class="w-full py-2 px-4 bg-ide-accent/20 text-ide-accent border border-ide-accent/40 rounded-lg text-sm font-medium hover:bg-ide-accent/30 hover:border-ide-accent/60 transition-all duration-200 active:scale-[0.98]"
+				class="w-full rounded-lg border border-ide-accent/40 bg-ide-accent/20 px-4 py-2 text-sm font-medium text-ide-accent transition-all duration-200 hover:border-ide-accent/60 hover:bg-ide-accent/30 active:scale-[0.98]"
 				onclick={() => {
-					if (orphanPlaceholders.length){
-							flashOrphanPlaceholders();
-							return;
-						}
-					creationModalArgs.isVisible = true
-				}}>
+					if (orphanPlaceholders.length) {
+						flashOrphanPlaceholders();
+						return;
+					}
+					creationModalArgs.isVisible = true;
+				}}
+			>
 				Save Layout
 			</button>
 			<button
-				class="w-full py-2 px-4 bg-transparent text-ide-text-secondary border border-ide-text-secondary/30 rounded-lg text-sm font-medium hover:bg-ide-text-secondary/10 transition-all duration-200 active:scale-[0.98]"
+				class="w-full rounded-lg border border-ide-text-secondary/30 bg-transparent px-4 py-2 text-sm font-medium text-ide-text-secondary transition-all duration-200 hover:bg-ide-text-secondary/10 active:scale-[0.98]"
 				onclick={resetLayout}
 			>
 				Reset
 			</button>
 		</div>
 	</div>
-	
-	<div class="flex-1 h-full flex flex-col">
-		<div class="h-14 px-6 flex items-center justify-between border-b border-ide-accent/20 bg-ide-bg">
+
+	<div class="flex h-full flex-1 flex-col">
+		<div
+			class="flex h-14 items-center justify-between border-b border-ide-accent/20 bg-ide-bg px-6"
+		>
 			<span class="text-xl font-semibold text-ide-text-primary">Layout Builder</span>
 			<div class="flex items-center gap-2 text-sm text-ide-text-secondary">
 				<span>Drag components to the preview area</span>
 			</div>
 		</div>
-		
-		<div class="flex-1 p-6 bg-ide-bg overflow-hidden">
-			<div class="w-full h-full rounded-xl overflow-hidden border-2 border-ide-accent/20 bg-ide-dcard">
+
+		<div class="flex-1 overflow-hidden bg-ide-bg p-6">
+			<div
+				class="h-full w-full overflow-hidden rounded-xl border-2 border-ide-accent/20 bg-ide-dcard"
+			>
 				{#if shouldRender}
 					<ComponentTreeRenderer {componentTree} bind:componentOpts {contextInjectors} />
 				{/if}
@@ -741,28 +851,30 @@
 </main>
 
 {#if showValidationModal}
-	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
-		<div class="bg-ide-card rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-			<h3 class="text-lg font-semibold text-ide-text-primary mb-4">Layout Validation</h3>
-			
-			<div class="max-h-64 overflow-y-auto mb-4">
+	<div class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50">
+		<div class="mx-4 w-full max-w-md rounded-xl bg-ide-card p-6 shadow-2xl">
+			<h3 class="mb-4 text-lg font-semibold text-ide-text-primary">Layout Validation</h3>
+
+			<div class="mb-4 max-h-64 overflow-y-auto">
 				{#each validationErrors as error}
-					<div class="py-2 px-3 mb-2 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400">
+					<div
+						class="mb-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400"
+					>
 						{error}
 					</div>
 				{/each}
 			</div>
-			
+
 			<div class="flex gap-3">
 				<button
-					class="flex-1 py-2 px-4 bg-ide-accent/20 text-ide-accent border border-ide-accent/40 rounded-lg text-sm font-medium hover:bg-ide-accent/30 transition-all"
+					class="flex-1 rounded-lg border border-ide-accent/40 bg-ide-accent/20 px-4 py-2 text-sm font-medium text-ide-accent transition-all hover:bg-ide-accent/30"
 					onclick={handleCleanupAndSave}
 				>
 					Clean & Save
 				</button>
 				<button
-					class="flex-1 py-2 px-4 bg-transparent text-ide-text-secondary border border-ide-text-secondary/30 rounded-lg text-sm font-medium hover:bg-ide-text-secondary/10 transition-all"
-					onclick={() => showValidationModal = false}
+					class="flex-1 rounded-lg border border-ide-text-secondary/30 bg-transparent px-4 py-2 text-sm font-medium text-ide-text-secondary transition-all hover:bg-ide-text-secondary/10"
+					onclick={() => (showValidationModal = false)}
 				>
 					Cancel
 				</button>
@@ -778,59 +890,74 @@
 {/snippet}
 
 {#snippet ContentCompContents(args: TerminalPipArgs)}
-	{@const Icon = ComponentRegistry.get(activeProfile.profile)?.get(args.component?.meta?.label?.icon?.component ?? "") as Component<{ options: svgArg }> | undefined}
-	<div class="w-full h-full flex flex-col items-center justify-center gap-1 {args.isPlaced ? 'opacity-40' : ''}">
+	{@const Icon = ComponentRegistry.get(activeProfile.profile)?.get(
+		args.component?.meta?.label?.icon?.component ?? ''
+	) as Component<{ options: svgArg }> | undefined}
+	<div
+		class="flex h-full w-full flex-col items-center justify-center gap-1 {args.isPlaced
+			? 'opacity-40'
+			: ''}"
+	>
 		{#if Icon}
-			<div class="w-6 h-6">
-				<Icon options={{class: "w-full h-full stroke-ide-text-secondary"}}/>
+			<div class="h-6 w-6">
+				<Icon options={{ class: 'w-full h-full stroke-ide-text-secondary' }} />
 			</div>
 		{:else}
-			<div class="w-6 h-6 rounded bg-ide-accent/20"></div>
+			<div class="h-6 w-6 rounded bg-ide-accent/20"></div>
 		{/if}
-		<span class="font-mono text-[10px] text-ide-text-secondary truncate max-w-full px-1">
-			{args.component?.meta?.label?.commonName ?? "<undefined>"}
+		<span class="max-w-full truncate px-1 font-mono text-[10px] text-ide-text-secondary">
+			{args.component?.meta?.label?.commonName ?? '<undefined>'}
 		</span>
 		{#if args.isPlaced}
-			<span class="text-[8px] text-green-500">✓ placed</span>
+			<span class="flex flex-row items-center gap-1 text-[8px] text-green-500"
+				><TickIconSvg options={{ class: 'w-2 h-2 stroke-[2] stroke-green-500' }} /> placed</span
+			>
 		{/if}
 	</div>
 {/snippet}
 
 {#snippet WizardContents()}
-	<div class="w-full h-full flex flex-col items-center justify-center gap-1">
+	<div class="flex h-full w-full flex-col items-center justify-center gap-1">
 		<div
-			class="w-10 h-8 bg-ide-dcard rounded flex {wizardPipPosition === 0
+			class="flex h-8 w-10 rounded bg-ide-dcard {wizardPipPosition === 0
 				? 'flex-col justify-start'
 				: ''} {wizardPipPosition === 1 ? 'flex-row justify-end' : ''} {wizardPipPosition === 2
 				? 'flex-col-reverse justify-start'
 				: ''} {wizardPipPosition === 3 ? 'flex-row justify-start' : ''} items-center p-1"
 		>
-			<div class="w-2 h-2 bg-ide-accent rounded-sm"></div>
+			<div class="h-2 w-2 rounded-sm bg-ide-accent"></div>
 		</div>
 		<span class="font-mono text-[10px] text-ide-text-secondary">Wizard</span>
 	</div>
 {/snippet}
 
 {#snippet SplitPaneContents()}
-	<div class="w-full h-full flex flex-col items-center justify-center gap-1">
+	<div class="flex h-full w-full flex-col items-center justify-center gap-1">
 		<div
-			class="w-10 h-8 flex gap-0.5 transition-transform duration-200 ease-out {isResizablePipRotated ? 'rotate-90' : ''}"
+			class="flex h-8 w-10 gap-0.5 transition-transform duration-200 ease-out {isResizablePipRotated
+				? 'rotate-90'
+				: ''}"
 		>
-			<div class="flex-1 h-full bg-ide-dcard rounded-sm border border-ide-accent/40"></div>
-			<div class="flex-1 h-full bg-ide-dcard rounded-sm border border-ide-accent/40"></div>
+			<div class="h-full flex-1 rounded-sm border border-ide-accent/40 bg-ide-dcard"></div>
+			<div class="h-full flex-1 rounded-sm border border-ide-accent/40 bg-ide-dcard"></div>
 		</div>
 		<span class="font-mono text-[10px] text-ide-text-secondary">Split</span>
 	</div>
 {/snippet}
 
-{#snippet draggablePip(attachable: (elem: HTMLButtonElement) => void, display: Snippet<[any]>, displayArgs: object, isPlaced?: boolean)}
-	<div class="w-20 h-20 flex-shrink-0">
-		<button 
+{#snippet draggablePip(
+	attachable: (elem: HTMLButtonElement) => void,
+	display: Snippet<[any]>,
+	displayArgs: object,
+	isPlaced?: boolean
+)}
+	<div class="h-20 w-20 flex-shrink-0">
+		<button
 			{@attach attachable}
-			class="w-full h-full p-2 flex items-center justify-center border rounded-lg transition-colors 
-				{isPlaced 
-					? 'border-green-500/30 bg-green-500/5 cursor-not-allowed' 
-					: 'border-ide-accent/20 bg-ide-bg hover:border-ide-accent/50 hover:bg-ide-accent/5 cursor-grab active:cursor-grabbing'}"
+			class="flex h-full w-full items-center justify-center rounded-lg border p-2 transition-colors
+				{isPlaced
+				? 'cursor-not-allowed border-green-500/30 bg-green-500/5'
+				: 'cursor-grab border-ide-accent/20 bg-ide-bg hover:border-ide-accent/50 hover:bg-ide-accent/5 active:cursor-grabbing'}"
 		>
 			{@render display(displayArgs)}
 		</button>
@@ -840,9 +967,17 @@
 <svelte:head>
 	<style>
 		@keyframes orphan-flash {
-			0%, 100% { box-shadow: inset 0 0 0 3px transparent; }
-			25%, 75% { box-shadow: inset 0 0 0 3px rgb(239 68 68); }
-			50% { box-shadow: inset 0 0 0 3px rgb(239 68 68 / 0.5); }
+			0%,
+			100% {
+				box-shadow: inset 0 0 0 3px transparent;
+			}
+			25%,
+			75% {
+				box-shadow: inset 0 0 0 3px rgb(239 68 68);
+			}
+			50% {
+				box-shadow: inset 0 0 0 3px rgb(239 68 68 / 0.5);
+			}
 		}
 		.orphan-flash {
 			animation: orphan-flash 0.5s ease-in-out 4;

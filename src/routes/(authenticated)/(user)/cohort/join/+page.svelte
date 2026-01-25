@@ -6,6 +6,7 @@
 	import PixelFrameSimple from '$lib/Components/LayoutComponents/PixelFrames/PixelFrameSimple.svelte';
 	import { onMount } from 'svelte';
 	import { cohortApi } from '$lib/api/cohort';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	let { data }: { data: { ducks: DuckDto[] } } = $props();
 
@@ -167,15 +168,22 @@
 		/>
 	</PixelFrameSimple>
 
-	<Button
-		size="medium"
-		label="→"
-		labelFontFamily="var(--font-ariw9500)"
-		labelColor="rgba(0,0,0,0.7)"
-		labelFontSize="2rem"
-		labelFontWeight="normal"
-		labelTracking="extra"
-		labelClass=""
-		onclick={submit}
-	/>
+	<div class="group relative inline-block">
+		<Button
+			size="medium"
+			label={'\u00A0'}
+			labelFontFamily="var(--font-ariw9500)"
+			labelColor="rgba(0,0,0,0.7)"
+			labelFontSize="2rem"
+			labelFontWeight="normal"
+			labelTracking="extra"
+			labelClass=""
+			onclick={submit}
+		/>
+		<span class="pointer-events-none absolute inset-0 flex items-center justify-center">
+			<span class="translate-y-[-4px] transition-transform duration-100 group-hover:translate-y-0">
+				<Arrow size={32} stroke="rgba(0,0,0,0.7)" />
+			</span>
+		</span>
+	</div>
 </section>

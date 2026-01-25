@@ -4,6 +4,7 @@
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/floyd-warshall.java';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const nodes = ['A', 'B', 'C', 'D', 'E'];
 	const INF = 1_000_000;
@@ -107,12 +108,12 @@
 			<div class="text-lg font-bold text-white">Floyd-Warshall</div>
 			<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
 				Computes shortest distances between every pair of nodes. It starts with direct edges, then
-				for each node K it tries to improve every route i→j by allowing it to go through K.
+				for each node K it tries to improve every route i to j by allowing it to go through K.
 			</div>
 
 			<div class="mt-3 text-xs text-[color:var(--color-landingpage-subtitle)]">
-				Highlighted row/column: the current intermediate node K. INF means “no path known /
-				unreachable”.
+				Highlighted row/column: the current intermediate node K. INF means "no path known or
+				unreachable".
 			</div>
 
 			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">

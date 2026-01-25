@@ -187,7 +187,7 @@
 				id="users_search_query"
 				bind:value={searchQuery}
 				class="w-full rounded-sm border border-admin-border-primary bg-admin-bg-primary px-3 py-2 text-sm text-admin-text-primary outline-none focus:border-admin-accent-primary-hover"
-				placeholder="Type part of username/email (GUID also supported)"
+				placeholder="Type part of username/email/GUID"
 				onkeydown={(e) => {
 					if (e.key === 'Enter') onSearchFromStart();
 				}}
@@ -338,7 +338,7 @@
 							</div>
 						{:else if searchResult.idMatch && idMatchHiddenByFilter}
 							<div class="text-sm text-admin-text-muted">
-								GUID match exists, but it’s hidden by the current role filter.
+								GUID match exists, but it is hidden by the current role filter.
 							</div>
 						{:else}
 							<div class="text-sm text-admin-text-muted">No GUID match.</div>
@@ -417,7 +417,7 @@
 				</div>
 			</div>
 		{:else}
-			<div class="text-sm text-admin-text-muted">Type a query and click Search.</div>
+			<div class="text-sm text-admin-text-muted"></div>
 		{/if}
 	</div>
 </div>

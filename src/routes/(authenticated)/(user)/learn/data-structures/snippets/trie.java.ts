@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Trie (Prefix Tree)',
-	what: 'A trie stores words by sharing common prefixes. Each node represents a prefix, and children represent the next character. This makes prefix checks fast: to test a prefix, you follow its characters down the tree. Autocomplete is “go to the prefix node, then list all words below it”.',
+	what: 'A trie stores words by sharing common prefixes. Each node represents a prefix, and children represent the next character. This makes prefix checks fast: to test a prefix, you follow its characters down the tree. Autocomplete is "go to the prefix node, then list all words below it".',
 	when: ['Autocomplete/search-as-you-type', 'Prefix filtering', 'Dictionary word lookups'],
 	avoid: ['Memory is tight (tries can be large)', 'You only need exact lookup with small sets'],
 	time: { best: 'O(L)', avg: 'O(L)', worst: 'O(L)' },

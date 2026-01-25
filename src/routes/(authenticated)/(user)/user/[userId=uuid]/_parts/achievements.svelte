@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { UserAchievementDto } from '$lib/api/user';
+	import TickIconSvg from '$lib/svg/EditorComponentIcons/TickIconSvg.svelte';
 
 	let { achievements, nameOf, descOf } = $props<{
 		achievements: UserAchievementDto[];
@@ -20,13 +21,18 @@
 			{#each achievements as a}
 				<div
 					class="flex flex-col rounded px-3 py-2 {a.isCompleted
-						? 'border border-green-500/30 bg-green-600/20'
+						? 'border border-green-500/30 bg-green-600/40'
 						: 'bg-white/10'}"
 				>
 					<div class="flex items-center justify-between">
 						<div class="font-black">{nameOf(a)}</div>
 						{#if a.isCompleted}
-							<span class="text-xs text-green-400">✓ Completed</span>
+							<span class="flex flex-row items-center gap-1 text-xs text-green-300">
+								<span>Completed</span>
+								<span class="inline-flex translate-y-[1px]">
+									<TickIconSvg options={{ class: 'h-3 w-3 stroke-[2] stroke-green-300' }} />
+								</span>
+							</span>
 						{:else}
 							<span class="text-xs opacity-70">{a.currentValue ?? 0}/{a.targetValue ?? 0}</span>
 						{/if}

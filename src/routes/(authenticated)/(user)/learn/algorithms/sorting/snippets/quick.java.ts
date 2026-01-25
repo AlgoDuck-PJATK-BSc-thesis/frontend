@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Quick Sort',
-	what: 'Partitions the array around a pivot so smaller values go left and larger values go right, then recursively sorts the partitions. It’s usually very fast, but a bad pivot choice can degrade to O(n^2).',
+	what: 'Partitions the array around a pivot so smaller values go left and larger values go right, then recursively sorts the partitions. It is usually very fast, but a bad pivot choice can degrade to O(n^2).',
 	when: ['Fast average-case', 'In-place needed', 'General purpose'],
 	avoid: ['Stability required', 'Adversarial inputs without better pivot strategy'],
 	time: { best: 'O(n log n)', avg: 'O(n log n)', worst: 'O(n^2)' },

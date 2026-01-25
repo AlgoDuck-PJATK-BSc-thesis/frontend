@@ -5,9 +5,12 @@ export const DUCK_WIDTH = DUCK_HEIGHT * 1.07;
 export const DUCK_COLLISION_RADIUS = 60;
 export const MIN_DUCK_DISTANCE = DUCK_COLLISION_RADIUS * 2;
 
-export const STEP_DISTANCE = 120;
+export const STEP_DISTANCE = 80;
 export const MOVE_DURATION = 182;
 export const FORWARD_BIAS_STRENGTH = 0.3;
+
+export const MIN_DUCK_IDLE_FRAMES = 90;
+export const MAX_DUCK_IDLE_FRAMES = 150;
 
 export const GRID_COLUMNS = 24;
 export const GRID_ROWS = 11;

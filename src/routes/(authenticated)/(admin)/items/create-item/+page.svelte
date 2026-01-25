@@ -168,7 +168,7 @@
 	<title>Admin - Algoduck</title>
 </svelte:head>
 
-<main class="w-full min-h-screen bg-admin-bg-primary text-admin-text-secondary">
+<main class="w-full grow bg-admin-bg-primary text-admin-text-secondary">
     <div class="max-w-4xl mx-auto grow p-6 flex flex-col gap-5">
         <div class="py-4 border-b border-admin-border-primary">
             <div class="flex items-center gap-3">

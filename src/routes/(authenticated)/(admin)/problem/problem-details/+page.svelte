@@ -88,10 +88,6 @@
         "Memory": drawMemoryChart
     }
 
-    const drawCurrentTab = $derived(performanceTabsConfig[currentlyPreviewedPerformanceTab])
-
-    let performanceContainerWidth: number = $state(0);
-    let performanceContainerHeight: number = $state(0);
 </script>
 
 <svelte:head>
@@ -102,8 +98,8 @@
     <DeletionModal bind:isVisible={isDeletionModalVisible} problemId={data.problemDetailsCore.problemId}/>
 {/if}
 {#key CurrentAdminTheme.theme}
-    <main class="w-full min-h-full bg-admin-bg-primary text-admin-text-muted">
-        <div class="max-w-7xl mx-auto p-6 flex flex-col gap-6">
+    <main class="w-full grow bg-admin-bg-primary text-admin-text-muted">
+        <div class="max-w-7xl mx-auto p-6 flex grow flex-col gap-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-b border-admin-bg-input">
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-3">
@@ -265,24 +261,25 @@
                         </div>
                     </div>
                     <div class="p-4 h-48 flex items-center justify-center">
-                        {#if data.performanceMetrics?.runtimeBuckets?.length > 0}
-                            <canvas 
-                            {@attach node => {
-                                $effect(() => {
-                                    performanceContainerWidth;
-                                    performanceContainerHeight;
-                                    return drawCurrentTab(node, data.performanceMetrics, chartColors, chartDefaults);
-                                });
-                                }}
-                            bind:clientHeight={performanceContainerHeight} 
-                            bind:clientWidth={performanceContainerWidth} 
-                            class="w-full h-full" 
-                            ></canvas>
-                        {:else}
-                            <div class="flex items-center justify-center h-full text-admin-text-muted text-sm">
-                                No runtime data available yet
-                            </div>
-                        {/if}
+                        <div class="p-4 h-48 flex items-center justify-center">
+                            {#if data.performanceMetrics?.runtimeBuckets?.length > 0}
+                                {#if currentlyPreviewedPerformanceTab === "Runtime"}
+                                    <canvas 
+                                        {@attach node => drawRuntimeChart(node, data.performanceMetrics, chartColors, chartDefaults)}
+                                        class="w-full h-full"
+                                    ></canvas>
+                                {:else}
+                                    <canvas 
+                                        {@attach node => drawMemoryChart(node, data.performanceMetrics, chartColors, chartDefaults)}
+                                        class="w-full h-full"
+                                    ></canvas>
+                                {/if}
+                            {:else}
+                                <span class="text-admin-text-muted text-sm">
+                                    No runtime data available yet
+                                </span>
+                            {/if}
+                        </div>
                     </div>
                     <div class="px-4 pb-4">
                         <div class="flex items-center justify-between text-xs text-admin-text-muted border-t border-admin-bg-input pt-3">

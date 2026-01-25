@@ -28,8 +28,6 @@
 	let loadedChatData: StandardResponseDto<ChatList> = $state({} as StandardResponseDto<ChatList>)
 	let loadedAutoSave: StandardResponseDto<AutoSaveDto | undefined> = $state({} as StandardResponseDto<AutoSaveDto | undefined>);
 
-$inspect(loadedData);
-
 	onMount(async () => {
 		activeProfile.profile = "placeholder";
 		data.autoSave.then((value: StandardResponseDto<AutoSaveDto | undefined>) => {
@@ -76,7 +74,7 @@ $inspect(loadedData);
 			'assistant-wizard': {
 				components: loadedChatData.body.chats.map(c => {
 					return {
-						compId: `${c.chatName}-comp-wrapper`,
+						compId: `${c.chatId}-comp-wrapper`,
 						component: "TopLevelComponent",
 						options: {
 							component: {
@@ -159,6 +157,9 @@ $inspect(loadedData);
 							}
 						},
 					} as ComponentConfig<MyTopLevelComponentArg<any>>)
+					if (!config[InsertData.compId]){
+						config[InsertData.compId] = InsertData.compArgs ?? {};
+					}
 				},
 				remove: async (compId: string): Promise<boolean> => {
 					(config['assistant-wizard'] as WizardComponentArg).components = (config['assistant-wizard'] as WizardComponentArg).components.filter(comp => comp.options.component.compId !== compId);
@@ -177,7 +178,6 @@ $inspect(loadedData);
 				rename: async (compId: string, newName: string): Promise<void> => {
 					let comp: ComponentConfig<MyTopLevelComponentArg<any>> | undefined = (config['assistant-wizard'] as WizardComponentArg).components.find(comp => comp.options.component.compId === compId);
 					if (!comp?.options.component.meta?.label) return;
-					comp.options.component.meta.label.commonName = newName;
 					const prevChatName: string | undefined = (comp.options.component.options as ChatWindowComponentArgs).chatName;
 					const chatId: string | undefined = (comp.options.component.options as ChatWindowComponentArgs).chatId;
 
@@ -192,19 +192,15 @@ $inspect(loadedData);
 								})
 							}, fetch);
 							(comp.options.component.options as ChatWindowComponentArgs).chatName = newName;
-
+							comp.options.component.meta.label.commonName = newName;
 						}catch(err){
-															console.log("err here");
-								console.log(err);
-								console.log("err here");
-							if (err instanceof ApiError){
-
-								const error: ApiError = err as ApiError;
-								if (error.response.status === "Error" && error.response.message){
-									toast.error(error.response.message)
+							if (err instanceof ApiError) {
+								const error = err as ApiError<Record<string, string[]>>;
+								if (error.response.status === "Error" && error.response.message) {
+									for (const [key, val] of Object.entries(error.response.body)) {
+										toast.error(`${val.join("\n")}`);
+									}
 								}
-							}else{
-								console.log("nope");
 							}
 						}
 						

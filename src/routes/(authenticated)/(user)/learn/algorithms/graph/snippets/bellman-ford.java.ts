@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Bellman-Ford',
-	what: 'Finds shortest distances from A by repeatedly trying to improve the current best distances. “Relaxing an edge” means: for an edge A→B with weight w, if distance[A] + w is smaller than distance[B], update distance[B] to that smaller value. It does this for all edges up to V-1 times, because the shortest path can use at most V-1 edges. If any distance can still improve after that, the graph contains a negative cycle.',
+	what: 'Finds shortest distances from A by repeatedly trying to improve the current best distances. "Relaxing an edge" means: for an edge A to B with weight w, if distance[A] + w is smaller than distance[B], update distance[B] to that smaller value. It does this for all edges up to V-1 times, because the shortest path can use at most V-1 edges. If any distance can still improve after that, the graph contains a negative cycle.',
 	when: [
 		'Shortest paths with negative weights',
 		'Need to detect negative cycles',

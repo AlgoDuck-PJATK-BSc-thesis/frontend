@@ -33,39 +33,30 @@
     <div class="w-full flex flex-col items-center">
         <div class="w-full py-2 px-1">
             <button onclick={async () => {
-                if (options.controlCallbacks?.insert && options.controlCallbacks.checkIfHasNewComponent && !options.controlCallbacks.checkIfHasNewComponent()){
-                    if (!options.controlCallbacks.getProblemId) return;
-                    const problemId: string = options.controlCallbacks.getProblemId();
-                    try{
-                        let result = await FetchFromApi<{ chatId: string }>("problem/assistant/chat", {
-                            method: "POST"
-                        }, fetch , new URLSearchParams({ problemId: problemId }))
+    if (options.controlCallbacks?.insert && options.controlCallbacks.checkIfHasNewComponent && !options.controlCallbacks.checkIfHasNewComponent()){
+        if (!options.controlCallbacks.getProblemId) return;
+        const problemId: string = options.controlCallbacks.getProblemId();
+        try {
+            let result = await FetchFromApi<{ chatId: string }>("problem/assistant/chat", {
+                method: "POST"
+            }, fetch, new URLSearchParams({ problemId: problemId }))
 
-                        if (options.labels.map(l => l.labelFor).some(l => l === problemId)){
-                            return;
-                        }
+            options.controlCallbacks!.insert({
+                compId: result.body.chatId,
+                compType: 'ChatWindow',
+                compCommonName: undefined,
+                compArgs: {
+                    chatName: undefined,
+                    chatId: result.body.chatId,
+                    pages: [] as CustomPageData<ChatMessage>[]
+                } as ChatWindowComponentArgs
+            });
 
-                        options.controlCallbacks!.insert({
-                            compId: result.body.chatId,
-                            compType: 'ChatWindow',
-                            compCommonName: undefined,
-                            compArgs: {
-                                chatName: undefined,
-                                pages: [] as CustomPageData<ChatMessage>[]
-                            } as ChatWindowComponentArgs
-                        });
-                        if (options.controlCallbacks?.addInsertedComponentToRoot){
-                            options.controlCallbacks.addInsertedComponentToRoot(result.body.chatId, {
-                                chatId: result.body.chatId
-                            });
-                        }    
-
-                    }catch(Error){
-                        toast.error("Could not create chat");
-                    }
-                    
-                }
-            }} class="flex w-full h-10 rounded-full flex-row justify-center gap-2 items-center bg-ide-dcard/50 transition-colors duration-300 ease-out hover:bg-ide-dcard">
+        } catch(Error) {
+            toast.error("Could not create chat");
+        } 
+    }
+}} class="flex w-full h-10 rounded-full flex-row justify-center gap-2 items-center bg-ide-dcard/50 transition-colors duration-300 ease-out hover:bg-ide-dcard">
                 <CrossIconSvg options={{ class: "h-4 w-4 stroke-ide-text-secondary rotate-45 stroke-[3]" }}/>
                 <span class="text-sm font-semibold text-ide-text-secondary">New Chat</span>
             </button>

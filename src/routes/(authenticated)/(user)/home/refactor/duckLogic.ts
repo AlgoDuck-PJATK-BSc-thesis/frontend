@@ -1,4 +1,4 @@
-import { DIRECTION_VECTORS, DUCK_DIMENSIONS, DUCK_HEIGHT, DUCK_WIDTH, FORWARD_BIAS_STRENGTH, MIN_DUCK_DISTANCE, MOVE_DURATION, MOVEMENT_SAFETY_BUFFER, NUM_DIRECTIONS, STEP_DISTANCE } from './constants';
+import { DIRECTION_VECTORS, DUCK_DIMENSIONS, DUCK_HEIGHT, DUCK_WIDTH, FORWARD_BIAS_STRENGTH, MAX_DUCK_IDLE_FRAMES, MIN_DUCK_DISTANCE, MIN_DUCK_IDLE_FRAMES, MOVE_DURATION, MOVEMENT_SAFETY_BUFFER, NUM_DIRECTIONS, STEP_DISTANCE } from './constants';
 import { isPixelBlack, samplePixel } from './gridUtils';
 import type { BoundingBox2d, BoundingBox2dCollisionData, Coords, DuckAnimationContext, DuckPositionalData, ObjectDims2d, Vec2 } from './PondTypes';
 
@@ -228,7 +228,7 @@ export const pickNewDirection = (duckId: string, ctx: DuckAnimationContext): voi
 		duck.isMoving = true;
 	}
 
-	duck.framesUntilNewDirection = Math.floor(Math.random() * 60) + 30;
+	duck.framesUntilNewDirection = Math.floor(Math.random() * (MAX_DUCK_IDLE_FRAMES - MIN_DUCK_IDLE_FRAMES)) + MIN_DUCK_IDLE_FRAMES;
 };
 
 export const calculateSpawnPosition = (duckId: string, containerCenter: Coords, ctx: DuckAnimationContext): Coords | null => {

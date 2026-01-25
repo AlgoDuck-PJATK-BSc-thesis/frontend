@@ -60,10 +60,16 @@
 					ResizeableComponentArg<MyTopLevelComponentArg<any>, MyTopLevelComponentArg<any>>
 				>
 			).options.comp2 = hydrateLayout(innerComponentConfig.options.comp2, componentConfigurations);
+			if (!componentOpts[innerComponentConfig.compId]){
+				componentOpts[innerComponentConfig.compId] = innerComponentConfig.options;
+			}
 		} else if (
 			innerComponentType === 'WizardPanel' ||
 			innerComponentType === 'TerminalWizardPanel'
 		) {
+			if (!componentOpts[innerComponentConfig.compId]){
+				componentOpts[innerComponentConfig.compId] = innerComponentConfig.options;
+			}
 			if (
 				(contextInjectors ?? {})[
 					(innerComponentConfig.options as WizardComponentArg).control.component

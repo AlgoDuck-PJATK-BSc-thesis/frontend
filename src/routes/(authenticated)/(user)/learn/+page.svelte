@@ -61,7 +61,7 @@
 			<div class="pl-[0rem]">
 				<Title
 					title="LEARN"
-					subtitle="Stuck on a problem? Whether you’re a beginner or advanced, it’s always worth brushing up on core algorithms and data structures. Explore visualizations, helpful tips, explanations and clean Java implementations you can reuse in your solutions."
+					subtitle="Stuck on a problem? Whether you are a beginner or advanced, it is always worth brushing up on core algorithms and data structures. Explore visualizations, helpful tips, explanations and clean Java implementations you can reuse in your solutions."
 				/>
 			</div>
 		</section>

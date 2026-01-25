@@ -77,8 +77,8 @@
         </button>
     </div>
 
-    <div class="w-[25%] h-full flex justify-end items-center px-5 gap-1">
-        <div class="grow h-full flex flex-row items-center justify-end gap-2 relative">
+    <div class="w-[25%] h-full flex justify-end items-center px-5 gap-5">
+        <div class="grow h-full flex flex-row items-center justify-end gap-1 relative">
             {#if isLayoutSelectionVisible}
                 <LayoutSelector bind:isVisible={isLayoutSelectionVisible}/>
             {/if}
@@ -105,7 +105,9 @@
                 <LayoutIconSvg options={{ class: 'stroke-ide-text-primary stroke-[1.5]' }} />
             </button>
         </div>
-        <button class="h-[75%] aspect-square hover:cursor-pointer px-5" onclick={() => {}}>
+        <button class="h-[90%] aspect-square hover:cursor-pointer flex items-center justify-center overflow-hidden rounded-full" 
+            onclick={() => {}}
+        >
             <MyProfile/>
         </button>
     </div>

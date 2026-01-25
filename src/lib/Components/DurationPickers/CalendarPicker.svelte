@@ -65,7 +65,7 @@
 			class="rounded-md px-2 py-1 ring-1 ring-[var(--border-15)]"
 			onclick={prevMonth}
 		>
-			‹
+			back
 		</button>
 		<div class="text-sm font-medium">
 			{new Date(year, month, 1).toLocaleString(undefined, {
@@ -78,7 +78,7 @@
 			class="rounded-md px-2 py-1 ring-1 ring-[var(--border-15)]"
 			onclick={nextMonth}
 		>
-			›
+			next
 		</button>
 	</div>
 

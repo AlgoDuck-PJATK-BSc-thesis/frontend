@@ -4,6 +4,7 @@
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/coin-change.java';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const coins = [1, 2, 5] as const;
 
@@ -195,13 +196,16 @@
 							{#if fromX !== null && candidate !== null}
 								<div class="mt-1 text-slate-200">
 									Try: dp[{fromX}] + 1 = {fmt(dp[fromX])} + 1 = {candidate}
-									{updated ? '→ update dp' : '→ no change'}
+									<span class="mx-1 inline-flex translate-y-[3px] opacity-90">
+										<Arrow size={14} stroke="currentColor" />
+									</span>
+									{updated ? 'update dp' : 'no change'}
 								</div>
 							{:else}
 								<div class="mt-1 text-slate-200">Coin too large or previous amount is INF</div>
 							{/if}
 						{:else}
-							<div class="text-slate-200">Filling the table…</div>
+							<div class="text-slate-200">Filling the table...</div>
 						{/if}
 					{:else}
 						Run to watch dp fill from 0 up to the target.

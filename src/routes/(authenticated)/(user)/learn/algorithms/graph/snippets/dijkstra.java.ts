@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Dijkstra',
-	what: 'Find shortest distances from A when all weights are non-negative. It repeatedly pick the unvisited node with the smallest known distance and “finalize” it.',
+	what: 'Find shortest distances from A when all weights are non-negative. It repeatedly pick the unvisited node with the smallest known distance and "finalize" it.',
 	when: ['Routing / navigation', 'Non-negative weighted graphs', 'Single-source shortest paths'],
 	avoid: ['Any negative edge weight (use Bellman-Ford)'],
 	time: { worst: 'O((V+E) log V)' },

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 	import type { PendingImage } from '../types';
 
 	let {
@@ -112,7 +113,7 @@
 	<div class="relative flex-1">
 		<textarea
 			bind:this={textareaRef}
-			placeholder="Type a message… (use ` for inline code or ``` for simple code block and ```java for Java code block)"
+			placeholder="Type a message... (use ` for inline code or ``` for simple code block and ```java for Java code block)"
 			class="max-h-[8.5rem] min-h-[2.5rem] w-full resize-none overflow-y-auto rounded-xl border border-[color:var(--color-accent-1)] bg-[color:var(--color-landingpage-subtitle)] px-4 py-2 text-sm text-[color:var(--color-shadow-black)]"
 			bind:value={message}
 			oninput={resizeTextarea}
@@ -121,16 +122,25 @@
 	</div>
 
 	<div class="translate-y-[-2px]">
-		<Button
-			size="small"
-			label="→"
-			labelFontFamily="var(--font-ariw9500)"
-			labelColor="rgba(0,0,0,0.7)"
-			labelFontSize="2rem"
-			labelFontWeight="normal"
-			labelTracking="extra"
-			labelClass=""
-			onclick={onSend}
-		/>
+		<div class="group relative inline-block">
+			<Button
+				size="small"
+				label={'\u00A0'}
+				labelFontFamily="var(--font-ariw9500)"
+				labelColor="rgba(0,0,0,0.7)"
+				labelFontSize="2rem"
+				labelFontWeight="normal"
+				labelTracking="extra"
+				labelClass=""
+				onclick={onSend}
+			/>
+			<span class="pointer-events-none absolute inset-0 flex items-center justify-center">
+				<span
+					class="translate-y-[-4px] transition-transform duration-100 group-hover:translate-y-0"
+				>
+					<Arrow size={28} stroke="rgba(0,0,0,0.7)" />
+				</span>
+			</span>
+		</div>
 	</div>
 </div>

@@ -92,7 +92,7 @@
 						accessibility.textSize === 60}
 					onclick={() => (accessibility.textSize = Math.max(accessibility.textSize - 20, 60))}
 				>
-					A−
+					A-
 				</button>
 			</div>
 		</div>

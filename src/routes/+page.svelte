@@ -2,6 +2,7 @@
 	import Button from '$lib/Components/ButtonComponents/Button.svelte';
 	import LandingPage from '$lib/Components/Misc/LandingPage.svelte';
 	import HeaderGuest from '$lib/Components/Headers/HeaderGuest.svelte';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 </script>
 
 <HeaderGuest />
@@ -25,17 +26,26 @@
 
 			<div class="mb-8 flex justify-center gap-4">
 				<div class="animate-side-bounce inline-block">
-					<Button
-						size="medium"
-						label="→"
-						labelFontFamily="var(--font-ariw9500)"
-						labelColor="rgba(0,0,0,0.7)"
-						labelFontSize="2rem"
-						labelFontWeight="normal"
-						labelTracking="extra"
-						labelClass=""
-						onclick={() => (window.location.href = '/signup')}
-					/>
+					<div class="group relative inline-block">
+						<Button
+							size="medium"
+							label={'\u00A0'}
+							labelFontFamily="var(--font-ariw9500)"
+							labelColor="rgba(0,0,0,0.7)"
+							labelFontSize="2rem"
+							labelFontWeight="normal"
+							labelTracking="extra"
+							labelClass=""
+							onclick={() => (window.location.href = '/signup')}
+						/>
+						<span class="pointer-events-none absolute inset-0 flex items-center justify-center">
+							<span
+								class="translate-y-[-4px] transition-transform duration-100 group-hover:translate-y-0"
+							>
+								<Arrow size={32} stroke="rgba(0,0,0,0.7)" />
+							</span>
+						</span>
+					</div>
 				</div>
 			</div>
 		</div>

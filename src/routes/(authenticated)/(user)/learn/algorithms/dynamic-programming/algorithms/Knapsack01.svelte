@@ -4,6 +4,7 @@
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/knapsack.java';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	const items = [
 		{ name: 'A', w: 2, v: 6 },
@@ -198,11 +199,15 @@
 									, take = {takeVal}
 									, choose {chose === 'take' ? 'take' : 'skip'}
 								{:else}
-									, item does not fit → choose skip
+									, item does not fit
+									<span class="mx-1 inline-flex translate-y-[3px] opacity-90">
+										<Arrow size={14} stroke="currentColor" />
+									</span>
+									choose skip
 								{/if}
 							</div>
 						{:else}
-							<div class="text-slate-200">Starting table…</div>
+							<div class="text-slate-200">Starting table...</div>
 						{/if}
 					{:else}
 						Run to watch the DP table fill cell by cell.

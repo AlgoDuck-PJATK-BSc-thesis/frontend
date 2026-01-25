@@ -149,7 +149,7 @@
 		<div class="rounded-3xl p-6">
 			<div class="text-lg font-bold text-white">Bubble Sort</div>
 			<div class="mt-2 text-sm text-[color:var(--color-landingpage-subtitle)]">
-				Compares adjacent elements and swaps them until the largest values “bubble” to the end.
+				Compares adjacent elements and swaps them until the largest values reaches the end.
 			</div>
 
 			<div class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5">

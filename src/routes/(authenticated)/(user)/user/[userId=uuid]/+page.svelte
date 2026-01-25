@@ -49,6 +49,8 @@
 	const displayName = $derived((user?.username ?? '').trim() || 'User');
 	const isLongName = $derived(displayName.length > 18);
 
+	const headTitle = $derived(isMe ? titleText : displayName);
+
 	const avatarPath = $derived.by(() => pickAvatarPath(user, stats, avatarOverride, defaultAvatar));
 
 	const xp = $derived(user?.experience ?? stats?.experience ?? 0);
@@ -57,10 +59,6 @@
 
 	const acceptance = $derived(stats?.acceptanceRate);
 	const totalSubs = $derived(stats?.totalSubmissions);
-	const accepted = $derived(stats?.accepted);
-	const wa = $derived(stats?.wrongAnswer);
-	const tle = $derived(stats?.timeLimitExceeded);
-	const re = $derived(stats?.runtimeError);
 
 	const cohortId = $derived.by(() => getCohortId(user, stats));
 	const cohortJoinCode = $derived.by(() => (cohortDetails?.joinCode ?? '').toString().trim());
@@ -174,7 +172,7 @@
 </script>
 
 <svelte:head>
-	<title>{titleText} - AlgoDuck</title>
+	<title>{headTitle} - AlgoDuck</title>
 </svelte:head>
 
 <section
@@ -208,7 +206,7 @@
 			onSwitch={leaveCurrentAndJoinTheirCohort}
 		/>
 
-		<Stats {solved} {acceptance} {totalSubs} {accepted} {wa} {tle} {re} />
+		<Stats {solved} {acceptance} {totalSubs} />
 
 		<Achievements {achievements} nameOf={achievementName} descOf={achievementDesc} />
 	</PixelFrameSimple>

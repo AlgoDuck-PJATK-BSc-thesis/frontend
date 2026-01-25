@@ -43,9 +43,9 @@
 
 		<div class="mt-4 flex flex-wrap gap-2">
 			<div class="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-				Time:{meta.time.best ? ` best ${meta.time.best}` : ''}{meta.time.avg
-					? ` • avg ${meta.time.avg}`
-					: ''}{meta.time.worst ? ` • worst ${meta.time.worst}` : ''}
+				Time:{meta.time.best ? ` best ${meta.time.best},` : ''}{meta.time.avg
+					? ` avg ${meta.time.avg},`
+					: ''}{meta.time.worst ? `  worst ${meta.time.worst}` : ''}
 			</div>
 			<div class="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
 				Space: {meta.space}

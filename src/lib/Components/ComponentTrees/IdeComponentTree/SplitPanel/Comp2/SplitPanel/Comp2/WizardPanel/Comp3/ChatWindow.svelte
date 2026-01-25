@@ -5,7 +5,6 @@
     import Placeholder from '@tiptap/extension-placeholder'
     import * as signalR from '@microsoft/signalr';
 	import { API_URL, FetchFromApi, type StandardResponseDto } from "$lib/api/apiCall";
-	import { onDestroy } from "svelte";
 	import SendMessageIconSvg from "$lib/svg/SendMessageIconSvg.svelte";
 	import type { CustomPageData } from "$lib/types/domain/Shared/CustomPageData";
 	import type { AssistantQuery, ChatMessage, MessageFragment } from "$lib/types/domain/modules/problem/assistant";
@@ -14,7 +13,7 @@
 
     import 'highlight.js/styles/dark.css';
 	import MarkdownRenderer from "$lib/Components/Misc/MarkdownRenderer.svelte";
-	import { createInfiniteQuery, createQuery } from "@tanstack/svelte-query";
+	import { createInfiniteQuery, useQueryClient, createQuery } from "@tanstack/svelte-query";
 	import CopyIconSvg from "$lib/svg/EditorComponentIcons/CopyIconSvg.svelte";
 	import MessageIconSvg from "$lib/svg/EditorComponentIcons/MessageIconSvg.svelte";
 	import BugIconSvg from "$lib/svg/EditorComponentIcons/BugIconSvg.svelte";
@@ -25,18 +24,17 @@
 
     let { options = $bindable() }: { options: ChatWindowComponentArgs } = $props();
     
-    let chatId: string = $derived(options.chatId);
-    
     hljs.registerLanguage('java', java);
 
     let userQuery: string = $state("");
-    type FragmentType = "Code" | "Text" | "Name" | "Id";
+    type FragmentType = "Code" | "Text" | "Name";
 
     type StreamingCompletionPart = {
         type: FragmentType
         message: string
     }
-    
+
+    const queryClient = useQueryClient();
 
     const avatarQuery = createQuery({
         queryFn: async () => {
@@ -47,78 +45,86 @@
         queryKey: [ "selected-icon" ]
     });
 
-    
-    const infiniteQuery = createInfiniteQuery({
-        queryKey: [ options.chatId ],
+    let infiniteQuery = $derived(createInfiniteQuery({
+        queryKey: ['chat-messages', options.chatId],
         initialPageParam: 1,
         queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
-            const existingPage: CustomPageData<ChatMessage> | undefined = options.pages.find(p => p.currPage === pageParam);
-            if (existingPage) {
-                return { body: existingPage } as StandardResponseDto<CustomPageData<ChatMessage>>;
-            }
-
             let data: StandardResponseDto<CustomPageData<ChatMessage>> = await FetchFromApi<CustomPageData<ChatMessage>>("ChatData", { 
                 method: "GET" 
-            },fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12", chatId: options.chatId! }));
+            }, fetch, new URLSearchParams({ page: `${pageParam}`, pageSize: "12", chatId: options.chatId! }));
             
-            if (!existingPage) {
+            const existingPageIndex = options.pages.findIndex(p => p.currPage === pageParam);
+            if (existingPageIndex >= 0) {
+                options.pages[existingPageIndex] = data.body;
+            } else {
                 options.pages.push(data.body);
             }
+            
             return data;
         },
+        initialData: options.pages.length > 0 ? {
+            pages: options.pages.map(p => ({ body: p } as StandardResponseDto<CustomPageData<ChatMessage>>)),
+            pageParams: options.pages.map(p => p.currPage)
+        } : undefined,
         getPreviousPageParam: (firstPage: StandardResponseDto<CustomPageData<ChatMessage>>) => firstPage.body.prevCursor ?? undefined,
         getNextPageParam: (lastPage: StandardResponseDto<CustomPageData<ChatMessage>>) => lastPage.body.nextCursor ?? undefined,
-        select: (data: any) => data.pages.map((p: any) => p.body.items).flat(),
-        get enabled() {
-            return !!options.chatId;
-        }
+        enabled: !!options.chatId
+    }));
+
+    let allMessages = $derived.by(() => {
+        const queryData = $infiniteQuery.data;
+        if (!queryData?.pages) return [];
+        
+        return queryData.pages
+            .flatMap(page => page.body.items)
+            .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime());
     });
 
-    /* 
-     * don't remove this, we're using the infinite query for infinite fetching,
-     * but pages get accumulated in the layout manager cache
-     * so even if it seems like we're not directly using $infinite query
-     * it's data is side channeled into the thing we pull from. Hence the subscription NEEDS to stay
-     */
-    $infiniteQuery 
+    let streamingMessage: ChatMessage | null = $state(null);
 
-    let allMessages = $derived(
-        options.pages
-            .flatMap(page => page.items)
-            .sort((a, b) => new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime())
-    );
+    let displayMessages = $derived([
+        ...(streamingMessage ? [streamingMessage] : []),
+        ...allMessages
+    ]);
+
     let connection: signalR.HubConnection | undefined;
 
     let htmlDivs: HTMLDivElement[] = $state([]);
     let tiptapEditor: Editor | undefined;
 
     const sendMessage = async () => {
-        if (!userQuery.trim() || options.isConnected === true) return;
-        let startedWithouChatName: boolean = options.chatName === undefined;
-        if (options.pages.length == 0){
-            options.pages.unshift({
-                currPage: 1,
-                pageSize: 12,
-                totalItems: 1,
-                items: []
-            })
-        }
-
-        options.pages[0].items.unshift({
+        if (!userQuery.trim() || options.isConnected === true){return;}
+        let startedWithoutChatName: boolean = options.chatName === undefined;
+        
+        const userMessage: ChatMessage = {
             fragments: [{
                 content: userQuery,
                 type: "Text"
             } as MessageFragment],
-            messageAuthor: "User"
-        } as ChatMessage)
-        
-        console.log(`${API_URL}/hubs/assistant`);
-        console.log({
-                chatId: chatId,
-                exerciseId: options.problemId,
-                codeB64: btoa(options.getUserCode()),
-                query: userQuery,
-            })
+            messageAuthor: "User",
+            createdOn: new Date()
+        } as ChatMessage;
+
+        queryClient.setQueryData(['chat-messages', options.chatId], (old: any) => {
+            if (!old) {
+                return {
+                    pages: [{ body: { currPage: 1, pageSize: 12, totalItems: 1, items: [userMessage] } }],
+                    pageParams: [1]
+                };
+            }
+            const newPages = [...old.pages];
+            if (newPages[0]) {
+                newPages[0] = {
+                    ...newPages[0],
+                    body: {
+                        ...newPages[0].body,
+                        items: [userMessage, ...newPages[0].body.items]
+                    }
+                };
+            }
+            return { ...old, pages: newPages };
+        });
+
         connection = new signalR.HubConnectionBuilder()
         .withUrl(`${API_URL}/hubs/assistant`, {
             withCredentials: true,
@@ -130,87 +136,99 @@
         try {
             await connection.start()
             options.isConnected = true;
-        }catch (err){
+            console.log("connected")
+        } catch (err) {
             options.isConnected = false;
-            console.error("SignalR connection failed:", err); // Add this
+            console.error("SignalR connection failed:", err);
             return;
         }
 
         let currentlyReading: FragmentType | undefined;
-        let inserted: boolean = false;
+        let currentChatId = options.chatId;
+
+        streamingMessage = {
+            fragments: [] as MessageFragment[],
+            messageAuthor: "Assistant",
+            createdOn: new Date()
+        } as ChatMessage;
 
         try {
             connection.stream("GetAssistance", {
-                chatId: chatId,
+                chatId: options.chatId,
                 exerciseId: options.problemId,
                 codeB64: btoa(options.getUserCode()),
                 query: userQuery,
             } as AssistantQuery).subscribe({
                 next: (messagePart: StandardResponseDto<StreamingCompletionPart>) => {
-                    if (messagePart.body.type === "Id"){
-                        options.chatId = messagePart.body.message;
-                        chatId = messagePart.body.message;
-                        return;                    
-                    }
+                    if (!streamingMessage) return;
 
-                    if (!inserted){
-                        options.pages[0].items.unshift({
-                            fragments: [] as MessageFragment[],
-                            messageAuthor: "Assistant",
-                            createdOn: new Date(Date.now())
-                        });
-                        inserted = true;
-                    }
-
-                    let message: ChatMessage | undefined = options.pages.at(0)?.items?.at(0)
-                    if (!message) return;
-
-                    switch (messagePart.body.type){
+                    switch (messagePart.body.type) {
                         case "Code":
-                            if (currentlyReading !== "Code"){
-                                currentlyReading = "Code"
-                                message.fragments.unshift({
+                            if (currentlyReading !== "Code") {
+                                currentlyReading = "Code";
+                                streamingMessage.fragments.unshift({
                                     type: "Code",
                                     content: ""
-                                } as MessageFragment)
+                                } as MessageFragment);
                             }
-                            message.fragments[0].content += messagePart.body.message;
-                            message.fragments[0].content.replaceAll("&gt;", '<')
-                            message.fragments[0].content.replaceAll("&lt;", '>')
+                            streamingMessage.fragments[0].content += messagePart.body.message;
+                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '<').replaceAll("&lt;", '>');
+                            streamingMessage = { ...streamingMessage };
                             break;
                         case "Text":
-                            if (currentlyReading !== "Text"){
-                                currentlyReading = "Text"
-                                message.fragments.unshift({
+                            if (currentlyReading !== "Text") {
+                                currentlyReading = "Text";
+                                streamingMessage.fragments.unshift({
                                     type: "Text",
                                     content: ""
-                                } as MessageFragment)
+                                } as MessageFragment);
                             }
-                            message.fragments[0].content += messagePart.body.message;
-                            message.fragments[0].content.replaceAll("&gt;", '<')
-                            message.fragments[0].content.replaceAll("&lt;", '>')
+                            streamingMessage.fragments[0].content += messagePart.body.message;
+                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '<').replaceAll("&lt;", '>');
+                            streamingMessage = { ...streamingMessage };
                             break;
                         case "Name":
-                            if (startedWithouChatName){                                
+                            if (startedWithoutChatName) {                                
                                 options.chatName = options.chatName ? options.chatName + messagePart.body.message : messagePart.body.message;
-                                options.changeLabel(options.chatId, options.chatName);
+                                options.changeLabel(currentChatId, options.chatName);
                             }
                             break;
-                      }
+                    }
                 },
                 complete: () => {
-                    connection?.stop()
+                    if (streamingMessage) {
+                        const finalMessage = streamingMessage;
+                        queryClient.setQueryData(['chat-messages', currentChatId], (old: any) => {
+                            if (!old) return old;
+                            const newPages = [...old.pages];
+                            if (newPages[0]) {
+                                newPages[0] = {
+                                    ...newPages[0],
+                                    body: {
+                                        ...newPages[0].body,
+                                        items: [finalMessage, ...newPages[0].body.items]
+                                    }
+                                };
+                            }
+                            return { ...old, pages: newPages };
+                        });
+                        streamingMessage = null;
+                    }
+                    connection?.stop();
                     options.isConnected = false;
                 },
                 error: (err) => {
-                    connection?.stop()
+                    streamingMessage = null;
+                    connection?.stop();
                     options.isConnected = false;
                 }
-            })
-        }catch(err){
+            });
+        } catch (err) {
+            console.log(err)
+            streamingMessage = null;
             options.isConnected = false;
-        }finally{
-        if (tiptapEditor) {
+        } finally {
+            if (tiptapEditor) {
                 tiptapEditor.commands.clearContent();
             }
         }
@@ -228,8 +246,9 @@
             sendMessage();
         }
     }
+
     let hasBeenCopied: boolean = $state(false);
-    let copyDebounceTimeout: NodeJS.Timeout | undefined = $state(); 
+    let copyDebounceTimeout: number | undefined = $state(); 
 </script>
 
 <main class="w-full h-full bg-gradient-to-br from-ide-card to-ide-bg flex flex-col relative">
@@ -242,34 +261,37 @@
         </div>
     </div>
 
-        <div {@attach node => {
-            if (!htmlDivs[0]) return;
-            const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
-                if (entries[0].isIntersecting){
-                    $infiniteQuery.fetchNextPage();
-                }
-            },{
-                root: node,
-                rootMargin: '200px 0px 0px 0px',
-                threshold: 0
-            });
-            observer.observe(htmlDivs[htmlDivs.length - 1]);
-            return () => observer.disconnect();
-        }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
-            {#if allMessages.length === 0}
-                {@render EmptyState()}
-            {:else}
-                {#each allMessages as message, i}
-                    {#if message.messageAuthor === "Assistant"}
-                        {@render AssistantMessage(message, i)}
-                    {:else}
-                        {@render UserMessage(message, i)}
-                    {/if}
-                {/each}
-            {/if}
-        </div>
+    <div {@attach node => {
+        if (!htmlDivs[0]) return;
+        const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+            if (entries[0].isIntersecting && $infiniteQuery.hasNextPage) {
+                $infiniteQuery.fetchNextPage();
+            }
+        }, {
+            root: node,
+            rootMargin: '200px 0px 0px 0px',
+            threshold: 0
+        });
+        observer.observe(htmlDivs[htmlDivs.length - 1]);
+        return () => observer.disconnect();
+    }} class="w-full grow bg-transparent overflow-y-auto flex flex-col-reverse gap-4 px-6 py-4 messages-container">
+        {#if $infiniteQuery.isLoading}
+            <div class="flex justify-center items-center h-full">
+                <div class="w-8 h-8 border-2 border-ide-text-primary/20 border-t-ide-text-primary rounded-full animate-spin"></div>
+            </div>
+        {:else if displayMessages.length === 0}
+            {@render EmptyState()}
+        {:else}
+            {#each displayMessages as message, i}
+                {#if message.messageAuthor === "Assistant"}
+                    {@render AssistantMessage(message, i)}
+                {:else}
+                    {@render UserMessage(message, i)}
+                {/if}
+            {/each}
+        {/if}
+    </div>
 
-    
     <div class="w-full sticky shrink-0 px-6 py-4 flex justify-center items-center border-t border-ide-bg/30 backdrop-blur-md bg-ide-card/40">
         <div class="w-full max-w-4xl relative">
             <div class="w-full chat-editor-wrapper">
@@ -321,9 +343,9 @@
 
 {#snippet EmptyState()}
     <div class="w-full h-full flex flex-col items-center justify-start gap-10 empty-state-fade-in overflow-y-auto">
-            <div class="w-24 aspect-square rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30 shadow-lg shadow-purple-500/10">
-                <MessageIconSvg options={{ class: "w-12 h-12 stroke-[1.5] stroke-ide-text-primary"}}/>
-            </div>
+        <div class="w-24 aspect-square rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30 shadow-lg shadow-purple-500/10">
+            <MessageIconSvg options={{ class: "w-12 h-12 stroke-[1.5] stroke-ide-text-primary"}}/>
+        </div>
 
         <div class="text-center space-y-2">
             <h3 class="text-xl font-semibold text-ide-text-primary">Start a Conversation</h3>
@@ -337,12 +359,12 @@
                 <SuggestionComponent options={{ 
                     ...suggestion,
                     onclick: () => useSuggestion(suggestion.prompt ?? "")
-                    }}/>
+                }}/>
             {/each}
         </div>
 
         <div class="flex items-center gap-8 text-xs text-ide-text-secondary/60">
-            <div class="flex flex-row gap-2 c">
+            <div class="flex flex-row gap-2">
                 <kbd class="px-2 py-1 rounded bg-ide-dcard/50 border border-ide-bg/30 font-mono">Enter</kbd>
                 <span class="flex items-center">to send</span>
             </div>
@@ -355,45 +377,45 @@
 {/snippet}
 
 {#snippet UserMessage(message: ChatMessage, index: number)}
-    <div 
-        bind:this={htmlDivs[htmlDivs.length]} 
-        class="w-[85%] self-end py-3 px-4 flex rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex-col-reverse gap-3 border border-blue-500/20 backdrop-blur-sm shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 message-slide-in"
-        style="animation-delay: {index * 50}ms"
-    >
-        {#each message.fragments as fragment}
-            {#if fragment.type === "Code" || fragment.type === 1}
-                {@render CodeFragment(fragment.content)}
-            {:else}
-                {@render TextFragment(fragment.content)}
-            {/if}
-        {/each}
-    </div>
+<div 
+    bind:this={htmlDivs[htmlDivs.length]} 
+    class="max-w-[85%] self-end py-3 px-4 flex rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex-col-reverse gap-3 border border-blue-500/20 backdrop-blur-sm shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 message-slide-in"
+    style="animation-delay: {index * 50}ms; word-break: break-word; overflow-wrap: anywhere;"
+>
+    {#each message.fragments as fragment}
+        {#if fragment.type === "Code" || fragment.type === 1}
+            {@render CodeFragment(fragment.content)}
+        {:else}
+            {@render TextFragment(fragment.content)}
+        {/if}
+    {/each}
+</div>
 {/snippet}
 
 {#snippet AssistantMessage(message: ChatMessage, index: number)}
-    <div 
-        bind:this={htmlDivs[htmlDivs.length]} 
-        class="w-[90%] self-start py-3 px-4 flex rounded-2xl bg-gradient-to-br from-ide-dcard/60 to-ide-card/40 flex-col-reverse gap-3 border border-ide-bg/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 message-slide-in"
-        style="animation-delay: {index * 50}ms"
-    >
-        <div class="flex items-center gap-2 pb-2 border-b border-ide-bg/30">
-            <div class="w-10 h-10 rounded-full overflow-hidden flex justify-center items-center bg-ide-dcard border-1 border-ide-accent/20 relative">
-                {#if $avatarQuery.isLoading || $avatarQuery.data === undefined}
-                    <div class="w-7 h-7 border-t-3 border-t-ide-text-primary rounded-full animate-spin"></div>
-                {:else}
-                    <img class="absolute w-20 h-20 max-w-none -scale-x-100 -mb-2 -ml-5" src={`https://d3018wbyyxg1xc.cloudfront.net/duck/${$avatarQuery.data.body.itemId}/Sprite.png`} alt="">
-                {/if}
-            </div>
-            <span class="text-xs text-ide-text-secondary font-medium">Assistant</span>
-        </div>
-        {#each message.fragments as fragment}
-            {#if fragment.type === "Code" || fragment.type === 1}
-                {@render CodeFragment(fragment.content)}
+<div 
+    bind:this={htmlDivs[htmlDivs.length]} 
+    class="max-w-[90%] self-start py-3 px-4 flex rounded-2xl bg-gradient-to-br from-ide-dcard/60 to-ide-card/40 flex-col-reverse gap-3 border border-ide-bg/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 message-slide-in"
+    style="animation-delay: {index * 50}ms; word-break: break-word; overflow-wrap: anywhere;"
+>
+    <div class="flex items-center gap-2 pb-2 border-b border-ide-bg/30">
+        <div class="w-10 h-10 rounded-full overflow-hidden flex justify-center items-center bg-ide-dcard border-1 border-ide-accent/20 relative">
+            {#if $avatarQuery.isLoading || $avatarQuery.data === undefined}
+                <div class="w-7 h-7 border-t-3 border-t-ide-text-primary rounded-full animate-spin"></div>
             {:else}
-                {@render TextFragment(fragment.content)}
+                <img class="absolute w-20 h-20 max-w-none -scale-x-100 -mb-2 -ml-5" src={`https://d3018wbyyxg1xc.cloudfront.net/duck/${$avatarQuery.data.body.itemId}/Sprite.png`} alt="">
             {/if}
-        {/each}
+        </div>
+        <span class="text-xs text-ide-text-secondary font-medium">Assistant</span>
     </div>
+    {#each message.fragments as fragment}
+        {#if fragment.type === "Code" || fragment.type === 1}
+            {@render CodeFragment(fragment.content)}
+        {:else}
+            {@render TextFragment(fragment.content)}
+        {/if}
+    {/each}
+</div>
 {/snippet}
 
 {#snippet CodeFragment(content: string)}
@@ -417,7 +439,7 @@
                 {/if}
             </button>
         </div>
-        {@html `<pre class="hljs language-java text-xs px-4 py-3"><code>${hljs.highlight(content, { language: 'java' }).value}</code></pre>`}
+        {@html `<pre class="hljs language-java text-xs px-4 py-3 whitespace-pre"><code>${hljs.highlight(content, { language: 'java' }).value}</code></pre>`}
     </div>
 {/snippet}
 
@@ -502,15 +524,6 @@
     opacity: 0;
   }
 
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -525,43 +538,4 @@
   .empty-state-fade-in {
     animation: fadeInUp 0.6s ease-out forwards;
   }
-
-  @keyframes float1 {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(5px, -8px);
-    }
-  }
-
-  @keyframes float2 {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(-6px, -5px);
-    }
-  }
-
-  @keyframes float3 {
-    0%, 100% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(4px, 6px);
-    }
-  }
-
-  @keyframes suggestionSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
 </style>

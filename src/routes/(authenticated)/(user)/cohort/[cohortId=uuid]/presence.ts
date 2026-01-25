@@ -241,7 +241,7 @@ export const buildUsers = (
 				status: 'away',
 				avatarPath,
 				badgeText: short,
-				badgeTitle: full ? `Away · ${full}` : 'Away'
+				badgeTitle: full ? `Away ${full}` : 'Away'
 			};
 		}
 

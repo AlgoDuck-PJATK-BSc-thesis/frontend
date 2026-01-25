@@ -43,7 +43,7 @@ export interface WizardComponentArg{
     side: tabSide,
     control: ComponentConfig<ControlPanelArgs>,
     groups?: GroupData[],
-
+    selectedElemId?: string,
 }
 
 export interface GroupData{

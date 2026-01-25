@@ -1,6 +1,6 @@
 export const meta = {
 	title: 'Job Sequencing with Deadlines',
-	what: 'Each job takes exactly 1 time unit, so the schedule is a row of slots: t1, t2, t3, ... Only one job can go in each slot. A job with deadline d must be placed in one of the slots t1..td. The greedy idea: sort jobs by profit (highest first), then for each job try to place it as late as possible before its deadline. In the animation, “t2: J1” means Job 1 is scheduled in slot 2.',
+	what: 'Each job takes exactly 1 time unit, so the schedule is a row of slots: t1, t2, t3, ... Only one job can go in each slot. A job with deadline d must be placed in one of the slots t1..td. The greedy idea: sort jobs by profit (highest first), then for each job try to place it as late as possible before its deadline. In the animation, "t2: J1" means Job 1 is scheduled in slot 2.',
 	when: [
 		'Each job duration is 1',
 		'You can do at most one job per time slot',

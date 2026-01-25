@@ -4,6 +4,7 @@
 	import Icons from '../../../_components/Icons.svelte';
 	import CodePanel from '../../../_components/CodePanel.svelte';
 	import { meta, java } from '../snippets/dfs.java';
+	import Arrow from '$lib/Components/Misc/Arrow.svelte';
 
 	type Edge = { node: string; weight: number };
 
@@ -163,7 +164,19 @@
 
 				<div class="mt-4 text-center text-sm text-[color:var(--color-landingpage-subtitle)]">
 					{#if visited.length}
-						<div class="font-semibold text-white">Order: {visited.join(' → ')}</div>
+						<div class="font-semibold text-white">
+							<span>Order:</span>
+							<span class="ml-2 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+								{#each visited as v, i (v + '-' + i)}
+									<span>{v}</span>
+									{#if i < visited.length - 1}
+										<span class="inline-flex translate-y-[3px] opacity-90">
+											<Arrow size={14} stroke="currentColor" />
+										</span>
+									{/if}
+								{/each}
+							</span>
+						</div>
 					{:else}
 						Run DFS to see traversal order.
 					{/if}
