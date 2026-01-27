@@ -32,16 +32,22 @@ export const normalizeToCloudfrontKey = (value: string): string => {
 
 export const ensureBang = (s: string) => {
 	const t = (s ?? '').toString().trim();
-	if (!t) return '!';
-	return t.endsWith('!') ? t : `${t}!`;
+	if (!t) return '';
+	if (/[.!?]$/.test(t)) return t;
+	return `${t}!`;
 };
 
 export const formatErrorMessage = (e: unknown, fallback: string) => {
 	const anyE = e as any;
-	const base = anyE?.message ? String(anyE.message) : fallback;
-	const extras: string[] = [];
-	if (anyE?.status) extras.push(`HTTP ${String(anyE.status)}`);
-	if (anyE?.requestId) extras.push(`req ${String(anyE.requestId)}`);
-	if (extras.length) return `${base} (${extras.join(', ')})`;
-	return base;
+
+	let base = fallback;
+	if (typeof e === 'string') base = e;
+	else if (e instanceof Error && e.message) base = e.message;
+	else if (anyE?.body?.message) base = String(anyE.body.message);
+	else if (anyE?.error?.message) base = String(anyE.error.message);
+	else if (anyE?.message) base = String(anyE.message);
+
+	base = base.replace(/\s*\(HTTP\s+\d+.*?\)\!?$/, '').trim();
+
+	return base || fallback;
 };
