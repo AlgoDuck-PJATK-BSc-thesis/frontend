@@ -16,7 +16,6 @@
 
 <div class="space-y-4">
 	<div class="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-		<!-- <div class="text-lg font-bold text-white">{meta.title}</div> -->
 		<p class="text mt-2 font-semibold text-[color:var(--color-landingpage-subtitle)]">
 			{meta.what}
 		</p>

@@ -2,7 +2,7 @@
 	import { userThemePreference } from '$lib/stores/theme.svelte';
 	import { applyTheme, type ThemeName } from '$lib/Themes';
 
-	let interval: NodeJS.Timeout | null;
+	let interval: number | null;
 	const totalFrames: number = 11;
 
 	let frame: number = $state(1);

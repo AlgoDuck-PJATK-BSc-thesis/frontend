@@ -170,14 +170,6 @@
 			Leaderboard
 		</h1>
 
-		<List
-			{items}
-			{topUsers}
-			{starSrc}
-			loadingMore={!!($leaderboardQuery as any).isFetchingNextPage}
-			onProfile={goProfile}
-			{onProfileKey}
-			bind:sentinel={sentinelEl}
-		/>
+		<List {starSrc} onProfile={goProfile} {onProfileKey} bind:sentinel={sentinelEl} />
 	</div>
 </section>

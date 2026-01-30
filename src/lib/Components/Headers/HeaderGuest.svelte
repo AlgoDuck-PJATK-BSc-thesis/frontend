@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/Components/LayoutComponents/ThemeToggles/ThemeToggle.svelte';
-
 </script>
 
 <header
@@ -24,15 +23,6 @@
 					Home
 				</a>
 			</li>
-			<!-- <li>
-				<a
-					href="/learnmore"
-					aria-current={page.url.pathname === '/learnmore' ? 'page' : undefined}
-					class="tracking-normal text-[#f5f5f5] no-underline hover:text-[color:var(--color-primary)]"
-				>
-					Learn More
-				</a>
-			</li> -->
 			<li>
 				<a
 					href="/aboutus"
