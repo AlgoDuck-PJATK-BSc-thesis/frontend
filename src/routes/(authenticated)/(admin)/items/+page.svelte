@@ -18,16 +18,45 @@
 	import TriangleIconSvg from "$lib/svg/EditorComponentIcons/TriangleIconSvg.svelte";
 	import CreatedByCard from "./CreatedByCard.svelte";
 	import { type UserPreviewDto } from "./column-preview-comps/columnPreviewArgs";
+	import { browser } from "$app/environment";
 
+    const COLUMN_STORAGE_KEY = "itemManagement_selectedColumns";
 
     let totalItems: number = $state(0);
     const queryClient = useQueryClient();
 
-    let columnPicker: Record<QueryableColumn, boolean> = $state({
+    const defaults: Record<QueryableColumn, boolean> = {
         ...Object.fromEntries(QueryableColumns.map((q) => [q, true])) as Record<QueryableColumn, boolean>,
         "itemName": false,
         "createdBy": false
-    });
+    }
+
+    const loadColumnPicker = (): Record<QueryableColumn, boolean> => {
+        
+        if (!browser) return defaults;
+
+        try {
+            const stored = localStorage.getItem(COLUMN_STORAGE_KEY);
+            if (!stored) return defaults;
+            const parsed: string[] = JSON.parse(stored);
+            return {
+                ...Object.fromEntries(QueryableColumns.map(qc => [qc, false])) as Record<QueryableColumn, boolean>,
+                ...Object.fromEntries(parsed.filter(x => (QueryableColumns as readonly string[]).includes(x)).map(x => [x, true]))
+            }
+        } catch {
+            return defaults;
+        }
+    };
+
+    const saveColumnPicker = (picker: Record<QueryableColumn, boolean>) => {
+        if (!browser) return;
+        try {
+            localStorage.setItem(COLUMN_STORAGE_KEY, JSON.stringify(Object.entries(picker).filter(e => e[1] === true).map(e => e[0])));
+        } catch {}
+    };
+
+
+    let columnPicker: Record<QueryableColumn, boolean> = $state(loadColumnPicker());
     let orderBy: string | null = $state(null)
 
 
@@ -150,6 +179,7 @@
 
     const updateColumnSelection = (newCols: Record<QueryableColumn, boolean>) => {
         columnPicker = newCols;
+        saveColumnPicker(columnPicker);
         $itemQuery.refetch();
     }
 

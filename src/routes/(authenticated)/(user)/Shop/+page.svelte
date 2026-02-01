@@ -343,12 +343,12 @@
 
 			{#if currentlySelectedItem}
 				<div 
-					class="fixed right-[10.5%] aspect-square w-[11%] flex justify-center items-center"
-					style="top: calc(6vh + {headerHeight}px);"
+					class="absolute flex justify-center items-center right-[7.75%] top-[18%] w-[13%] h-[5%]"
 				>
-					<h3 class="text-[4vh] font-bold flex items-center">
+					<span class="font-['Press_Start_2P'] text-white whitespace-nowrap island-label"
+						style="font-size: clamp(6px, {containerWidth * 0.009}px, 18px);">
 						{`${currentlySelectedItem?.name.at(0)?.toUpperCase()}${currentlySelectedItem?.name.substring(1)}`}
-					</h3>
+					</span>
 				</div>
 			{/if}
 			{#if currentlySelectedItem}
@@ -377,3 +377,13 @@
 <svelte:head>
 	<title>Shop - Algoduck</title>
 </svelte:head>
+
+<style>
+    .island-label {
+        text-shadow:
+            2px 0 0 #222,
+            -2px 0 0 #222,
+            0 2px 0 #222,
+            0 -2px 0 #222;
+    }
+</style>

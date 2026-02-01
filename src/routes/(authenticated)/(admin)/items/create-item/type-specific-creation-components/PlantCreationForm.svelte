@@ -5,9 +5,6 @@
 	import type { PlantData } from "../ItemCreationTypes";
 	import ToolTip from "../../../problem/upsert/ToolTip.svelte";
 	import ToggleButton from "./ToggleButton.svelte";
-	import homepageDark from '$lib/images/ponds/Homepage_dark.png';
-	import homepageDarkTrees from '$lib/images/ponds/Homepage_dark_trees.png';
-
 
 	let { itemData = $bindable(), sprite }: { itemData: PlantData, sprite?: File } = $props();
 	const MAX_DIMENSION = 5;
@@ -92,8 +89,8 @@
 		if (!backgroundCanvas || !containerWidth || !containerHeight || !backgroundCanvas2) return;
 		
 		if (isReferencePondVisible) {
-			loadImageToCanvas(backgroundCanvas, homepageDark);
-			loadImageToCanvas(backgroundCanvas2, homepageDarkTrees);
+			loadImageToCanvas(backgroundCanvas, '/ponds/Homepage_dark.png');
+			loadImageToCanvas(backgroundCanvas2, '/ponds/Homepage_dark_trees.png');
 		} else {
 			const ctx = backgroundCanvas.getContext('2d');
 			if (ctx) {

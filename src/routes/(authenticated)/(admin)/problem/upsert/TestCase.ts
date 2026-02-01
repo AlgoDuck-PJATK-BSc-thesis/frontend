@@ -9,6 +9,7 @@ export type TestCaseCreateDto = {
     expected: FunctionParam | undefined,
     isPublic: boolean,
     orderMatters: boolean,
+    inPlace: boolean
 }
 
 export type MethodRecommendation = {
@@ -23,7 +24,8 @@ export type MethodRecommendation = {
 
 export type FunctionParam = {
     type: string,
-    name: string
+    name: string,
+    isMutated?: boolean,
 }
 
 export type SuggestedInputArgs<T extends Record<string, any>> = {

@@ -13,6 +13,7 @@
 	import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
 	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
     import CoinSrc from "$lib/images/store/coin.png"
+	import ErrorIconSvg from "$lib/svg/Toast/ErrorIconSvg.svelte";
 
 
     let { data }: { data: ItemCreationPageArgs } = $props(); 
@@ -149,7 +150,11 @@
         }).then((value: StandardResponseDto<ItemCreateResponseDto>) => {
             submitResult = value.body;
         }).catch((err) => {
-            submitError = err.message ?? "Failed to create item";
+            if (err.response?.status === "Error" && err.response?.message === "Validation failed.") {
+                submitError = Object.values(err.response.body).flat().join('\n');
+            } else {
+                submitError = err.message ?? "Failed to create item";
+            }
         }).finally(() => {
             isSubmitting = false;
         });
@@ -180,13 +185,11 @@
         </div>
 
         {#if submitResult}
-            <ItemCreationResult {submitResult} {resetForm}/>
+            <ItemCreationResult {submitResult} {resetForm} wasEdit={isEditMode}/>
         {:else}
             {#if submitError}
                 <div class="flex items-center gap-3 p-4 bg-admin-danger-bg/20 border border-admin-danger-bg/50 rounded">
-                    <svg class="w-5 h-5 text-admin-danger-text flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <ErrorIconSvg options={{ class: 'w-5 h-5 stroke-admin-danger-text stroke-[2]' }}/>
                     <span class="text-sm text-admin-danger-text">{submitError}</span>
                 </div>
             {/if}
@@ -272,7 +275,7 @@
                                : 'bg-admin-border-primary text-admin-text-muted cursor-not-allowed'}">
                     {#if isSubmitting}
                         <div class="w-5 h-5 border-2 border-gray-500 border-t-0 rounded-full animate-spin"></div>
-                        <span>Creating...</span>
+                        <span>{isEditMode ? "Updating" : "Creating"}...</span>
                     {:else}
                         <CrossIconSvg options={{ class: 'w-4 h-4 stroke-[2] rotate-45 stroke-admin-text-secondary' }}/>
                         <span>{isEditMode ? "Update Item" : "Create Item"}</span>

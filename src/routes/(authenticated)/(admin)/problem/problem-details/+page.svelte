@@ -2,7 +2,7 @@
     import { Chart, registerables } from 'chart.js';
     import ChevronIconSvgNew from "$lib/svg/EditorComponentIcons/ChevronIconSvgNew.svelte";
     import BinIconSvg from "$lib/svg/EditorComponentIcons/BinIconSvg.svelte";
-	import { formatRuntimeNs, PerformanceTabs, type PerformanceTab, type ProblemStatsDto } from "./problemDetailTypes";
+	import { PerformanceTabs, type PerformanceTab, type ProblemStatsDto } from "./problemDetailTypes";
 	import PenIconSvg from '$lib/svg/EditorComponentIcons/PenIconSvg.svelte';
 	import CrossIconSvg from '$lib/svg/CrossIconSvg.svelte';
 	import { adminThemes, rgbToHex, rgbToRgba } from '$lib/Themes/AdminThemes';
@@ -20,6 +20,8 @@
     Chart.register(...registerables);
 
     let { data }: { data: ProblemStatsDto } = $props();
+
+    $inspect(data);
 
     let chartColors = $derived({
         primary: rgbToHex(adminThemes[CurrentAdminTheme.theme]['--color-admin-accent-primary']),
@@ -82,11 +84,6 @@
 
     let currentlyPreviewedPerformanceTab: PerformanceTab = $state("Runtime")
     let isDeletionModalVisible: boolean = $state(false);
-
-    const performanceTabsConfig: Record<PerformanceTab, ((canvas: HTMLCanvasElement, data: any, chartDefaults: Record<string, any>, chartColors: Record<string, any>) => () => void)> = {
-        "Runtime": drawRuntimeChart,
-        "Memory": drawMemoryChart
-    }
 
 </script>
 
@@ -181,7 +178,7 @@
                         <span class="text-xs font-semibold text-admin-text-muted uppercase tracking-wider">Avg Runtime</span>
                     </div>
                     <div class="text-2xl font-semibold text-admin-accent-primary">
-                        {formatRuntimeNs(data.performanceMetrics.averageRuntimeNs)}
+                        {`${(data.performanceMetrics.averageRuntimeNs / 1_000_000).toFixed(2)}ms`}
                     </div>
                     <div class="text-xs text-admin-text-muted mt-1">
                         p95: {`${(data.performanceMetrics.p95RuntimeMs / 1_000_000).toFixed(2)}ms`}

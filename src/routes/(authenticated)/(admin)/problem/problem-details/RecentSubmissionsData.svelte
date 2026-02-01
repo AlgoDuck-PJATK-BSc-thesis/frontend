@@ -1,8 +1,7 @@
 <script lang='ts'>
-	import TickIconSvg from "$lib/svg/EditorComponentIcons/TickIconSvg.svelte";
 	import ErrorIconSvg from "$lib/svg/Toast/ErrorIconSvg.svelte";
 	import SuccessIconSvg from "$lib/svg/Toast/SuccessIconSvg.svelte";
-    import { formatRuntimeNs, type ProblemStatsDto } from "./problemDetailTypes";
+    import { type ProblemStatsDto } from "./problemDetailTypes";
 
     let { data }: { data: ProblemStatsDto } = $props()
 

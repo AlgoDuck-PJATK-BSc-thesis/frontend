@@ -15,6 +15,8 @@
     import ToolTip from "./ToolTip.svelte";
 	import MethodRecommentaionSelectedComp from "./SuggestionCards/MethodRecommentaionSelectedComp.svelte";
 	import ErrorIconSvg from "$lib/svg/Toast/ErrorIconSvg.svelte";
+	import InPlaceToggleButton from "./InPlaceToggleButton.svelte";
+	import { toast } from "$lib/Components/Notifications/ToastStore.svelte";
 
     let {
         mountExpanded, 
@@ -158,18 +160,36 @@
 
     <div class="flex flex-col gap-px bg-[#3c3c3c] overflow-hidden transition-all duration-300 {isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}">
         <div class="bg-[#252526] p-4 border-b border-[#3c3c3c]">
-            <div class="flex items-center gap-6">
+            <div class="flex items-center justify-start gap-6">
                 <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="checkbox" bind:checked={testCase.isPublic}
                         class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Public</span>
                     <ToolTip options={{ tip: "Public test cases are visible to users before submission" }}/>
+                    <!-- <div class="w-3 h-3 relative pointer-events-none">
+                        <div class="absolute left-0 top-0 h-3 w-[100vw] flex justify-start pointer-events-none">
+                            <div class="pointer-events-none w-full flex items-center justify-start">
+                            </div>
+                        </div>
+                    </div> -->
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer grow justify-start group">
+                <label class="flex items-center gap-2 relative cursor-pointer justify-start group">
                     <input type="checkbox" bind:checked={testCase.orderMatters}
                         class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
                     <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">Order Matters</span>
                     <ToolTip options={{ tip: "If unchecked, array/list outputs will be compared regardless of element order" }}/>
+                    <!-- <div class="w-3 h-3 relative pointer-events-none">
+                        <div class="absolute left-0 top-0 h-3 w-[100vw] flex justify-start pointer-events-none">
+                            <div class="pointer-events-none w-full flex items-center justify-start">
+                            </div>
+                        </div>
+                    </div> -->
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer grow justify-start group">
+                    <input type="checkbox" bind:checked={testCase.inPlace}
+                        class="w-4 h-4 rounded border-2 border-[#3c3c3c] bg-[#3c3c3c] checked:bg-[#0e639c] checked:border-[#0e639c] cursor-pointer accent-[#0e639c] transition-colors"/>
+                    <span class="text-sm text-[#cccccc] group-hover:text-[#e7e7e7] transition-colors">In Place</span>
+                    <ToolTip options={{ tip: "Specifies whether the method operates in place. \nAuto checked for void return type methods" }}/>
                 </label>
             </div>
         </div>
@@ -234,7 +254,11 @@
                                 <span class="font-mono text-xs text-[#9cdcfe] min-w-[80px]">{param.name}</span>
                                 <SuggestedInput options={{
                                     onSelect: (selected: VariableRecommendation) => {
-                                        (testCase.callArgs ??= [])[i] = selected as FunctionParam;
+                                        testCase.callArgs ??= [];
+                                        testCase.callArgs[i] = {
+                                            ...testCase.callArgs[i],
+                                            ...selected as FunctionParam
+                                        };
                                         selectedCallArgs[i] = selected as FunctionParam;
                                     },
                                     getCurrentRecommendationsForQuery: (prefix: string) => variableRecommendationTrie?.getAllSubtreeValues(prefix),
@@ -246,6 +270,33 @@
                                     },
                                     defaultSelected: testCase.callArgs[i]
                                 }}/>
+                                {#if testCase.inPlace}
+                                    <ToolTip options={{ 
+                                        tip:"set the variable to be recognized \nas the value trasnformed by the function against \nwhich to test the user's solution", 
+                                        customIcon: {
+                                            component: InPlaceToggleButton,
+                                            options: { 
+                                                checked: testCase.callArgs?.[i]?.isMutated ?? false,
+                                                oncheck: () => {
+                                                if (testCase.callArgs.some(ca => ca?.isMutated === true)){
+                                                    toast.error("Invalid: cannot mark multiple arguments as mutable")
+                                                    return;
+                                                }
+                                                testCase.callArgs ??= [];
+                                                testCase.callArgs[i] = { 
+                                                    ...(testCase.callArgs[i] ?? {} as FunctionParam),
+                                                    isMutated: true
+                                                }
+                                                },
+                                                onuncheck: ()=> {
+                                                        testCase.callArgs[i] = { 
+                                                        ...(testCase.callArgs[i] ?? {} as FunctionParam),
+                                                        isMutated: false
+                                                    }
+                                                }
+                                            }
+                                        }}}/>
+                                {/if}
                             </div>
                         {/each}
                     </div>
@@ -284,7 +335,7 @@
                                 placeholder: 'Example: 1 -> 2 -> 3 -> 4 -> 2 (cyclic linked list)'
                             })
                         ],
-                        onUpdate: ({ editor }: {editor: Editor}) => {
+                        onBlur: ({ editor }: {editor: Editor}) => {
                             testCase.display = editor.getText();
                         },
                         editorProps: {
@@ -321,7 +372,7 @@
                         onTransaction: () => {
                             tiptapEditor = tiptapEditor; 
                         },
-                        onUpdate: ({ editor }: {editor: Editor}) => {
+                        onBlur: ({ editor }: {editor: Editor}) => {
                             testCase.displayRes = editor.getText();
                         },
                         editorProps: {

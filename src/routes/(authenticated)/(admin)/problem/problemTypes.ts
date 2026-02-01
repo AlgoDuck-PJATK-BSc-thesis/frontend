@@ -28,7 +28,7 @@ export type CreatorDto = {
 export type ProblemKeys = keyof ProblemDto
 
 
-export const QueryableColumns =  ["problemId", "name", "createdOn", "createdBy", "category", "completionRatio", "difficulty"] as const;
+export const QueryableColumns = ["problemId", "name", "createdOn", "createdBy", "category", "completionRatio", "difficulty"] as const;
 export type QueryableColumn = (typeof QueryableColumns)[number] & keyof ProblemDto;
 
 export type CategoryPreviewDto = {

@@ -9,9 +9,8 @@
 
   const compToCompIdMapping: Record<string, ComponentConfig<any>> | undefined = $derived(options?.components === undefined ? {} : Object.fromEntries(options.components.map(c => [c.options.component.compId, c])))
 
-  let selectedElemId: string = $derived(options.selectedElemId ?? (options?.components ?? [])[0]?.options?.component?.compId ?? "")
+  let selectedElemId: string = $derived(options?.selectedElemId ?? (options?.components ?? [])[0]?.options?.component?.compId ?? "")
 
-  $inspect(selectedElemId);
   let controlPanelOpts: ControlPanelArgs = $derived({
     ...(options?.control?.options ?? {}) ,
     labels: (options?.components ?? []).filter(comp => comp.options.component.meta !== undefined && comp.options.component.meta.label != undefined).map(comp => comp.options!.component.meta!.label!),

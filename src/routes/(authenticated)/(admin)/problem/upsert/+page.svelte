@@ -66,6 +66,16 @@
             .filter((tc) => tc.testCase.callMethod && (tc.testCase.callMethod.functionParams ?? []).length !== (tc.testCase.callArgs ?? 0).length)
             .forEach((tc) => errors.push(`test case: ${tc.testCaseIndex}. Missing call function arguments.`));
 
+        creationDto.testCases.forEach((tc, i) => {
+            if (tc.inPlace) {
+                const mutatedCount = (tc.callArgs ?? []).filter(arg => arg?.isMutated).length;
+                if (mutatedCount !== 1) {
+                    errors.push(`Test case ${i}: in-place requires exactly 1 mutated argument (found ${mutatedCount})`);
+                }
+            }
+        });
+
+
         if (incompleteTestCases.length > 0) {
             errors.push(`${incompleteTestCases.length} test case(s) are incomplete`);
         }
@@ -75,6 +85,7 @@
             errors
         };
     });
+
 
     const createProblem = async () => {
         if (!formValidation.isValid) {
@@ -98,7 +109,6 @@
             }
 
             let res: StandardResponseDto<CreateUnverifiedProblemDto>;
-
 
             if (isInEditMode && data.problemId){
                 res = await FetchFromApi<CreateUnverifiedProblemDto>("UpdateProblem", {
@@ -149,9 +159,16 @@
                 validationHistory.push(...(jobData?.body ?? []))
             } catch (err) {
                 connected = false;
+                currentValidationStatus = "Failed";
                 submissionError = "Failed to connect to validation server";
             }
-        } catch (err) {
+        } catch (err: any) {
+            connected = false;
+            currentValidationStatus = "Failed";
+            if (err?.response?.status === "Error" && err?.response?.message === "Validation failed.") {
+                submissionError = Object.values(err.response.body).flat().join('\n');
+                return;
+            }
             submissionError = err instanceof Error ? err.message : "Failed to create problem";
         }
     }
@@ -165,8 +182,8 @@
     const firstCategory: CategoryDto | undefined = data.categories.at(0);
 </script>
 
-<main class="w-full grow bg-admin-bg-primary text-admin-text-muted">
-    <div class="max-w-6xl mx-auto p-6 flex flex-col gap-6 overflow-y-auto">
+<main class="w-full grow bg-admin-bg-primary text-admin-text-muted overflow-y-auto">
+    <div class="max-w-6xl mx-auto p-6 flex flex-col gap-6">
         <div class="py-4 border-b border-admin-bg-input mb-2">
             <h2 class="text-2xl font-normal text-admin-text-primary tracking-tight">Add Problem</h2>
         </div>
@@ -316,7 +333,7 @@
         </div>
 
         <div class="bg-admin-bg-secondary border border-admin-bg-input rounded overflow-hidden">
-            <div class="flex flex-row items-center justify-between gap-5 p-5">
+            <div class="flex flex-row items-center justify-end gap-5 p-5">
                 {#if currentValidationStatus === "Succeeded" && createdProblemId}
                     <div class="flex flex-row gap-2 justify-start p-2 items-center bg-[#89d185]/20 rounded-xl grow">
                         <TickIconSvg options={{ class: 'w-6 h-6 stroke-[2] stroke-[#89d185]'}}/>
@@ -328,7 +345,7 @@
                         </a>
                     </div>
                 {:else if submissionError || validationHistory.some(ve => ve.status === "Failed")}
-                    <div class="flex flex-row gap-2 justify-start p-2 items-center bg-admin-danger-text/50 rounded-xl grow">
+                    <div class="flex flex-row gap-2 justify-start p-2 items-center bg-admin-danger-text/50 rounded-xl grow overflow-x-auto">
                         <ErrorIconSvg options={{ class: 'w-6 h-6 stroke-[2] stroke-admin-danger-text' }}/>
                         {#if submissionError}
                             <span class="text-sm text-admin-danger-text whitespace-pre ">{submissionError}</span>
@@ -352,7 +369,7 @@
                 
                 <button onclick={createProblem} 
                     disabled={currentValidationStatus === "Pending" || currentValidationStatus === "Queued"}
-                    class="flex items-center justify-center gap-2 px-6 py-3 bg-admin-accent-primary text-white border-none rounded-sm text-sm font-medium cursor-pointer transition-colors hover:bg-admin-accent-primary-hover focus:outline-[#007fd4] focus:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-admin-accent-primary">
+                    class="flex items-center justify-center gap-2 shrink-0 px-6 py-3 bg-admin-accent-primary text-white border-none rounded-sm text-sm font-medium cursor-pointer transition-colors hover:bg-admin-accent-primary-hover focus:outline-[#007fd4] focus:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-admin-accent-primary">
                     {#if currentValidationStatus === "Pending" || currentValidationStatus === "Queued"}
                         <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>{currentValidationStatus}</span>

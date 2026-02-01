@@ -1,8 +1,7 @@
 <script lang='ts'>
 	import type { ItemCreateResponseDto } from "./ItemCreationTypes";
 
-    let { submitResult, resetForm } : { submitResult: ItemCreateResponseDto, resetForm: (() => void) } = $props();
-
+    let { submitResult, resetForm, wasEdit } : { submitResult: ItemCreateResponseDto, resetForm: (() => void), wasEdit: boolean } = $props();
 </script>
 
 <div class="bg-admin-bg-secondary h-full min-h-screen border border-admin-border-primary rounded overflow-hidden">
@@ -12,7 +11,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
-        <h3 class="text-sm font-semibold text-[#89d185]">Item Created Successfully</h3>
+        <h3 class="text-sm font-semibold text-[#89d185]">Item {wasEdit ? "Edited" : "Created"} Successfully</h3>
     </div>
     <div class="p-4 flex flex-col gap-3">
         <div class="flex items-center gap-2 text-sm">
@@ -49,7 +48,7 @@
                 View Item
             </a>
             <button onclick={resetForm} class="px-4 py-2 text-sm text-admin-text-secondary border border-admin-border-primary rounded hover:bg-admin-border-primary transition-colors">
-                Create Another
+                {wasEdit ? "Create" : "Create Another"} 
             </button>
         </div>
     </div>
