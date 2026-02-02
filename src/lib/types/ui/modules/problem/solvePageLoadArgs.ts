@@ -8,5 +8,5 @@ export type SolvePageLoadArgs = {
     problemLoadResponse: Promise<StandardResponseDto<ProblemDetailsDto>>,
     chatList: Promise<StandardResponseDto<ChatList>>,
     autoSave: Promise<StandardResponseDto<AutoSaveDto | undefined>>
-    configData: Promise<StandardResponseDto<EditorConfigData>>
+    // configData: Promise<StandardResponseDto<EditorConfigData>>
 }

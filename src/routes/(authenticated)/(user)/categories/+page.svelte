@@ -232,6 +232,7 @@
 
 	let isKeyboardMode: boolean = $state(false);
 	let isScrollableFrameFocused: boolean = $state(false);
+	
 </script>
 
 <svelte:window onresize={calculateLayout} onkeydown={handleKeyDown}/>

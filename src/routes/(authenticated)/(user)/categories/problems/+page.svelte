@@ -6,6 +6,8 @@
 	import { Difficulties, type CategoryDto, type Difficulty, type ProblemDisplayDto } from './solve/types';
 	import { Trie } from '../../../(admin)/problem/upsert/Trie';
 	import { FetchFromApi } from '$lib/api/apiCall';
+	import { applyThemeEditor, type EditorThemeName } from '$lib/Themes';
+	import { userEditorPreferences } from '$lib/stores/theme.svelte';
 
 	let { data }: { data: { categoryId: string | null } } = $props();
 
@@ -19,6 +21,8 @@
 		},
 		select: (response) => response.body
 	});
+
+	applyThemeEditor(userEditorPreferences.theme.themeName as EditorThemeName);
 
 	let colors: Record<string, string> = {
 		EASY: 'bg-green-200/20 border-green-500',

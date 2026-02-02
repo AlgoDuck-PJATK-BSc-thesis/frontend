@@ -104,12 +104,19 @@
 					}
 				);
 
-			} catch (err) {
+			} catch (err: any) {
 				connected = false;
+				if (err?.response?.body !== undefined){
+					toast.error(err.response.body);
+				} else {
+					toast.error(err.message);
+				}
 			}
-		}catch(err){
-			if (err instanceof ApiError && (err as ApiError<{ message: string }>).response?.body?.message !== undefined){
-				toast.error(err.response.body.message);
+		}catch(err: any){
+			if (err?.response?.body !== undefined){
+				toast.error(err.response.body);
+			} else {
+				toast.error(err.message);
 			}
 		}
 	};

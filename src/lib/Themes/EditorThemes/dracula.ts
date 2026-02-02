@@ -5,5 +5,5 @@ export const dracula = {
   '--color-ide-dcard': '68 71 90',         
   '--color-ide-button': '0 0 255',        
   '--color-text-primary': '248 248 242',  
-  '--color-text-secondary': '255 121 198'  
+  '--color-text-secondary': '240 237 255'  
 }

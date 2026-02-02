@@ -37,16 +37,7 @@
 		})
 		loadedData = await data.problemLoadResponse;
 		loadedChatData = await data.chatList;
-		
-		data.configData.then((data: StandardResponseDto<EditorConfigData>) => {
-			userEditorPreferences.layout = data.body.layout;
-			userEditorPreferences.fontSize = data.body.fontSize;
-			userEditorPreferences.theme = data.body.theme;
-			applyThemeEditor(userEditorPreferences.theme.themeName as EditorThemeName)
-		}).catch((err) => {
-			toast.warning('failed loading editor config. Falling back to default');
-		})
-
+		applyThemeEditor(userEditorPreferences.theme.themeName as EditorThemeName)
 
 		config = {
 			'code-editor': { 

@@ -1,8 +1,6 @@
 const registeredGroups: Record<string, Record<string, DropDownData>> = {};
 const groupHighlightedMember: Record<string, DropDownData | undefined> = {};
 
-let hideCallbacks: Record<string, () => void> = {};
-
 export interface GroupElements {
     dropDown?: HTMLDivElement,
     chevron: HTMLDivElement 

@@ -136,10 +136,8 @@
         try {
             await connection.start()
             options.isConnected = true;
-            console.log("connected")
         } catch (err) {
             options.isConnected = false;
-            console.error("SignalR connection failed:", err);
             return;
         }
 
@@ -172,7 +170,7 @@
                                 } as MessageFragment);
                             }
                             streamingMessage.fragments[0].content += messagePart.body.message;
-                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '<').replaceAll("&lt;", '>');
+                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '>').replaceAll("&lt;", '<');
                             streamingMessage = { ...streamingMessage };
                             break;
                         case "Text":
@@ -184,7 +182,7 @@
                                 } as MessageFragment);
                             }
                             streamingMessage.fragments[0].content += messagePart.body.message;
-                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '<').replaceAll("&lt;", '>');
+                            streamingMessage.fragments[0].content = streamingMessage.fragments[0].content.replaceAll("&gt;", '>').replaceAll("&lt;", '<');
                             streamingMessage = { ...streamingMessage };
                             break;
                         case "Name":
@@ -384,9 +382,9 @@
 >
     {#each message.fragments as fragment}
         {#if fragment.type === "Code" || fragment.type === 1}
-            {@render CodeFragment(fragment.content)}
+            {@render CodeFragment(fragment.content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'))}
         {:else}
-            {@render TextFragment(fragment.content)}
+            {@render TextFragment(fragment.content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'))}
         {/if}
     {/each}
 </div>
@@ -410,9 +408,9 @@
     </div>
     {#each message.fragments as fragment}
         {#if fragment.type === "Code" || fragment.type === 1}
-            {@render CodeFragment(fragment.content)}
+            {@render CodeFragment(fragment.content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'))}
         {:else}
-            {@render TextFragment(fragment.content)}
+            {@render TextFragment(fragment.content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'))}
         {/if}
     {/each}
 </div>
@@ -439,12 +437,12 @@
                 {/if}
             </button>
         </div>
-        {@html `<pre class="hljs language-java text-xs px-4 py-3 whitespace-pre"><code>${hljs.highlight(content, { language: 'java' }).value}</code></pre>`}
+        {@html `<pre class="hljs language-java text-xs px-4 py-3 whitespace-pre"><code>${hljs.highlight(content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'), { language: 'java' }).value}</code></pre>`}
     </div>
 {/snippet}
 
 {#snippet TextFragment(content: string)}
-    <MarkdownRenderer options={{ markdown: content, class:"w-full text-ide-text-primary text-sm font-mono px-1 py-1 leading-relaxed"}}/>
+    <MarkdownRenderer options={{ markdown: content.replaceAll("&gt;", '>').replaceAll("&lt;", '<'), class:"w-full text-ide-text-primary text-sm font-mono px-1 py-1 leading-relaxed"}}/>
 {/snippet}
 
 <style>

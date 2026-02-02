@@ -24,12 +24,12 @@
 
     let selectedIndex: number | undefined = $state();
 
-	const onSelect = (selected: KeyValuePair<K, V>, selectedIndexInternal: number): void => {
+    const onSelect = (selected: KeyValuePair<K, V>, selectedIndexInternal: number): void => {
         selectedIndex = selectedIndexInternal;
-		label = selected.key;
-		toggleDropDown();
-		options.onSelectCallback(selected.value);
-	};
+        label = selected.key;
+        hideGroupElem(dropDownData!.groupId!);
+        options.onSelectCallback(selected.value);
+    };
 
     let DisplayComp: Component<{ options: DisplayCompArgs<K>}> = $derived(options.displayComp)
 
@@ -39,7 +39,7 @@
 		    dropDownData = registerGroupElem(dropDownData)
         }}>
         <button class="relative flex items-center rounded-t-md {!dropDownData.isVisible ? "rounded-md": ""} overflow-hidden" onclick={toggleDropDown}>
-            <DisplayComp options={{isSelected: options.defaultSelected ? true : false,  content: label }}/>            
+            <DisplayComp options={{isSelected: options.defaultSelected ? true : false, isPreviewed: true, content: label }}/>            
             <div class="h-full aspect-sqaure pointer-events-none absolute right-0 {dropDownData.isVisible ? "rotate-90" : ""}">
                 <div class="w-full h-full p-[30%]">
                     <ChevronIconSvgNew options={{class: "w-full h-full stroke-white"}}/>
@@ -50,7 +50,7 @@
             <div class="absolute max-h-40 overflow-y-scroll rounded-b-md z-999 overflow-hidden">
                 {#each options.options as option, i}
                     <button onclick={() => onSelect(option, i)}>
-                        <DisplayComp options={{isSelected: i === selectedIndex, content: option.key}}/>
+                        <DisplayComp options={{isSelected: i === selectedIndex, isPreviewed: false, content: option.key}}/>
                     </button>
                 {/each}
             </div>

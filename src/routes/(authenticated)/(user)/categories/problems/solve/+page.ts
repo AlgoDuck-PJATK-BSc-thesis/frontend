@@ -19,9 +19,9 @@ export const load: PageLoad = async ({ params, fetch, url }) : Promise<SolvePage
     autoSave: FetchFromApi<AutoSaveDto>("LoadAutoSave", {
       method: "GET"
     }, fetch, new URLSearchParams({problemId: problemId ?? ""})),
-    configData: FetchFromApi<EditorConfigData>("user/preferences/editor", {
-      method: "GET"
-    }, fetch) 
+    // configData: FetchFromApi<EditorConfigData>("user/preferences/editor", {
+    //   method: "GET"
+    // }, fetch) 
   };
 }
 

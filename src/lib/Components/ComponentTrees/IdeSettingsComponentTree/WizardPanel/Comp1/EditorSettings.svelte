@@ -40,11 +40,15 @@
 	let currentUpdateTimeout: number | undefined;
 </script>
 
-<main class="flex h-full w-full flex-col items-center justify-start px-5">
+<main class="flex h-full w-full flex-col items-center justify-start px-5 text-ide-text-secondary">
 	<div class="flex w-full flex-row items-center justify-between px-5 py-3 text-lg">
 		<span>Font-size</span>
 		<DropDownSelect2
 			options={{
+				defaultSelected: {
+					key: { value: `${userEditorPreferences.fontSize}px` },
+					value: userEditorPreferences.fontSize
+				},
 				options: avaliableFontSizes.map((f) => {
 					return { key: { value: `${f}px` } as SettingSelectionTileArgs, value: f };
 				}),
@@ -66,7 +70,7 @@
 		/>
 	</div>
 	<div class="flex w-full flex-row items-center justify-between px-5 py-3 text-lg">
-		<span>Editor</span>
+		<span>Editor-theme</span>
 		{#if $themeQuery.isLoading}
 			<div class="flex h-12 w-50 items-center justify-center gap-2 bg-ide-card px-1 py-0.5">
 				<div class="h-5 w-5 animate-spin rounded-full border-t-3 border-t-ide-text-secondary"></div>
@@ -75,6 +79,10 @@
 		{:else if $themeQuery.data}
 			<DropDownSelect2
 				options={{
+					defaultSelected: {
+						key: { value: userEditorPreferences.theme.themeName },
+						value: userEditorPreferences.theme
+					},
 					options: $themeQuery.data.body.map((f) => {
 						return { key: { value: f.themeName }, value: f };
 					}),

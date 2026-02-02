@@ -18,6 +18,7 @@ export interface DropDownMenuOptions2<K extends Record<string, any>, V> {
 
 export type DisplayCompArgs<K> = {
     isSelected: boolean,
+    isPreviewed?: boolean,
     content: K 
 }
 
