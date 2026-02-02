@@ -344,6 +344,19 @@
 			<button onclick={() => isSelectionMenuVisible = false} onmouseover={() => isCancelHovered = true} onfocus={() => isCancelHovered = true} onmouseout={() => isCancelHovered = false} onblur={() => isCancelHovered = false} class="w-[25px] hover:cursor-pointer h-[25px] z-999 top-[25px] absolute left-[55px]">
 				<img src={isCancelHovered ? "/ponds/Cancel-hover.png" : "/ponds/Cancel.png"} alt="Back">
 			</button>
+			<!-- 
+			Inventory UI Asset (Modified)
+			Original work by: Jacob Christian (https://jacobbergholtz.artstation.com/)
+			Contact: cuppuccino.dev@gmail.com
+			Original available at: https://jacobbergholtz.artstation.com/projects/rRoRWe
+			Licensed under: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)
+
+			Modifications made:
+			- Removed preexisting item icons
+			- Reduced grid from 6 to 4 columns
+
+			This is a derivative work based on the original.
+			-->
 			<img class="w-full h-full absolute x-100 bg-transparent" src={"/ponds/Inventory.png"} alt="">
 			<button onclick={() => activeTab = "duck"} onmouseover={() => isDucksHovered = true} onfocus={() => isDucksHovered = true} onmouseout={() => isDucksHovered = false} onblur={() => isDucksHovered = false} class="absolute z-110 top-[60px] left-[80px] h-[60px]">
 				<img class="w-full h-full hover:cursor-pointer {isDucksHovered ? "-translate-y-1 transition-all transition-ease-out duration-150" : ""}" src={isDucksHovered ? "/ponds/Duck-hover.png" : "/ponds/Duck.png"} alt="ducks">
